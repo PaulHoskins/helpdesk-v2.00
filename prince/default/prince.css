@@ -1,0 +1,89 @@
+@page {
+	size: A4 portrait;
+	margin: 40pt 30pt 40pt 30pt;
+	@
+	top
+	{
+	content
+	:
+	flow(
+	header
+	)
+}
+
+@
+bottom-right {
+	content: "Page " counter(page);
+	border-top: 1px solid black;
+}
+
+}
+body {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.heading {
+	flow: static(header);
+	width: 100%;
+	font-size: 15px;
+}
+
+#content {
+	border-top: 1px solid black;
+}
+
+.sub {
+	font-weight: bold;
+	font-size: 15px;
+	text-align: center;
+}
+
+.info {
+	width: 70%; 100%;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.info th {
+	text-align: right;
+	vertical-align: text-top;
+}
+
+.info caption {
+	font-size: 25px;
+	text-align: left;
+}
+
+.info td {
+	padding-left: 10px;
+}
+
+.browse {
+	width: 100%;
+	border: 1px solid black;
+}
+
+.browse th,td {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.browse th {
+	text-align: left;
+	border-bottom: 1px solid black;
+}
+
+.browse td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.browse thead {
+	background-color: #DFDFDF;
+}
+
+.browse>tr:nth-of-type(even) {
+	background-color: #F2F2F2;
+	border-top: 1px solid black;
+}

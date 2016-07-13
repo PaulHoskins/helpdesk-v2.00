@@ -1,0 +1,129 @@
+@page {
+	size: A4 landscape;
+	margin: 40pt 30pt 40pt 30pt;
+	@
+	top
+	{
+	content
+	:
+	flow(
+	header
+	)
+}
+
+@
+bottom-right {
+	content: "Page " counter(page);
+	border-top: 1px solid black;
+}
+
+}
+body {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.heading {
+	flow: static(header);
+	width: 100%;
+	font-size: 15px;
+}
+
+#content {
+	border-top: 1px solid black;
+}
+
+.sub {
+	font-weight: bold;
+	font-size: 15px;
+	text-align: center;
+}
+
+.info {
+	width: 100%;
+}
+
+.info th {
+	text-align: right;
+	vertical-align: text-top;
+}
+
+.info caption {
+	font-size: 25px;
+	text-align: left;
+}
+
+.info td {
+	padding-left: 10px;
+}
+
+.browse {
+	width: 100%;
+	border: 1px solid black;
+}
+
+.browse th,td {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.browse th {
+	text-align: left;
+	border-bottom: 1px solid black;
+}
+
+.browse td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.browse thead {
+	background-color: #DFDFDF;
+}
+
+.browse>tr:nth-of-type(even) {
+	background-color: #F2F2F2;
+	border-top: 1px solid black;
+}
+
+.hinfo {
+	width: 100%;
+}
+
+.hinfo th {
+	text-align: right;
+}
+
+.hinfo td,th {
+	padding-left: 10px;
+	padding-right: 10px;
+	vertical-align: text-top;
+}
+
+.landrep {
+	width: 100%;
+	font-size: 10px;
+}
+
+.landrep th,td {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+.landrep th {
+	text-align: left;
+	vertical-align: bottom;
+}
+
+.landrep td {
+	padding-top: 2px;
+	padding-bottom: 2px;
+}
+
+.landrep>tr:nth-of-type(even) {
+	background-color: #F2F2F2;
+}
+
+.landrep thead,tfoot {
+	background-color: #DFDFDF;
+}

@@ -1,0 +1,6026 @@
+ADD SEQUENCE "issue"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MIN-VAL 1
+  MAX-VAL 99999999
+
+ADD SEQUENCE "docid"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MIN-VAL 1
+  MAX-VAL 999999999
+
+ADD SEQUENCE "HiAudit"
+  INITIAL 0
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MIN-VAL 0
+  MAX-VAL 9999999
+
+ADD SEQUENCE "LoAudit"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MIN-VAL 1
+  MAX-VAL 999999
+
+ADD SEQUENCE "ReportNumber"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MIN-VAL 1
+  MAX-VAL 999999
+
+ADD SEQUENCE "eSched"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MAX-VAL 99999999
+
+ADD SEQUENCE "ProjPhase"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+  MAX-VAL 99999999999
+
+ADD SEQUENCE "acs_line"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+
+ADD TABLE "acs_head"
+  AREA "Schema Area"
+  LABEL "Survey Header"
+  DUMP-NAME "acs_head"
+
+ADD FIELD "CompanyCode" OF "acs_head" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "acs_code" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Survey Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "descr" OF "acs_head" AS character 
+  FORMAT "x(200)"
+  INITIAL ""
+  LABEL "Descriptiion"
+  POSITION 4
+  MAX-WIDTH 400
+  ORDER 30
+
+ADD FIELD "em_subject" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "em_begin" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "em_end" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "wp_begin" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "wp_end" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "wp_subject" OF "acs_head" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD INDEX "Prim" ON "acs_head" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "acs_code" ASCENDING 
+
+ADD TABLE "acs_line"
+  AREA "Schema Area"
+  LABEL "Survey Lines"
+  DUMP-NAME "acs_line"
+
+ADD FIELD "CompanyCode" OF "acs_line" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "acs_code" OF "acs_line" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Survey Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "DisplayOrder" OF "acs_line" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "qText" OF "acs_line" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Question"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "qType" OF "acs_line" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "acs_line_id" OF "acs_line" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "isMandatory" OF "acs_line" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 9
+  MAX-WIDTH 1
+  ORDER 70
+
+ADD INDEX "acs_code_key" ON "acs_line" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "acs_code" ASCENDING 
+  INDEX-FIELD "DisplayOrder" ASCENDING 
+
+ADD INDEX "acs_lne_id_key" ON "acs_line" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "acs_line_id" ASCENDING 
+
+ADD TABLE "acs_res"
+  AREA "Schema Area"
+  LABEL "Account Survey Result"
+  DUMP-NAME "acs_res"
+
+ADD FIELD "acs_line_id" OF "acs_res" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "rvalue" OF "acs_res" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "rq_id" OF "acs_res" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD INDEX "Prim" ON "acs_res" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "rq_id" ASCENDING 
+  INDEX-FIELD "acs_line_id" ASCENDING 
+
+ADD INDEX "acs_line_id" ON "acs_res" 
+  AREA "Schema Area"
+  INDEX-FIELD "acs_line_id" ASCENDING 
+
+ADD TABLE "acs_rq"
+  AREA "Schema Area"
+  LABEL "Account Survey Request"
+  DUMP-NAME "acs_rq"
+
+ADD FIELD "rq_id" OF "acs_rq" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "CompanyCode" OF "acs_rq" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "IssueNumber" OF "acs_rq" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "LoginID" OF "acs_rq" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 5
+  MAX-WIDTH 30
+  ORDER 40
+
+ADD FIELD "Email" OF "acs_rq" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Email Address"
+  POSITION 6
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "rq_status" OF "acs_rq" AS integer 
+  DESCRIPTION "0 - outstanding
+1 - complete
+99 - expired"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "acs_code" OF "acs_rq" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Survey Code"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "rq_created" OF "acs_rq" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  POSITION 9
+  MAX-WIDTH 8
+  ORDER 80
+
+ADD FIELD "rq_completed" OF "acs_rq" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  POSITION 10
+  MAX-WIDTH 8
+  ORDER 90
+
+ADD FIELD "Eng-LoginID" OF "acs_rq" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Last Engineer"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD INDEX "rq_id" ON "acs_rq" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "rq_id" ASCENDING 
+
+ADD INDEX "acs_code" ON "acs_rq" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "acs_code" ASCENDING 
+  INDEX-FIELD "rq_created" ASCENDING 
+
+ADD INDEX "issueNumber" ON "acs_rq" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "rg_status" ON "acs_rq" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "rq_status" ASCENDING 
+  INDEX-FIELD "rq_created" ASCENDING 
+
+ADD TABLE "AdHocWork"
+  AREA "Schema Area"
+  LABEL "AdHocWork"
+  DESCRIPTION "AdHoc work types"
+  DUMP-NAME "adhoccon"
+
+ADD FIELD "CompanyCode" OF "AdHocWork" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "AdHocTypeNo" OF "AdHocWork" AS integer 
+  FORMAT "999999"
+  INITIAL "0"
+  LABEL "AdHocNo"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "AdHocNo"
+  ORDER 20
+
+ADD FIELD "Type" OF "AdHocWork" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 4
+  MAX-WIDTH 40
+  COLUMN-LABEL "Type"
+  ORDER 30
+
+ADD FIELD "Billable" OF "AdHocWork" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Billable"
+  POSITION 5
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill"
+  ORDER 40
+
+ADD FIELD "AdHocRate" OF "AdHocWork" AS decimal 
+  FORMAT ">>,>>9.99"
+  INITIAL "0"
+  LABEL "AHRate"
+  POSITION 6
+  MAX-WIDTH 17
+  COLUMN-LABEL "AHRate"
+  DECIMALS 2
+  ORDER 60
+
+ADD FIELD "Description" OF "AdHocWork" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Desc"
+  POSITION 7
+  MAX-WIDTH 40
+  COLUMN-LABEL "Desc"
+  ORDER 70
+
+ADD TABLE "BatchWork"
+  AREA "Schema Area"
+  LABEL "BatchWork"
+  DUMP-NAME "batchwor"
+
+ADD FIELD "BatchID" OF "BatchWork" AS integer 
+  FORMAT ">,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 2
+  MAX-WIDTH 4
+  COLUMN-LABEL "ID"
+  ORDER 10
+
+ADD FIELD "BatchDate" OF "BatchWork" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "Date"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Date"
+  ORDER 20
+
+ADD FIELD "BatchRun" OF "BatchWork" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Run?"
+  POSITION 4
+  MAX-WIDTH 1
+  COLUMN-LABEL "Run?"
+  ORDER 30
+
+ADD FIELD "BatchProg" OF "BatchWork" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Prog"
+  POSITION 5
+  MAX-WIDTH 60
+  COLUMN-LABEL "Prog"
+  ORDER 40
+
+ADD FIELD "BatchParams" OF "BatchWork" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Params"
+  POSITION 6
+  MAX-WIDTH 1240
+  COLUMN-LABEL "Params"
+  EXTENT 20
+  ORDER 50
+
+ADD FIELD "Description" OF "BatchWork" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Desc"
+  POSITION 7
+  MAX-WIDTH 60
+  COLUMN-LABEL "Desc"
+  ORDER 60
+
+ADD FIELD "BatchTime" OF "BatchWork" AS integer 
+  FORMAT "999999"
+  INITIAL "0"
+  LABEL "Time"
+  POSITION 8
+  MAX-WIDTH 4
+  COLUMN-LABEL "Time"
+  ORDER 70
+
+ADD FIELD "BatchUser" OF "BatchWork" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "User"
+  POSITION 9
+  MAX-WIDTH 40
+  COLUMN-LABEL "User"
+  ORDER 80
+
+ADD FIELD "BatchDelete" OF "BatchWork" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Delete?"
+  POSITION 10
+  MAX-WIDTH 1
+  COLUMN-LABEL "Delete?"
+  ORDER 90
+
+ADD TABLE "Company"
+  AREA "Schema Area"
+  DUMP-NAME "company"
+
+ADD FIELD "CompanyCode" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "Name" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "smtp" OF "Company" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "SMTP Server"
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 30
+
+ADD FIELD "HelpDeskEmail" OF "Company" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "WebAddress" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Web Site"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "EmailFooter" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Email Footer"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "HelpDeskPhone" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "SLABeginHour" OF "Company" AS integer 
+  FORMAT "99"
+  INITIAL "8"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "SLABeginMin" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "SLAEndHour" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "17"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "SLAEndMin" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "MonitorMessage" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Mail Monitor Message"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "Address1" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 1"
+  POSITION 14
+  MAX-WIDTH 80
+  ORDER 130
+
+ADD FIELD "Address2" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 2"
+  POSITION 15
+  MAX-WIDTH 80
+  ORDER 140
+
+ADD FIELD "City" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 16
+  MAX-WIDTH 80
+  ORDER 150
+
+ADD FIELD "County" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "County"
+  POSITION 17
+  MAX-WIDTH 80
+  ORDER 160
+
+ADD FIELD "Country" OF "Company" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Country"
+  POSITION 18
+  MAX-WIDTH 80
+  COLUMN-LABEL "Country"
+  ORDER 170
+
+ADD FIELD "Postcode" OF "Company" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Post Code"
+  POSITION 19
+  MAX-WIDTH 30
+  ORDER 180
+
+ADD FIELD "IssueInfo" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 20
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "PasswordExpire" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Password Expire Days"
+  POSITION 21
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "TimeOut" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Timeout Minutes"
+  POSITION 22
+  MAX-WIDTH 4
+  ORDER 210
+
+ADD FIELD "Email2DB" OF "Company" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 23
+  MAX-WIDTH 16
+  ORDER 220
+
+ADD FIELD "mBanner" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 24
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "em_user" OF "Company" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "SMTP User"
+  POSITION 25
+  MAX-WIDTH 160
+  ORDER 240
+
+ADD FIELD "em_pass" OF "Company" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "SMTP Password"
+  POSITION 26
+  MAX-WIDTH 160
+  ORDER 250
+
+ADD FIELD "em_ssl" OF "Company" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Email SSL/TLS"
+  POSITION 27
+  MAX-WIDTH 1
+  ORDER 260
+
+ADD FIELD "renewal-Login" OF "Company" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Renewal Login User"
+  POSITION 28
+  MAX-WIDTH 30
+  ORDER 270
+
+ADD FIELD "EngCost" OF "Company" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Engineer Cost"
+  POSITION 29
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 280
+
+ADD FIELD "bulkemail" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 30
+  MAX-WIDTH 16
+  ORDER 290
+
+ADD FIELD "custaddissue" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 31
+  MAX-WIDTH 16
+  ORDER 300
+
+ADD FIELD "HelpDeskLink" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 32
+  MAX-WIDTH 16
+  ORDER 310
+
+ADD FIELD "isc_acs_code" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Issue Completion Survey Code"
+  POSITION 33
+  MAX-WIDTH 16
+  ORDER 320
+
+ADD FIELD "TwoFactor_Auth" OF "Company" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "2 Factor Auth"
+  POSITION 34
+  MAX-WIDTH 1
+  ORDER 330
+
+ADD FIELD "TwoFactor_Email" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 35
+  MAX-WIDTH 16
+  ORDER 340
+
+ADD FIELD "TwoFactor_Account" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 36
+  MAX-WIDTH 16
+  ORDER 350
+
+ADD FIELD "TwoFactor_Password" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 37
+  MAX-WIDTH 16
+  ORDER 360
+
+ADD FIELD "TwoFactor_PinLength" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "4"
+  POSITION 38
+  MAX-WIDTH 4
+  ORDER 370
+
+ADD INDEX "CompanyCode" ON "Company" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+
+ADD TABLE "ContAccess"
+  AREA "Schema Area"
+  LABEL "Contractor Account Access"
+  DUMP-NAME "contacce"
+
+ADD FIELD "LoginID" OF "ContAccess" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 10
+
+ADD FIELD "AccountNumber" OF "ContAccess" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD INDEX "LoginID" ON "ContAccess" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD TABLE "ContractRate"
+  AREA "Schema Area"
+  DUMP-NAME "contractrate"
+
+ADD FIELD "CompanyCode" OF "ContractRate" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "Customer" OF "ContractRate" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Customer"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "Cust"
+  ORDER 20
+
+ADD FIELD "ContractCode" OF "ContractRate" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Code"
+  POSITION 4
+  MAX-WIDTH 16
+  COLUMN-LABEL "Code"
+  ORDER 180
+
+ADD FIELD "cBegin" OF "ContractRate" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Contract Begin"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 190
+
+ADD FIELD "cValue" OF "ContractRate" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Contract Value"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 200
+
+ADD INDEX "PrimKey" ON "ContractRate" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Customer" ASCENDING 
+  INDEX-FIELD "ContractCode" ASCENDING 
+  INDEX-FIELD "cBegin" ASCENDING 
+
+ADD TABLE "ContractType"
+  AREA "Schema Area"
+  LABEL "ContractType"
+  DESCRIPTION "Type of Contracts"
+  DUMP-NAME "contract"
+
+ADD FIELD "CompanyCode" OF "ContractType" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "ContractNo" OF "ContractType" AS integer 
+  FORMAT "999999"
+  INITIAL "0"
+  LABEL "Contract"
+  POSITION 3
+  MAX-WIDTH 4
+  COLUMN-LABEL "Contract"
+  ORDER 20
+
+ADD FIELD "Type" OF "ContractType" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 4
+  MAX-WIDTH 40
+  COLUMN-LABEL "Type"
+  ORDER 30
+
+ADD FIELD "Billable" OF "ContractType" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Billable"
+  POSITION 5
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill"
+  ORDER 40
+
+ADD FIELD "Description" OF "ContractType" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Desc"
+  POSITION 7
+  MAX-WIDTH 40
+  COLUMN-LABEL "Desc"
+  ORDER 60
+
+ADD FIELD "ContractNumber" OF "ContractType" AS character 
+  FORMAT "X(6)"
+  INITIAL ""
+  LABEL "CNum"
+  POSITION 8
+  MAX-WIDTH 12
+  COLUMN-LABEL "CNum"
+  ORDER 70
+
+ADD FIELD "Notes" OF "ContractType" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Notes"
+  POSITION 9
+  MAX-WIDTH 40
+  COLUMN-LABEL "Notes"
+  ORDER 80
+
+ADD FIELD "GrossProfit" OF "ContractType" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Gross Profit %"
+  POSITION 10
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 90
+
+ADD INDEX "Prim" ON "ContractType" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ContractNumber" ASCENDING 
+
+ADD TABLE "CustAst"
+  AREA "Schema Area"
+  LABEL "Customer Assets"
+  DUMP-NAME "custast"
+
+ADD FIELD "CompanyCode" OF "CustAst" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "AccountNumber" OF "CustAst" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "AssetID" OF "CustAst" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Asset ID"
+  POSITION 4
+  MAX-WIDTH 40
+  ORDER 30
+
+ADD FIELD "aType" OF "CustAst" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 5
+  MAX-WIDTH 40
+  ORDER 40
+
+ADD FIELD "aManu" OF "CustAst" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Manufacturer"
+  POSITION 6
+  MAX-WIDTH 40
+  ORDER 50
+
+ADD FIELD "Model" OF "CustAst" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Model"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "Serial" OF "CustAst" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Serial"
+  POSITION 8
+  MAX-WIDTH 40
+  ORDER 70
+
+ADD FIELD "Location" OF "CustAst" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Location"
+  POSITION 9
+  MAX-WIDTH 40
+  ORDER 80
+
+ADD FIELD "aStatus" OF "CustAst" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Status"
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "Purchased" OF "CustAst" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Purchased"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "Cost" OF "CustAst" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Cost"
+  POSITION 12
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 110
+
+ADD FIELD "Descr" OF "CustAst" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "Details" OF "CustAst" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Maintenance Details"
+  POSITION 14
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD INDEX "prim-key" ON "CustAst" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "AssetID" ASCENDING 
+
+ADD TABLE "CustField"
+  AREA "Schema Area"
+  LABEL "Customer Inventory Fields"
+  DUMP-NAME "custfiel"
+
+ADD FIELD "CustIvID" OF "CustField" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "ivFieldID" OF "CustField" AS decimal 
+  FORMAT "9999999999"
+  INITIAL "0"
+  LABEL "Field ID"
+  POSITION 3
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 20
+
+ADD FIELD "FieldData" OF "CustField" AS character 
+  FORMAT "X(60)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 30
+
+ADD INDEX "CustField" ON "CustField" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CustIvID" ASCENDING 
+  INDEX-FIELD "ivFieldID" ASCENDING 
+
+ADD INDEX "ivFieldID" ON "CustField" 
+  AREA "Schema Area"
+  INDEX-FIELD "ivFieldID" ASCENDING 
+
+ADD TABLE "CustIv"
+  AREA "Schema Area"
+  LABEL "Customer Inventory"
+  DUMP-NAME "custiv"
+
+ADD FIELD "AccountNumber" OF "CustIv" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "CompanyCode" OF "CustIv" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "CustIvID" OF "CustIv" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 4
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 30
+
+ADD FIELD "ivSubID" OF "CustIv" AS decimal 
+  DESCRIPTION "AUTO GENERATED FIELD"
+  FORMAT "9999999999999"
+  INITIAL ?
+  LABEL "Sub Class ID"
+  POSITION 5
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "Ref" OF "CustIv" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Reference"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "crt-by" OF "CustIv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Created By"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "crt-datetime" OF "CustIv" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 8
+  MAX-WIDTH 8
+  ORDER 70
+
+ADD FIELD "upd-by" OF "CustIv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Updated By"
+  POSITION 9
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 80
+
+ADD FIELD "upd-datetime" OF "CustIv" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Updated Time"
+  POSITION 10
+  MAX-WIDTH 100
+  EXTENT 10
+  ORDER 90
+
+ADD FIELD "isDecom" OF "CustIv" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Decomissioned"
+  POSITION 11
+  MAX-WIDTH 1
+  ORDER 100
+
+ADD INDEX "Customer" ON "CustIv" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "CustIvID" ASCENDING 
+
+ADD INDEX "CustIvID" ON "CustIv" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "CustIvID" ASCENDING 
+
+ADD INDEX "ivSubID" ON "CustIv" 
+  AREA "Schema Area"
+  INDEX-FIELD "ivSubID" ASCENDING 
+
+ADD TABLE "Customer"
+  AREA "Schema Area"
+  LABEL "Customer"
+  DUMP-NAME "customer"
+
+ADD FIELD "AccountNumber" OF "Customer" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Name" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "Address1" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 1"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "Address2" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 2"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "City" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "County" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "County"
+  POSITION 7
+  MAX-WIDTH 80
+  ORDER 70
+
+ADD FIELD "Country" OF "Customer" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Country"
+  POSITION 8
+  MAX-WIDTH 80
+  COLUMN-LABEL "Country"
+  ORDER 80
+
+ADD FIELD "Postcode" OF "Customer" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Post Code"
+  POSITION 9
+  MAX-WIDTH 30
+  ORDER 90
+
+ADD FIELD "Telephone" OF "Customer" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Telephone"
+  POSITION 10
+  MAX-WIDTH 40
+  ORDER 100
+
+ADD FIELD "Contact" OF "Customer" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Contact"
+  POSITION 11
+  MAX-WIDTH 80
+  ORDER 110
+
+ADD FIELD "CompanyCode" OF "Customer" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "notes" OF "Customer" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Notes"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "DefaultSLAID" OF "Customer" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 14
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 130
+
+ADD FIELD "SupportTicket" OF "Customer" AS character 
+  FORMAT "X(8)"
+  INITIAL "NONE"
+  LABEL "Ticket Type"
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "StatementEmail" OF "Customer" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Statement Email"
+  POSITION 17
+  MAX-WIDTH 16
+  ORDER 160
+
+ADD FIELD "IsActive" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Active?"
+  POSITION 18
+  MAX-WIDTH 1
+  ORDER 170
+
+ADD FIELD "ViewAction" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "View Actions?"
+  POSITION 19
+  MAX-WIDTH 1
+  ORDER 180
+
+ADD FIELD "ViewActivity" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "View Activities?"
+  POSITION 20
+  MAX-WIDTH 1
+  ORDER 190
+
+ADD FIELD "st-num" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Team Number"
+  POSITION 21
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "old-accountNumber" OF "Customer" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Old Account"
+  POSITION 22
+  MAX-WIDTH 40
+  ORDER 210
+
+ADD FIELD "def-iss-loginid" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Default Issue User"
+  POSITION 24
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "AccountManager" OF "Customer" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Account Manager"
+  POSITION 25
+  MAX-WIDTH 30
+  ORDER 220
+
+ADD FIELD "def-stat-loginid" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Default Issue Status User"
+  POSITION 26
+  MAX-WIDTH 16
+  ORDER 250
+
+ADD FIELD "def-bulk-loginid" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Default Bulk Email User"
+  POSITION 27
+  MAX-WIDTH 16
+  ORDER 240
+
+ADD FIELD "def-renew-loginid" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Inventory Renewal User"
+  POSITION 28
+  MAX-WIDTH 16
+  ORDER 260
+
+ADD FIELD "allowAllTeams" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Allow All Support Teams To View"
+  POSITION 29
+  MAX-WIDTH 1
+  ORDER 270
+
+ADD FIELD "AccountRef" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Accounts Ref"
+  POSITION 30
+  MAX-WIDTH 16
+  ORDER 280
+
+ADD FIELD "iss_survey" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Send Issue Surveys"
+  POSITION 31
+  MAX-WIDTH 1
+  ORDER 290
+
+ADD INDEX "AccountNumber" ON "Customer" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "AccountManager" ON "Customer" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountManager" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "AccountRef" ON "Customer" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountRef" ASCENDING 
+
+ADD INDEX "CustomerWordKey" ON "Customer" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "Name" ASCENDING 
+
+ADD INDEX "Name" ON "Customer" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Name" ASCENDING 
+
+ADD INDEX "st-num" ON "Customer" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "st-num" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD TABLE "dashb"
+  AREA "Schema Area"
+  LABEL "Dash Board Defintion"
+  DUMP-NAME "dashb"
+
+ADD FIELD "CompanyCode" OF "dashb" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "dashCode" OF "dashb" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Dashboard Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "descr" OF "dashb" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "panelCode" OF "dashb" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "panelCode"
+  POSITION 6
+  MAX-WIDTH 450
+  EXTENT 25
+  ORDER 50
+
+ADD FIELD "panelParam" OF "dashb" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Panel Parameters"
+  POSITION 7
+  MAX-WIDTH 450
+  EXTENT 25
+  ORDER 60
+
+ADD FIELD "isActive" OF "dashb" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 9
+  MAX-WIDTH 1
+  ORDER 70
+
+ADD INDEX "prim" ON "dashb" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "dashCode" ASCENDING 
+
+ADD TABLE "DiaryDays"
+  AREA "Schema Area"
+  LABEL "DiaryDays"
+  DESCRIPTION "Diary day records"
+  DUMP-NAME "diaryday"
+
+ADD TABLE "DiaryEvents"
+  AREA "Schema Area"
+  LABEL "DiaryEvents"
+  DESCRIPTION "Diary events table"
+  DUMP-NAME "diaryeve"
+
+ADD FIELD "ID" OF "DiaryEvents" AS character 
+  DESCRIPTION "ID"
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "ID"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "ID"
+  ORDER 10
+
+ADD FIELD "Name" OF "DiaryEvents" AS character 
+  DESCRIPTION "Name"
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "NAme"
+  ORDER 20
+
+ADD FIELD "StartDate" OF "DiaryEvents" AS date 
+  DESCRIPTION "Start Date"
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "StDate"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "StDate"
+  ORDER 30
+
+ADD FIELD "StartTime" OF "DiaryEvents" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "StTime"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "StTime"
+  ORDER 40
+
+ADD FIELD "EndDate" OF "DiaryEvents" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "EndDate"
+  POSITION 6
+  MAX-WIDTH 4
+  COLUMN-LABEL "EndDate"
+  ORDER 50
+
+ADD FIELD "EndTime" OF "DiaryEvents" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "EndTime"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "EndTime"
+  ORDER 60
+
+ADD FIELD "EventData" OF "DiaryEvents" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Data"
+  POSITION 8
+  MAX-WIDTH 60
+  COLUMN-LABEL "Data"
+  ORDER 70
+
+ADD FIELD "EventRowid" OF "DiaryEvents" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "EVRow"
+  POSITION 9
+  MAX-WIDTH 40
+  COLUMN-LABEL "EVRow"
+  ORDER 80
+
+ADD TABLE "DiaryParams"
+  AREA "Schema Area"
+  LABEL "DiaryParams"
+  DESCRIPTION "Diary Parameters Table"
+  DUMP-NAME "diarypar"
+
+ADD FIELD "coreHours" OF "DiaryParams" AS character 
+  FORMAT "9999-9999"
+  INITIAL "0900-1730"
+  LABEL "Core Hours"
+  POSITION 2
+  MAX-WIDTH 18
+  COLUMN-LABEL "Core Hours"
+  ORDER 10
+
+ADD FIELD "coreDays" OF "DiaryParams" AS character 
+  DESCRIPTION "1 = Sunday"
+  FORMAT "9-9"
+  INITIAL ""
+  LABEL "Core Days"
+  POSITION 3
+  MAX-WIDTH 6
+  COLUMN-LABEL "Core Days"
+  HELP "1 = Sunday"
+  ORDER 20
+
+ADD FIELD "openEventColour" OF "DiaryParams" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Open Event Colour"
+  POSITION 4
+  MAX-WIDTH 16
+  COLUMN-LABEL "Open Event Colour"
+  ORDER 30
+
+ADD FIELD "closedEventColour" OF "DiaryParams" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Closed Event Colour"
+  POSITION 5
+  MAX-WIDTH 16
+  COLUMN-LABEL "Closed Event Colour"
+  ORDER 40
+
+ADD FIELD "displayHours" OF "DiaryParams" AS character 
+  DESCRIPTION "Initial hours of day displayed"
+  FORMAT "9999-9999"
+  INITIAL ""
+  LABEL "Display Hours"
+  POSITION 6
+  MAX-WIDTH 18
+  COLUMN-LABEL "Display Hours"
+  ORDER 50
+
+ADD FIELD "initialDays" OF "DiaryParams" AS integer 
+  DESCRIPTION "Initial days to display"
+  FORMAT "999"
+  INITIAL "0"
+  LABEL "Initial Days"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "Initial Days"
+  ORDER 60
+
+ADD FIELD "CompanyCode" OF "DiaryParams" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 8
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 70
+
+ADD FIELD "LoginID" OF "DiaryParams" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 9
+  MAX-WIDTH 30
+  ORDER 80
+
+ADD FIELD "incWeekends" OF "DiaryParams" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "IncW/E"
+  POSITION 10
+  MAX-WIDTH 1
+  COLUMN-LABEL "IncW/E"
+  ORDER 90
+
+ADD FIELD "viewHours" OF "DiaryParams" AS character 
+  DESCRIPTION "Initial hours of day displayed"
+  FORMAT "9999-9999"
+  INITIAL ""
+  LABEL "View Hours"
+  POSITION 11
+  MAX-WIDTH 18
+  COLUMN-LABEL "View Hours"
+  ORDER 100
+
+ADD FIELD "initialEngineers" OF "DiaryParams" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Eng"
+  POSITION 12
+  MAX-WIDTH 60
+  COLUMN-LABEL "Eng"
+  ORDER 110
+
+ADD FIELD "viewShowY" OF "DiaryParams" AS integer 
+  DESCRIPTION "Magnification of display hours"
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "View Hours"
+  POSITION 13
+  MAX-WIDTH 4
+  COLUMN-LABEL "View Hours"
+  ORDER 120
+
+ADD FIELD "viewShowX" OF "DiaryParams" AS integer 
+  DESCRIPTION "Magnification of display hours"
+  FORMAT "9"
+  INITIAL "0"
+  LABEL "View Width"
+  POSITION 14
+  MAX-WIDTH 4
+  COLUMN-LABEL "View Width"
+  ORDER 130
+
+ADD TABLE "doch"
+  AREA "Schema Area"
+  LABEL "Document Headers"
+  DUMP-NAME "doch"
+
+ADD FIELD "DocID" OF "doch" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "RelType" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "RelKey" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "CreateBy" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "CreateDate" OF "doch" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "CreateTime" OF "doch" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "DocType" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "descr" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "InBytes" OF "doch" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "CompanyCode" OF "doch" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD FIELD "CustomerView" OF "doch" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer View?"
+  POSITION 12
+  MAX-WIDTH 1
+  ORDER 110
+
+ADD FIELD "QuickView" OF "doch" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "QuickView"
+  POSITION 13
+  MAX-WIDTH 1
+  ORDER 120
+
+ADD INDEX "DocID" ON "doch" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "DocID" ASCENDING 
+
+ADD INDEX "CreateBy" ON "doch" 
+  AREA "Schema Area"
+  INDEX-FIELD "CreateBy" ASCENDING 
+
+ADD INDEX "RelatedKey" ON "doch" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "RelType" ASCENDING 
+  INDEX-FIELD "RelKey" ASCENDING 
+  INDEX-FIELD "CreateDate" DESCENDING 
+  INDEX-FIELD "CreateTime" DESCENDING 
+
+ADD TABLE "docl"
+  AREA "Schema Area"
+  LABEL "Document Lines"
+  DUMP-NAME "docl"
+
+ADD FIELD "DocID" OF "docl" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "LineNo" OF "docl" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "rdata" OF "docl" AS raw 
+  FORMAT "X(8)"
+  INITIAL ?
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD INDEX "DocID" ON "docl" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "DocID" ASCENDING 
+  INDEX-FIELD "LineNo" ASCENDING 
+
+ADD TABLE "EmailH"
+  AREA "Schema Area"
+  LABEL "Email Headers"
+  DUMP-NAME "emailh"
+
+ADD FIELD "EmailID" OF "EmailH" AS decimal 
+  FORMAT "999999999999"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "CompanyCode" OF "EmailH" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "RcpDate" OF "EmailH" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Recieved"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "RcpTime" OF "EmailH" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "AccountNumber" OF "EmailH" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "Email" OF "EmailH" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Email Address"
+  POSITION 7
+  MAX-WIDTH 60
+  ORDER 60
+
+ADD FIELD "Subject" OF "EmailH" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "MText" OF "EmailH" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "HTMLBody" OF "EmailH" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD INDEX "EmailID" ON "EmailH" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "EmailID" ASCENDING 
+
+ADD INDEX "Company" ON "EmailH" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "RcpDate" DESCENDING 
+  INDEX-FIELD "RcpTime" DESCENDING 
+
+ADD TABLE "eSched"
+  AREA "Schema Area"
+  LABEL "Engineer Schedule"
+  DUMP-NAME "eSched"
+
+ADD FIELD "CompanyCode" OF "eSched" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "IssueNumber" OF "eSched" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "AssignTo" OF "eSched" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Assigned To"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "ActionDate" OF "eSched" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "IssActionID" OF "eSched" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 50
+
+ADD FIELD "eSchedID" OF "eSched" AS int64 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 8
+  ORDER 60
+
+ADD INDEX "prim" ON "eSched" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "eSchedID" ASCENDING 
+
+ADD INDEX "Engineer" ON "eSched" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AssignTo" ASCENDING 
+  INDEX-FIELD "ActionDate" ASCENDING 
+
+ADD INDEX "IssActionID" ON "eSched" 
+  AREA "Schema Area"
+  INDEX-FIELD "IssActionID" ASCENDING 
+
+ADD INDEX "issue" ON "eSched" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "ActionDate" ASCENDING 
+
+ADD TABLE "gempty"
+  AREA "Schema Area"
+  DUMP-NAME "gempty"
+
+ADD TABLE "GenTab"
+  AREA "Schema Area"
+  LABEL "General Codes"
+  DUMP-NAME "gentab"
+
+ADD FIELD "CompanyCode" OF "GenTab" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "gType" OF "GenTab" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Code Type"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "gCode" OF "GenTab" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Code"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "descr" OF "GenTab" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 40
+
+ADD INDEX "prim-key" ON "GenTab" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "gType" ASCENDING 
+  INDEX-FIELD "gCode" ASCENDING 
+
+ADD TABLE "Holiday"
+  AREA "Schema Area"
+  DUMP-NAME "holiday"
+
+ADD FIELD "CompanyCode" OF "Holiday" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "hDate" OF "Holiday" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Date"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "descr" OF "Holiday" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Details"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "observed" OF "Holiday" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Observed?"
+  POSITION 5
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD INDEX "PrimKey" ON "Holiday" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "hDate" ASCENDING 
+
+ADD TABLE "iemailtmp"
+  AREA "Schema Area"
+  LABEL "Issue email templates"
+  DUMP-NAME "iemailtmp"
+
+ADD FIELD "CompanyCode" OF "iemailtmp" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "tmpCode" OF "iemailtmp" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Template Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "descr" OF "iemailtmp" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 160
+  ORDER 30
+
+ADD FIELD "tmpTxt" OF "iemailtmp" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Text"
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 40
+
+ADD INDEX "primKey" ON "iemailtmp" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "tmpCode" ASCENDING 
+
+ADD TABLE "IssAction"
+  AREA "Schema Area"
+  LABEL "Issue Actions"
+  DUMP-NAME "issactio"
+
+ADD FIELD "CompanyCode" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "IssueNumber" OF "IssAction" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "ActionID" OF "IssAction" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 30
+
+ADD FIELD "notes" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "IssActionID" OF "IssAction" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 50
+
+ADD FIELD "CreatedBy" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "CreateDate" OF "IssAction" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "CreateTime" OF "IssAction" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "AssignTo" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Assigned To"
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "AssignDate" OF "IssAction" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Assigned Date"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "AssignTime" OF "IssAction" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "ActionStatus" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL "OPEN"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "ActionDate" OF "IssAction" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "AssignBy" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "CustomerView" OF "IssAction" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer View?"
+  POSITION 16
+  MAX-WIDTH 1
+  ORDER 150
+
+ADD FIELD "ContractType" OF "IssAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "CType"
+  POSITION 17
+  MAX-WIDTH 16
+  COLUMN-LABEL "CType"
+  ORDER 160
+
+ADD FIELD "Billable" OF "IssAction" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Bill?"
+  POSITION 18
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill?"
+  ORDER 170
+
+ADD FIELD "ActDescription" OF "IssAction" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Activity Description"
+  POSITION 19
+  MAX-WIDTH 80
+  ORDER 180
+
+ADD FIELD "Responsibility" OF "IssAction" AS character 
+  DESCRIPTION "Engineer/Customer/3rd Party"
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Responsibility"
+  POSITION 20
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "StartDay" OF "IssAction" AS integer 
+  FORMAT "zzz9"
+  INITIAL "0"
+  LABEL "Start Day"
+  POSITION 21
+  MAX-WIDTH 4
+  ORDER 200
+
+ADD FIELD "IgnoreWeekend" OF "IssAction" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Ignore Weekend?"
+  POSITION 23
+  MAX-WIDTH 1
+  ORDER 210
+
+ADD FIELD "ActionGroup" OF "IssAction" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Action Group"
+  POSITION 24
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "TaskID" OF "IssAction" AS int64 
+  DESCRIPTION "if > 0 then its a Complex project action"
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 25
+  MAX-WIDTH 8
+  ORDER 230
+
+ADD FIELD "DisplayOrder" OF "IssAction" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Dsiplay Order"
+  POSITION 26
+  MAX-WIDTH 4
+  ORDER 240
+
+ADD FIELD "PhaseID" OF "IssAction" AS int64 
+  DESCRIPTION "System Generated "
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 27
+  MAX-WIDTH 8
+  ORDER 250
+
+ADD FIELD "WorkDuration" OF "IssAction" AS integer 
+  DESCRIPTION "in seconds although always rounded to mins"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Work Duration"
+  POSITION 28
+  MAX-WIDTH 4
+  ORDER 260
+
+ADD FIELD "PlanDuration" OF "IssAction" AS integer 
+  DESCRIPTION "in seconds although always rounded to mins"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Planned Duration"
+  POSITION 29
+  MAX-WIDTH 4
+  ORDER 270
+
+ADD INDEX "IssueNumber" ON "IssAction" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "ActionDate" DESCENDING 
+  INDEX-FIELD "IssActionID" DESCENDING 
+
+ADD INDEX "ActionID" ON "IssAction" 
+  AREA "Schema Area"
+  INDEX-FIELD "ActionID" ASCENDING 
+
+ADD INDEX "ActionStatus" ON "IssAction" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActionStatus" ASCENDING 
+  INDEX-FIELD "ActionDate" ASCENDING 
+
+ADD INDEX "AssignBy" ON "IssAction" 
+  AREA "Schema Area"
+  INDEX-FIELD "AssignBy" ASCENDING 
+
+ADD INDEX "AssignTo" ON "IssAction" 
+  AREA "Schema Area"
+  INDEX-FIELD "AssignTo" ASCENDING 
+  INDEX-FIELD "ActionStatus" ASCENDING 
+  INDEX-FIELD "AssignDate" DESCENDING 
+  INDEX-FIELD "AssignTime" DESCENDING 
+
+ADD INDEX "CreateBy" ON "IssAction" 
+  AREA "Schema Area"
+  INDEX-FIELD "CreatedBy" ASCENDING 
+
+ADD INDEX "IssActionID" ON "IssAction" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "IssActionID" ASCENDING 
+
+ADD TABLE "issActivity"
+  AREA "Schema Area"
+  LABEL "Issue Activity"
+  DUMP-NAME "issactiv"
+
+ADD FIELD "IssActivityID" OF "issActivity" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "IssActionID" OF "issActivity" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 20
+
+ADD FIELD "CompanyCode" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "IssueNumber" OF "issActivity" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "CreatedBy" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "CreateDate" OF "issActivity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "CreateTime" OF "issActivity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "ActDate" OF "issActivity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "Duration" OF "issActivity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "Description" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD FIELD "notes" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD FIELD "ActivityBy" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "StartDate" OF "issActivity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Start Date"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "StartTime" OF "issActivity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Start Time"
+  POSITION 15
+  MAX-WIDTH 4
+  ORDER 140
+
+ADD FIELD "EndDate" OF "issActivity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "End Date"
+  POSITION 16
+  MAX-WIDTH 4
+  ORDER 150
+
+ADD FIELD "EndTime" OF "issActivity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "End Time"
+  POSITION 17
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD FIELD "CustomerView" OF "issActivity" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer View?"
+  POSITION 18
+  MAX-WIDTH 1
+  ORDER 170
+
+ADD FIELD "SiteVisit" OF "issActivity" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Site Visit?"
+  POSITION 19
+  MAX-WIDTH 1
+  ORDER 180
+
+ADD FIELD "ContractType" OF "issActivity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "CType"
+  POSITION 20
+  MAX-WIDTH 16
+  COLUMN-LABEL "CType"
+  ORDER 190
+
+ADD FIELD "Billable" OF "issActivity" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Bill?"
+  POSITION 21
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill?"
+  ORDER 200
+
+ADD FIELD "ActDescription" OF "issActivity" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Activity Description"
+  POSITION 22
+  MAX-WIDTH 80
+  ORDER 210
+
+ADD FIELD "ActivityType" OF "issActivity" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "ActType"
+  POSITION 23
+  MAX-WIDTH 60
+  COLUMN-LABEL "ActType"
+  ORDER 220
+
+ADD FIELD "TypeID" OF "issActivity" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "typeID"
+  POSITION 24
+  MAX-WIDTH 4
+  COLUMN-LABEL "TypeID"
+  ORDER 230
+
+ADD INDEX "IssueNumber" ON "issActivity" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "IssActionID" ASCENDING 
+  INDEX-FIELD "ActDate" DESCENDING 
+
+ADD INDEX "ActivityBy" ON "issActivity" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActivityBy" ASCENDING 
+  INDEX-FIELD "ActDate" ASCENDING 
+
+ADD INDEX "ActivityID" ON "issActivity" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "IssActivityID" ASCENDING 
+
+ADD INDEX "ActivityType" ON "issActivity" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActivityType" ASCENDING 
+
+ADD INDEX "EngStartIDX" ON "issActivity" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActivityBy" ASCENDING 
+  INDEX-FIELD "StartDate" ASCENDING 
+  INDEX-FIELD "StartTime" ASCENDING 
+
+ADD INDEX "StartDate" ON "issActivity" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "StartDate" ASCENDING 
+
+ADD TABLE "IssAlert"
+  AREA "Schema Area"
+  LABEL "Issue SLA Alert"
+  DUMP-NAME "issalert"
+
+ADD FIELD "IssueNumber" OF "IssAlert" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CompanyCode" OF "IssAlert" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "SLALevel" OF "IssAlert" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Level"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "LoginID" OF "IssAlert" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 5
+  MAX-WIDTH 30
+  ORDER 40
+
+ADD FIELD "CreateDate" OF "IssAlert" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "CreateTime" OF "IssAlert" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD INDEX "IssueNumber" ON "IssAlert" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "SLALevel" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+
+ADD INDEX "LoginID" ON "IssAlert" 
+  AREA "Schema Area"
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD TABLE "IssNote"
+  AREA "Schema Area"
+  DUMP-NAME "issnote"
+
+ADD FIELD "IssueNumber" OF "IssNote" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CreateDate" OF "IssNote" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Create Date"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "CreateTime" OF "IssNote" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Create Time"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "LoginID" OF "IssNote" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 5
+  MAX-WIDTH 30
+  ORDER 50
+
+ADD FIELD "Contents" OF "IssNote" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Note"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "NoteCode" OF "IssNote" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Status Code"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "CompanyCode" OF "IssNote" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD INDEX "IssueNumber" ON "IssNote" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "CreateDate" DESCENDING 
+  INDEX-FIELD "CreateTime" DESCENDING 
+
+ADD INDEX "NoteCode" ON "IssNote" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "NoteCode" ASCENDING 
+
+ADD TABLE "issPhase"
+  AREA "Schema Area"
+  LABEL "Issue Project Phases"
+  DESCRIPTION "Only applicable for complex project "
+  DUMP-NAME "issphase"
+
+ADD FIELD "CompanyCode" OF "issPhase" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "IssueNumber" OF "issPhase" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "PhaseID" OF "issPhase" AS int64 
+  DESCRIPTION "System Generated "
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 8
+  ORDER 30
+
+ADD FIELD "Descr" OF "issPhase" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 5
+  MAX-WIDTH 120
+  ORDER 40
+
+ADD FIELD "DisplayOrder" OF "issPhase" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Dsiplay Order"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD INDEX "prim" ON "issPhase" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "PhaseID" ASCENDING 
+
+ADD INDEX "displayOrder" ON "issPhase" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "DisplayOrder" ASCENDING 
+
+ADD TABLE "IssStatus"
+  AREA "Schema Area"
+  DUMP-NAME "issstatu"
+
+ADD FIELD "IssueNumber" OF "IssStatus" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "ChangeDate" OF "IssStatus" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Change Date"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "ChangeTime" OF "IssStatus" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Change Time"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "OldStatusCode" OF "IssStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Old Status Code"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "NewStatusCode" OF "IssStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "New Status Code"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "LoginID" OF "IssStatus" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 7
+  MAX-WIDTH 30
+  ORDER 70
+
+ADD FIELD "CompanyCode" OF "IssStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD INDEX "IssueNumber" ON "IssStatus" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "ChangeDate" DESCENDING 
+  INDEX-FIELD "ChangeTime" DESCENDING 
+
+ADD INDEX "NewStatusCode" ON "IssStatus" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "NewStatusCode" ASCENDING 
+
+ADD INDEX "OldStatusCode" ON "IssStatus" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "OldStatusCode" ASCENDING 
+
+ADD TABLE "Issue"
+  AREA "Schema Area"
+  DUMP-NAME "issue"
+
+ADD FIELD "IssueNumber" OF "Issue" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "IssueDate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Issue Date"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "BriefDescription" OF "Issue" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Brief Description"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "LongDescription" OF "Issue" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Long Description"
+  POSITION 5
+  MAX-WIDTH 160
+  ORDER 60
+
+ADD FIELD "StatusCode" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Status Code"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "AccountNumber" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "RaisedLoginID" OF "Issue" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Raised By"
+  POSITION 8
+  MAX-WIDTH 30
+  ORDER 90
+
+ADD FIELD "CreateBy" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Created By"
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD FIELD "CreateDate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "CreateTime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Created Time"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 120
+
+ADD FIELD "AreaCode" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Area Code"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD FIELD "AssignTo" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Assigned To"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "AssignDate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Assigned Date"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 150
+
+ADD FIELD "PlannedCompletion" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Planned Completion"
+  POSITION 15
+  MAX-WIDTH 4
+  ORDER 170
+
+ADD FIELD "TimeSpent" OF "Issue" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Time Spent"
+  POSITION 17
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 180
+
+ADD FIELD "SearchField" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Search Field"
+  POSITION 18
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "CompanyCode" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 19
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "link-SLAID" OF "Issue" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "SLA Id"
+  POSITION 20
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 200
+
+ADD FIELD "SLAStatus" OF "Issue" AS character 
+  DESCRIPTION "OFF or ON"
+  FORMAT "X(8)"
+  INITIAL "ON"
+  LABEL "SLA Status"
+  POSITION 21
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "SLALevel" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Level"
+  POSITION 22
+  MAX-WIDTH 4
+  ORDER 220
+
+ADD FIELD "SLADate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "SLA Date"
+  POSITION 23
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 230
+
+ADD FIELD "SLATime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Time"
+  POSITION 24
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 240
+
+ADD FIELD "AssignTime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Assigned Time"
+  POSITION 25
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD FIELD "CompDate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Complete Date"
+  POSITION 26
+  MAX-WIDTH 4
+  ORDER 250
+
+ADD FIELD "CompTime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Complete Time"
+  POSITION 27
+  MAX-WIDTH 4
+  ORDER 260
+
+ADD FIELD "IssueTime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Issue Time"
+  POSITION 28
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "CatCode" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Category Code"
+  POSITION 29
+  MAX-WIDTH 16
+  ORDER 270
+
+ADD FIELD "Ticket" OF "Issue" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Ticket?"
+  POSITION 30
+  MAX-WIDTH 1
+  ORDER 280
+
+ADD FIELD "CreateSource" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Create Source"
+  POSITION 32
+  MAX-WIDTH 16
+  ORDER 300
+
+ADD FIELD "BatchID" OF "Issue" AS character 
+  DESCRIPTION "Batch ID for auto generated issues"
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "BatchID"
+  POSITION 33
+  MAX-WIDTH 40
+  COLUMN-LABEL "BatchID"
+  ORDER 310
+
+ADD FIELD "Billable" OF "Issue" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Bill?"
+  POSITION 34
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill?"
+  ORDER 330
+
+ADD FIELD "ContractType" OF "Issue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Contract Type"
+  POSITION 35
+  MAX-WIDTH 16
+  COLUMN-LABEL "CType"
+  ORDER 320
+
+ADD FIELD "ActDescription" OF "Issue" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Activity Description"
+  POSITION 36
+  MAX-WIDTH 80
+  ORDER 340
+
+ADD FIELD "iClass" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL "Issue"
+  LABEL "Issue Class"
+  POSITION 37
+  MAX-WIDTH 16
+  ORDER 350
+
+ADD FIELD "LastActivity" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "Last Activity"
+  POSITION 38
+  MAX-WIDTH 8
+  ORDER 360
+
+ADD FIELD "tLight" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "99"
+  LABEL "Traffic Light Level"
+  POSITION 39
+  MAX-WIDTH 4
+  ORDER 370
+
+ADD FIELD "SLAAmber" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "Amber Warning At"
+  POSITION 40
+  MAX-WIDTH 8
+  ORDER 390
+
+ADD FIELD "SLATrip" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "SLA Deadline"
+  POSITION 41
+  MAX-WIDTH 8
+  ORDER 380
+
+ADD FIELD "LastTmpCode" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Email Template Code"
+  POSITION 42
+  MAX-WIDTH 16
+  ORDER 400
+
+ADD FIELD "isProject" OF "Issue" AS logical 
+  DESCRIPTION "Complex Project flag "
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Project?"
+  POSITION 43
+  MAX-WIDTH 1
+  ORDER 410
+
+ADD FIELD "prj-eng" OF "Issue" AS character 
+  DESCRIPTION "complex project - manager of Projects
+"
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Project Engineer"
+  POSITION 44
+  MAX-WIDTH 30
+  ORDER 430
+
+ADD FIELD "ProjCode" OF "Issue" AS character 
+  DESCRIPTION "complex project"
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Project Code"
+  POSITION 45
+  MAX-WIDTH 16
+  ORDER 440
+
+ADD FIELD "prj-Start" OF "Issue" AS date 
+  DESCRIPTION "complex project"
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Project Start"
+  POSITION 46
+  MAX-WIDTH 4
+  ORDER 450
+
+ADD FIELD "Old_ContractType" OF "Issue" AS character 
+  DESCRIPTION "Used when moving adhoc to default contract"
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Contract Type"
+  POSITION 47
+  MAX-WIDTH 16
+  COLUMN-LABEL "CType"
+  ORDER 460
+
+ADD FIELD "AlertUsers" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 48
+  MAX-WIDTH 16
+  ORDER 470
+
+ADD INDEX "IssueNumber" ON "Issue" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "AccountNumber" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "AreaCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AreaCode" ASCENDING 
+
+ADD INDEX "Assign_To" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AssignTo" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "CatCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "CatCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "ClassIndex" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "iClass" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "ContractCustomer" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ContractType" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "CreateDate" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "CreateDate" ASCENDING 
+
+ADD INDEX "issueDate" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueDate" ASCENDING 
+
+ADD INDEX "LastActiviy" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "LastActivity" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "link-SLAID" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "link-SLAID" ASCENDING 
+  INDEX-FIELD "IssueDate" DESCENDING 
+
+ADD INDEX "project" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "isProject" ASCENDING 
+  INDEX-FIELD "prj-eng" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "Raised_Login" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "RaisedLoginID" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "SearchField" ON "Issue" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "SearchField" ASCENDING 
+
+ADD INDEX "SlaAmber" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "SLAAmber" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "SLAStatus" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "SLAStatus" ASCENDING 
+  INDEX-FIELD "link-SLAID" ASCENDING 
+
+ADD INDEX "SLAtrip" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "SLATrip" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "StatusCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "StatusCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "tlight" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "tLight" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD TABLE "ivClass"
+  AREA "Schema Area"
+  LABEL "Inventory Classes"
+  DUMP-NAME "ivclass"
+
+ADD FIELD "CompanyCode" OF "ivClass" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "ClassCode" OF "ivClass" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Class"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "name" OF "ivClass" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 30
+
+ADD FIELD "DisplayPriority" OF "ivClass" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "Style" OF "ivClass" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "ClassCode" ON "ivClass" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ClassCode" ASCENDING 
+
+ADD TABLE "ivField"
+  AREA "Schema Area"
+  LABEL "Inventory Field Definitions"
+  DUMP-NAME "ivfield"
+
+ADD FIELD "ivFieldID" OF "ivField" AS decimal 
+  FORMAT "9999999999"
+  INITIAL "0"
+  LABEL "Field ID"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "ivSubID" OF "ivField" AS decimal 
+  DESCRIPTION "AUTO GENERATED FIELD"
+  FORMAT "9999999999999"
+  INITIAL ?
+  LABEL "Sub Class ID"
+  POSITION 3
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 20
+
+ADD FIELD "dOrder" OF "ivField" AS integer 
+  FORMAT "999"
+  INITIAL "0"
+  LABEL "Display Order"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "dLabel" OF "ivField" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Label"
+  POSITION 5
+  MAX-WIDTH 40
+  ORDER 40
+
+ADD FIELD "dType" OF "ivField" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Field Type"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "dMandatory" OF "ivField" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Mandatory?"
+  POSITION 7
+  MAX-WIDTH 1
+  ORDER 60
+
+ADD FIELD "dPrompt" OF "ivField" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Prompt"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "dWarning" OF "ivField" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD INDEX "ivFieldID" ON "ivField" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ivFieldID" ASCENDING 
+
+ADD INDEX "dWarning" ON "ivField" 
+  AREA "Schema Area"
+  INDEX-FIELD "dType" ASCENDING 
+  INDEX-FIELD "dWarning" ASCENDING 
+
+ADD INDEX "ivSubID" ON "ivField" 
+  AREA "Schema Area"
+  INDEX-FIELD "ivSubID" ASCENDING 
+  INDEX-FIELD "dOrder" ASCENDING 
+
+ADD TABLE "ivSub"
+  AREA "Schema Area"
+  LABEL "Inventory Sub Classes"
+  DUMP-NAME "ivsub"
+
+ADD FIELD "CompanyCode" OF "ivSub" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "ClassCode" OF "ivSub" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Class"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "name" OF "ivSub" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 60
+  ORDER 40
+
+ADD FIELD "SubCode" OF "ivSub" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Sub Class Code"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "ivSubID" OF "ivSub" AS decimal 
+  DESCRIPTION "AUTO GENERATED FIELD"
+  FORMAT "9999999999999"
+  INITIAL ?
+  LABEL "Sub Class ID"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 60
+
+ADD FIELD "DisplayPriority" OF "ivSub" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "Style" OF "ivSub" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD INDEX "SubCode" ON "ivSub" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ClassCode" ASCENDING 
+  INDEX-FIELD "SubCode" ASCENDING 
+
+ADD INDEX "ivSubID" ON "ivSub" 
+  AREA "Schema Area"
+  UNIQUE
+  DESCRIPTION "COMPANY NOT REQUIRED ON THIS"
+  INDEX-FIELD "ivSubID" ASCENDING 
+
+ADD TABLE "knbItem"
+  AREA "Schema Area"
+  LABEL "Knowledge Base Item"
+  DUMP-NAME "knbitem"
+
+ADD FIELD "CompanyCode" OF "knbItem" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 5
+
+ADD FIELD "knbCode" OF "knbItem" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Section"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "knbID" OF "knbItem" AS decimal 
+  FORMAT "9999999999"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 20
+
+ADD FIELD "kTitle" OF "knbItem" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "CreateDate" OF "knbItem" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "CreateBy" OF "knbItem" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "AmendDate" OF "knbItem" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "AmendBy" OF "knbItem" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD INDEX "knbID" ON "knbItem" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "knbID" ASCENDING 
+
+ADD INDEX "CompanyCode" ON "knbItem" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "knbCode" ASCENDING 
+  INDEX-FIELD "knbID" ASCENDING 
+
+ADD INDEX "Description" ON "knbItem" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "kTitle" ASCENDING 
+
+ADD TABLE "knbSection"
+  AREA "Schema Area"
+  LABEL "Knowledge Base Sections"
+  DUMP-NAME "knbsecti"
+
+ADD FIELD "knbCode" OF "knbSection" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Section"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "CompanyCode" OF "knbSection" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 5
+
+ADD FIELD "description" OF "knbSection" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD INDEX "knbCode" ON "knbSection" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "knbCode" ASCENDING 
+
+ADD TABLE "knbText"
+  AREA "Schema Area"
+  LABEL "Knowledgebase Text"
+  DUMP-NAME "knbtext"
+
+ADD FIELD "knbID" OF "knbText" AS decimal 
+  FORMAT "9999999999"
+  INITIAL "0"
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 20
+
+ADD FIELD "dType" OF "knbText" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "dData" OF "knbText" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "CompanyCode" OF "knbText" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "knbCode" OF "knbText" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Section"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD INDEX "knbid" ON "knbText" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "knbID" ASCENDING 
+  INDEX-FIELD "dType" ASCENDING 
+
+ADD INDEX "CompanyCode" ON "knbText" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+
+ADD INDEX "dData" ON "knbText" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "dData" ASCENDING 
+
+ADD INDEX "dType" ON "knbText" 
+  AREA "Schema Area"
+  INDEX-FIELD "dType" ASCENDING 
+
+ADD INDEX "knbCode" ON "knbText" 
+  AREA "Schema Area"
+  INDEX-FIELD "knbCode" ASCENDING 
+
+ADD TABLE "ptp_phase"
+  AREA "Schema Area"
+  LABEL "Project Template - Phase"
+  DUMP-NAME "ptp_phase"
+
+ADD FIELD "CompanyCode" OF "ptp_phase" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "ProjCode" OF "ptp_phase" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Project Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Descr" OF "ptp_phase" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 45
+
+ADD FIELD "PhaseID" OF "ptp_phase" AS int64 
+  DESCRIPTION "System Generated "
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD FIELD "DisplayOrder" OF "ptp_phase" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Dsiplay Order"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 55
+
+ADD INDEX "prim" ON "ptp_phase" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ProjCode" ASCENDING 
+  INDEX-FIELD "PhaseID" ASCENDING 
+
+ADD INDEX "displayOrder" ON "ptp_phase" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ProjCode" ASCENDING 
+  INDEX-FIELD "DisplayOrder" ASCENDING 
+
+ADD INDEX "phase" ON "ptp_phase" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "PhaseID" ASCENDING 
+
+ADD TABLE "ptp_proj"
+  AREA "Schema Area"
+  LABEL "Project Template - Project Def"
+  DUMP-NAME "ptp_proj"
+
+ADD FIELD "CompanyCode" OF "ptp_proj" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "ProjCode" OF "ptp_proj" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Project Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Descr" OF "ptp_proj" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 30
+
+ADD INDEX "prim-key" ON "ptp_proj" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ProjCode" ASCENDING 
+
+ADD TABLE "ptp_task"
+  AREA "Schema Area"
+  LABEL "Project Template - Tasks"
+  DUMP-NAME "ptp_task"
+
+ADD FIELD "CompanyCode" OF "ptp_task" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "ProjCode" OF "ptp_task" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Project Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "PhaseID" OF "ptp_task" AS int64 
+  DESCRIPTION "System Generated "
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD FIELD "TaskID" OF "ptp_task" AS int64 
+  FORMAT "->,>>>,>>>,>>9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 50
+
+ADD FIELD "DisplayOrder" OF "ptp_task" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Dsiplay Order"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "Descr" OF "ptp_task" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 8
+  MAX-WIDTH 120
+  ORDER 80
+
+ADD FIELD "Billable" OF "ptp_task" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Billable?"
+  POSITION 11
+  MAX-WIDTH 1
+  COLUMN-LABEL "Billable"
+  ORDER 110
+
+ADD FIELD "Responsibility" OF "ptp_task" AS character 
+  DESCRIPTION "Engineer/Customer/3rd Party"
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Responsibility"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "StartDay" OF "ptp_task" AS integer 
+  FORMAT "zzz9"
+  INITIAL "0"
+  LABEL "Start Day"
+  POSITION 13
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "EstDuration" OF "ptp_task" AS integer 
+  DESCRIPTION "in seconds although always rounded to mins"
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Estimated Duration"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 140
+
+ADD FIELD "IgnoreWeekend" OF "ptp_task" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Ignore Weekend?"
+  POSITION 15
+  MAX-WIDTH 1
+  ORDER 150
+
+ADD FIELD "ActionGroup" OF "ptp_task" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Action Group"
+  POSITION 16
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD INDEX "primkey" ON "ptp_task" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ProjCode" ASCENDING 
+  INDEX-FIELD "PhaseID" ASCENDING 
+  INDEX-FIELD "TaskID" ASCENDING 
+
+ADD INDEX "displayOrder" ON "ptp_task" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ProjCode" ASCENDING 
+  INDEX-FIELD "PhaseID" ASCENDING 
+  INDEX-FIELD "DisplayOrder" ASCENDING 
+
+ADD INDEX "task" ON "ptp_task" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "TaskID" ASCENDING 
+
+ADD TABLE "ptt_def"
+  AREA "Schema Area"
+  LABEL "Project Template - Task Def"
+  DUMP-NAME "ptt_def"
+
+ADD FIELD "CompanyCode" OF "ptt_def" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "TaskCode" OF "ptt_def" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Task Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Descr" OF "ptt_def" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 30
+
+ADD INDEX "prim-key" ON "ptt_def" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "TaskCode" ASCENDING 
+
+ADD TABLE "SchedLog"
+  AREA "Schema Area"
+  DUMP-NAME "schedlog"
+
+ADD FIELD "LoginID" OF "SchedLog" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 10
+
+ADD FIELD "SchedCode" OF "SchedLog" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "SchedDate" OF "SchedLog" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD INDEX "prim_key" ON "SchedLog" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "SchedCode" ASCENDING 
+  INDEX-FIELD "SchedDate" ASCENDING 
+
+ADD TABLE "slahead"
+  AREA "Schema Area"
+  LABEL "SLA Header"
+  DUMP-NAME "slahead"
+
+ADD FIELD "CompanyCode" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "SLACode" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "SLA Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "AccountNumber" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "SLAID" OF "slahead" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 5
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 40
+
+ADD FIELD "Description" OF "slahead" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "Notes" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "RespUnit" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 70
+
+ADD FIELD "RespTime" OF "slahead" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 9
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 80
+
+ADD FIELD "RespAction" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 90
+
+ADD FIELD "RespDest" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 100
+
+ADD FIELD "RespDesc" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 12
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 110
+
+ADD FIELD "TimeBase" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL "OFF"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "incSat" OF "slahead" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 14
+  MAX-WIDTH 1
+  ORDER 130
+
+ADD FIELD "incSun" OF "slahead" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 15
+  MAX-WIDTH 1
+  ORDER 140
+
+ADD FIELD "AlertBase" OF "slahead" AS character 
+  FORMAT "X(8)"
+  INITIAL "ISSUE"
+  POSITION 16
+  MAX-WIDTH 16
+  ORDER 150
+
+ADD FIELD "AmberWarning" OF "slahead" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 17
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD INDEX "SLACode" ON "slahead" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "SLACode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "SLAID" ON "slahead" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "SLAID" ASCENDING 
+
+ADD TABLE "SMSQueue"
+  AREA "Schema Area"
+  LABEL "SMS Messages"
+  DUMP-NAME "smsqueue"
+
+ADD FIELD "CreateDate" OF "SMSQueue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CreateTime" OF "SMSQueue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "QStatus" OF "SMSQueue" AS integer 
+  FORMAT "99"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "CreatedBy" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "msg" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "SentDate" OF "SMSQueue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "SentTime" OF "SMSQueue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "Mobile" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "SMSId" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 10
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "SendTo" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 45
+
+ADD FIELD "SMSResponse" OF "SMSQueue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 12
+  MAX-WIDTH 4
+  ORDER 110
+
+ADD FIELD "CompanyCode" OF "SMSQueue" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "IssueNumber" OF "SMSQueue" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD INDEX "QStatus" ON "SMSQueue" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "QStatus" ASCENDING 
+  INDEX-FIELD "CreateDate" DESCENDING 
+  INDEX-FIELD "CreateTime" DESCENDING 
+
+ADD INDEX "CompanyQueue" ON "SMSQueue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "QStatus" ASCENDING 
+  INDEX-FIELD "CreateDate" DESCENDING 
+  INDEX-FIELD "CreateTime" DESCENDING 
+
+ADD TABLE "steam"
+  AREA "Schema Area"
+  LABEL "Support Team"
+  DUMP-NAME "steam"
+
+ADD FIELD "st-num" OF "steam" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Team Number"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CompanyCode" OF "steam" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "descr" OF "steam" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "SupportEmail" OF "steam" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Email Address"
+  POSITION 5
+  MAX-WIDTH 60
+  ORDER 40
+
+ADD INDEX "st-num" ON "steam" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "st-num" ASCENDING 
+
+ADD TABLE "SysAct"
+  AREA "Schema Area"
+  LABEL "System Activity"
+  DUMP-NAME "sysact"
+
+ADD FIELD "ActDate" OF "SysAct" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "ActTime" OF "SysAct" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "LoginID" OF "SysAct" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 4
+  MAX-WIDTH 30
+  ORDER 30
+
+ADD FIELD "ActType" OF "SysAct" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "AttrData" OF "SysAct" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "primkey" ON "SysAct" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "ActDate" ASCENDING 
+  INDEX-FIELD "ActTime" ASCENDING 
+
+ADD INDEX "Activity" ON "SysAct" 
+  AREA "Schema Area"
+  INDEX-FIELD "ActDate" ASCENDING 
+  INDEX-FIELD "ActTime" ASCENDING 
+
+ADD TABLE "Ticket"
+  AREA "Schema Area"
+  LABEL "Ticket Transactions"
+  DUMP-NAME "ticket"
+
+ADD FIELD "TickID" OF "Ticket" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL ?
+  POSITION 2
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 10
+
+ADD FIELD "CompanyCode" OF "Ticket" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "AccountNumber" OF "Ticket" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "TxnType" OF "Ticket" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "TxnDate" OF "Ticket" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "TxnTime" OF "Ticket" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "CreateBy" OF "Ticket" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "CreateDate" OF "Ticket" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "CreateTime" OF "Ticket" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "IssueNumber" OF "Ticket" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 11
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "Reference" OF "Ticket" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "Amount" OF "Ticket" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "IssActivityID" OF "Ticket" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 15
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 140
+
+ADD INDEX "TickID" ON "Ticket" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "TickID" ASCENDING 
+
+ADD INDEX "AccountNumber" ON "Ticket" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "TxnDate" ASCENDING 
+  INDEX-FIELD "TxnTime" ASCENDING 
+
+ADD INDEX "IssueNumber" ON "Ticket" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "IssueNumber" ASCENDING 
+  INDEX-FIELD "TxnDate" ASCENDING 
+
+ADD TABLE "UserParam"
+  AREA "Schema Area"
+  LABEL "User Params"
+  DESCRIPTION "Save stuff "
+  DUMP-NAME "userparam"
+
+ADD FIELD "LoginID" OF "UserParam" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "pKey" OF "UserParam" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 30
+  ORDER 30
+
+ADD FIELD "pData" OF "UserParam" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD INDEX "prim" ON "UserParam" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "pKey" ASCENDING 
+
+ADD TABLE "WebAction"
+  AREA "Schema Area"
+  LABEL "Action Types"
+  DUMP-NAME "webactio"
+
+ADD FIELD "CompanyCode" OF "WebAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "ActionCode" OF "WebAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "Notes" OF "WebAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "ActionID" OF "WebAction" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 50
+
+ADD FIELD "EmailAssign" OF "WebAction" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 7
+  MAX-WIDTH 1
+  ORDER 60
+
+ADD FIELD "AutoActionCode" OF "WebAction" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "ActionClass" OF "WebAction" AS character 
+  FORMAT "x(8)"
+  INITIAL "ENG"
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD INDEX "ActionCode" ON "WebAction" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActionCode" ASCENDING 
+
+ADD INDEX "ActionID" ON "WebAction" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "ActionID" ASCENDING 
+
+ADD TABLE "WebActType"
+  AREA "Schema Area"
+  LABEL "Web Activity Type"
+  DUMP-NAME "webactty"
+
+ADD FIELD "CompanyCode" OF "WebActType" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "Description" OF "WebActType" AS character 
+  FORMAT "x(70)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 140
+  COLUMN-LABEL "Desc"
+  ORDER 30
+
+ADD FIELD "MinTime" OF "WebActType" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "Min Time"
+  POSITION 5
+  MAX-WIDTH 4
+  COLUMN-LABEL "MinTime"
+  ORDER 40
+
+ADD FIELD "ActivityType" OF "WebActType" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "ActType"
+  POSITION 6
+  MAX-WIDTH 60
+  COLUMN-LABEL "ActType"
+  ORDER 50
+
+ADD FIELD "TypeID" OF "WebActType" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "typeID"
+  POSITION 7
+  MAX-WIDTH 4
+  COLUMN-LABEL "TypeID"
+  ORDER 60
+
+ADD FIELD "isAdminTime" OF "WebActType" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Is Admin Time"
+  POSITION 8
+  MAX-WIDTH 1
+  ORDER 70
+
+ADD INDEX "prim-key" ON "WebActType" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "ActivityType" ASCENDING 
+
+ADD INDEX "TypeID" ON "WebActType" 
+  AREA "Schema Area"
+  UNIQUE
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "TypeID" ASCENDING 
+
+ADD TABLE "WebAttr"
+  AREA "Schema Area"
+  LABEL "Web Attributes"
+  DESCRIPTION "Contains various parameters"
+  DUMP-NAME "webattr"
+
+ADD FIELD "SystemID" OF "WebAttr" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "System"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 10
+
+ADD FIELD "AttrID" OF "WebAttr" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Attribute ID"
+  POSITION 3
+  MAX-WIDTH 40
+  ORDER 20
+
+ADD FIELD "AttrValue" OF "WebAttr" AS character 
+  FORMAT "x(60)"
+  INITIAL ""
+  LABEL "Value"
+  POSITION 4
+  MAX-WIDTH 120
+  ORDER 30
+
+ADD FIELD "Note" OF "WebAttr" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Note"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "HTMFormat" OF "WebAttr" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "HTM Format"
+  POSITION 6
+  MAX-WIDTH 1
+  VIEW-AS "VIEW-AS TOGGLE-BOX"
+  ORDER 50
+
+ADD INDEX "SystemID" ON "WebAttr" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "SystemID" ASCENDING 
+  INDEX-FIELD "AttrID" ASCENDING 
+
+ADD TABLE "WebIssAGrp"
+  AREA "Schema Area"
+  LABEL "Issue Area Group"
+  DUMP-NAME "webissag"
+
+ADD FIELD "CompanyCode" OF "WebIssAGrp" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "GroupID" OF "WebIssAGrp" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Group"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebIssAGrp" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD INDEX "GroupID" ON "WebIssAGrp" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "GroupID" ASCENDING 
+
+ADD TABLE "WebIssArea"
+  AREA "Schema Area"
+  DUMP-NAME "webissa"
+
+ADD FIELD "AreaCode" OF "WebIssArea" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Area Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebIssArea" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "CompanyCode" OF "WebIssArea" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "def-ActionCode" OF "WebIssArea" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Default Action Code"
+  POSITION 5
+  MAX-WIDTH 180
+  EXTENT 10
+  ORDER 40
+
+ADD FIELD "GroupID" OF "WebIssArea" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Group"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "AreaCode" ON "WebIssArea" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AreaCode" ASCENDING 
+
+ADD INDEX "GroupID" ON "WebIssArea" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "GroupID" ASCENDING 
+  INDEX-FIELD "AreaCode" ASCENDING 
+
+ADD TABLE "WebIssCat"
+  AREA "Schema Area"
+  LABEL "Issue Categories"
+  DUMP-NAME "webissca"
+
+ADD FIELD "CompanyCode" OF "WebIssCat" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "CatCode" OF "WebIssCat" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Category Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebIssCat" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "IsDefault" OF "WebIssCat" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Is Default?"
+  POSITION 5
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD FIELD "Customer" OF "WebIssCat" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer Selectable?"
+  POSITION 6
+  MAX-WIDTH 1
+  ORDER 50
+
+ADD INDEX "CatCode" ON "WebIssCat" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "CatCode" ASCENDING 
+
+ADD TABLE "WebissCont"
+  AREA "Schema Area"
+  LABEL "WContracts"
+  DESCRIPTION "Web Issues Contract Records"
+  DUMP-NAME "webissco"
+
+ADD FIELD "CompanyCode" OF "WebissCont" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "Customer" OF "WebissCont" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Customer"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "Cust"
+  ORDER 20
+
+ADD FIELD "Billable" OF "WebissCont" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Bill"
+  POSITION 5
+  MAX-WIDTH 1
+  COLUMN-LABEL "Bill"
+  ORDER 140
+
+ADD FIELD "Notes" OF "WebissCont" AS character 
+  FORMAT "X(25)"
+  INITIAL ""
+  LABEL "Notes"
+  POSITION 6
+  MAX-WIDTH 50
+  COLUMN-LABEL "Notes"
+  ORDER 150
+
+ADD FIELD "DefCon" OF "WebissCont" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "DefCon"
+  POSITION 7
+  MAX-WIDTH 1
+  COLUMN-LABEL "DefCon"
+  ORDER 160
+
+ADD FIELD "ConActive" OF "WebissCont" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Active"
+  POSITION 8
+  MAX-WIDTH 1
+  COLUMN-LABEL "Active"
+  ORDER 170
+
+ADD FIELD "ContractCode" OF "WebissCont" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Code"
+  POSITION 9
+  MAX-WIDTH 16
+  COLUMN-LABEL "Code"
+  ORDER 180
+
+ADD FIELD "ConID" OF "WebissCont" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 10
+  MAX-WIDTH 4
+  COLUMN-LABEL "ID"
+  ORDER 190
+
+ADD FIELD "Contract_no" OF "WebissCont" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Contract Number"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 200
+
+ADD INDEX "PrimKey" ON "WebissCont" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Customer" ASCENDING 
+  INDEX-FIELD "ContractCode" ASCENDING 
+
+ADD TABLE "WebMHead"
+  AREA "Schema Area"
+  DUMP-NAME "webmenu"
+
+ADD FIELD "PageName" OF "WebMHead" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Page Name"
+  POSITION 2
+  MAX-WIDTH 40
+  ORDER 10
+
+ADD FIELD "PageDesc" OF "WebMHead" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD INDEX "PageName" ON "WebMHead" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "PageName" ASCENDING 
+
+ADD TABLE "WebMLine"
+  AREA "Schema Area"
+  DUMP-NAME "webmline"
+
+ADD FIELD "PageName" OF "WebMLine" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Page Name"
+  POSITION 2
+  MAX-WIDTH 40
+  ORDER 10
+
+ADD FIELD "PageLine" OF "WebMLine" AS integer 
+  FORMAT "zz9"
+  INITIAL "0"
+  LABEL "Line No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "LinkObject" OF "WebMLine" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Linked URL/Menu Page"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "LinkType" OF "WebMLine" AS character 
+  DESCRIPTION "object or page"
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Link Type"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "PageName" ON "WebMLine" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "PageName" ASCENDING 
+  INDEX-FIELD "PageLine" ASCENDING 
+
+ADD INDEX "LinkObject" ON "WebMLine" 
+  AREA "Schema Area"
+  INDEX-FIELD "LinkObject" ASCENDING 
+
+ADD TABLE "WebNote"
+  AREA "Schema Area"
+  DUMP-NAME "webnote"
+
+ADD FIELD "NoteCode" OF "WebNote" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Status Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebNote" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "CustomerCanView" OF "WebNote" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Customer Can View?"
+  POSITION 4
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD FIELD "CompanyCode" OF "WebNote" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD INDEX "Note" ON "WebNote" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "NoteCode" ASCENDING 
+
+ADD TABLE "WebObject"
+  AREA "Schema Area"
+  DUMP-NAME "webobjec"
+
+ADD FIELD "ObjectID" OF "WebObject" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Object ID"
+  POSITION 2
+  MAX-WIDTH 80
+  ORDER 10
+
+ADD FIELD "Description" OF "WebObject" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 20
+
+ADD FIELD "ObjURL" OF "WebObject" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "URL"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "ObjTarget" OF "WebObject" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Target"
+  POSITION 5
+  MAX-WIDTH 30
+  ORDER 40
+
+ADD FIELD "ObjType" OF "WebObject" AS character 
+  FORMAT "X(8)"
+  INITIAL "WS"
+  LABEL "Object Type"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "MenuLocation" OF "WebObject" AS character 
+  DESCRIPTION "B=Both,T=Top,S=Side"
+  FORMAT "x(1)"
+  INITIAL "B"
+  LABEL "Menu Location"
+  POSITION 7
+  MAX-WIDTH 2
+  ORDER 60
+
+ADD FIELD "IconFile" OF "WebObject" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Icon File"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "TopOrder" OF "WebObject" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Top Menu Order"
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD INDEX "ObjectID" ON "WebObject" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "ObjectID" ASCENDING 
+
+ADD INDEX "objURL" ON "WebObject" 
+  AREA "Schema Area"
+  INDEX-FIELD "ObjURL" ASCENDING 
+
+ADD TABLE "websalt"
+  AREA "Schema Area"
+  DUMP-NAME "websalt"
+
+ADD FIELD "LoginID" OF "websalt" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "sdate" OF "websalt" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "sother" OF "websalt" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "sval" OF "websalt" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "prim-key" ON "websalt" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "sdate" ASCENDING 
+  INDEX-FIELD "sother" ASCENDING 
+
+ADD TABLE "WebSecPin"
+  AREA "Schema Area"
+  LABEL "Securiy Pins"
+  DUMP-NAME "websecpin"
+
+ADD FIELD "LoginID" OF "WebSecPin" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "dtCreated" OF "WebSecPin" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 3
+  MAX-WIDTH 8
+  ORDER 30
+
+ADD FIELD "Pin" OF "WebSecPin" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "PIN"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "Pin_id" OF "WebSecPin" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 10
+
+ADD INDEX "Pin_id" ON "WebSecPin" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "Pin_id" ASCENDING 
+
+ADD INDEX "LoginID" ON "WebSecPin" 
+  AREA "Schema Area"
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "dtCreated" ASCENDING 
+
+ADD TABLE "WebSession"
+  AREA "Schema Area"
+  DUMP-NAME "websession"
+
+ADD FIELD "wsKey" OF "WebSession" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  POSITION 2
+  MAX-WIDTH 160
+  ORDER 10
+
+ADD FIELD "wsDate" OF "WebSession" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "wsValue" OF "WebSession" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD INDEX "wskey" ON "WebSession" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "wsKey" ASCENDING 
+  INDEX-FIELD "wsDate" ASCENDING 
+
+ADD TABLE "WebStatus"
+  AREA "Schema Area"
+  DUMP-NAME "webstatu"
+
+ADD FIELD "StatusCode" OF "WebStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Status Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Description" OF "WebStatus" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 3
+  MAX-WIDTH 80
+  ORDER 30
+
+ADD FIELD "CompletedStatus" OF "WebStatus" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Completed?"
+  POSITION 4
+  MAX-WIDTH 1
+  ORDER 40
+
+ADD FIELD "NoteCode" OF "WebStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Note Code"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "CompanyCode" OF "WebStatus" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "DefaultCode" OF "WebStatus" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Default Code On New Issue?"
+  POSITION 7
+  MAX-WIDTH 1
+  ORDER 60
+
+ADD FIELD "DisplayOrder" OF "WebStatus" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Display Order"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "CustomerTrack" OF "WebStatus" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer Track"
+  POSITION 9
+  MAX-WIDTH 1
+  ORDER 80
+
+ADD FIELD "IgnoreEmail" OF "WebStatus" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Ignore Email Issue"
+  POSITION 10
+  MAX-WIDTH 1
+  ORDER 90
+
+ADD INDEX "StatusCode" ON "WebStatus" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "StatusCode" ASCENDING 
+
+ADD INDEX "CompletedStatus" ON "WebStatus" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "CompletedStatus" ASCENDING 
+  INDEX-FIELD "StatusCode" ASCENDING 
+
+ADD TABLE "WebStdTime"
+  AREA "Schema Area"
+  LABEL "Standard Contracted Times"
+  DUMP-NAME "webstdti"
+
+ADD FIELD "CompanyCode" OF "WebStdTime" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "LoginID" OF "WebStdTime" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "ID"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "ID"
+  ORDER 20
+
+ADD FIELD "StdWkYear" OF "WebStdTime" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "Year"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "Year"
+  ORDER 30
+
+ADD FIELD "StdAMStTime" OF "WebStdTime" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "StAM"
+  POSITION 5
+  MAX-WIDTH 70
+  COLUMN-LABEL "StAM"
+  EXTENT 7
+  ORDER 70
+
+ADD FIELD "StdAMEndTime" OF "WebStdTime" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "EndAM"
+  POSITION 6
+  MAX-WIDTH 70
+  COLUMN-LABEL "EndAM"
+  EXTENT 7
+  ORDER 80
+
+ADD FIELD "StdPMStTime" OF "WebStdTime" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "StPM"
+  POSITION 7
+  MAX-WIDTH 70
+  COLUMN-LABEL "StPM"
+  EXTENT 7
+  ORDER 90
+
+ADD FIELD "StdPMEndTime" OF "WebStdTime" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "EndPM"
+  POSITION 8
+  MAX-WIDTH 70
+  COLUMN-LABEL "EndPM"
+  EXTENT 7
+  ORDER 100
+
+ADD FIELD "StdColour" OF "WebStdTime" AS character 
+  FORMAT "X(7)"
+  INITIAL ""
+  LABEL "Colour"
+  POSITION 9
+  MAX-WIDTH 14
+  COLUMN-LABEL "Colour"
+  ORDER 110
+
+ADD INDEX "prim" ON "WebStdTime" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "StdWkYear" ASCENDING 
+
+ADD TABLE "WebUser"
+  AREA "Schema Area"
+  DUMP-NAME "webuser"
+
+ADD FIELD "LoginID" OF "WebUser" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "Passwd" OF "WebUser" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Password"
+  POSITION 3
+  MAX-WIDTH 30
+  ORDER 30
+
+ADD FIELD "Name" OF "WebUser" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "Email" OF "WebUser" AS character 
+  FORMAT "x(30)"
+  INITIAL ""
+  LABEL "Email Address"
+  POSITION 5
+  MAX-WIDTH 60
+  ORDER 50
+
+ADD FIELD "Disabled" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Disabled?"
+  POSITION 6
+  MAX-WIDTH 1
+  VIEW-AS "VIEW-AS TOGGLE-BOX"
+  ORDER 60
+
+ADD FIELD "UserTitle" OF "WebUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Title"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "Forename" OF "WebUser" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Forename"
+  POSITION 8
+  MAX-WIDTH 40
+  ORDER 80
+
+ADD FIELD "Surname" OF "WebUser" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Surname"
+  POSITION 9
+  MAX-WIDTH 80
+  ORDER 90
+
+ADD FIELD "PageName" OF "WebUser" AS character 
+  FORMAT "X(20)"
+  INITIAL ""
+  LABEL "Page Name"
+  POSITION 10
+  MAX-WIDTH 40
+  ORDER 100
+
+ADD FIELD "Telephone" OF "WebUser" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Telephone"
+  POSITION 11
+  MAX-WIDTH 40
+  ORDER 110
+
+ADD FIELD "AccountNumber" OF "WebUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "ExpireDate" OF "WebUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Password Expires"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 130
+
+ADD FIELD "JobTitle" OF "WebUser" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Job Title"
+  POSITION 15
+  MAX-WIDTH 40
+  ORDER 140
+
+ADD FIELD "AllowArea" OF "WebUser" AS character 
+  FORMAT "X(8)"
+  INITIAL "*"
+  LABEL "Allow Issue Area"
+  POSITION 16
+  MAX-WIDTH 16
+  ORDER 150
+
+ADD FIELD "UserClass" OF "WebUser" AS character 
+  DESCRIPTION "INTERNAL,CONTRACT,CUSTOMER"
+  FORMAT "X(8)"
+  INITIAL "INTERNAL"
+  LABEL "User Class"
+  POSITION 17
+  MAX-WIDTH 16
+  ORDER 160
+
+ADD FIELD "CompanyCode" OF "WebUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 18
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "CustomerTrack" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer Track"
+  POSITION 19
+  MAX-WIDTH 1
+  ORDER 170
+
+ADD FIELD "RecordsPerPage" OF "WebUser" AS integer 
+  FORMAT "zz9"
+  INITIAL "10"
+  LABEL "Records Per Page"
+  POSITION 20
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD FIELD "Mobile" OF "WebUser" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Mobile"
+  POSITION 21
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "AllowSMS" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Allow SMS"
+  POSITION 22
+  MAX-WIDTH 1
+  ORDER 200
+
+ADD FIELD "AccessSMS" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Access To SMS"
+  POSITION 23
+  MAX-WIDTH 1
+  ORDER 210
+
+ADD FIELD "SuperUser" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "SuperUser?"
+  POSITION 24
+  MAX-WIDTH 1
+  ORDER 220
+
+ADD FIELD "QuickView" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Access Quick View?"
+  POSITION 25
+  MAX-WIDTH 1
+  ORDER 230
+
+ADD FIELD "LastPasswordChange" OF "WebUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Last Password Change"
+  POSITION 26
+  MAX-WIDTH 4
+  ORDER 240
+
+ADD FIELD "LastTime" OF "WebUser" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Last Login Time"
+  POSITION 27
+  MAX-WIDTH 4
+  ORDER 260
+
+ADD FIELD "LastDate" OF "WebUser" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Last Login Date"
+  POSITION 28
+  MAX-WIDTH 4
+  ORDER 250
+
+ADD FIELD "DefaultUser" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Default User For Account?"
+  POSITION 29
+  MAX-WIDTH 1
+  ORDER 270
+
+ADD FIELD "DisableTimeOut" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Disable Time Out?"
+  POSITION 30
+  MAX-WIDTH 1
+  VIEW-AS "VIEW-AS TOGGLE-BOX"
+  ORDER 280
+
+ADD FIELD "AutoDisableTime" OF "WebUser" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  LABEL "Auto Disabled At"
+  POSITION 31
+  MAX-WIDTH 8
+  ORDER 300
+
+ADD FIELD "FailedLoginCount" OF "WebUser" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Failed Login Count"
+  POSITION 32
+  MAX-WIDTH 4
+  ORDER 290
+
+ADD FIELD "AccountManager" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Account Manager?"
+  POSITION 33
+  MAX-WIDTH 1
+  ORDER 310
+
+ADD FIELD "CustomerViewInventory" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Customer Can View Inventory"
+  POSITION 34
+  MAX-WIDTH 1
+  ORDER 320
+
+ADD FIELD "engType" OF "WebUser" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Engineer Type"
+  POSITION 35
+  MAX-WIDTH 16
+  ORDER 330
+
+ADD FIELD "dashbList" OF "WebUser" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Available Dashboards"
+  POSITION 36
+  MAX-WIDTH 16
+  ORDER 340
+
+ADD FIELD "EmailTimeReport" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 37
+  MAX-WIDTH 1
+  ORDER 350
+
+ADD FIELD "iss_survey" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  LABEL "Send Issue Surveys"
+  POSITION 38
+  MAX-WIDTH 1
+  ORDER 360
+
+ADD FIELD "TwoFactor_Disable" OF "WebUser" AS logical 
+  DESCRIPTION "if true then no 2 factor auth for user"
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 39
+  MAX-WIDTH 1
+  ORDER 370
+
+ADD INDEX "LoginID" ON "WebUser" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+
+ADD INDEX "AccountNumber" ON "WebUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+
+ADD INDEX "Company" ON "WebUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+
+ADD INDEX "Email" ON "WebUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Email" ASCENDING 
+  INDEX-FIELD "UserClass" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "NameWord" ON "WebUser" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "Name" ASCENDING 
+
+ADD INDEX "PageName" ON "WebUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "PageName" ASCENDING 
+
+ADD INDEX "Surname" ON "WebUser" 
+  AREA "Schema Area"
+  INDEX-FIELD "Surname" ASCENDING 
+  INDEX-FIELD "Forename" ASCENDING 
+
+ADD TABLE "WebUserTime"
+  AREA "Schema Area"
+  LABEL "UTime"
+  DESCRIPTION "Users Scheduled Time"
+  DUMP-NAME "webusert"
+
+ADD FIELD "CompanyCode" OF "WebUserTime" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company"
+  POSITION 2
+  MAX-WIDTH 16
+  COLUMN-LABEL "Co"
+  ORDER 10
+
+ADD FIELD "LoginID" OF "WebUserTime" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "ID"
+  POSITION 3
+  MAX-WIDTH 16
+  COLUMN-LABEL "ID"
+  ORDER 20
+
+ADD FIELD "EventDate" OF "WebUserTime" AS date 
+  FORMAT "99/99/99"
+  INITIAL ?
+  LABEL "EVDATE"
+  POSITION 4
+  MAX-WIDTH 4
+  COLUMN-LABEL "EVDATE"
+  ORDER 30
+
+ADD FIELD "EventType" OF "WebUserTime" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Type"
+  POSITION 5
+  MAX-WIDTH 16
+  COLUMN-LABEL "Type"
+  ORDER 40
+
+ADD FIELD "EventNotes" OF "WebUserTime" AS character 
+  FORMAT "X(50)"
+  INITIAL ""
+  LABEL "Note"
+  POSITION 6
+  MAX-WIDTH 100
+  COLUMN-LABEL "Note"
+  ORDER 60
+
+ADD FIELD "EventHours" OF "WebUserTime" AS decimal 
+  FORMAT "-99.99"
+  INITIAL "0"
+  LABEL "Hrs"
+  POSITION 7
+  MAX-WIDTH 17
+  COLUMN-LABEL "Hrs"
+  DECIMALS 2
+  ORDER 70
+
+ADD INDEX "EventID" ON "WebUserTime" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+
+ADD INDEX "EventDate" ON "WebUserTime" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "EventDate" ASCENDING 
+  INDEX-FIELD "EventType" ASCENDING 
+
+ADD TABLE "WebUSteam"
+  AREA "Schema Area"
+  LABEL "User support teams"
+  DUMP-NAME "webusteam"
+
+ADD FIELD "LoginID" OF "WebUSteam" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "st-num" OF "WebUSteam" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Team Number"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD INDEX "prim-key" ON "WebUSteam" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "st-num" ASCENDING 
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000119658
