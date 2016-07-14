@@ -1,0 +1,250 @@
+a {
+	color: #000000;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-style: normal;
+}
+
+body {
+	background-color: #FFFFFF;
+	color: #000000;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-variant: normal;
+	font-weight: normal;
+	margin: 0px 0px 0px 0px;
+}
+
+.actionbutton {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.errormessage {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: larger;
+	font-style: italic;
+	font-weight: bolder;
+}
+
+.inputfield {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.mnttablefield {
+	color: #000000;
+	font-family:'Courier New',Courier,'Nimbus Mono L',monospace;
+	font-size: 10px;
+	background-color: #F5F5F5;
+}
+
+.normaltext {
+	color: #000000;
+	float: right;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	font-weight: normal;
+	line-height: normal;
+	text-align: left;
+	width: 100%;
+}
+
+.programtitle {
+	background-color: #E0E3E7;
+	color: Black;
+	text-align: center;
+	width: 100%;
+	word-spacing: 2px;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.sidelabel {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: bold;
+}
+
+.sidelabelerror {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: italic;
+	font-weight: bolder;
+	color: red;
+}
+
+.submitbutton {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+.subprogramtitle {
+	background-color: #E0E3E7;
+	color: Black;
+	font-family:Cambria,'Times New Roman','Nimbus Roman No9 L','Freeserif',Times,serif;
+
+	text-align: center;
+	width: 100%;
+	word-spacing: 2px;
+}
+
+.subtitle {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+}
+
+.tableback {
+   margin: 1% 0% 1%;
+   
+}
+
+.tableback a {
+	font-size: 10px;
+}
+.tablefield {
+   color: black;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	
+}
+
+.tableheading {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-weight: 800;
+	color: Black;
+	background-color: #C2D2DF;
+}
+.xableheading {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: 800;
+	background-image: url('/images/background/blue.jpg');
+	color: White;
+}
+
+.tabrow1 {
+	color: black;
+	background-color: #F5F5F5;
+}
+.ml {
+	color: black;
+	text-decoration: none;
+	font-size: 12px;
+}
+.mb { 
+	border-bottom: 1px solid black;
+	  padding-bottom: 5px;
+	  padding-left:5px;}
+a.ml:hover {
+	text-decoration: underline;
+	color: white;
+	background-color: black;
+}
+.test { border: 1px solid black; }
+
+.expandboxi {
+   float: right;
+	cursor: pointer;
+}
+.expandboxc {
+	font-weight: bolder;
+	margin-top: 2px;
+	margin-bottom: 2px;
+}
+
+.imglink {
+	cursor: pointer;
+}
+
+label {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: bold;
+}
+
+
+.clear { /* generic container (i.e. div) for floating buttons */
+    overflow: hidden;
+    width: 100%;
+}
+
+a.button {
+    background: transparent url('/images/toolbar/bg_button_a.gif') no-repeat scroll top right;
+    color: #444;
+    display: block;
+    float: left;
+    font: normal 12px Verdana, Geneva, Arial, Helvetica, sans-serif;
+    height: 24px;
+    margin-right: 6px;
+    padding-right: 18px; /* sliding doors padding */
+    text-decoration: none;
+}
+
+a.button span {
+    background: transparent url('/images/toolbar/bg_button_span.gif') no-repeat;
+    display: block;
+    line-height: 14px;
+    padding: 5px 0 5px 18px;
+} 
+a.button:active {
+    background-position: bottom right;
+    color: #000;
+    outline: none; /* hide dotted outline in Firefox */
+}
+
+a.button:active span {
+    background-position: bottom left;
+    padding: 6px 0 4px 18px; /* push text down 1px */
+} 
+
+
+.buttonbox {
+	border: 0px dotted blue; 
+	padding: 1px; 
+	margin-bottom: 1px; 
+	margin-top: 1px; 
+	font-weight: bold; 
+	background-color: #FFFFFF;
+	position: relative;
+	width: 100%;
+	height: 20px;	 
+	
+}
+
+.clockface {
+	font-weight: bold;
+	font-size: 19pt;
+	color: #FF0033;
+	font-style: normal;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	border: 0
+
+
+}
+
+.sidelabelr {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: bold;
+	float: right;
+}
+
+
+.prefsbutton {
+  cursor: pointer;
+  color:#00427B;
+  font: bold 95% Verdana, Geneva, Arial, Helvetica, sans-serif;
+  background-color:#fed;
+  border: 1px solid;
+  border-color: #06c #039 #039 #06c;
+  width: 90px;
+  filter:progid:DXImageTransform.Microsoft.Gradient(GradientType=0,StartColorStr='#ffffffff',EndColorStr='#ffeeddaa');
+}
+

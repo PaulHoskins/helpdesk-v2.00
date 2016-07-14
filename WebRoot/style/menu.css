@@ -1,0 +1,37 @@
+#menu {
+	font-size: 10px;
+	margin-left: 2px;
+}
+.menuhead {
+	color: #00427B;	
+}
+.menuhd {
+	color: #00427B;
+}
+.menuhd img {
+   cursor: hand;
+	cursor: pointer;
+}
+.menusub {
+	margin-left: 10px;
+	
+}
+.menusub td {
+	font-size: 10px;
+	width: 100%;
+}
+.menusub a {
+	text-decoration: none;
+	color: #00427B;
+	
+}
+.menusub a:hover {
+	color: #59D75A;
+}
+.menualert {
+	border: 1px solid #00427B;
+	margin-top: 5px;
+}
+.menuinfo {
+	color: #00427B;	
+}

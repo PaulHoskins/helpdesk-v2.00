@@ -1,0 +1,27 @@
+body {
+	font-size: 12px;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+#intab {
+	width: 100%;
+}
+#intab th {
+	text-align: right;
+	font-size: 12px;
+}
+#intab input {
+	border: 1px green solid; 
+}
+
+
+.information {
+	border-top: 1px black dotted;
+	width: 100%;
+	font-size: 12px;
+}
+.inerror {
+	color: #F24300;
+	font-size: 10px;
+	font-weight: bold;
+}

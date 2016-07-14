@@ -1,0 +1,97 @@
+p, body, td 
+{
+    font-family: Tahoma;
+    font-size: 10pt;
+}
+pre 
+{
+    font-size: 8pt;
+    background-color: White;
+}    
+
+a {
+	color:navy;
+}
+
+.content {
+	padding: 10px;
+	background-color: #C3D9FF;
+	font-size: 10pt; 
+}
+/*
+td .calendar 
+{
+	font-size: 10pt; 
+}
+*/
+.menutitle {
+	padding: 3px 3px 30px 3px;
+	font-size: 10pt;
+}
+
+a.MenuLink
+{
+	font-weight: normal;
+	display: block;
+	text-align: left;
+	text-decoration: underline;
+	font-size: 10pt;
+	color: Navy;
+	vertical-align: middle;
+	padding: 3px 3px 3px 3px;
+}
+
+a.MenuSelected
+{
+	font-weight: bold;
+	display: block;
+	text-align: left;
+	text-decoration: none;
+	font-size: 10pt;
+	color: Black;
+	vertical-align: middle;
+	padding: 3px 3px 3px 3px;
+	background-color: #C3D9FF;
+}
+
+.MenuHeader 
+{
+	padding: 3px 3px 3px 3px;
+	font-weight: bold;
+}
+
+/* calendar */
+.calendar {
+	background-color: white;	
+	font-family: Tahoma;
+	font-size: 8pt;
+}
+
+.calendar td 
+{
+	font-family: Tahoma;
+	font-size: 8pt;
+	padding: 2px 2px 2px 2px;
+}
+
+.calendar table  {
+	background-color: #9EBEF5;
+}
+
+.calendar tr td a {
+	text-decoration: none;
+}
+
+.calendar td a {
+	text-decoration: none;
+}
+
+.calendar td.today a 
+{
+    border: solid 1px red;   
+}
+
+.calendar td.selected  
+{
+    background-color: #FBE694;
+}

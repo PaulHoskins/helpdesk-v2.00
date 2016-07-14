@@ -1,0 +1,296 @@
+
+body  {
+	font-size: 10px;
+	
+}
+
+.tableback {
+	font-size: 10px;
+}
+
+.tableback th {
+	font-size: 10px;
+	background-color: #E4ECF0;
+	text-align: left;
+}
+.tableback td , th {
+   padding-left: 5px;
+	padding-right: 5px;
+}
+.tableback th {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid white;
+}
+.tableback td {
+	border-bottom: 1px solid white;
+	border-right: 1px solid white;
+}
+.sidelabel {
+	margin-right: 5px;
+}
+
+.programtitle , .subprogramtitle {
+   text-align: center; 
+	background-image:url(/images/table/bar_mid.gif); 
+	border-bottom: 1px solid #B9CFD8; 
+	border-right: 1px solid #B9CFD8; 
+	border-left: 1px solid #B9CFD8;
+	font-size: 12px;
+	color: #00427B;
+}
+
+
+
+.subprogramtitle {
+	font-size: 12px;
+	font-style: normal;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+.inform {
+
+}
+
+.inform fieldset {
+	border: 1px solid #E4ECF0;
+	padding: 5px;
+	margin-bottom: 3px;
+}
+.inform legend {
+	font-weight: bold;
+	color: #4B7387;
+	font-size: 10px;
+}
+
+.crit {
+	
+}
+
+.crit fieldset {
+	border: 1px solid #E4ECF0;
+	
+}
+.crit legend {
+	font-weight: bold;
+	color: #4B7387;
+
+}
+
+.tlink {
+	border: 1px solid #B9CFD8;
+	padding: 5px;
+	color: #00427B;
+	text-decoration: none;
+	font-weight: 700;
+	
+}
+
+.tlink:hover {
+   color: #59D75A;
+	text-decoration: underline;
+}
+#topcontent {
+	margin: 2px;
+}
+#topheader {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 15px;
+	height: 25px;
+	font-weight: 800;
+	color: #00427B;
+}
+
+#topbarmenu {
+   text-align: right;
+	background-image:url(/images/table/bar_mid.gif); 
+	border-bottom: 1px solid #B9CFD8; 
+	border-right: 1px solid #B9CFD8; 
+	border-left: 1px solid #B9CFD8; 
+	height: 14px;
+}
+
+#topbaritem {
+	font-size: 10px;
+	margin: 0px;
+	padding: 0px;
+
+}
+#topbaritem a {
+	border-left: 1px solid #B9CFD8;
+	margin-right: 2px;
+	margin-left: 2px;
+	padding-left: 2px;
+	color: #00427B;
+	text-decoration: none;
+	font-weight: 700;
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+}
+
+#topbaritem a:hover {
+   color: #59D75A;
+	text-decoration: underline;
+	
+}
+.topbarinfo {
+   float: left;
+	color: #00427B;	
+}
+.buttonpanel {
+	background-color: #E0E3E7;
+	border: 1px solid #B9CFD8;
+	background-image:url(/images/table/panelmid.gif);
+}
+.tabrow1 {
+	color: black;
+	background-color: #F5F5F5;
+	
+}
+.tabrow2, .tabrowselected {	
+	color: black;
+	background-color: #A4C1F4;
+}
+
+.tabrowover {	
+	background-color: #E1EAFB;
+}
+
+.tabrow1, .tabrow2, .tabrowover, .tabrowselected {
+	
+}
+.tabrowselected {
+	
+}
+.tabrowselected td {
+	border-top: 1px solid #929DAB;
+	border-bottom: 1px solid #929DAB;
+}
+
+.errormessage {
+	font-size: 12px;
+}
+
+#urlinfo {
+	display: none;
+}
+
+.tree img {
+   cursor: hand;
+	cursor: pointer;
+}
+
+.tree a {
+	text-decoration: none;
+	color: #00427B;
+	
+}
+.tree a:hover {
+	color: #59D75A;
+}
+
+.loglink {
+	text-decoration: none;	
+	background-color: #F5F5F5;
+	border: 1px solid #B9CFD8;
+}
+.loglink a {
+	text-decoration: none;
+	color: #00427B;
+	
+}
+.loglink a:hover {
+	color: #59D75A;
+}
+.loglink p {
+	margin: 5px;
+}
+
+.inputfield:focus, textarea:focus, select:focus {
+    background-color: #ffc;
+    color: #000;
+}
+
+.toolbar {
+	background-color: #E0E3E7;
+	border: 1px solid #B9CFD8;
+	background-image:url(/images/table/panelmid2.gif);
+	// height: 20px;
+	height: 32px;
+	width: 100%;
+	vertical-align: middle;
+}
+.tbarimg {
+   margin-top: 2px;
+	margin-right: 2px;
+}
+.tboption {
+	
+}
+.tbright {
+	font-size: 10px;
+	float: right;
+}
+
+.reffield {
+	font-size: 10px;
+	color: #00427B;
+}
+.errormessage {
+	font-size: 10px;
+	font-style: normal;
+	border-top: 1px dotted red;
+	border-bottom: 1px dotted red;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+.calimg {
+	cursor: pointer; 
+	border: 	none;
+	margin-left: 2px;
+	
+}
+
+.bargraphcontainer {
+	font-family:verdana,arial,helvetica,sans-serif;
+	font-size:9px;
+	border-left:1px solid #B9CFD8;
+	width:100%;
+	padding:2px 0 8px 0;
+	margin:0 0 15px 0;
+}
+
+.bargraphcaption {
+	color:#555;
+	background-color:white;
+	margin:0;
+	padding:0 0 5px 2px;
+}
+
+.bargraph, .overbargraph {
+	color:#555;
+	background-color:transparent;
+	background-color: #F5F5F5;
+	text-align:right;
+	padding:0 1px;
+	margin:0 0 0 -1px;
+	border: 1px solid #B9CFD8;
+	
+}
+.overbargraph {
+	border: 1px solid #59D75A;
+	cursor: hand;
+	cursor: pointer;
+}
+.bartitle {
+	padding:4px 0 0 2px;
+}
+
+.infobox {
+	border: 1px dotted red; 
+	padding: 15px; 
+	margin-bottom: 10px; 
+	margin-top: 10px; 
+	font-weight: bold; 
+	background-color: #FFFFCC;
+}
+
