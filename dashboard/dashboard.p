@@ -80,12 +80,11 @@ PROCEDURE ip-HTM-Header:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER pc-return       AS CHARACTER NO-UNDO.
-      
-      
+
     pc-return = 
-        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.2/themes/default/easyui.css">' +
-        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.2/themes/icon.css">' +
-        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.2/themes/color.css">' +
+        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.5/themes/default/easyui.css">' +
+        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.5/themes/icon.css">' +
+        '~n<link rel="stylesheet" type="text/css" href="/asset/jquery-easyui-1.4.5/themes/color.css">' +
     
         lc-global-jquery +
         lc-global-jquery-ui 

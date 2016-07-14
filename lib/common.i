@@ -30,6 +30,7 @@
     01/07/2016  phoski      com-GetAssignList/com-GetAssignIssue
                             - only active users
     02/07/2016  phoski      com-GetActivityByType 
+    14/07/2016  phoski      JQueryUI - 1.4.5
   
 ***********************************************************************/
 
@@ -169,7 +170,7 @@ DEFINE VARIABLE lc-global-jquery              AS CHARACTER
    
 DEFINE VARIABLE lc-global-jquery-ui           AS CHARACTER 
     INITIAL 
-    '<script type="text/javascript" src="/asset/jquery-easyui-1.4.2/jquery.easyui.min.js"></script>~n'
+    '<script type="text/javascript" src="/asset/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>~n'
     NO-UNDO.
     
 /* ********************  Preprocessor Definitions  ******************** */
