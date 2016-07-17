@@ -1,0 +1,307 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Changelog for Kendo UI Core v2016.2.714 (July 14, 2016)</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font: .75em/1.5 Tahoma, sans-serif;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-size: normal;
+        }
+
+        h2 {
+            font-size: 2em;
+            font-weight: normal;
+
+            margin: 1.2em 0 .3em;
+            padding-bottom: .2em;
+        }
+
+        .breaking {
+            background-color: #e10c01;
+            color: #fff;
+            border-radius: 3px;
+            padding: 3px 4px;
+            display: inline-block;
+            font-size: 11px;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        #page {
+            width: 50em;
+            margin: 0 auto 2em;
+            border-radius: 0 0 1em 1em;
+            box-shadow: 0 0 10px #ccc;
+            padding: 1em 2em 2em;
+        }
+
+        .poBoxIcon {
+            float: left;
+            font-size: 2em;
+            margin: 1.2em .5em 0 0;
+        }
+
+        .poTopLine {
+            border-top: 2px solid #e1e1e1;
+            margin: 17px 0 40px 0;
+        }
+    </style>
+
+    <base href="http://www.telerik.com/support/whats-new/kendo-ui-web/release-history">
+</head>
+<body>
+    <div id="page">
+        <h1 class="title">Release notes for Kendo UI Core v2016.2.714</h1>
+
+        <h1>Components</h1>
+        <div class="tClear poTopLine">
+            <div class="poBoxIconText">
+                
+                <p><strong>What's fixed</strong></p>
+<ul>
+<li>Disabled Radio Button wrong styling on hover</li>
+<li>Material theme - Checkboxes has wrong highlight in RTL mode</li>
+</ul>
+            </div>
+        </div>
+
+
+        <div class="tClear poTopLine">
+            <h2>AngularJS</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Widget throws an exception when bound to complex undefined object</li>
+<li>$dirty and $pristine not updating when widget's name contains a dot</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>AutoComplete</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Wrong active state text color in Metro theme</li>
+<li>highlightFirst option not working when the theme is Bootstrap</li>
+<li>Virtualized widget requests wrong data page when selecting border index</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Button</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Wrong active state text color in Metro theme</li>
+<li>Button hover style is missing when using the MaterialBlack theme</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>ColorPicker</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>ComboBox</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Wrong active state text color in Metro theme</li>
+<li>highlightFirst option not working when the theme is Bootstrap</li>
+<li>Broken appearance in IE 11 and Edge with the Bootstrap theme</li>
+<li>Virtualized widget requests wrong data page when selecting border index</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>ContextMenu</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Destroying a ContextMenu incorrectly detaches event handlers related to other instances</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>DatePicker</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Broken appearance in IE 11 and Edge with the Bootstrap theme</li>
+<li>Inconsistency when disabled dates are manually entered in the picker</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>DateTimePicker</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Broken appearance in IE 11 and Edge with the Bootstrap theme</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Draggable</h2>
+            <p><strong>What's new</strong></p>
+<ul>
+<li>Support autoscroll when custom hint is used</li>
+</ul>
+            
+        </div>
+        <div class="tClear poTopLine">
+            <h2>DropDownList</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Hide input [x] button shown in IE from filtering popup</li>
+<li>Wrong active state text color in Metro theme</li>
+<li>Virtualized widget requests wrong data page when selecting border index</li>
+<li>Widget does not render optionLabelTemplate when data binding is deferred</li>
+<li>Widget renders an OPTION element with "null" string value when optionLabel value is null</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Globalization</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>parseDate attempts to parse culture short date format before ISO datetime format</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>MVVM</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>JS error when ListView is destroyed and removed</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Menu</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>MultiSelect</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Widget throws an exception when bound to complex undefined object</li>
+<li>Virtualized widget selects incorrect item when the datasouce is filtered</li>
+<li>Virtualized widget requests wrong data page when selecting border index</li>
+<li>Widget loses pre-selected items when start with filtering</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Notification</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+<li>Warning color is not properly set in Metro theme</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>NumericTextBox</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Broken appearance in IE 11 and Edge with the Bootstrap theme</li>
+<li>NumericTextBox missing borders</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>PDF Export</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Unable to create multi-page document</li>
+<li>Linear gradient ignore transition points in PDF</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>PanelBar</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Inconsistent hover state in Metro theme</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>ProgressBar</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>TimePicker</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>ToolBar</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Tooltip</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Touch</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Does not undbind event handlers on destroy</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Validator</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Components throwing "elem.getClientRects is not a function" with jQuery 3.0.0</li>
+</ul>
+        </div>
+        <div class="tClear poTopLine">
+            <h2>Window</h2>
+            
+            <p><strong>What's fixed</strong></p>
+<ul>
+<li>Prevent modal overlay flicker when opening a second modal Window</li>
+<li>Regression: widget cannot be resized vertically on Windows Phone</li>
+</ul>
+        </div>
+    </div>
+</body>
+</html>
