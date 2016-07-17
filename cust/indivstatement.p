@@ -9,6 +9,7 @@
     
     When        Who         What
     26/07/2006  phoski      Initial
+    17/07/2016  phoski      admin time param
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -107,6 +108,7 @@ PROCEDURE ip-ProcessReport :
         ( lc-global-user,
         lc-global-company,
         lc-AccountNumber,
+        TRUE,
         DATE(lc-lodate),
         DATE(lc-hidate),
         OUTPUT lc-pdf ).
