@@ -187,7 +187,7 @@ PROCEDURE ip-InitialProcess :
     
         
     ASSIGN
-        ENTRY(1,lc-global-engType-Desc,"|") = "All"
+        ENTRY(1,lc-global-EngType-Desc,"|") = "All"
         lc-lodate                           = get-value("lodate")         
         lc-hidate                           = get-value("hidate")
         lc-engType                          = get-value("engtype")
@@ -288,7 +288,7 @@ PROCEDURE ip-Selection :
         ELSE htmlib-SideLabel("Engineer Type"))    '</TD>'.
     
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("engtype",lc-global-engType-Code,lc-global-engType-desc,lc-engtype) 
+    htmlib-Select("engtype",lc-global-EngType-Code,lc-global-EngType-desc,lc-engtype) 
     '</TD>' skip.
     
     {&out} '<TD VALIGN="TOP" ALIGN="right">' 

@@ -26,7 +26,8 @@
     25/06/2016  phoski      iss_survey field  
     03/07/2016  phoski      TwoFactor_Disable field 
     24/07/2016  phoski      CRM
-    31/07/2016  phoski      Filter On Disabled flag         
+    31/07/2016  phoski      Filter On Disabled flag      
+    31/07/2016  phoski      Customers must have a relevany sub type   
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -432,7 +433,7 @@ PROCEDURE ip-Page :
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("engtype",lc-global-engType-Code,lc-global-engType-desc,lc-engtype) 
+    htmlib-Select("engtype",lc-global-UserSubType-Code,lc-global-UserSubType-desc,lc-engtype) 
     '</TD>' skip.
     else 
     {&out} htmlib-TableField(html-encode(
@@ -938,11 +939,21 @@ PROCEDURE ip-Validate :
     END.
 
     IF lc-userClass = "CUSTOMER"
-    AND lc-engtype <> "" THEN
+    AND NOT lc-engtype BEGINS "cust" THEN
     DO:
         RUN htmlib-AddErrorMessage(
             'engtype', 
-            'Only Internal users should have an engineer type',
+            'Customers must have a relevant sub user type',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+    END.
+    
+    IF lc-userClass <> "CUSTOMER"
+    AND lc-engtype BEGINS "cust" THEN
+    DO:
+        RUN htmlib-AddErrorMessage(
+            'engtype', 
+            'Intenal Users must have a relevant sub user type',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
     END.

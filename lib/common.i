@@ -32,7 +32,7 @@
     02/07/2016  phoski      com-GetActivityByType 
     14/07/2016  phoski      JQueryUI - 1.4.5
     24/07/2016  phoski      CRM Changes
-***********************************************************************/
+ ***********************************************************************/
 
 {lib/attrib.i}
 {lib/slatt.i}
@@ -134,11 +134,16 @@ DEFINE VARIABLE lc-global-excludeType         AS CHARACTER
 DEFINE VARIABLE lc-global-teamassign          AS CHARACTER 
     INITIAL '[TeamAssign]' NO-UNDO.
 
-DEFINE VARIABLE lc-global-engType-Code        AS CHARACTER 
+DEFINE VARIABLE lc-global-UserSubType-Code        AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project|Sal|SalMan|custAdmin|custSal' NO-UNDO.
-DEFINE VARIABLE lc-global-engType-desc        AS CHARACTER 
+DEFINE VARIABLE lc-global-UserSubType-desc        AS CHARACTER 
     INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales' NO-UNDO.
-    
+
+DEFINE VARIABLE lc-global-EngType-Code        AS CHARACTER 
+    INITIAL '|FIELD|REMOTE|Project' NO-UNDO.
+DEFINE VARIABLE lc-global-EngType-desc        AS CHARACTER 
+    INITIAL 'Not Applicable|Field|Remote|Project' NO-UNDO.
+        
 DEFINE VARIABLE lc-global-taskResp-code       AS CHARACTER 
     INITIAL 'E|C|3' NO-UNDO.
 DEFINE VARIABLE lc-global-taskResp-desc       AS CHARACTER 

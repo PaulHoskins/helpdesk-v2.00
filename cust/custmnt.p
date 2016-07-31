@@ -24,6 +24,7 @@
     25/06/2016  phoski      iss_survey field   
     08/07/2016  phoski      Remove View related stuff as view is done 
                             in custview.p
+    31/07/2016  phoski      AccStatus field instead of active field
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -104,6 +105,7 @@ DEFINE VARIABLE ll-default          AS LOG       EXTENT 20 NO-UNDO.
 DEFINE VARIABLE ll-conactive        AS LOG       EXTENT 20 NO-UNDO.
 DEFINE VARIABLE lc-cu-code          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-cu-desc          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-AccStatus        AS CHARACTER NO-UNDO.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -547,7 +549,7 @@ htmlib-CheckBox("iss-survey", IF lc-iss-survey = 'on'
     THEN TRUE ELSE FALSE) 
 '</TD></TR>' skip.
 
-
+/** Remove 
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("gotomaint",lc-error-field,'|') > 0 
@@ -558,6 +560,22 @@ IF NOT CAN-DO("view,delete",lc-mode) THEN
 htmlib-CheckBox("isactive", IF lc-isActive = 'on'
     THEN TRUE ELSE FALSE) 
 '</TD></TR>' skip.
+ **/
+ 
+ {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            htmlib-SideLabel("Account Status")
+        '</TD>'.
+
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-Select("accstatus",lc-global-accStatus-code,lc-global-accStatus-code,lc-accstatus)
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(lc-accStatus,'left')
+           skip.
+    {&out} '</TR>' skip.
+    
+    
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("accountref",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Account Reference")
@@ -907,6 +925,7 @@ PROCEDURE process-web-request :
                 lc-allowAllTeams     = get-value("allowallteams")
                 lc-accountref        = get-value("accountref")
                 lc-iss-survey        = get-value("iss-survey")
+                lc-accStatus         = get-value("accstatus")
              
                 .
 
@@ -952,7 +971,7 @@ PROCEDURE process-web-request :
                         b-table.notes          = lc-notes
                         b-table.supportticket  = lc-supportticket
                         b-table.statementemail = lc-statementemail
-                        b-table.isActive       = lc-isActive = "on"
+                       /* b-table.isActive       = lc-isActive = "on" */
                         b-table.ViewAction     = lc-viewAction = "on"
                         b-table.ViewActivity   = lc-viewActivity = "on"
                         b-table.allowAllTeams  = lc-allowAllTeams = "on"
@@ -964,8 +983,13 @@ PROCEDURE process-web-request :
                         b-table.def-renew-loginid = lc-renew-loginid
                         b-table.accountref       = lc-accountref
                         b-table.iss_survey      = lc-iss-survey = "on"
+                        b-table.accStatus       = lc-accStatus
+                        .
                         
-                       .
+                    /* Active now means active on the help desk only */
+                    
+                    ASSIGN
+                        b-table.isActive = b-table.accStatus = "Active".
                      
                     
 
@@ -1046,7 +1070,7 @@ PROCEDURE process-web-request :
                 lc-notes     = b-table.notes
                 lc-supportticket = b-table.SupportTicket
                 lc-statementemail = b-table.statementemail
-                lc-isactive = IF b-table.isActive THEN "on" ELSE ""
+                /* lc-isactive = IF b-table.isActive THEN "on" ELSE "" */
                 lc-viewAction = IF b-table.viewAction THEN "on" ELSE ""
                 lc-viewActivity = IF b-table.viewActivity THEN "on" ELSE ""
                 lc-allowAllTeams = IF b-table.allowAllTeams THEN "on" ELSE ""
@@ -1058,6 +1082,7 @@ PROCEDURE process-web-request :
                 lc-renew-loginid  = b-table.def-renew-loginid
                 lc-accountref     = b-table.accountRef
                 lc-iss-survey = IF b-table.iss_survey THEN "on" ELSE ""
+                lc-accstatus = b-table.accStatus
                 
                 
                 .
