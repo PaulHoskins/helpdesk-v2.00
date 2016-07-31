@@ -31,7 +31,7 @@
                             - only active users
     02/07/2016  phoski      com-GetActivityByType 
     14/07/2016  phoski      JQueryUI - 1.4.5
-  
+    24/07/2016  phoski      CRM Changes
 ***********************************************************************/
 
 {lib/attrib.i}
@@ -98,7 +98,7 @@ DEFINE VARIABLE lc-System-Note-Desc           AS CHARACTER
     NO-UNDO.
 
 DEFINE VARIABLE lc-global-GT-Code             AS CHARACTER INITIAL
-    'Asset.Type,Asset.Manu,Asset.Status' NO-UNDO.
+    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector' NO-UNDO.
 
 DEFINE VARIABLE lc-global-iclass-complex      AS CHARACTER INITIAL
     'ComplexProject' NO-UNDO.   
@@ -121,7 +121,6 @@ DEFINE VARIABLE lc-global-SupportTicket-Code  AS CHARACTER
     INITIAL 'NONE|YES|BOTH' NO-UNDO.
 DEFINE VARIABLE lc-global-SupportTicket-Desc  AS CHARACTER
     INITIAL 'Standard Support Only|Ticket Support Only|Standard And Ticket Support'
-                                     
     NO-UNDO.
 DEFINE VARIABLE lc-global-Allow-TicketSupport AS CHARACTER
     INITIAL 'YES|BOTH' NO-UNDO.
@@ -136,29 +135,33 @@ DEFINE VARIABLE lc-global-teamassign          AS CHARACTER
     INITIAL '[TeamAssign]' NO-UNDO.
 
 DEFINE VARIABLE lc-global-engType-Code        AS CHARACTER 
-    INITIAL '|FIELD|REMOTE|Project' NO-UNDO.
-
+    INITIAL '|FIELD|REMOTE|Project|Sal|SalMan|custAdmin|custSal' NO-UNDO.
 DEFINE VARIABLE lc-global-engType-desc        AS CHARACTER 
-    INITIAL 'Not Applicable|Field|Remote|Project' NO-UNDO.
+    INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales' NO-UNDO.
+    
 DEFINE VARIABLE lc-global-taskResp-code       AS CHARACTER 
     INITIAL 'E|C|3' NO-UNDO.
 DEFINE VARIABLE lc-global-taskResp-desc       AS CHARACTER 
     INITIAL 'Engineer|Customer|3rd Party' NO-UNDO.
                         
 DEFINE VARIABLE lc-global-sq-code             AS CHARACTER 
-    INITIAL 'RANGE1-10|LOG|COM|FIELD|PARA|NUMBER'  NO-UNDO.                        
-DEFINE VARIABLE lc-global-sq-desc           AS CHARACTER 
-    INITIAL 'Range (1-10)|Yes/No|Comment Box|Text Input|Text Only|Number'  NO-UNDO.
+    INITIAL 'RANGE1-10|LOG|COM|FIELD|PARA|NUMBER' NO-UNDO.                        
+DEFINE VARIABLE lc-global-sq-desc             AS CHARACTER 
+    INITIAL 'Range (1-10)|Yes/No|Comment Box|Text Input|Text Only|Number' NO-UNDO.
     
-DEFINE VARIABLE lc-global-webActionClass-code             AS CHARACTER 
-    INITIAL 'ENG|ACC'  NO-UNDO.                        
-DEFINE VARIABLE lc-global-WebActionClass-desc           AS CHARACTER 
-    INITIAL 'Engineer|Account'  NO-UNDO.
+DEFINE VARIABLE lc-global-webActionClass-code AS CHARACTER 
+    INITIAL 'ENG|ACC' NO-UNDO.                        
+DEFINE VARIABLE lc-global-WebActionClass-desc AS CHARACTER 
+    INITIAL 'Engineer|Account' NO-UNDO.
         
 DEFINE VARIABLE li-global-sla-fail            AS INTEGER   INITIAL 10 NO-UNDO.
 DEFINE VARIABLE li-global-sla-amber           AS INTEGER   INITIAL 20 NO-UNDO.
 DEFINE VARIABLE li-global-sla-ok              AS INTEGER   INITIAL 30 NO-UNDO.
 DEFINE VARIABLE li-global-sla-na              AS INTEGER   INITIAL 99 NO-UNDO.
+
+DEFINE VARIABLE lc-global-accStatus-code      AS CHARACTER 
+    INITIAL 'Active|Ex-Customer|Unqualified|Qualified' NO-UNDO.
+    
 
 
 DEFINE VARIABLE li-global-sched-days-back     AS INTEGER   INITIAL 100 NO-UNDO.
@@ -284,8 +287,8 @@ FUNCTION com-GenTabDesc RETURNS CHARACTER
 
 
 FUNCTION com-GetActivityByType RETURNS CHARACTER 
-	(pc-companyCode AS CHARACTER,
-	 pi-TypeID      AS INTEGER) FORWARD.
+    (pc-companyCode AS CHARACTER,
+    pi-TypeID      AS INTEGER) FORWARD.
 
 FUNCTION com-GetDefaultCategory RETURNS CHARACTER
     ( pc-CompanyCode AS CHARACTER )  FORWARD.
@@ -294,15 +297,15 @@ FUNCTION com-GetDefaultCategory RETURNS CHARACTER
 FUNCTION com-GetHelpDeskEmail RETURNS CHARACTER 
     (pc-mode        AS CHARACTER,
     pc-companyCode AS CHARACTER,
-     pc-accountNumber AS CHARACTER) FORWARD.
+    pc-accountNumber AS CHARACTER) FORWARD.
 
 FUNCTION com-GetTicketBalance RETURNS INTEGER 
-	(pc-companyCode AS CHARACTER,
-	 pc-accountNumber   AS CHARACTER) FORWARD.
+    (pc-companyCode AS CHARACTER,
+    pc-accountNumber   AS CHARACTER) FORWARD.
 
 FUNCTION com-GetTicketBalanceWithAdmin RETURNS INTEGER 
-	(pc-companyCode AS CHARACTER,
-	 pc-accountNumber   AS CHARACTER) FORWARD.
+    (pc-companyCode AS CHARACTER,
+    pc-accountNumber   AS CHARACTER) FORWARD.
 
 FUNCTION com-HasSchedule RETURNS INTEGER 
     (pc-companyCode AS CHARACTER,
@@ -322,7 +325,7 @@ FUNCTION com-InternalTime RETURNS INTEGER
 
 
 FUNCTION com-IsActivityChargeable RETURNS LOGICAL 
-	(pf-ActID     AS DECIMAL) FORWARD.
+    (pf-ActID     AS DECIMAL) FORWARD.
 
 FUNCTION com-IsContractor RETURNS LOGICAL
     ( pc-companyCode  AS CHARACTER,
@@ -1067,10 +1070,10 @@ END PROCEDURE.
 
 PROCEDURE com-GetCustomerAccountActiveOnly:
 
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
 
     DEFINE INPUT PARAMETER pc-CompanyCode      AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER pc-LoginID          AS CHARACTER NO-UNDO.
@@ -1086,7 +1089,7 @@ PROCEDURE com-GetCustomerAccountActiveOnly:
     
     FOR EACH b-cust NO-LOCK 
         WHERE b-cust.CompanyCode = pc-CompanyCode
-          AND b-cust.IsActive = TRUE
+        AND b-cust.IsActive = TRUE
         BY b-cust.AccountNumber:
         IF pc-AccountNumber = "" 
             THEN ASSIGN 
@@ -2075,7 +2078,7 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                     AND Issue.AccountNumber = WebissCont.Customer NO-LOCK ).
                   
             END.
-            WHEN "webacs" THEN
+        WHEN "webacs" THEN
             DO:
                 FIND acs_head WHERE ROWID(acs_head) = pr-rowid NO-LOCK NO-ERROR.
                 IF NOT AVAILABLE acs_head THEN RETURN FALSE.
@@ -2085,13 +2088,13 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                 RETURN TRUE.
             END.
         WHEN "webacsquestion" THEN
-        DO:
-            FIND acs_line WHERE ROWID(acs_line)  = pr-rowid NO-LOCK NO-ERROR.
-            IF NOT AVAILABLE acs_line THEN RETURN FALSE.
-            IF CAN-FIND(FIRST acs_res WHERE acs_res.acs_line_id = acs_line.acs_line_id NO-LOCK)
-            THEN RETURN FALSE.
-            RETURN TRUE.
-        END.
+            DO:
+                FIND acs_line WHERE ROWID(acs_line)  = pr-rowid NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE acs_line THEN RETURN FALSE.
+                IF CAN-FIND(FIRST acs_res WHERE acs_res.acs_line_id = acs_line.acs_line_id NO-LOCK)
+                    THEN RETURN FALSE.
+                RETURN TRUE.
+            END.
         OTHERWISE
         DO:
             MESSAGE "com-CanDelete invalid table for " pc-table.
@@ -2469,21 +2472,21 @@ END FUNCTION.
 
 
 FUNCTION com-GetActivityByType RETURNS CHARACTER 
-	    ( pc-companyCode AS CHARACTER ,
-	      pi-TypeID      AS INTEGER  ):
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/	
+    ( pc-companyCode AS CHARACTER ,
+    pi-TypeID      AS INTEGER  ):
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/	
 
-		DEFINE BUFFER WebActType FOR WebActType.
+    DEFINE BUFFER WebActType FOR WebActType.
 		
-		FOR FIRST WebActType NO-LOCK
-		  WHERE WebActType.CompanyCode = pc-companyCode
-		    AND WebActType.TypeID = pi-TypeID:
-		      RETURN WebActType.ActivityType.
-		END.
-		RETURN "".
+    FOR FIRST WebActType NO-LOCK
+        WHERE WebActType.CompanyCode = pc-companyCode
+        AND WebActType.TypeID = pi-TypeID:
+        RETURN WebActType.ActivityType.
+    END.
+    RETURN "".
 
 		
 END FUNCTION.
@@ -2522,18 +2525,18 @@ FUNCTION com-GetHelpDeskEmail RETURNS CHARACTER
     DEFINE VARIABLE lc-Email AS CHARACTER NO-UNDO.
     
     FIND Customer WHERE Customer.CompanyCode = pc-companyCode
-                    AND Customer.AccountNumber = pc-accountNumber
-                    NO-LOCK NO-ERROR.
+        AND Customer.AccountNumber = pc-accountNumber
+        NO-LOCK NO-ERROR.
     IF AVAILABLE Customer AND Customer.st-num > 0 THEN
     DO:
         FIND steam WHERE steam.CompanyCode = pc-companyCode
-                     AND steam.st-num = Customer.st-num NO-LOCK NO-ERROR.
+            AND steam.st-num = Customer.st-num NO-LOCK NO-ERROR.
         IF AVAILABLE steam
-        THEN lc-email = steam.supportemail.                
+            THEN lc-email = steam.supportemail.                
     END.
        
     IF lc-email  = ""
-    OR lc-email  = ? THEN
+        OR lc-email  = ? THEN
     DO:
         FIND Company WHERE Company.CompanyCode = pc-companyCode NO-LOCK NO-ERROR.
         lc-email = Company.HelpDeskEmail.
@@ -2546,33 +2549,33 @@ FUNCTION com-GetHelpDeskEmail RETURNS CHARACTER
 END FUNCTION.
 
 FUNCTION com-GetTicketBalance RETURNS INTEGER  
-	    ( pc-companyCode AS CHARACTER ,
-	      pc-accountNumber   AS CHARACTER  ):
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/	
+    ( pc-companyCode AS CHARACTER ,
+    pc-accountNumber   AS CHARACTER  ):
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/	
 
-        DEFINE BUFFER b-query    FOR Ticket.
+    DEFINE BUFFER b-query FOR Ticket.
         
-		DEFINE VARIABLE li-bal AS INTEGER  NO-UNDO.
-        FOR EACH b-query NO-LOCK
-            WHERE b-query.CompanyCode   = pc-CompanyCode
-            AND b-query.AccountNumber = pc-AccountNumber
+    DEFINE VARIABLE li-bal AS INTEGER NO-UNDO.
+    FOR EACH b-query NO-LOCK
+        WHERE b-query.CompanyCode   = pc-CompanyCode
+        AND b-query.AccountNumber = pc-AccountNumber
         :
          
-            IF b-query.IssActivityID <> 0 THEN
-            DO:
-                IF com-IsActivityChargeable(b-query.IssActivityID) = FALSE THEN NEXT.
+        IF b-query.IssActivityID <> 0 THEN
+        DO:
+            IF com-IsActivityChargeable(b-query.IssActivityID) = FALSE THEN NEXT.
                 
-            END.
-            
-            
-            li-bal = li-bal + b-query.Amount.
-            
         END.
+            
+            
+        li-bal = li-bal + b-query.Amount.
+            
+    END.
         
-		RETURN li-bal.
+    RETURN li-bal.
 		
 
 
@@ -2580,28 +2583,28 @@ FUNCTION com-GetTicketBalance RETURNS INTEGER
 END FUNCTION.
 
 FUNCTION com-GetTicketBalanceWithAdmin RETURNS INTEGER 
-	   ( pc-companyCode AS CHARACTER ,
-         pc-accountNumber   AS CHARACTER  ):
-/*------------------------------------------------------------------------------
-        Purpose:                                                                      
-        Notes:                                                                        
-------------------------------------------------------------------------------*/    
+    ( pc-companyCode AS CHARACTER ,
+    pc-accountNumber   AS CHARACTER  ):
+    /*------------------------------------------------------------------------------
+            Purpose:                                                                      
+            Notes:                                                                        
+    ------------------------------------------------------------------------------*/    
 
-        DEFINE BUFFER b-query    FOR Ticket.
+    DEFINE BUFFER b-query FOR Ticket.
         
-        DEFINE VARIABLE li-bal AS INTEGER  NO-UNDO.
-        FOR EACH b-query NO-LOCK
-            WHERE b-query.CompanyCode   = pc-CompanyCode
-            AND b-query.AccountNumber = pc-AccountNumber
+    DEFINE VARIABLE li-bal AS INTEGER NO-UNDO.
+    FOR EACH b-query NO-LOCK
+        WHERE b-query.CompanyCode   = pc-CompanyCode
+        AND b-query.AccountNumber = pc-AccountNumber
         :
          
                         
             
-            li-bal = li-bal + b-query.Amount.
+        li-bal = li-bal + b-query.Amount.
             
-        END.
+    END.
         
-        RETURN li-bal.
+    RETURN li-bal.
 
 
 		
@@ -2743,27 +2746,27 @@ END FUNCTION.
 
 
 FUNCTION com-IsActivityChargeable RETURNS LOGICAL 
-	    ( pf-ActID     AS DECIMAL ):
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/	
+    ( pf-ActID     AS DECIMAL ):
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/	
 
-    DEFINE BUFFER IssActivity  FOR IssActivity.
-    DEFINE BUFFER WebActType   FOR WebActType.		 
+    DEFINE BUFFER IssActivity FOR IssActivity.
+    DEFINE BUFFER WebActType  FOR WebActType.		 
     FIND issActivity WHERE issActivity.issActivityID = 
-                pf-ActID NO-LOCK NO-ERROR.
+        pf-ActID NO-LOCK NO-ERROR.
     IF AVAILABLE issActivity AND issActivity.ActivityType <> "" THEN
-    FOR FIRST WebActType NO-LOCK
-        WHERE WebActType.CompanyCode = issActivity.CompanyCode
-          AND WebActType.ActivityType = issActivity.ActivityType
-          AND WebActType.isAdminTime = TRUE:
+        FOR FIRST WebActType NO-LOCK
+            WHERE WebActType.CompanyCode = issActivity.CompanyCode
+            AND WebActType.ActivityType = issActivity.ActivityType
+            AND WebActType.isAdminTime = TRUE:
               
-        RETURN FALSE.
+            RETURN FALSE.
               
-    END.
+        END.
           
-	RETURN TRUE.
+    RETURN TRUE.
 		
 
 

@@ -1449,6 +1449,71 @@ ADD FIELD "iss_survey" OF "Customer" AS logical
   MAX-WIDTH 1
   ORDER 290
 
+ADD FIELD "SalesManager" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Sales Manager"
+  POSITION 32
+  MAX-WIDTH 16
+  ORDER 310
+
+ADD FIELD "SalesContact" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Sales Contact"
+  POSITION 33
+  MAX-WIDTH 16
+  ORDER 320
+
+ADD FIELD "NoOfEmployees" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "No Of Employees"
+  POSITION 34
+  MAX-WIDTH 4
+  ORDER 330
+
+ADD FIELD "industrySector" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Industry Sector"
+  POSITION 35
+  MAX-WIDTH 16
+  ORDER 340
+
+ADD FIELD "AnnualTurnover" OF "Customer" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  LABEL "Annual Turnover"
+  POSITION 36
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 350
+
+ADD FIELD "SalesNote" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Sales Note"
+  POSITION 37
+  MAX-WIDTH 16
+  ORDER 360
+
+ADD FIELD "webSite" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Web Site"
+  POSITION 38
+  MAX-WIDTH 16
+  ORDER 370
+
+ADD FIELD "accStatus" OF "Customer" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Account Status"
+  POSITION 39
+  MAX-WIDTH 16
+  ORDER 300
+
 ADD INDEX "AccountNumber" ON "Customer" 
   AREA "Schema Area"
   UNIQUE
@@ -6023,4 +6088,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000119658
+0000120922

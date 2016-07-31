@@ -11,6 +11,8 @@
     04/12/2014  phoski      Initial  
     12/03/2016  phoski      Engineer in lookup list instead of range
     02/07/2016  phoski      Exclude Admin
+    31/07/2016  phoski      Exclude disabled users option
+     
    
 ***********************************************************************/
 
@@ -25,7 +27,7 @@ DEFINE INPUT PARAMETER pd-ToDate            AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pc-SelectEngineer    AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-engtype           AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pl-ExcludeAdmin      AS LOGICAL           NO-UNDO.
-
+DEFINE INPUT PARAMETER pl-ExcludeDisabled   AS LOGICAL           NO-UNDO.
 
 DEFINE OUTPUT PARAMETER table               FOR tt-engtime.
 
@@ -83,6 +85,9 @@ PROCEDURE ip-BuildData :
         END.
         IF pc-engType <> "" AND pc-engType <> WebUser.engType THEN NEXT.
         
+        IF pl-ExcludeDisabled AND WebUser.Disabled THEN NEXT.
+        
+        
         FIND FIRST tt-engtime 
             WHERE tt-engtime.loginid     = WebUser.LoginID
             AND tt-engtime.startdate     = iact.startdate    
@@ -139,6 +144,8 @@ PROCEDURE ip-BuildDefaultInfo:
              
         IF pc-engType <> "" AND pc-engType <> WebUser.engType THEN NEXT.
         
+        IF pl-ExcludeDisabled AND WebUser.Disabled THEN NEXT.
+         
         
         DO li-loop = 0 TO ( pd-toDate - pd-FromDate):
             CREATE tt-engtime.

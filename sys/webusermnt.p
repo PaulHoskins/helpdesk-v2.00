@@ -25,6 +25,8 @@
     24/05/2015  phoski      Dashboard selection  
     25/06/2016  phoski      iss_survey field  
     03/07/2016  phoski      TwoFactor_Disable field 
+    24/07/2016  phoski      CRM
+    31/07/2016  phoski      Filter On Disabled flag         
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -424,8 +426,8 @@ PROCEDURE ip-Page :
     
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("engtype",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Engineer Type")
-        ELSE htmlib-SideLabel("Engineer Type"))
+        THEN htmlib-SideLabelError("Sub User Type")
+        ELSE htmlib-SideLabel("Sub User Type"))
     '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
@@ -1095,7 +1097,8 @@ PROCEDURE process-web-request :
                            "&firstrow=" + lc-firstrow + 
                            "&lastrow=" + lc-lastrow +
                            "&selacc=" + lc-SelAcc + 
-                           "&submityear=" + string(li-curr-year).
+                           "&submityear=" + string(li-curr-year) +
+                           "&fstatus=" + get-value("fstatus").
 
     CASE lc-mode:
         WHEN 'add'
@@ -1134,6 +1137,7 @@ PROCEDURE process-web-request :
                                   '&navigation=refresh' +
                                   '&selacc=' + lc-selacc + 
                                   '&submityear=' + string(li-curr-year) +
+                                  '&fstatus=' + get-value("fstatus") +
                                   '&time=' + string(TIME)
         .
 
@@ -1442,6 +1446,7 @@ PROCEDURE process-web-request :
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
            htmlib-Hidden ("savenavigation", lc-navigation) skip
            htmlib-Hidden ("nullfield", lc-navigation) SKIP
+           htmlib-Hidden ("fstatus", get-value("fstatus")) SKIP
            htmlib-Hidden ("selacc", lc-selacc) SKIP.
         
     {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.

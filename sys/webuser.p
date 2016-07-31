@@ -17,7 +17,8 @@
     27/11/2014  phoski      Working Hours page & changes
     25/06/2015  phoski      Shorten account/user type width to stop 
                             overflow on toolbar
-    03/07/2016  phoski      Show Mobile Number                        
+    03/07/2016  phoski      Show Mobile Number    
+    31/07/2016  phoski      Filter On Disabled flag                    
     
 
 ***********************************************************************/
@@ -58,6 +59,7 @@ DEFINE VARIABLE lc-ContactInfo AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-QPhrase     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE vhLBuffer      AS HANDLE    NO-UNDO.
 DEFINE VARIABLE vhLQuery       AS HANDLE    NO-UNDO.
+DEFINE VARIABLE lc-Status      AS CHARACTER NO-UNDO.
 
 
 DEFINE BUFFER b-query  FOR webuser.
@@ -83,6 +85,9 @@ FUNCTION fnToolbarAccountSelection RETURNS CHARACTER
 
 &ENDIF
 
+
+FUNCTION fnToolbarStatusSelection RETURNS CHARACTER 
+	(  ) FORWARD.
 
 FUNCTION fnToolbarYearSelection RETURNS CHARACTER 
     (  ) FORWARD.
@@ -285,12 +290,14 @@ PROCEDURE process-web-request :
 
     {lib/checkloggedin.i}
 
+
     ASSIGN 
         lc-search = get-value("search")
         lc-firstrow = get-value("firstrow")
         lc-lastrow  = get-value("lastrow")
         lc-navigation = get-value("navigation")
-        lc-selacc     = get-value("selacc").
+        lc-selacc     = get-value("selacc")
+        lc-status    = get-value("fstatus").
         
     IF get-value("submityear") = ""
         THEN set-user-field("submityear",STRING(YEAR(TODAY),"9999")).
@@ -300,7 +307,8 @@ PROCEDURE process-web-request :
         lc-parameters = "search=" + lc-search +
                            "&firstrow=" + lc-firstrow + 
                            "&lastrow=" + lc-lastrow +
-                           "&selacc=" + lc-selacc.
+                           "&selacc=" + lc-selacc +
+                           "&fstatus=" + lc-status.
 
     
     ASSIGN
@@ -335,6 +343,9 @@ PROCEDURE process-web-request :
         + '&nbsp;' + 
         DYNAMIC-FUNCTION('fnToolbarAccountSelection':U) 
         + 
+        '&nbsp;' +
+        dynamic-function('fnToolbarStatusSelection':U)
+        +
         tbar-FindLabel(appurl + "/sys/webuser.p","Find Name")
         )
     tbar-Link("add",?,appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
@@ -380,6 +391,16 @@ PROCEDURE process-web-request :
         ASSIGN
             lc-qPhrase = lc-qphrase + " and b-query.name contains '" + lc-search + "'".
     END.
+    IF lc-status <> "" THEN
+    DO:
+        IF lc-status = "D"
+        THEN ASSIGN
+            lc-qPhrase = lc-qphrase + " and b-query.disabled = true".
+        ELSE ASSIGN
+            lc-qPhrase = lc-qphrase + " and b-query.disabled = false".
+        
+    END.
+        
 
     lc-QPhrase = lc-QPhrase + ' INDEXED-REPOSITION'.
     
@@ -427,7 +448,8 @@ PROCEDURE process-web-request :
             lc-link-otherp = 'search=' + lc-search +
                              '&firstrow=' + string(lr-first-row) +
                              "&selacc=" + lc-selacc +
-                             "&submityear=" + get-value("submityear")
+                             "&submityear=" + get-value("submityear") +
+                             "&fstatus=" + get-value("fstatus")
             .
                                 
                                 
@@ -564,7 +586,8 @@ PROCEDURE process-web-request :
            htmlib-Hidden("lastrow", string(lr-last-row)) skip
            skip.
     {&out} 
-    '<div id="urlinfo">|selacc=' lc-selacc  '</div>' skip.
+    '<div id="urlinfo">|selacc=' lc-selacc '|fstatus=' get-value("fstatus") 
+        '</div>' skip.
     
     
     {&out} htmlib-EndForm().
@@ -630,6 +653,42 @@ END FUNCTION.
 
 
 &ENDIF
+
+FUNCTION fnToolbarStatusSelection RETURNS CHARACTER 
+	    (  ):
+ 
+    DEFINE VARIABLE lc-return       AS CHARACTER     NO-UNDO.
+
+    DEFINE VARIABLE lc-codes        AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE lc-names        AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE lc-this         AS CHARACTER     NO-UNDO.
+
+    DEFINE BUFFER customer FOR customer.
+
+    ASSIGN
+        lc-codes = "|D|E"
+        lc-names = "All|Disabled|Enabled"
+        lc-this  = get-value("fstatus").
+   
+   
+
+    lc-return =  htmlib-SelectJS(
+        "fstatus",
+        'OptionChange(this)',
+        lc-codes,
+        lc-names,
+        lc-this
+        ).
+
+
+
+    lc-return = "<b>Status:</b>" + lc-return + "&nbsp;".
+
+    RETURN lc-return.
+
+
+		
+END FUNCTION.
 
 FUNCTION fnToolbarYearSelection RETURNS CHARACTER 
     (  ):

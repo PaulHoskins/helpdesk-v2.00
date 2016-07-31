@@ -15,6 +15,7 @@
     05/06/2015  phoski      Contract Page
     08/11/2015  phoski      Show account Ref & show def contract
     02/07/2016  phoski      com-getTicketBalance
+    24/07/2016  phoski      CRM
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -236,7 +237,7 @@ PROCEDURE process-web-request :
 
     {&out}
     htmlib-TableHeading(
-        "Account|Name|Contact|Telephone|Account Ref|Default Contract|Ticket Balance^right"
+        "Account|Name|Contact|Telephone|Account Ref|Default Contract|Status|Ticket Balance^right"
         ) skip.
 
     IF lc-search = ""
@@ -337,11 +338,12 @@ PROCEDURE process-web-request :
             tbar-tr(rowid(b-query))
             skip
             htmlib-MntTableField(html-encode(b-query.accountnumber),'left')
-            htmlib-MntTableField(html-encode(b-query.name),'left')
-            htmlib-MntTableField(html-encode(b-query.contact),'left')
+            htmlib-MntTableField(html-encode(substr(b-query.name,1,30)),'left')
+            htmlib-MntTableField(html-encode(substr(b-query.contact,1,30)),'left')
             htmlib-MntTableField(html-encode(b-query.telephone),'left')
             htmlib-MntTableField(html-encode(b-query.accountref),'left')
             htmlib-MntTableField((lc-def-cont),'left')
+            replace(htmlib-MntTableField(b-query.accStatus,'left'),'<td','<td nowrap ')
             htmlib-MntTableField(if DYNAMIC-FUNCTION('com-AllowTicketSupport':U,rowid(b-query))
                                  then dynamic-function("com-TimeToString",com-GetTicketBalance(b-query.companyCode,b-query.accountnumber))
                                  else "&nbsp;",'right')

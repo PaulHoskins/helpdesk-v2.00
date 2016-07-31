@@ -12,7 +12,8 @@
     03/12/2014  phoski      Initial
     12/03/2016  phoski      Engineer in multi select instead of range
     02/07/2016  phoski      Admin Time option
-         
+    31/07/2016  phoski      Exclude disabled users option
+       
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -34,6 +35,7 @@ DEFINE VARIABLE lc-eng-code       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-eng-desc       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-selectengineer AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-admin          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-exclude        AS CHARACTER NO-UNDO.
 
 
 DEFINE BUFFER this-user FOR WebUser.
@@ -192,10 +194,13 @@ PROCEDURE ip-InitialProcess :
         lc-repType                          = get-value("reptype")
         lc-selectengineer = get-value("selectengineer")
         lc-admin          = get-value("admin")
+        lc-exclude        = get-value("exclude")
         
         .
     IF request_method = "GET" THEN
     DO:
+        ASSIGN
+            lc-exclude = "on".
         
         IF lc-lodate = ""
             THEN ASSIGN lc-lodate = STRING(TODAY - 7, "99/99/9999").
@@ -230,6 +235,7 @@ PROCEDURE ip-ProcessReport :
         lc-selectEngineer,
         lc-engtype,
         lc-admin = "on",
+        lc-exclude = "on",
         OUTPUT TABLE tt-engtime
 
         ).
@@ -274,7 +280,7 @@ PROCEDURE ip-Selection :
     '<td valign="top" align="left">'
     htmlib-CalendarInputField("hidate",10,lc-hidate) 
     htmlib-CalendarLink("hidate")
-    '</td>' skip.
+    '</td></tr><tr>' skip.
     
     {&out} '<TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("engtype",lc-error-field,'|') > 0 
@@ -311,7 +317,15 @@ PROCEDURE ip-Selection :
                                         THEN TRUE ELSE FALSE) 
             '</TD>'.
             
+    {&out} '</tr><tr>'
+            '<TD VALIGN="TOP"  ALIGN="right">&nbsp;' 
+            htmlib-SideLabel("Exclude Disabled Users?")
      
+             '</td><TD VALIGN="TOP" ALIGN="left">'
+                htmlib-CheckBox("exclude", IF lc-exclude = 'on'
+                                        THEN TRUE ELSE FALSE) 
+            '</TD>'.
+                 
 
    
     {&out} '</tr></table>' skip.
