@@ -16,6 +16,7 @@
     08/11/2015  phoski      Show account Ref & show def contract
     02/07/2016  phoski      com-getTicketBalance
     24/07/2016  phoski      CRM
+    01/08/2016  phoski      CRM Page link
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -227,6 +228,7 @@ PROCEDURE process-web-request :
     tbar-Link("ticketadd",?,"off",lc-link-otherp)
     tbar-Link("CustAsset",?,"off",lc-link-otherp)
     tbar-Link("CustContract",?,"off",lc-link-otherp)
+    tbar-Link("CRM",?,"off",lc-link-otherp)
     tbar-EndOption()
     tbar-End().
 
@@ -372,6 +374,11 @@ PROCEDURE process-web-request :
                                                 string(rowid(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
                                                 )
+                 tbar-Link("CRM",rowid(b-query),appurl + '/' + "crm/customer.p","customer=" + 
+                                                string(rowid(b-query)) + 
+                                                "&returnback=" + string(lr-first-row)
+                                                )
+                                                
 
             tbar-EndHidden()
 

@@ -37,6 +37,7 @@
     01/07/2016  phoski      Shorten name in customer combo   
     02/07/2016  phoski      issActivity.ActivityType    
     02/07/2016  phoski      com-GetTicketBalance for ticket balance
+    01/08/2016  phoski      CRM
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -739,9 +740,11 @@ PROCEDURE ip-GetAccountNumbers :
 
     FOR EACH b-cust NO-LOCK
         WHERE b-cust.CompanyCode = b-user.CompanyCode
-        AND  b-cust.isActive = TRUE   
+        /*AND  b-cust.isActive = TRUE */   
         BY b-cust.name:
 
+         IF LOOKUP(b-cust.accStatus,lc-global-accStatus-HelpDesk-Active,"|") = 0 THEN NEXT.
+        
         /*
         *** if user is in teams then customer must be in 1 of the users teams
         *** or they have been assigned to the an issue for the customer

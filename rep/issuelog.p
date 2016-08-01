@@ -15,6 +15,7 @@
     29/03/2015  phoski      Class Code/Desc
     23/02/2015  phoski      Acive/Inactive Customers & toggle 
     21/05/2016  phoski      use Longchars for customer selection
+    01/08/2016  phoski      CRM
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -275,8 +276,8 @@ PROCEDURE ip-InitialProcess :
     
     
     IF lc-temp = "on"
-    THEN RUN com-GetCustomerAccount ( lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
-    ELSE RUN com-GetCustomerAccountActiveOnly ( lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+    THEN RUN com-GetCustomerAccount( lc-global-accStatus-HelpDesk-All , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+    ELSE RUN com-GetCustomerAccount( lc-global-accStatus-HelpDesk-Active , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
 
 
 

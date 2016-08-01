@@ -15,6 +15,7 @@
     23/10/2015  phoski      Replace week/year DJS drivel with a 
                             date range
     02/07/2016  phoski      Admin Time option
+    01/08/2016  phoski      CRM
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -179,6 +180,7 @@ PROCEDURE ip-customer-select :
         WHERE customer.company = lc-global-company
         BY customer.name:
  
+        IF  LOOKUP(customer.accStatus,lc-global-accStatus-HelpDesk-All ,"|") = 0 THEN NEXT.
         {&out}
         '<option value="'  customer.accountnumber '" ' '>'  html-encode(customer.name) '</option>' skip.
     END.

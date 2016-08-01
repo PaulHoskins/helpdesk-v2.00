@@ -41,70 +41,70 @@
 &global-define CUSTOMER CUSTOMER
 &global-define CONTRACT CONTRACT
 
-DEFINE VARIABLE lc-global-selcode             AS CHARACTER 
+DEFINE VARIABLE lc-global-selcode                     AS CHARACTER 
     INITIAL "WALESFOREVER" NO-UNDO.
-DEFINE VARIABLE lc-global-seldesc             AS CHARACTER
+DEFINE VARIABLE lc-global-seldesc                     AS CHARACTER
     INITIAL "None" NO-UNDO.
 
-DEFINE VARIABLE lc-global-company             AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-user                AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-secure              AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-internal            AS CHARACTER 
+DEFINE VARIABLE lc-global-company                     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-user                        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-secure                      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-internal                    AS CHARACTER 
     INITIAL "INTERNAL,CONTRACT" NO-UNDO.
 
-DEFINE VARIABLE lc-global-dtype               AS CHARACTER
+DEFINE VARIABLE lc-global-dtype                       AS CHARACTER
     INITIAL "Text|Number|Date|Note|Yes/No" NO-UNDO.
 
-DEFINE VARIABLE lc-global-respaction-code     AS CHARACTER
+DEFINE VARIABLE lc-global-respaction-code             AS CHARACTER
     INITIAL "None|Email|EmailPage|Page|Web" NO-UNDO.
-DEFINE VARIABLE lc-global-respaction-display  AS CHARACTER
+DEFINE VARIABLE lc-global-respaction-display          AS CHARACTER
     INITIAL "None|Send Email|Send Email & SMS|Send SMS|Web Alert" NO-UNDO.
 
-DEFINE VARIABLE lc-global-tbase-code          AS CHARACTER
+DEFINE VARIABLE lc-global-tbase-code                  AS CHARACTER
     INITIAL "OFF|REAL" NO-UNDO.
-DEFINE VARIABLE lc-global-tbase-display       AS CHARACTER
+DEFINE VARIABLE lc-global-tbase-display               AS CHARACTER
     INITIAL "Office Hours|24 Hours" NO-UNDO.
 
-DEFINE VARIABLE lc-global-abase-code          AS CHARACTER
+DEFINE VARIABLE lc-global-abase-code                  AS CHARACTER
     INITIAL "ISSUE|ALERT" NO-UNDO.
-DEFINE VARIABLE lc-global-abase-display       AS CHARACTER
+DEFINE VARIABLE lc-global-abase-display               AS CHARACTER
     INITIAL "Issue Date/Time|Previous Alert Date/Time"         
     NO-UNDO.
 
-DEFINE VARIABLE lc-global-respunit-code       AS CHARACTER
+DEFINE VARIABLE lc-global-respunit-code               AS CHARACTER
     INITIAL "None|Minute|Hour|Day|Week" NO-UNDO.
-DEFINE VARIABLE lc-global-respunit-display    AS CHARACTER
+DEFINE VARIABLE lc-global-respunit-display            AS CHARACTER
     INITIAL "None|Minute|Hour|Day|Week" NO-UNDO.
 
-DEFINE VARIABLE lc-global-action-code         AS CHARACTER
+DEFINE VARIABLE lc-global-action-code                 AS CHARACTER
     INITIAL "OPEN|CLOSED" NO-UNDO.
-DEFINE VARIABLE lc-global-action-display      AS CHARACTER
+DEFINE VARIABLE lc-global-action-display              AS CHARACTER
     INITIAL "Open|Closed" NO-UNDO.
 
-DEFINE VARIABLE lc-global-hour-code           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-hour-display        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-min-code            AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-global-min-display         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-hour-code                   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-hour-display                AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-min-code                    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-min-display                 AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-System-KB-Code             AS CHARACTER
+DEFINE VARIABLE lc-System-KB-Code                     AS CHARACTER
     INITIAL "SYS.ISSUE" NO-UNDO.
-DEFINE VARIABLE lc-System-KB-Desc             AS CHARACTER
+DEFINE VARIABLE lc-System-KB-Desc                     AS CHARACTER
     INITIAL "Completed Issues" NO-UNDO.
 
-DEFINE VARIABLE lc-System-Note-Code           AS CHARACTER
+DEFINE VARIABLE lc-System-Note-Code                   AS CHARACTER
     INITIAL 'SYS.ACCOUNT,SYS.EMAILCUST,SYS.ASSIGN,SYS.SLA,SYS.MISC,SYS.SLAWARN,SYS.SLAMISSED' NO-UNDO.
-DEFINE VARIABLE lc-System-Note-Desc           AS CHARACTER
+DEFINE VARIABLE lc-System-Note-Desc                   AS CHARACTER
     INITIAL 'System - Account Changed,System - Customer Emailed,System - Issue Assignment,System - SLA Assigned,System - Misc Note,System - SLA Warning,System - SLA Missed'
     NO-UNDO.
 
-DEFINE VARIABLE lc-global-GT-Code             AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-GT-Code                     AS CHARACTER INITIAL
     'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector' NO-UNDO.
 
-DEFINE VARIABLE lc-global-iclass-complex      AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-iclass-complex              AS CHARACTER INITIAL
     'ComplexProject' NO-UNDO.   
-DEFINE VARIABLE lc-global-iclass-code         AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-iclass-code                 AS CHARACTER INITIAL
     'Issue|Admin|Project|ComplexProject' NO-UNDO.
-DEFINE VARIABLE lc-global-iclass-desc         AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-iclass-desc                 AS CHARACTER INITIAL
     'Issue|Administration|Simple Project|Complex Project' NO-UNDO.    
 /*
 *** 
@@ -112,71 +112,75 @@ DEFINE VARIABLE lc-global-iclass-desc         AS CHARACTER INITIAL
 ***
 */
 
-DEFINE VARIABLE lc-global-iclass-Add-code     AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-iclass-Add-code             AS CHARACTER INITIAL
     'Issue|Admin|Project' NO-UNDO.
-DEFINE VARIABLE lc-global-iclass-Add-desc     AS CHARACTER INITIAL
+DEFINE VARIABLE lc-global-iclass-Add-desc             AS CHARACTER INITIAL
     'Issue|Administration|Simple Project' NO-UNDO. 
     
-DEFINE VARIABLE lc-global-SupportTicket-Code  AS CHARACTER
+DEFINE VARIABLE lc-global-SupportTicket-Code          AS CHARACTER
     INITIAL 'NONE|YES|BOTH' NO-UNDO.
-DEFINE VARIABLE lc-global-SupportTicket-Desc  AS CHARACTER
+DEFINE VARIABLE lc-global-SupportTicket-Desc          AS CHARACTER
     INITIAL 'Standard Support Only|Ticket Support Only|Standard And Ticket Support'
     NO-UNDO.
-DEFINE VARIABLE lc-global-Allow-TicketSupport AS CHARACTER
+DEFINE VARIABLE lc-global-Allow-TicketSupport         AS CHARACTER
     INITIAL 'YES|BOTH' NO-UNDO.
-DEFINE VARIABLE lc-global-sms-username        AS CHARACTER
+DEFINE VARIABLE lc-global-sms-username                AS CHARACTER
     INITIAL 'tomcarroll' NO-UNDO.
-DEFINE VARIABLE lc-global-sms-password        AS CHARACTER
+DEFINE VARIABLE lc-global-sms-password                AS CHARACTER
     INITIAL 'cr34tion' NO-UNDO.
 
-DEFINE VARIABLE lc-global-excludeType         AS CHARACTER
+DEFINE VARIABLE lc-global-excludeType                 AS CHARACTER
     INITIAL "exe,vbs" NO-UNDO.
-DEFINE VARIABLE lc-global-teamassign          AS CHARACTER 
+DEFINE VARIABLE lc-global-teamassign                  AS CHARACTER 
     INITIAL '[TeamAssign]' NO-UNDO.
 
-DEFINE VARIABLE lc-global-UserSubType-Code        AS CHARACTER 
+DEFINE VARIABLE lc-global-UserSubType-Code            AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project|Sal|SalMan|custAdmin|custSal' NO-UNDO.
-DEFINE VARIABLE lc-global-UserSubType-desc        AS CHARACTER 
+DEFINE VARIABLE lc-global-UserSubType-desc            AS CHARACTER 
     INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales' NO-UNDO.
 
-DEFINE VARIABLE lc-global-EngType-Code        AS CHARACTER 
+DEFINE VARIABLE lc-global-EngType-Code                AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project' NO-UNDO.
-DEFINE VARIABLE lc-global-EngType-desc        AS CHARACTER 
+DEFINE VARIABLE lc-global-EngType-desc                AS CHARACTER 
     INITIAL 'Not Applicable|Field|Remote|Project' NO-UNDO.
         
-DEFINE VARIABLE lc-global-taskResp-code       AS CHARACTER 
+DEFINE VARIABLE lc-global-taskResp-code               AS CHARACTER 
     INITIAL 'E|C|3' NO-UNDO.
-DEFINE VARIABLE lc-global-taskResp-desc       AS CHARACTER 
+DEFINE VARIABLE lc-global-taskResp-desc               AS CHARACTER 
     INITIAL 'Engineer|Customer|3rd Party' NO-UNDO.
                         
-DEFINE VARIABLE lc-global-sq-code             AS CHARACTER 
+DEFINE VARIABLE lc-global-sq-code                     AS CHARACTER 
     INITIAL 'RANGE1-10|LOG|COM|FIELD|PARA|NUMBER' NO-UNDO.                        
-DEFINE VARIABLE lc-global-sq-desc             AS CHARACTER 
+DEFINE VARIABLE lc-global-sq-desc                     AS CHARACTER 
     INITIAL 'Range (1-10)|Yes/No|Comment Box|Text Input|Text Only|Number' NO-UNDO.
     
-DEFINE VARIABLE lc-global-webActionClass-code AS CHARACTER 
+DEFINE VARIABLE lc-global-webActionClass-code         AS CHARACTER 
     INITIAL 'ENG|ACC' NO-UNDO.                        
-DEFINE VARIABLE lc-global-WebActionClass-desc AS CHARACTER 
+DEFINE VARIABLE lc-global-WebActionClass-desc         AS CHARACTER 
     INITIAL 'Engineer|Account' NO-UNDO.
         
-DEFINE VARIABLE li-global-sla-fail            AS INTEGER   INITIAL 10 NO-UNDO.
-DEFINE VARIABLE li-global-sla-amber           AS INTEGER   INITIAL 20 NO-UNDO.
-DEFINE VARIABLE li-global-sla-ok              AS INTEGER   INITIAL 30 NO-UNDO.
-DEFINE VARIABLE li-global-sla-na              AS INTEGER   INITIAL 99 NO-UNDO.
+DEFINE VARIABLE li-global-sla-fail                    AS INTEGER   INITIAL 10 NO-UNDO.
+DEFINE VARIABLE li-global-sla-amber                   AS INTEGER   INITIAL 20 NO-UNDO.
+DEFINE VARIABLE li-global-sla-ok                      AS INTEGER   INITIAL 30 NO-UNDO.
+DEFINE VARIABLE li-global-sla-na                      AS INTEGER   INITIAL 99 NO-UNDO.
 
-DEFINE VARIABLE lc-global-accStatus-code      AS CHARACTER 
-    INITIAL 'Active|Ex-Customer|Unqualified|Qualified' NO-UNDO.
-    
+DEFINE VARIABLE lc-global-accStatus-code              AS CHARACTER 
+    INITIAL 'Active|Ex-Customer|CRM' NO-UNDO.
+DEFINE VARIABLE lc-global-accStatus-HelpDesk-All      AS CHARACTER 
+    INITIAL 'Active|Ex-Customer' NO-UNDO. 
+DEFINE VARIABLE lc-global-accStatus-HelpDesk-Active   AS CHARACTER 
+    INITIAL 'Active' NO-UNDO.     
+DEFINE VARIABLE lc-global-accStatus-HelpDesk-InActive AS CHARACTER 
+    INITIAL 'Ex-Customer' NO-UNDO.      
 
+DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
-DEFINE VARIABLE li-global-sched-days-back     AS INTEGER   INITIAL 100 NO-UNDO.
-
-DEFINE VARIABLE lc-global-jquery              AS CHARACTER 
+DEFINE VARIABLE lc-global-jquery                      AS CHARACTER 
     INITIAL 
     '<script type="text/javascript" src="/asset/jquery/jquery-1.11.3.min.js"></script>~n'
     NO-UNDO.
    
-DEFINE VARIABLE lc-global-jquery-ui           AS CHARACTER 
+DEFINE VARIABLE lc-global-jquery-ui                   AS CHARACTER 
     INITIAL 
     '<script type="text/javascript" src="/asset/jquery-easyui-1.4.5/jquery.easyui.min.js"></script>~n'
     NO-UNDO.
@@ -1042,6 +1046,7 @@ PROCEDURE com-GetCustomerAccount :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pc-Status           AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER pc-CompanyCode      AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER pc-LoginID          AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-AccountNumber   AS CHARACTER NO-UNDO.
@@ -1057,6 +1062,10 @@ PROCEDURE com-GetCustomerAccount :
     FOR EACH b-cust NO-LOCK 
         WHERE b-cust.CompanyCode = pc-CompanyCode
         BY b-cust.AccountNumber:
+            
+        IF pc-Status <> "" AND LOOKUP(b-cust.accStatus,pc-status,"|") = 0 THEN NEXT.
+        
+        
         IF pc-AccountNumber = "" 
             THEN ASSIGN 
                 pc-AccountNumber = b-cust.AccountNumber
@@ -1627,6 +1636,50 @@ PROCEDURE com-StatusType :
 
 END PROCEDURE.
 
+PROCEDURE com-StatusGetCustomer:
+    /*------------------------------------------------------------------------------
+      Purpose:     
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pc-Status           AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-CompanyCode      AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-LoginID          AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-AccountNumber   AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-Name            AS CHARACTER NO-UNDO.
+
+
+    DEFINE BUFFER b-cust FOR customer.
+    DEFINE BUFFER b-user FOR WebUser.
+
+    ASSIGN 
+        pc-AccountNumber = DYNAMIC-FUNCTION("htmlib-Null")
+        pc-name          = "All Customers".
+
+    FIND b-user WHERE b-user.LoginID = pc-LoginID NO-LOCK NO-ERROR.
+    
+    FOR EACH b-cust NO-LOCK 
+        WHERE b-cust.CompanyCode = pc-CompanyCode
+        BY b-cust.name:
+        IF pc-Status <> "" AND LOOKUP(b-cust.accStatus,pc-status,"|") = 0 THEN NEXT.
+        
+        IF AVAILABLE b-user THEN
+        DO:
+            IF NOT DYNAMIC-FUNCTION('com-AllowCustomerAccess':U,
+                pc-companyCode,
+                pc-LoginID,
+                b-cust.AccountNumber) THEN NEXT.
+        END.
+        ASSIGN 
+            pc-AccountNumber = pc-AccountNumber + '|' + 
+               b-cust.AccountNumber
+            pc-name          = pc-name + '|' + 
+               com-LimitCustomerName(b-cust.Name).
+    END.
+
+
+
+END PROCEDURE.
 
 /* ************************  Function Implementations ***************** */
 

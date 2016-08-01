@@ -267,8 +267,8 @@ PROCEDURE ip-InitialProcess :
     
     
     IF lc-temp = "on"
-        THEN RUN com-GetCustomerAccount ( lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
-    ELSE RUN com-GetCustomerAccountActiveOnly ( lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+    THEN RUN com-GetCustomerAccount ( lc-global-accStatus-HelpDesk-All, lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+    ELSE RUN com-GetCustomerAccount ( lc-global-accStatus-HelpDesk-Active, lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
 
 
 

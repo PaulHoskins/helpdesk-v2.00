@@ -253,7 +253,9 @@ PROCEDURE ip-ReportSelectionHTML:
     FOR EACH customer NO-LOCK
         WHERE customer.company = lc-global-company
         BY customer.name:
- 
+        
+        IF  LOOKUP(customer.accStatus,lc-global-accStatus-HelpDesk-All ,"|") = 0 THEN NEXT.
+         
         {&out}
         '<option value="'  customer.accountnumber '" ' '>'  html-encode(customer.name) '</option>' skip.
     END.

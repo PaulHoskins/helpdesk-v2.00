@@ -27,6 +27,7 @@
     07/03/2015  phoski      Default dates for customers today & today - 30
     29/03/2015  phoski      Complex Project Class 
     24/08/2015  phoski      Default to Open issues and sort by issue 
+    01/08/2016  phoski      CRM
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -658,7 +659,7 @@ PROCEDURE ip-InitialProcess :
         OR li-max-lines < 1
         OR li-max-lines = ? THEN li-max-lines = 12.
 
-    RUN com-GetCustomer ( lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+    RUN com-StatusGetCustomer( lc-global-accStatus-HelpDesk-All , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
 
     RUN com-GetStatus ( lc-global-company , OUTPUT lc-list-status, OUTPUT lc-list-sname ).
 

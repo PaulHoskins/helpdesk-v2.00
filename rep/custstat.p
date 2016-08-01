@@ -11,6 +11,7 @@
     26/07/2006  phoski      Initial
     19/11/2014  phoski      Phase 2 changes
     02/07/2016  phoski      Admin time 
+    01/08/2016  phoski      CRM
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -142,9 +143,13 @@ PROCEDURE ip-CustomerTable :
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode   = lc-Global-Company
         AND b-query.StatementEmail <> ""
-        AND b-query.IsActive = pl-ActiveOnly    
+        /*  AND b-query.IsActive = pl-ActiveOnly */   
         BY b-query.name
         :
+         
+       IF pl-ActiveOnly AND LOOKUP(b-query.accStatus,lc-global-accStatus-HelpDesk-Active,"|") = 0 THEN NEXT.   
+       
+       IF NOT pl-ActiveOnly AND LOOKUP(b-query.accStatus,lc-global-accStatus-HelpDesk-Active,"|") > 0 THEN NEXT.     
 
         ASSIGN
             lc-name = "tog" + string(ROWID(b-query)).

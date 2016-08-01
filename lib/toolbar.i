@@ -816,6 +816,10 @@ FUNCTION tbar-Link RETURNS CHARACTER
             ASSIGN 
                 lc-image    = '/images/toolbar3/surv-send.gif'
                 lc-alt-text = 'Test Survey'.
+            WHEN "CRM" THEN 
+            ASSIGN 
+                lc-image    = '/images/toolbar3/crm.gif'
+                lc-alt-text = 'CRM'.
                 
                   
   

@@ -11,6 +11,7 @@
     26/07/2006  phoski      Initial
     17/07/2016  phoski      admin time param
     31/07/2016  phoski      Admin time set to off
+    01/08/2016  phoski      Ask for admin
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -32,6 +33,7 @@ DEFINE VARIABLE lc-AccountNumber AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-label    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-admin         AS CHARACTER NO-UNDO.
 
 
 
@@ -109,7 +111,7 @@ PROCEDURE ip-ProcessReport :
         ( lc-global-user,
         lc-global-company,
         lc-AccountNumber,
-        FALSE,
+        lc-admin = "on",
         DATE(lc-lodate),
         DATE(lc-hidate),
         OUTPUT lc-pdf ).
@@ -283,6 +285,7 @@ PROCEDURE process-web-request :
             lc-hidate = get-value("hidate")
             lc-lodate = get-value("lodate")
             lc-view   = get-value("view")
+            lc-admin = get-value("admin")
             .
         
         RUN ip-Validate( OUTPUT lc-error-field,
@@ -359,7 +362,7 @@ PROCEDURE process-web-request :
     htmlib-CalendarLink("lodate")
     '</td>' skip
         
-            '<TD VALIGN="TOP" ALIGN="right">' 
+            '<TD VALIGN="TOP" ALIGN="right">&nbsp;&nbsp;' 
 
             
             (if lookup("hidate",lc-error-field,'|') > 0 
@@ -369,7 +372,15 @@ PROCEDURE process-web-request :
             '<TD VALIGN="TOP" ALIGN="left">'
             htmlib-InputField("hidate",10,lc-hidate) 
             htmlib-CalendarLink("hidate")
-            '</td>' skip
+            '</td>' SKIP
+            '</tr><tr><TD VALIGN="TOP" ALIGN="right">&nbsp;' 
+            htmlib-SideLabel("Include Administration Time?")
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">'
+                htmlib-CheckBox("admin", if lc-admin = 'on'
+                                        then true else false) 
+            '</TD></tr><tr>'
+            
             '<TD VALIGN="TOP" ALIGN="right">' 
                '&nbsp;'
             htmlib-SideLabel("View Statement?")
