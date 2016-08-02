@@ -25,6 +25,7 @@
     08/07/2016  phoski      Remove View related stuff as view is done 
                             in custview.p
     31/07/2016  phoski      AccStatus field instead of active field
+    02/08/2016  phoski      CRM fields update
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -50,62 +51,79 @@ DEFINE BUFFER b-valid FOR customer.
 DEFINE BUFFER b-table FOR customer.
 
 
-DEFINE VARIABLE lc-search           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-firstrow         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lastrow          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-navigation       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parameters       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-search         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-firstrow       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lastrow        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-navigation     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parameters     AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE lc-link-label       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit-label     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-url         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-label     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit-label   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-url       AS CHARACTER NO-UNDO.
 
 
 
-DEFINE VARIABLE lc-accountnumber    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-name             AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-address1         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-address2         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-city             AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-county           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-country          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-postcode         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-telephone        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-contact          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-notes            AS CHARACTER NO-UNDO. 
-DEFINE VARIABLE lc-supportticket    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-statementemail   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-isActive         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-viewAction       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-viewActivity     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-st-num           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-st-code          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-st-descr         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-AccountManager   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-iss-loginid      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-bulk-loginid     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-stat-loginid     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-renew-loginid    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-allowAllTeams    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-accountref       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-iss-survey       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-accountnumber  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-name           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-address1       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-address2       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-city           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-county         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-country        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-postcode       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-telephone      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-contact        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-notes          AS CHARACTER NO-UNDO. 
+DEFINE VARIABLE lc-supportticket  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-statementemail AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-isActive       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-viewAction     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-viewActivity   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-st-num         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-st-code        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-st-descr       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-AccountManager AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-iss-loginid    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-bulk-loginid   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-stat-loginid   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-renew-loginid  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-allowAllTeams  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-accountref     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-iss-survey     AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-sla-rows         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-sla-selected     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sla-rows       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sla-selected   AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-temp             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-temp           AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-ct-code          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-ct-desc          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-contract         AS CHARACTER EXTENT 20 NO-UNDO.
-DEFINE VARIABLE ll-billable         AS LOG       EXTENT 20 NO-UNDO.
-DEFINE VARIABLE lc-connotes         AS CHARACTER EXTENT 20 NO-UNDO.
-DEFINE VARIABLE ll-default          AS LOG       EXTENT 20 NO-UNDO.
-DEFINE VARIABLE ll-conactive        AS LOG       EXTENT 20 NO-UNDO.
-DEFINE VARIABLE lc-cu-code          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-cu-desc          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-AccStatus        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ct-code        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ct-desc        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-contract       AS CHARACTER EXTENT 20 NO-UNDO.
+DEFINE VARIABLE ll-billable       AS LOG       EXTENT 20 NO-UNDO.
+DEFINE VARIABLE lc-connotes       AS CHARACTER EXTENT 20 NO-UNDO.
+DEFINE VARIABLE ll-default        AS LOG       EXTENT 20 NO-UNDO.
+DEFINE VARIABLE ll-conactive      AS LOG       EXTENT 20 NO-UNDO.
+DEFINE VARIABLE lc-cu-code        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-cu-desc        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-AccStatus      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-SalesManager   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sm-code        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sm-desc        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-SalesContact   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-Website        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-noEmp          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-turn           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-SalesNote      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-indsector      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ind-code       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ind-desc       AS CHARACTER NO-UNDO.
+
+
+
+
+
+
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -304,6 +322,21 @@ PROCEDURE ip-MainPage :
     '</TD>' skip.
     
     {&out} '</TR>' skip.
+        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("website",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Web Site")
+        ELSE htmlib-SideLabel("Web Site"))
+    '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("website",40,lc-website) 
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(lc-website),'left')
+           skip.
+    {&out} '</TR>' skip.
+    
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("contact",lc-error-field,'|') > 0 
@@ -336,9 +369,22 @@ PROCEDURE ip-MainPage :
     {&out} '</TR>' skip.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Account Status")
+    '</TD>'.
+
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-Select("accstatus",lc-global-accStatus-code,lc-global-accStatus-code,lc-accstatus)
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(lc-accStatus,'left')
+           skip.
+    {&out} '</TR>' skip.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("notes",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Note")
-        ELSE htmlib-SideLabel("Note"))
+        THEN htmlib-SideLabelError("General Note")
+        ELSE htmlib-SideLabel("General Note"))
     '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
@@ -350,6 +396,7 @@ PROCEDURE ip-MainPage :
            skip.
     {&out} '</TR>' skip.
 
+    {&out} '<tr><td></td><td colspan=2><div class="infobox">Helpdesk Information</div></td></tr>' SKIP.
     
     IF lc-sla-rows <> "" THEN
     DO:
@@ -385,8 +432,8 @@ END.
 IF lc-mode <> "ADD" THEN
 DO:
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-            htmlib-SideLabel("Default Issue User")
-        '</TD>'.
+    htmlib-SideLabel("Default Issue User")
+    '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
@@ -397,9 +444,9 @@ DO:
            skip.
     {&out} '</TR>' skip.
 
-   {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-            htmlib-SideLabel("Bulk Email User")
-        '</TD>'.
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Bulk Email User")
+    '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
@@ -411,8 +458,8 @@ DO:
     {&out} '</TR>' skip.
     
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-            htmlib-SideLabel("Status Change User")
-        '</TD>'.
+    htmlib-SideLabel("Status Change User")
+    '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
@@ -423,8 +470,8 @@ DO:
            skip.
     {&out} '</TR>' skip.
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-            htmlib-SideLabel("Inventory Renewal User")
-        '</TD>'.
+    htmlib-SideLabel("Inventory Renewal User")
+    '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
@@ -453,7 +500,7 @@ htmlib-Select("st-num",lc-st-Code,lc-st-descr,lc-st-num)
            skip.
 {&out} '</TR>' skip.
 
- IF NOT CAN-DO("view,delete",lc-mode) THEN
+IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("allowAllTeams",lc-error-field,'|') > 0 
     THEN htmlib-SideLabelError("Allow Access To All Teams?")
@@ -549,47 +596,119 @@ htmlib-CheckBox("iss-survey", IF lc-iss-survey = 'on'
     THEN TRUE ELSE FALSE) 
 '</TD></TR>' skip.
 
-/** Remove 
-IF NOT CAN-DO("view,delete",lc-mode) THEN
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    (IF LOOKUP("gotomaint",lc-error-field,'|') > 0 
-    THEN htmlib-SideLabelError("Active?")
-    ELSE htmlib-SideLabel("Active?"))
-'</TD>'
-'<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-htmlib-CheckBox("isactive", IF lc-isActive = 'on'
-    THEN TRUE ELSE FALSE) 
-'</TD></TR>' skip.
- **/
- 
- {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-            htmlib-SideLabel("Account Status")
-        '</TD>'.
 
-    IF NOT CAN-DO("view,delete",lc-mode) THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-Select("accstatus",lc-global-accStatus-code,lc-global-accStatus-code,lc-accstatus)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(lc-accStatus,'left')
-           skip.
-    {&out} '</TR>' skip.
+ 
+{&out} '<tr><td></td><td colspan=2><div class="infobox">CRM Information</div></td></tr>' SKIP.
+  
     
     
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("accountref",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Account Reference")
-        ELSE htmlib-SideLabel("Account Reference"))
-    '</TD>'.
-    
- IF NOT CAN-DO("view,delete",lc-mode) THEN
+    (IF LOOKUP("accountref",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Account Reference")
+    ELSE htmlib-SideLabel("Account Reference"))
+'</TD>'.
+IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-      htmlib-InputField("accountref",15,lc-accountref) 
-    '</TD>' skip.
+htmlib-InputField("accountref",15,lc-accountref) 
+'</TD>' skip.
     else 
  {&out} htmlib-TableField(html-encode(lc-accountref),'left')
            skip.
- {&out} '</TR>' skip.
+{&out} '</TR>' skip.
+    
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("SalesManager",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Sales Manager")
+    ELSE htmlib-SideLabel("Sales Manager"))
+'</TD>'.
+
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+htmlib-Select("salesmanager",lc-sm-Code,lc-sm-desc,lc-SalesManager)
+'</TD>' skip.
+    else 
+    {&out} htmlib-TableField(lc-SalesManager,'left')
+           skip.
+{&out} '</TR>' skip.
+
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+htmlib-SideLabel("Sales Contact")
+'</TD>'.
+IF lc-mode <> 'add' THEN
+DO:
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-Select("salescontact",lc-cu-Code,lc-cu-desc,lc-salescontact)
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(lc-salescontact,'left')
+           skip.
+    {&out} '</TR>' skip.
+END.
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("noemp",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("No Of Employees")
+        ELSE htmlib-SideLabel("No Of Employees"))
+    '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("noemp",6,lc-noemp) 
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(lc-noemp),'left')
+           skip.
+
+    {&out} '</TR>' skip.
+    
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("turn",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Annual Turnover")
+        ELSE htmlib-SideLabel("Annual Turnover"))
+    '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("turn",8,lc-turn) 
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(lc-turn),'left')
+           skip.
+
+    {&out} '</TR>' skip.
+        
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("indsector",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Industry Sector")
+    ELSE htmlib-SideLabel("Industry Sector"))
+'</TD>'.
+
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+htmlib-Select("indsector",lc-ind-Code,lc-ind-desc,lc-indsector)
+'</TD>' skip.
+    else 
+    {&out} htmlib-TableField(lc-indsector,'left')
+           skip.
+{&out} '</TR>' skip.
+
+ {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("salesnote",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Sales Note")
+        ELSE htmlib-SideLabel("Sales Note"))
+    '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-TextArea("salesnote",lc-salesnote,5,60)
+    '</TD>' skip.
+    else 
+    {&out} htmlib-TableField(replace(html-encode(lc-salesnote),"~n",'<br>'),'left')
+           skip.
+    {&out} '</TR>' skip.
+        
+   
+ 
     
 {&out} htmlib-EndTable() skip.
 
@@ -668,10 +787,12 @@ PROCEDURE ip-Validate :
       Parameters:  <none>
       objtargets:       
     ------------------------------------------------------------------------------*/
-    DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
-    DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
 
     DEFINE BUFFER b-Customer FOR Customer.
+    DEFINE VARIABLE li-int  AS INT  NO-UNDO.
+    
     
     IF lc-mode = "ADD":U THEN
     DO:
@@ -697,8 +818,8 @@ PROCEDURE ip-Validate :
     END.
 
     IF lc-name = ""
-    OR lc-name = ?
-    THEN RUN htmlib-AddErrorMessage(
+        OR lc-name = ?
+        THEN RUN htmlib-AddErrorMessage(
             'name', 
             'You must enter the name',
             INPUT-OUTPUT pc-error-field,
@@ -708,24 +829,39 @@ PROCEDURE ip-Validate :
     DO:
         FIND FIRST b-customer 
             WHERE b-customer.companyCode = lc-global-company
-              AND b-customer.accountref = lc-accountRef
-              NO-LOCK NO-ERROR. 
+            AND b-customer.accountref = lc-accountRef
+            NO-LOCK NO-ERROR. 
         IF AVAILABLE b-customer THEN
         DO:
             IF lc-mode = "ADD"
-            OR b-table.AccountNumber <> b-customer.AccountNumber THEN
+                OR b-table.AccountNumber <> b-customer.AccountNumber THEN
             DO:
                 RUN htmlib-AddErrorMessage(
                     'accountref', 
-                'This account reference already exists on account ' + b-customer.accountnumber + ' ' + b-customer.name,
-                INPUT-OUTPUT pc-error-field,
-                INPUT-OUTPUT pc-error-msg ).
+                    'This account reference already exists on account ' + b-customer.accountnumber + ' ' + b-customer.name,
+                    INPUT-OUTPUT pc-error-field,
+                    INPUT-OUTPUT pc-error-msg ).
                 
             END.
         END.
               
     END.
+    ASSIGN li-int = int(lc-noemp) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+    OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'noemp', 
+            'The number of employees is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
     
+    ASSIGN li-int = int(lc-turn) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+    OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'turn', 
+            'The annual turnover is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
 END PROCEDURE.
 
 
@@ -803,12 +939,27 @@ PROCEDURE process-web-request :
  
 
     RUN com-GetTeams ( lc-global-company, OUTPUT lc-st-code, OUTPUT lc-st-descr ).
-    RUN com-GetUserListByClass ( lc-global-company, "INTERNAL",OUTPUT lc-ct-code, OUTPUT lc-ct-desc).
+    RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-EngType-Code,'|',",") ,OUTPUT lc-ct-code, OUTPUT lc-ct-desc).
     
-
+    RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-SalType-Code,'|',",") ,OUTPUT lc-sm-code, OUTPUT lc-sm-desc).
+    
+    RUN com-GenTabSelect ( lc-global-company, "CRM.IndustrySector", 
+       OUTPUT lc-ind-code,
+       OUTPUT lc-ind-desc ).
+       
+    IF lc-ind-code = ""
+    THEN lc-ind-desc = "None".
+    ELSE 
+    ASSIGN lc-ind-code = "|" + lc-ind-code
+           lc-ind-desc = "None|" + lc-ind-desc.
+           
+    
+    
     ASSIGN
         lc-ct-code = "|" + lc-ct-code
         lc-ct-desc = "None Selected|" + lc-ct-desc
+        lc-sm-code = "|" + lc-sm-code
+        lc-sm-desc = "None Selected|" + lc-sm-desc
         lc-st-code = "0|" + lc-st-code
         lc-st-descr = "None Selected|" + lc-st-descr.
 
@@ -895,7 +1046,7 @@ PROCEDURE process-web-request :
             IF lc-mode = 'update' THEN
             DO:
                 FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid)
-                        NO-LOCK NO-ERROR.
+                    NO-LOCK NO-ERROR.
             END.
                         
             ASSIGN 
@@ -926,6 +1077,13 @@ PROCEDURE process-web-request :
                 lc-accountref        = get-value("accountref")
                 lc-iss-survey        = get-value("iss-survey")
                 lc-accStatus         = get-value("accstatus")
+                lc-SalesManager      = get-value("salesmanager")
+                lc-SalesContact      = get-value("salescontact")
+                lc-website           = get-value("website")
+                lc-noemp             = get-value("noemp")
+                lc-turn              = get-value("turn")
+                lc-salesnote         = get-value("salesnote")
+                lc-indsector        =  get-value("indsector")
              
                 .
 
@@ -971,7 +1129,7 @@ PROCEDURE process-web-request :
                         b-table.notes          = lc-notes
                         b-table.supportticket  = lc-supportticket
                         b-table.statementemail = lc-statementemail
-                       /* b-table.isActive       = lc-isActive = "on" */
+                        /* b-table.isActive       = lc-isActive = "on" */
                         b-table.ViewAction     = lc-viewAction = "on"
                         b-table.ViewActivity   = lc-viewActivity = "on"
                         b-table.allowAllTeams  = lc-allowAllTeams = "on"
@@ -984,6 +1142,13 @@ PROCEDURE process-web-request :
                         b-table.accountref       = lc-accountref
                         b-table.iss_survey      = lc-iss-survey = "on"
                         b-table.accStatus       = lc-accStatus
+                        b-table.SalesManager    = lc-SalesManager
+                        b-table.salesContact    = lc-SalesContact
+                        b-table.website         = lc-WebSite
+                        b-table.NoOfEmployees   = int(lc-noemp)
+                        b-table.AnnualTurnover = int(lc-turn)
+                        b-table.salesnote       = lc-salesnote
+                        b-table.industrySector = lc-indsector
                         .
                         
                     /* Active now means active on the help desk only */
@@ -1050,6 +1215,9 @@ PROCEDURE process-web-request :
         ASSIGN 
             lc-accountnumber = b-table.accountnumber.
         RUN com-GetUserListForAccount (lc-global-company,lc-AccountNumber,OUTPUT lc-cu-code, OUTPUT lc-cu-desc).
+        IF lc-cu-code = ""
+        THEN lc-cu-desc = "None".
+        ELSE
         ASSIGN
             lc-cu-code = "|" + lc-cu-code
             lc-cu-desc = "None|" + lc-cu-desc.
@@ -1083,6 +1251,13 @@ PROCEDURE process-web-request :
                 lc-accountref     = b-table.accountRef
                 lc-iss-survey = IF b-table.iss_survey THEN "on" ELSE ""
                 lc-accstatus = b-table.accStatus
+                lc-SalesManager = b-table.SalesManager
+                lc-SalesContact = b-table.salescontact
+                lc-website      = b-table.website
+                lc-noemp        = STRING(b-table.NoOfEmployees)
+                lc-turn         = STRING(b-table.AnnualTurnover)
+                lc-salesnote    = b-table.SalesNote
+                lc-indsector    = b-table.industrySector
                 
                 
                 .
@@ -1126,7 +1301,7 @@ PROCEDURE process-web-request :
 
     
 
-        IF lc-error-msg <> "" THEN
+    IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
         htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.

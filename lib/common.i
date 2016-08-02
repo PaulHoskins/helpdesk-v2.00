@@ -143,7 +143,11 @@ DEFINE VARIABLE lc-global-EngType-Code                AS CHARACTER
     INITIAL '|FIELD|REMOTE|Project' NO-UNDO.
 DEFINE VARIABLE lc-global-EngType-desc                AS CHARACTER 
     INITIAL 'Not Applicable|Field|Remote|Project' NO-UNDO.
-        
+DEFINE VARIABLE lc-global-SalType-Code                AS CHARACTER 
+    INITIAL '|Sal|SalMan' NO-UNDO.
+DEFINE VARIABLE lc-global-SalType-desc                AS CHARACTER 
+    INITIAL 'Not Applicable|Sales|Sales Manager' NO-UNDO.
+            
 DEFINE VARIABLE lc-global-taskResp-code               AS CHARACTER 
     INITIAL 'E|C|3' NO-UNDO.
 DEFINE VARIABLE lc-global-taskResp-desc               AS CHARACTER 
@@ -1499,6 +1503,8 @@ PROCEDURE com-GetUserListByClass:
     ------------------------------------------------------------------------------*/
     DEFINE INPUT  PARAMETER pc-CompanyCode AS CHARACTER NO-UNDO.
     DEFINE INPUT  PARAMETER pc-class       AS CHARACTER NO-UNDO.
+    DEFINE INPUT  PARAMETER pc-SubType     AS CHARACTER NO-UNDO.
+    
         
     DEFINE OUTPUT PARAMETER pc-LoginID     AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-Name        AS CHARACTER NO-UNDO.
@@ -1509,7 +1515,9 @@ PROCEDURE com-GetUserListByClass:
 
     FOR EACH b-user NO-LOCK 
         WHERE CAN-DO(pc-class,b-user.UserClass)
+        AND CAN-DO(pc-subType,b-user.engType)
         AND b-user.CompanyCode = pc-CompanyCode
+        AND b-user.EngType > ""
         BY b-user.name:
         icount = icount + 1.
         IF icount = 1 
