@@ -50,6 +50,12 @@ ADD SEQUENCE "acs_line"
   INCREMENT 1
   CYCLE-ON-LIMIT yes
 
+ADD SEQUENCE "op_master"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+  MAX-VAL 999999999
+
 ADD TABLE "acs_head"
   AREA "Schema Area"
   LABEL "Survey Header"
@@ -3908,6 +3914,208 @@ ADD INDEX "knbCode" ON "knbText"
   AREA "Schema Area"
   INDEX-FIELD "knbCode" ASCENDING 
 
+ADD TABLE "op_master"
+  AREA "Schema Area"
+  LABEL "Opportunitiy Master"
+  DUMP-NAME "op_master"
+
+ADD FIELD "op_id" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 2
+  MAX-WIDTH 4
+  ORDER 10
+
+ADD FIELD "CompanyCode" OF "op_master" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "AccountNumber" OF "op_master" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "descr" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "SalesManager" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Sales Manager"
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "salesContact" OF "op_master" AS character 
+  DESCRIPTION "-> webuser.loginid"
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Customer User"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "Department" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD FIELD "NextStep" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "CloseDate" OF "op_master" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Close Date"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "CurrentProvider" OF "op_master" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 80
+  ORDER 100
+
+ADD FIELD "OpType" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD FIELD "servRequired" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "OpNote" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 14
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD FIELD "Rating" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "OpStatus" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 16
+  MAX-WIDTH 16
+  ORDER 150
+
+ADD FIELD "Probability" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 17
+  MAX-WIDTH 4
+  ORDER 160
+
+ADD FIELD "CostOfSale" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 18
+  MAX-WIDTH 4
+  ORDER 170
+
+ADD FIELD "Revenue" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 19
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD FIELD "DealLostReason" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 20
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "SourceType" OF "op_master" AS character 
+  DESCRIPTION "--> genTable crm.SourceType"
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 21
+  MAX-WIDTH 16
+  ORDER 200
+
+ADD FIELD "dBase" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Datebase"
+  POSITION 22
+  MAX-WIDTH 16
+  ORDER 210
+
+ADD FIELD "Campaign" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 23
+  MAX-WIDTH 16
+  ORDER 220
+
+ADD FIELD "opSource" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 24
+  MAX-WIDTH 16
+  ORDER 230
+
+ADD FIELD "createDate" OF "op_master" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 25
+  MAX-WIDTH 8
+  ORDER 240
+
+ADD FIELD "createLoginid" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 26
+  MAX-WIDTH 16
+  ORDER 250
+
+ADD INDEX "op_id" ON "op_master" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "op_id" ASCENDING 
+
+ADD INDEX "AccountNumber" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+
 ADD TABLE "ptp_phase"
   AREA "Schema Area"
   LABEL "Project Template - Phase"
@@ -6088,4 +6296,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000120922
+0000124929

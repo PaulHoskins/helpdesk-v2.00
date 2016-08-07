@@ -176,6 +176,8 @@ PROCEDURE process-web-request :
     ------------------------------------------------------------------------------*/
   
     DEFINE VARIABLE lc-view-Link AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-crm-link  AS CHARACTER NO-UNDO.
+    
     
     {lib/checkloggedin.i}
 
@@ -322,9 +324,13 @@ PROCEDURE process-web-request :
             lc-link-otherp = 'search=' + lc-search +
                                 '&firstrow=' + string(lr-first-row).
         ASSIGN
-            lc-view-link = tbar-Link("view",ROWID(b-query),appurl + '/' + "cust/custview.p",lc-link-otherp).
+            lc-view-link = tbar-Link("view",ROWID(b-query),appurl + '/' + "cust/custview.p",lc-link-otherp)
+            lc-crm-link = tbar-Link("CRM",ROWID(b-query),appurl + '/' + "crm/customer.p",lc-link-otherp).
         ASSIGN
             lc-view-link = REPLACE(lc-view-link,STRING(ROWID(b-query)),url-encode(lc-enc-key,"Query"))
+            lc-crm-link = REPLACE(
+                            REPLACE(lc-crm-link,STRING(ROWID(b-query)),url-encode(lc-enc-key,"Query")),
+                            "rowid=","crmaccount=")
             lc-def-cont = "<b>** None **</b>".
             
         FIND FIRST WebissCont 
@@ -374,10 +380,12 @@ PROCEDURE process-web-request :
                                                 string(rowid(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
                                                 )
+                                                /*
                  tbar-Link("CRM",rowid(b-query),appurl + '/' + "crm/customer.p","customer=" + 
                                                 string(rowid(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
-                                                )
+                                                ) */
+                  lc-crm-link
                                                 
 
             tbar-EndHidden()
