@@ -98,7 +98,7 @@ DEFINE VARIABLE lc-System-Note-Desc                   AS CHARACTER
     NO-UNDO.
 
 DEFINE VARIABLE lc-global-GT-Code                     AS CHARACTER INITIAL
-    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector' NO-UNDO.
+    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector,CRM.SourceType,CRM.Database,CRM.Campaign' NO-UNDO.
 
 DEFINE VARIABLE lc-global-iclass-complex              AS CHARACTER INITIAL
     'ComplexProject' NO-UNDO.   
@@ -177,6 +177,26 @@ DEFINE VARIABLE lc-global-accStatus-HelpDesk-Active   AS CHARACTER
 DEFINE VARIABLE lc-global-accStatus-HelpDesk-InActive AS CHARACTER 
     INITIAL 'Ex-Customer' NO-UNDO.      
 
+DEFINE VARIABLE lc-global-opType-Code                 AS CHARACTER 
+    INITIAL 'ULEAD|LEAD|OPP'        NO-UNDO.
+DEFINE VARIABLE lc-global-opType-Desc                 AS CHARACTER 
+    INITIAL "Unqualified Lead|Lead|Opportunity"   NO-UNDO.
+     
+DEFINE VARIABLE lc-global-Rating-Code                 AS CHARACTER 
+    INITIAL 'HOT|WARM|COLD'        NO-UNDO.
+DEFINE VARIABLE lc-global-Rating-Desc                 AS CHARACTER 
+    INITIAL "Hot|Warm|Cold"   NO-UNDO.
+
+DEFINE VARIABLE lc-global-opStatus-Code                 AS CHARACTER 
+    INITIAL 'OP|CL|W|L'        NO-UNDO.
+DEFINE VARIABLE lc-global-opStatus-Desc                 AS CHARACTER 
+    INITIAL "Open|Closed|Won|Lost"   NO-UNDO.
+ 
+DEFINE VARIABLE lc-global-opProb-Code                 AS CHARACTER 
+    INITIAL '0|25|50|75|100'        NO-UNDO.
+DEFINE VARIABLE lc-global-opProb-Desc                 AS CHARACTER 
+    INITIAL "0%|25%|50%|75%|100%"   NO-UNDO.
+             
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
 DEFINE VARIABLE lc-global-jquery                      AS CHARACTER 

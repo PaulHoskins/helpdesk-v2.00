@@ -548,11 +548,11 @@ PROCEDURE ip-opPage:
             tbar-End() SKIP.
   
         {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+           replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
     
     {&out}
     htmlib-TableHeading(
-        "Description|Sales Manager|Customer Contact|Department|Next Step"
+        "Description|Status|Type|Close Date|Sales Manager|Customer Contact|Department|Next Step|Created^right"
         ) skip.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -584,10 +584,18 @@ PROCEDURE ip-opPage:
             skip
             
             htmlib-MntTableField(html-encode(b-query.descr),'left')
+            
+            htmlib-MntTableField(com-DecodeLookup(b-query.opstatus,lc-global-opStatus-Code,lc-global-opStatus-desc),'left')
+            
+             htmlib-MntTableField(com-DecodeLookup(b-query.opType,lc-global-opType-Code,lc-global-opType-desc),'left')
+            
+            htmlib-MntTableField(html-encode(IF b-query.closeDate = ? THEN '' ELSE string(b-query.CloseDate,"99/99/9999")),'left')
             htmlib-MntTableField(html-encode(com-UserName(b-query.salesmanager)),'left')
             htmlib-MntTableField(html-encode(com-UserName(b-query.salesContact)),'left')
             htmlib-MntTableField(html-encode(b-query.department),'left')
             htmlib-MntTableField(html-encode(b-query.nextStep),'left')
+            htmlib-MntTableField(html-encode(IF b-query.createDate = ? THEN '' ELSE string(b-query.createDate,"99/99/9999 HH:MM")),'right')
+            
                
             
             

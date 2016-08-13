@@ -56,6 +56,21 @@ DEFINE VARIABLE lc-cu-desc      AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-department   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-nextStep     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-CloseDate    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-currentProv  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opType       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ServReq      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opNote       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rating       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opStatus     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-prob         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-cos          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rev          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lost         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sType        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-dbase        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-camp         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ops          AS CHARACTER NO-UNDO.
 
 
 DEFINE BUFFER b-valid  FOR op_master.
@@ -79,6 +94,10 @@ PROCEDURE ip-UpdatePage:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
+    
+    DEFINE VARIABLE lc-code AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-desc AS CHARACTER NO-UNDO.
+    
     {&out} htmlib-StartTable("mnt",
         100,
         0,
@@ -89,7 +108,7 @@ PROCEDURE ip-UpdatePage:
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("descr",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Description")
-        ELSE htmlib-SideLabel("Descripion"))
+        ELSE htmlib-SideLabel("Description"))
     '</TD>' skip
             '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("descr",40,lc-descr) skip
@@ -121,14 +140,141 @@ PROCEDURE ip-UpdatePage:
                           
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("nextstep",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("nextstep")
-        ELSE htmlib-SideLabel("nextstep"))
+        THEN htmlib-SideLabelError("Next Step")
+        ELSE htmlib-SideLabel("Next Step"))
     '</TD>' skip
             '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("nextstep",40,lc-nextstep) skip
            '</TD></tr>'.
                                  
+    {&out} '<TR align="left"><td valign="top" align="right">' 
+        (IF LOOKUP("closedate",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Close Date")
+        ELSE htmlib-SideLabel("Close Date"))
+    '</td>'
+    '<td valign="top" align="left">'
+    htmlib-CalendarInputField("closedate",10,lc-closedate) 
+    htmlib-CalendarLink("closedate")
+    '</td></tr>' SKIP.
+    
+     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+        ( IF LOOKUP("currentprov",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Current Provider")
+        ELSE htmlib-SideLabel("Current Provider"))
+    '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("currentprov",40,lc-currentProv) skip
+           '</TD></tr>'.
+           
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Opportunity Type")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("optype",lc-global-opType-Code ,lc-global-opType-desc,lc-opType)
+    '</TD></TR>' skip.
+    
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+        ( IF LOOKUP("servreq",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Service Required")
+        ELSE htmlib-SideLabel("Servie Required"))
+    '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("servreq",40,lc-servreq) skip
+           '</TD></tr>'.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("opnote",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Note")
+        ELSE htmlib-SideLabel("Note"))
+    '</TD>' skip
+    '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-TextArea("opnote",lc-Opnote,5,60)
+    '</TD></tr>' SKIP.
+   
+   {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Rating")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("rating",lc-global-rating-Code ,lc-global-Rating-desc,lc-Rating)
+    '</TD></TR>' skip.
+
+          
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Opportunity Status")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("opstatus",lc-global-opstatus-Code ,lc-global-opStatus-desc,lc-opstatus)
+    '</TD></TR>' skip.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Probability")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("prob",lc-global-opProb-Code ,lc-global-opProb-desc,lc-Prob)
+    '</TD></TR>' skip.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("cos",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Cost Of Sale")
+        ELSE htmlib-SideLabel("Cost Of Sale"))
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("cos",8,lc-cos) 
+    '</TD>' skip.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("rev",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Revenue")
+        ELSE htmlib-SideLabel("Revenue"))
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("rev",8,lc-rev) 
+    '</TD>' skip.
+    
+           
+     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+        ( IF LOOKUP("lost",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Deal Lost Reason")
+        ELSE htmlib-SideLabel("Detal Lost Reason"))
+    '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("lost",40,lc-lost) skip
+           '</TD></tr>'.
+    
          
+    RUN com-GenTabSelect ( lc-global-company, "CRM.SourceType", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Source Type")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("stype",lc-Code ,lc-desc,lc-sType)
+    '</TD></TR>' skip.
+    
+     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+        ( IF LOOKUP("ops",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Opportunity Source")
+        ELSE htmlib-SideLabel("Opportunity Source"))
+    '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("ops",40,lc-ops) skip
+           '</TD></tr>'.
+           
+    RUN com-GenTabSelect ( lc-global-company, "CRM.Database", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Database")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("dbase",lc-Code ,lc-desc,lc-dbase)
+    '</TD></TR>' skip.
+    
+    RUN com-GenTabSelect ( lc-global-company, "CRM.Campaign", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Campaign")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("camp",lc-Code ,lc-desc,lc-camp)
+    '</TD></TR>' skip.
+    
+    
+              
+    
     {&out} htmlib-EndTable() skip.
   
 
@@ -142,6 +288,10 @@ PROCEDURE ip-Validate:
     DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
 
+    DEFINE VARIABLE ld-date AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-int  AS INT  NO-UNDO.
+    
+    
     IF lc-descr = ""
         OR lc-descr = ?
         THEN RUN htmlib-AddErrorMessage(
@@ -150,6 +300,38 @@ PROCEDURE ip-Validate:
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
  
+    IF lc-closeDate <> "" THEN
+    DO:
+        ASSIGN
+            ld-date = DATE(lc-closedate) no-error.
+        IF ERROR-STATUS:ERROR 
+            OR ld-date = ?
+            THEN RUN htmlib-AddErrorMessage(
+                'closedate', 
+                'The close date is invalid',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+    END.
+     
+    ASSIGN 
+        li-int = int(lc-cos) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'cos', 
+            'The cost of sale is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+        li-int = int(lc-rev) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'rev', 
+            'The revenue is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+                     
+
 
 END PROCEDURE.
 
@@ -264,6 +446,21 @@ PROCEDURE process-web-request:
                 lc-SalesContact      = get-value("salescontact")
                 lc-department        = get-value("department")
                 lc-nextstep          = get-value("nextstep")
+                lc-closedate         = get-value("closedate")
+                lc-currentProv       = get-value("currentprov")
+                lc-opType            = get-value("optype")
+                lc-servReq           = get-value("servreq")
+                lc-opnote            = get-value("opnote")
+                lc-rating            = get-value("rating")
+                lc-opstatus          = get-value("opstatus")
+                lc-prob              = get-value("prob")
+                lc-cos               = get-value("cos")
+                lc-rev               = get-value("rev")
+                lc-lost              = get-value("lost")
+                lc-stype             = get-value("stype")
+                lc-dbase             = get-value("dbase")
+                lc-camp              = get-value("camp")
+                lc-ops               = get-value("ops")
                   
                 .
                         
@@ -302,6 +499,21 @@ PROCEDURE process-web-request:
                     b-table.salesContact    = lc-SalesContact
                     b-table.Department      = lc-department
                     b-table.NextStep        = lc-nextstep
+                    b-table.closeDate       = IF lc-closedate = "" THEN ? ELSE DATE(lc-closedate)
+                    b-table.CurrentProvider = lc-currentProv
+                    b-table.optype          = lc-optype
+                    b-table.servRequired    = lc-servreq
+                    b-table.opnote          = lc-opnote
+                    b-table.Rating          = lc-rating
+                    b-table.OpStatus        = lc-opstatus
+                    b-table.Probability     = INTEGER(lc-prob)
+                    b-table.CostOfSale      = INTEGER(lc-cos)
+                    b-table.Revenue         = INTEGER(lc-rev)
+                    b-table.DealLostReason  = lc-lost
+                    b-table.SourceType      = lc-stype
+                    b-table.dbase           = lc-dbase
+                    b-table.Campaign        = lc-camp
+                    b-table.opSource        = lc-ops
                     .
                     
                 IF b-table.salesContact = lc-global-selcode
@@ -352,6 +564,21 @@ PROCEDURE process-web-request:
             lc-SalesContact = b-table.Salescontact
             lc-department   = b-table.department
             lc-nextstep     = b-table.nextstep
+            lc-CloseDate    = IF b-table.CloseDate = ? THEN "" ELSE STRING(b-table.CloseDate,"99/99/9999")
+            lc-currentProv  = b-table.CurrentProvider
+            lc-optype       = b-table.optype
+            lc-servreq      = b-table.servRequired
+            lc-opnote       = b-table.opnote
+            lc-rating       = b-table.rating
+            lc-opstatus     = b-table.OpStatus
+            lc-prob         = STRING(b-table.Probability)
+            lc-cos          = STRING(b-table.CostOfSale)
+            lc-rev          = STRING(b-table.Revenue)
+            lc-lost         = b-table.DealLostReason
+            lc-stype        = b-table.SourceType
+            lc-dbase        = b-table.dBase
+            lc-camp         = b-table.Campaign
+            lc-ops          = b-table.opSource
             .
             
        
@@ -359,6 +586,7 @@ PROCEDURE process-web-request:
                                         
     RUN outputHeader.
     
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
     
     {&out} htmlib-Header("Opportunity CRM") skip.
  
@@ -375,6 +603,7 @@ PROCEDURE process-web-request:
         OR lc-mode = "UPDATE" THEN
     DO:
         RUN ip-UpdatePage.
+        {&out} htmlib-CalendarScript("closedate") SKIP.
     END.
     
     {&out} htmlib-Hidden ("mode", lc-mode) skip
