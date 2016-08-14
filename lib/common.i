@@ -137,7 +137,7 @@ DEFINE VARIABLE lc-global-teamassign                  AS CHARACTER
 DEFINE VARIABLE lc-global-UserSubType-Code            AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project|Sal|SalMan|custAdmin|custSal' NO-UNDO.
 DEFINE VARIABLE lc-global-UserSubType-desc            AS CHARACTER 
-    INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales' NO-UNDO.
+    INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales Contact' NO-UNDO.
 
 DEFINE VARIABLE lc-global-EngType-Code                AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project' NO-UNDO.

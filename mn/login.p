@@ -15,6 +15,8 @@
     24/02/2016  phoski      Email new password for internal users
     27/02/2016  phoski      Issue link from SLA Email
     06/07/2016  phoski      2 Factor Auth
+    14/08/2016  phoski      Customer Sales Contacts dont have access to
+                            helpdesk
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -187,6 +189,15 @@ PROCEDURE ip-Validate :
         RETURN.
     END.
 
+    IF b-webuser.engType = "custSal" THEN
+    DO:
+        RUN htmlib-AddErrorMessage('User', 'Your account does not have access to the helpdesk',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+        RETURN.
+        
+    END.
+    
     IF b-webuser.disabled THEN
     DO:
         lc-AttrData ="IP|" + remote_addr.

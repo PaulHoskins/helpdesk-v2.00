@@ -27,6 +27,7 @@
     21/03/2016 phoski       Document Link Encrypt
     18/06/2016 phoski       Show decomissioned at end of inventory
     01/07/2016 phoski       AdminTime activity is not chargeable
+    14/08/2016 phoski       CRM 
                         
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -854,11 +855,11 @@ PROCEDURE ip-CustomerUsers :
         THEN RETURN.
    
     {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="97%"') skip.
+           replace(htmlib-StartMntTable(),'width="100%"','width="100%"') skip.
 
     {&out}
     htmlib-TableHeading(
-        "User Name^left|Name^left|Last Login|Email^left|Telephone|Mobile|Track?|Disabled?"
+        "User Name^left|Name^left|Last Login|Email^left|Telephone|Mobile|Track?|Disabled?|Type"
         ) skip.
 
 
@@ -891,6 +892,10 @@ PROCEDURE ip-CustomerUsers :
                                           then 'Yes' else 'No'),'left')
             htmlib-MntTableField(html-encode((if b-query.disabled = true
                                           then 'Yes' else 'No') + lc-nopass),'left')
+            htmlib-MntTableField(com-DecodeLookup(b-query.engType,lc-global-UserSubType-Code ,lc-global-UserSubType-desc),'left')
+                                             
+           
+                                         
 
         .
             
@@ -905,6 +910,9 @@ PROCEDURE ip-CustomerUsers :
            htmlib-EndTable()
            skip.
 
+    IF Customer.def-iss-loginid <> ""
+    OR Customer.def-bulk-loginid <> ""
+    THEN
     DO:
         {&out} '<div class="infobox">'.
         

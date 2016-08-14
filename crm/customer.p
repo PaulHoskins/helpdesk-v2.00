@@ -33,7 +33,7 @@ DEFINE VARIABLE lc-title         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submitsource  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-mode          AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-Enc-Key        AS CHARACTER NO-UNDO.  
+DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO.  
 
 DEFINE VARIABLE lc-accountnumber AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-name          AS CHARACTER NO-UNDO.
@@ -66,6 +66,10 @@ DEFINE VARIABLE lc-accountref    AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-opt-TBAR      AS CHARACTER 
     INITIAL 'opu' NO-UNDO.
+    
+DEFINE VARIABLE lc-con-TBAR      AS CHARACTER 
+    INITIAL 'con' NO-UNDO.
+        
     
 
 
@@ -122,6 +126,142 @@ RUN process-web-request.
 /* **********************  Internal Procedures  *********************** */
 
 &IF DEFINED(EXCLUDE-outputHeader) = 0 &THEN
+
+PROCEDURE ip-ConPage:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pc-companycode      AS CHARACTER     NO-UNDO.
+    DEFINE INPUT PARAMETER pc-AccountNumber    AS CHARACTER     NO-UNDO.
+    DEFINE INPUT PARAMETER pc-ToolBarID        AS CHARACTER     NO-UNDO.
+    
+    DEFINE VARIABLE lc-rowid AS CHARACTER NO-UNDO.
+    
+    DEFINE VARIABLE ll-ToolBar          AS LOG      NO-UNDO.
+    
+    DEFINE VARIABLE li-max-lines AS INTEGER INITIAL 12 NO-UNDO.
+    DEFINE VARIABLE lr-first-row AS ROWID NO-UNDO.
+    DEFINE VARIABLE lr-last-row  AS ROWID NO-UNDO.
+    DEFINE VARIABLE li-count     AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE ll-prev      AS LOG   NO-UNDO.
+    DEFINE VARIABLE ll-next      AS LOG   NO-UNDO.
+    DEFINE VARIABLE lc-search    AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE lc-firstrow  AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE lc-lastrow   AS CHARACTER  NO-UNDO.
+    DEFINE VARIABLE lc-navigation AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-parameters   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-smessage     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-link-otherp  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-char         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-customer     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-returnback   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-temp         AS CHARACTER NO-UNDO.
+
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER b-query  FOR webUser.
+   
+
+ 
+                 
+    ASSIGN
+        lc-returnback="crm".
+
+
+    FIND customer 
+        WHERE customer.CompanyCode = pc-CompanyCode
+        AND customer.AccountNumber = pc-AccountNumber
+        NO-LOCK.
+
+    lc-customer = STRING(ROWID(customer)).
+
+    ASSIGN 
+        lc-enc-key =
+                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(customer))).
+
+    ASSIGN 
+        ll-toolbar = TRUE.
+    {&out} SKIP
+            tbar-BeginID(pc-ToolBarID,"") SKIP
+            tbar-Link("add",?,appurl + '/crm/crmcontact.p',"crmaccount=" +
+                      url-encode(lc-enc-key,"Query") + "&returnback=crm")
+            tbar-BeginOptionID(pc-ToolBarID)
+            tbar-Link("update",?,"off",lc-link-otherp)
+            tbar-Link("delete",?,"off",lc-link-otherp)
+            
+ 
+            tbar-EndOption()
+            tbar-End() SKIP.
+  
+    {&out} skip
+           replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    
+    {&out}
+    htmlib-TableHeading(
+        "User Name^left|Name^left|Position|Email^left|Telephone|Mobile|Type"
+        ) skip.
+
+    OPEN QUERY q FOR EACH b-query NO-LOCK
+        WHERE b-query.CompanyCode   = pc-CompanyCode
+        AND b-query.AccountNumber = pc-AccountNumber.
+        
+
+    GET FIRST q NO-LOCK.
+
+    REPEAT WHILE AVAILABLE b-query:
+        
+        ASSIGN 
+            lc-rowid = STRING(ROWID(b-query)).
+        
+        ASSIGN 
+            li-count = li-count + 1.
+        IF lr-first-row = ?
+            THEN ASSIGN lr-first-row = ROWID(b-query).
+        ASSIGN 
+            lr-last-row = ROWID(b-query).
+        
+        ASSIGN 
+            lc-link-otherp = 'search=' + lc-search +
+                             '&crmaccount=' +  url-encode(lc-enc-key,"Query") +
+                             '&returnback=' + lc-returnback.
+                                
+        
+        {&out}
+            skip
+             tbar-trID(pc-ToolBarID,rowid(b-query))
+            skip
+            
+            htmlib-MntTableField(html-encode(b-query.loginid),'left')
+            htmlib-MntTableField(html-encode(b-query.name),'left')
+            htmlib-MntTableField(html-encode(b-query.JobTitle),'left')
+            htmlib-MntTableField(html-encode(b-query.email),'left')
+            htmlib-MntTableField(html-encode(b-query.Telephone),'left')
+            htmlib-MntTableField(html-encode(b-query.Mobile),'left')
+            htmlib-MntTableField(com-DecodeLookup(b-query.engType,lc-global-UserSubType-Code ,lc-global-UserSubType-desc),'left')
+                                             
+            
+            
+            tbar-BeginHidden(rowid(b-query))
+            
+            tbar-Link("update",rowid(b-query),appurl +  '/crm/crmcontact.p',lc-link-otherp)
+            tbar-Link("delete",rowid(b-query),appurl + '/crm/crmcontact.p',lc-link-otherp)
+            
+                
+            tbar-EndHidden()
+            '</tr>' skip.
+            
+            
+        GET NEXT q NO-LOCK.
+            
+    END.
+
+    {&out} skip 
+           htmlib-EndTable()
+           skip.
+           
+
+END PROCEDURE.
 
 PROCEDURE ip-CRM-Page:
     /*------------------------------------------------------------------------------
@@ -447,10 +587,12 @@ PROCEDURE ip-ExportJS:
            '<script language="javascript">' SKIP
            'var appurl = "' appurl '";' SKIP
            '</script>' SKIP
-           tbar-JavaScript(lc-Opt-TBAR) skip
+           tbar-JavaScript(lc-Opt-TBAR) SKIP
+           tbar-JavaScript(lc-Con-TBAR) SKIP
+           
            '<script language="JavaScript" src="/asset/page/crm/customer.js?v=1.0.0"></script>' SKIP
            
-           .
+    .
            
     
            
@@ -528,7 +670,7 @@ PROCEDURE ip-opPage:
     lc-customer = STRING(ROWID(customer)).
 
     ASSIGN 
-            lc-enc-key =
+        lc-enc-key =
                  DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(customer))).
 
     ASSIGN 
@@ -538,16 +680,14 @@ PROCEDURE ip-opPage:
             tbar-Link("add",?,appurl + '/crm/crmop.p',"crmaccount=" +
                       url-encode(lc-enc-key,"Query") + "&returnback=crm")
             tbar-BeginOptionID(pc-ToolBarID)
-
-            tbar-Link("view",?,"off",lc-link-otherp)
             tbar-Link("update",?,"off",lc-link-otherp)
             tbar-Link("delete",?,"off",lc-link-otherp)
-
+            
  
             tbar-EndOption()
             tbar-End() SKIP.
   
-        {&out} skip
+    {&out} skip
            replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
     
     {&out}
@@ -600,9 +740,10 @@ PROCEDURE ip-opPage:
             
             
             tbar-BeginHidden(rowid(b-query))
-            tbar-Link("view",rowid(b-query),appurl + '/crm/crmop.p',lc-link-otherp)
+            
             tbar-Link("update",rowid(b-query),appurl +  '/crm/crmop.p',lc-link-otherp)
             tbar-Link("delete",rowid(b-query),appurl + '/crm/crmop.p',lc-link-otherp)
+            
                 
             tbar-EndHidden()
             '</tr>' skip.
@@ -835,7 +976,7 @@ PROCEDURE process-web-request :
                 .
                 
             IF b-table.salesContact = lc-global-selcode
-            THEN b-table.salesContact = "".
+                THEN b-table.salesContact = "".
             lc-error-msg = "OK:Update".
             
         END.
@@ -874,11 +1015,11 @@ PROCEDURE process-web-request :
     
     RUN com-GetUserListForAccount (lc-global-company,b-table.AccountNumber,OUTPUT lc-cu-code, OUTPUT lc-cu-desc).
     IF lc-cu-code = ""
-    THEN ASSIGN lc-cu-code = lc-global-selcode
-                lc-cu-desc = "None".
+        THEN ASSIGN lc-cu-code = lc-global-selcode
+            lc-cu-desc = "None".
     
     ELSE 
-    ASSIGN
+        ASSIGN
             lc-cu-code = lc-global-selcode + "|" + lc-cu-code
             lc-cu-desc = "None|" + lc-cu-desc.
             
@@ -948,14 +1089,16 @@ PROCEDURE process-web-request :
     '<div class="tabbertab" title="Opportunities">' SKIP.
     RUN ip-opPage ( b-table.companyCode , b-table.AccountNumber ,lc-opt-TBAR).
     {&out} '</div>' SKIP.
-           
-    {&out}
-    '<div class="tabbertab" title="Oppurtunities2">' skip 
-        '</div>' SKIP.
+        
+    IF get-value("showtab") = "contact" 
+    THEN {&out}
+    '<div class="tabbertab tabbertabdefault" title="Contacts">' SKIP. 
+    else {&out}
+    '<div class="tabbertab" title="Contacts">' SKIP.
+    RUN ip-ConPage ( b-table.companyCode , b-table.AccountNumber ,lc-Con-TBAR).   
+    {&out} '</div>' SKIP.
               
-    {&out}
-    '<div class="tabbertab" title="Oppurtunities3">' skip 
-        '</div>' SKIP.
+    
                    
  
     {&out} '</div>' SKIP.

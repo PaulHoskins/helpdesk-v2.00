@@ -72,6 +72,9 @@ DEFINE VARIABLE lc-dbase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-camp         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ops          AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE lc-Action-TBar     AS CHARACTER INITIAL 'tim' NO-UNDO.
+DEFINE VARIABLE lc-doc-tbar     AS CHARACTER INITIAL 'doc' NO-UNDO.
+
 
 DEFINE BUFFER b-valid  FOR op_master.
 DEFINE BUFFER b-table  FOR op_master.
@@ -88,6 +91,34 @@ RUN process-web-request.
 
 
 /* **********************  Internal Procedures  *********************** */
+
+PROCEDURE ip-ExportJS:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    {&out} lc-global-jquery  SKIP
+           tbar-JavaScript(lc-Action-TBar) SKIP
+           tbar-JavaScript(lc-Doc-TBAR) SKIP
+           '<script language="javascript">' SKIP
+           'var appurl = "' appurl '";' SKIP
+           'var ActionAjax = "' appurl '/crm/ajax/action.p?allowdelete=yes&rowid=' string(rowid(b-table)) 
+                    '&toolbarid=' lc-Action-TBar  
+                    '"' SKIP
+            'var DocumentAjax = "' appurl '/crm/ajax/document.p?rowid=' string(rowid(b-table)) 
+                    '&toolbarid=' lc-Doc-TBAR 
+                    '"' skip
+                    
+           '</script>' SKIP
+          
+           
+           
+           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP
+           
+    .
+    
+
+END PROCEDURE.
 
 PROCEDURE ip-UpdatePage:
     /*------------------------------------------------------------------------------
@@ -157,7 +188,7 @@ PROCEDURE ip-UpdatePage:
     htmlib-CalendarLink("closedate")
     '</td></tr>' SKIP.
     
-     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("currentprov",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Current Provider")
         ELSE htmlib-SideLabel("Current Provider"))
@@ -190,7 +221,7 @@ PROCEDURE ip-UpdatePage:
     htmlib-TextArea("opnote",lc-Opnote,5,60)
     '</TD></tr>' SKIP.
    
-   {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Rating")
     '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
     htmlib-Select("rating",lc-global-rating-Code ,lc-global-Rating-desc,lc-Rating)
@@ -226,7 +257,7 @@ PROCEDURE ip-UpdatePage:
     '</TD>' skip.
     
            
-     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("lost",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Deal Lost Reason")
         ELSE htmlib-SideLabel("Detal Lost Reason"))
@@ -245,7 +276,7 @@ PROCEDURE ip-UpdatePage:
     htmlib-Select("stype",lc-Code ,lc-desc,lc-sType)
     '</TD></TR>' skip.
     
-     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("ops",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Opportunity Source")
         ELSE htmlib-SideLabel("Opportunity Source"))
@@ -588,6 +619,10 @@ PROCEDURE process-web-request:
     
     {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
     
+    IF lc-mode = "UPDATE"
+    THEN RUN ip-ExportJS.
+    
+    
     {&out} htmlib-Header("Opportunity CRM") skip.
  
    
@@ -599,12 +634,50 @@ PROCEDURE process-web-request:
     {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
 
 
-    IF lc-mode = "ADD"
-        OR lc-mode = "UPDATE" THEN
+    IF lc-mode = "ADD" THEN
     DO:
         RUN ip-UpdatePage.
         {&out} htmlib-CalendarScript("closedate") SKIP.
     END.
+    ELSE 
+        IF lc-mode = "UPDATE" THEN
+        DO:
+            {&out}
+            '<div class="tabber">' skip.
+         
+            {&out} '<div class="tabbertab" title="Opportunity">' SKIP.
+            RUN ip-UpdatePage.
+            {&out} htmlib-CalendarScript("closedate") SKIP.
+        
+            IF lc-error-msg <> "" THEN
+            DO:
+                {&out} '<BR><BR><CENTER>' 
+                htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+            END.
+
+            IF lc-submit-label <> "" THEN
+            DO:
+                {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+                '</center>' skip.
+            END.
+    
+            {&out} '</div>' SKIP.
+        
+        
+        
+            {&out} '<div class="tabbertab" title="Action & Activities">' SKIP.
+            {&out} '</div>' SKIP.
+        
+            {&out} '<div class="tabbertab" title="Attachments">' SKIP.
+            {&out} '</div>' SKIP.
+        
+        
+            {&out} '<div class="tabbertab" title="Customer Details">' SKIP.
+            {&out} '</div>' SKIP.
+        
+         
+            {&out} '</div>' SKIP.
+        END.
     
     {&out} htmlib-Hidden ("mode", lc-mode) skip
            htmlib-Hidden ("rowid", lc-rowid) skip
@@ -613,18 +686,24 @@ PROCEDURE process-web-request:
            htmlib-Hidden ("savefirstrow", lc-firstrow) skip
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
            htmlib-Hidden ("savenavigation", lc-navigation) skip.
-           
-    IF lc-error-msg <> "" THEN
-    DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
-    END.
+       
+       
+    IF lc-mode <> "UPDATE" THEN
+    DO:      
+        IF lc-error-msg <> "" THEN
+        DO:
+            {&out} '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        END.
 
-    IF lc-submit-label <> "" THEN
-    DO:
-        {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        IF lc-submit-label <> "" THEN
+        DO:
+            {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+            '</center>' skip.
+        END.
+    
     END.
+    
 
 
     {&out} htmlib-EndForm() skip

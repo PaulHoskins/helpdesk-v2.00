@@ -30,6 +30,7 @@ body {
 .inputfield {
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	font-size: 12px;
+	margin-bottom: 2px;
 }
 
 .mnttablefield {
