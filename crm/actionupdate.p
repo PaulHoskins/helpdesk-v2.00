@@ -20,7 +20,7 @@ CREATE WIDGET-POOL.
 /* Local Variable Definitions ---                                       */
 
 
-DEFINE VARIABLE lc-op-rowid  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-op-rowid     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-rowid        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-title        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-mode         AS CHARACTER NO-UNDO.
@@ -32,10 +32,10 @@ DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-error-field  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-error-msg    AS CHARACTER NO-UNDO.
 
-DEFINE BUFFER b-table  FOR opAction.
-DEFINE BUFFER op_master  FOR op_master.
-DEFINE BUFFER b-user   FOR WebUser.
-DEFINE BUFFER customer FOR Customer.
+DEFINE BUFFER b-table   FOR op_Action.
+DEFINE BUFFER op_master FOR op_master.
+DEFINE BUFFER b-user    FOR WebUser.
+DEFINE BUFFER customer  FOR Customer.
 DEFINE BUFFER b-status  FOR WebStatus.
 
 
@@ -49,7 +49,6 @@ DEFINE VARIABLE lc-notes        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-assign       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-status       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-actiondate   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-CustomerView AS CHARACTER NO-UNDO.
 
 
 DEFINE VARIABLE lf-Audit        AS DECIMAL   NO-UNDO.
@@ -158,7 +157,7 @@ PROCEDURE ip-Page :
     '</TD>' skip
     .
 
-    IF lc-mode = "ADD" THEN
+    IF lc-mode = "ADD" OR lc-mode = "UPDATE" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-Select("actioncode",lc-list-action,lc-list-aname,
         lc-actioncode)
@@ -168,15 +167,7 @@ PROCEDURE ip-Page :
            skip.
     {&out} '</TR>' skip.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Issue Details")
-    '</TD>' skip
-           '<TD VALIGN="TOP" ALIGN="left" class="tablefield">'
-           replace(Issue.LongDescription,"~n","<br>")
-          '<br><input type="button" class="submitbutton" onclick="copyinfo();" value="Copy To Note">' skip
-          '</TD></tr>' skip
-           skip.
-
+    
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("statnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
@@ -197,23 +188,6 @@ PROCEDURE ip-Page :
         lc-assign)
     '</TD></TR>' skip. 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("customerview",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Customer View?")
-        ELSE htmlib-SideLabel("Customer View?"))
-    '</TD>'.
-    
-    IF NOT CAN-DO("view,delete",lc-mode) THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-CheckBox("customerview", IF lc-customerview = 'on'
-        THEN TRUE ELSE FALSE) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-customerview = 'on'
-                                         then 'yes' else 'no'),'left')
-           skip.
-    
-    {&out} '</TR>' skip.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("status",lc-error-field,'|') > 0 
@@ -379,7 +353,7 @@ PROCEDURE process-web-request :
 
             
     ASSIGN
-    ll-isOpen = TRUE.   
+        ll-isOpen = TRUE.   
               
 
 
@@ -402,7 +376,7 @@ PROCEDURE process-web-request :
     END CASE.
 
     ASSIGN
-        lc-title = lc-title + " Action - Oppurtunity  " + string(op_master.descr).
+        lc-title = lc-title + " Action - Opportunity  " + string(op_master.descr).
 
 
     IF request_method = "POST" THEN
@@ -415,8 +389,7 @@ PROCEDURE process-web-request :
                 lc-assign       = get-value("assign")
                 lc-status       = get-value("status")
                 lc-actiondate   = get-value("actiondate")
-                lc-customerview   = get-value("customerview")
-                .
+               .                .
             
                
             RUN ip-Validate( OUTPUT lc-error-field,
@@ -444,13 +417,11 @@ PROCEDURE process-web-request :
                         NO-LOCK NO-ERROR.
                     CREATE b-table.
                     ASSIGN 
-                        b-table.actionID    = WebAction.ActionID
                         b-table.CompanyCode = lc-global-company
                         b-table.op_id = op_master.op_id
-                        b-table.CreateDate  = TODAY
-                        b-table.CreateTime  = TIME
+                        b-table.CreateDt    = NOW
                         b-table.CreatedBy   = lc-global-user
-                        b-table.customerview    = lc-customerview = "on"
+                        
                         .
 
                     DO WHILE TRUE:
@@ -459,7 +430,7 @@ PROCEDURE process-web-request :
                             OUTPUT lf-audit
                             ).
                         IF CAN-FIND(FIRST op_action
-                            WHERE op_Action.opActionID = lf-audit NO-LOCK)
+                            WHERE op_Action.opActionID = int(lf-audit) NO-LOCK)
                             THEN NEXT.
                         ASSIGN
                             b-table.opActionID = lf-audit.
@@ -472,20 +443,20 @@ PROCEDURE process-web-request :
                     ASSIGN 
                         b-table.notes            = lc-notes
                         b-table.ActionStatus     = lc-Status
+                        b-table.ActionCode       = lc-ActionCode
                         b-table.ActionDate       = DATE(lc-ActionDate)
-                        b-table.customerview    = lc-customerview = "on".
+                        .
 
                     IF lc-mode = "ADD"
                         OR b-table.assignto <> lc-assign THEN 
                     DO:
                         IF lc-assign = ""
-                            THEN ASSIGN b-table.AssignDate = ?
-                                b-table.AssignTime = 0.
+                            THEN ASSIGN b-table.AssignDt = ?.
+                                
                         ELSE
                         DO:
                             ASSIGN 
-                                b-table.AssignDate = TODAY
-                                b-table.AssignTime = TIME
+                                b-table.AssignDt = NOW
                                 b-table.AssignBy   = lc-global-user.
                             
                         END.
@@ -540,19 +511,19 @@ PROCEDURE process-web-request :
     DO:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         FIND WebAction
-            WHERE WebAction.ActionID = b-table.ActionID NO-LOCK NO-ERROR.
+            WHERE WebAction.CompanyCode = b-table.CompanyCode
+            AND WebAction.ActionCode = b-table.ActionCode NO-LOCK NO-ERROR.
         IF AVAILABLE WebAction
-        THEN ASSIGN 
-                lc-actioncode = WebAction.description.
+            THEN ASSIGN 
+                lc-actioncode = WebAction.ActionCode.
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post"
             THEN ASSIGN lc-notes        = b-table.notes
+                lc-actionCode   = b-table.ActionCode
                 lc-assign       = b-table.assignto
                 lc-status       = b-table.ActionStatus
                 lc-actiondate   = STRING(b-table.ActionDate,'99/99/9999')
-                lc-customerview   = IF b-table.CustomerView 
-                                        THEN "on" ELSE ""
                 .
        
     END.
@@ -562,24 +533,16 @@ PROCEDURE process-web-request :
         ASSIGN 
             lc-assign = lc-global-user
             lc-actiondate = STRING(TODAY,'99/99/9999')
-            lc-customerview = "on".
+            .
     END.
 
 
-    /** **/
 
     RUN outputHeader.
     
     {&out} htmlib-Header(lc-title) skip
     .
 
-    {&out} 
-    '<script>' skip
-        'function copyinfo() ~{' skip
-        'document.mainform.elements["notes"].value = document.mainform.elements["longdescription"].value' skip
-        '~}' skip
-        '</script>' skip.
-    
     {&out}
     htmlib-StartForm("mainform","post", selfurl)
     htmlib-ProgramTitle(lc-title) skip.
@@ -590,7 +553,7 @@ PROCEDURE process-web-request :
     {&out} htmlib-Hidden("oprowid",lc-op-rowid) skip
            htmlib-Hidden("mode",lc-mode) skip
            htmlib-Hidden("rowid",lc-rowid) skip
-           htmlib-Hidden("longdescription",issue.LongDescription) skip.
+    .
 
     {&out} htmlib-EndForm() skip.
 

@@ -33,8 +33,8 @@ DEFINE VARIABLE lc-Audit          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ll-HasClosed      AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lc-descr          AS CHARACTER NO-UNDO.
 
-DEFINE BUFFER op_master     FOR op_master.
-DEFINE BUFFER op_action     FOR op_action.
+DEFINE BUFFER op_master   FOR op_master.
+DEFINE BUFFER op_action   FOR op_action.
 DEFINE BUFFER op_activity FOR op_Activity.   
 
 
@@ -111,21 +111,21 @@ PROCEDURE ip-StandardActionTable:
        
         :
 
-        IF op_Action.ActionCode <> "" THEN 
-        DO:
-            FIND WebAction 
-                WHERE WebAction.CompanyCode = op_Action.CompanyCode
-                   AND WebAction.ActionCode = op_Action.ActionCode
-                  
-                NO-LOCK NO-ERROR.
-            ASSIGN 
-                lc-descr = WebAction.Description.
-        END.
-       
-        
+    
+        FIND WebAction 
+            WHERE WebAction.CompanyCode = op_Action.CompanyCode
+            AND WebAction.ActionCode = op_Action.ActionCode
+            NO-LOCK NO-ERROR.
+                   
+            
+        ASSIGN 
+            lc-descr = IF AVAILABLE WebAction THEN WebAction.Description ELSE op_Action.ActionCode.
+      
+         
+            
         ASSIGN
-           li-class-count = li-class-count + 1 
-           lc-this-class = "cl" + STRING(li-class-count).
+            li-class-count = li-class-count + 1 
+            lc-this-class = "cl" + STRING(li-class-count).
         
         ASSIGN
             li-duration = 0.
@@ -222,7 +222,7 @@ PROCEDURE ip-StandardActionTable:
         tbar-Link("update",?,
             'javascript:PopUpWindow('
             + '~'' + appurl 
-            + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
+            + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
             + '~'' 
             + ');'
             ,"")
@@ -230,7 +230,7 @@ PROCEDURE ip-StandardActionTable:
         tbar-Link("multiiss",?,
             'javascript:PopUpWindow('
             + '~'' + appurl 
-            + '/iss/activityupdmain.p?mode=display&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action)) + "&actionrowid=" + string(ROWID(op_action))
+            + '/crm/activityupdmain.p?mode=display&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action)) + "&actionrowid=" + string(ROWID(op_action))
             + '~'' 
             + ');'
             ,"") skip
@@ -251,7 +251,7 @@ PROCEDURE ip-StandardActionTable:
                 lc-start = ""
                 lc-descr = op_activity.Description.
             IF op_activity.activityType <> ""
-            THEN ASSIGN lc-descr = op_activity.activityType + " - " + op_activity.Description.
+                THEN ASSIGN lc-descr = op_activity.activityType + " - " + op_activity.Description.
             
             
             
@@ -264,8 +264,8 @@ PROCEDURE ip-StandardActionTable:
                                string(op_activity.StartTime,"hh:mm").
 
                 IF op_activity.EndDate <> ? THEN
-                ASSIGN
-                    lc-start = lc-start + " - " + STRING(op_activity.endDate,"99/99/9999") + 
+                    ASSIGN
+                        lc-start = lc-start + " - " + STRING(op_activity.endDate,"99/99/9999") + 
                                " " +
                                string(op_activity.EndTime,"hh:mm").
                                 
@@ -301,7 +301,7 @@ PROCEDURE ip-StandardActionTable:
                 {&out} lc-info.
         
                 {&out} REPLACE(htmlib-ExpandBox(lc-object,op_activity.Notes),
-                        'class="','class="' + lc-this-class + " ").
+                    'class="','class="' + lc-this-class + " ").
     
                 {&out} '</td>' skip.
             END.
@@ -325,7 +325,7 @@ PROCEDURE ip-StandardActionTable:
             tbar-Link("update",?,
                 'javascript:PopUpWindow('
                 + '~'' + appurl 
-                + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
+                + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
                 + '~'' 
                 + ');'
                 ,"")
@@ -344,19 +344,8 @@ PROCEDURE ip-StandardActionTable:
         REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=9 ")
         htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
             ,'right')
-            '</tr>'.
+        '</tr>'.
             
-        {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
-        REPLACE(htmlib-MntTableField("Total Duration (Admin)","right"),"<td","<td colspan=9 ")
-        htmlib-MntTableField(html-encode(com-TimeToString(li-tduration[1]))
-            ,'right')
-            '</tr>'.
-            
-         {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
-        REPLACE(htmlib-MntTableField("Total Duration (Non Admin)","right"),"<td","<td colspan=9 ")
-        htmlib-MntTableField(html-encode(com-TimeToString(li-tduration[2]))
-            ,'right')
-            '</tr>'.
             
     END.
     

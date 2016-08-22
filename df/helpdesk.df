@@ -3992,6 +3992,20 @@ ADD FIELD "ActionStatus" OF "op_Action" AS character
   MAX-WIDTH 16
   ORDER 110
 
+ADD FIELD "AssignDt" OF "op_Action" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 12
+  MAX-WIDTH 8
+  ORDER 120
+
+ADD FIELD "AssignBy" OF "op_Action" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 130
+
 ADD INDEX "prim_key" ON "op_Action" 
   AREA "Schema Area"
   UNIQUE
@@ -4143,6 +4157,23 @@ ADD FIELD "EndTime" OF "op_Activity" AS integer
   MAX-WIDTH 4
   ORDER 190
 
+ADD FIELD "ActDescription" OF "op_Activity" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Activity Description"
+  POSITION 20
+  MAX-WIDTH 80
+  ORDER 200
+
+ADD FIELD "TypeID" OF "op_Activity" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "typeID"
+  POSITION 21
+  MAX-WIDTH 4
+  COLUMN-LABEL "TypeID"
+  ORDER 210
+
 ADD INDEX "prim_key" ON "op_Activity" 
   AREA "Schema Area"
   PRIMARY
@@ -4161,7 +4192,7 @@ ADD INDEX "op_key" ON "op_Activity"
 
 ADD TABLE "op_master"
   AREA "Schema Area"
-  LABEL "Opportunitiy Master"
+  LABEL "Opportunity Master"
   DUMP-NAME "op_master"
 
 ADD FIELD "op_id" OF "op_master" AS integer 
@@ -4360,6 +4391,75 @@ ADD INDEX "AccountNumber" ON "op_master"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
+
+ADD TABLE "op_note"
+  AREA "Schema Area"
+  LABEL "Opportunity Note"
+  DUMP-NAME "op_note"
+
+ADD FIELD "CompanyCode" OF "op_note" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "op_id" OF "op_note" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "CreateDate" OF "op_note" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Create Date"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "CreateTime" OF "op_note" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Create Time"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "LoginID" OF "op_note" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 6
+  MAX-WIDTH 30
+  ORDER 50
+
+ADD FIELD "Contents" OF "op_note" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Note"
+  POSITION 7
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "NoteCode" OF "op_note" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Status Code"
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 70
+
+ADD INDEX "prim_key" ON "op_note" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+  INDEX-FIELD "CreateDate" DESCENDING 
+  INDEX-FIELD "CreateTime" DESCENDING 
 
 ADD TABLE "ptp_phase"
   AREA "Schema Area"
@@ -6541,4 +6641,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000129751
+0000131707

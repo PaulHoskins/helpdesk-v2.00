@@ -196,7 +196,7 @@ DEFINE VARIABLE lc-global-opProb-Code                 AS CHARACTER
     INITIAL '0|25|50|75|100'        NO-UNDO.
 DEFINE VARIABLE lc-global-opProb-Desc                 AS CHARACTER 
     INITIAL "0%|25%|50%|75%|100%"   NO-UNDO.
-             
+         
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
 DEFINE VARIABLE lc-global-jquery                      AS CHARACTER 
@@ -2733,6 +2733,14 @@ FUNCTION com-Initialise RETURNS LOGICAL
     DEFINE VARIABLE li-loop AS INTEGER NO-UNDO.
 
 
+    DO li-loop = 0 TO 100 BY 10:
+        
+        IF li-loop = 0
+        THEN ASSIGN lc-global-opProb-Code = "0"
+                    lc-global-opProb-Desc = "0%".
+        ELSE ASSIGN lc-global-opProb-Code = lc-global-opProb-code + "|" + string(li-loop)
+                    lc-global-opProb-Desc = lc-global-opProb-Desc + "|" + string(li-loop) + "%".
+    END.    
     DO li-loop = 0 TO 23:
 
         IF li-loop = 0 THEN

@@ -129,34 +129,140 @@ PROCEDURE ip-ActionPage:
 
 END PROCEDURE.
 
+PROCEDURE ip-Documents:
+/*------------------------------------------------------------------------------
+		Purpose:  																	  
+		Notes:  																	  
+------------------------------------------------------------------------------*/
+    {&out}
+           skip
+           tbar-BeginID(lc-Doc-TBAR,"")
+           tbar-Link("add",?,'javascript:documentAdd();',"") skip
+            tbar-BeginOptionID(lc-Doc-TBAR) skip
+            tbar-Link("delete",?,"off","")
+            tbar-Link("documentview",?,"off","")
+            tbar-EndOption()
+            
+           tbar-End().
+
+    {&out}
+    '<div id="IDDocument"></div>'.
+    
+
+END PROCEDURE.
+
 PROCEDURE ip-ExportJS:
     /*------------------------------------------------------------------------------
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out} lc-global-jquery  SKIP
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip
            tbar-JavaScript(lc-Action-TBar) SKIP
            tbar-JavaScript(lc-Doc-TBAR) SKIP
            '<script language="javascript">' SKIP
            'var appurl = "' appurl '";' SKIP
            'var appMode = "' lc-mode '";' SKIP
-           
+           'var CustomerAjax = "' appurl '/cust/custequiplist.p?expand=yes&ajaxsubwindow=yes&customer=' url-encode(lc-enc-key,"Query")  '"' skip
+            'var NoteAddURL = "' appurl '/crm/addnote.p?rowid=' + lc-rowid '"' SKIP
+            'var NoteAjax = "' appurl '/crm/ajax/note.p?rowid=' STRING(ROWID(b-table)) '"' skip
+                       
            'var ActionAjax = "' appurl '/crm/ajax/action.p?allowdelete=yes&rowid=' string(rowid(b-table)) 
                     '&toolbarid=' lc-Action-TBar  
                     '"' SKIP
             'var DocumentAjax = "' appurl '/crm/ajax/document.p?rowid=' string(rowid(b-table)) 
                     '&toolbarid=' lc-Doc-TBAR 
-                    '"' skip
+                    '"' SKIP
+            'var DocumentAddURL = "' appurl '/crm/adddocument.p?rowid=' + lc-rowid '"' SKIP
                     
            '</script>' SKIP
           
            
            
-           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP
+           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP.
            
-    .
+         /* 3678 ----------------------> */ 
+    {&out}  '<script type="text/javascript" >~n'
+    'var pIP =  window.location.host; ~n'
+    'function goGMAP(pCODE, pNAME, pADD) ~{~n'
+    'var pOPEN = "http://www.google.co.uk/maps/preview?q=";' SKIP
+            'pOPEN = pOPEN + pCODE;~n' SKIP
+            'window.open(pOPEN, ~'WinName~' , ~'width=645,height=720,left=0,top=0~');~n'
+            ' ~}~n'
+            '</script>'  skip.
+    /* ----------------------- 3678 */ 
+
+    /* 3677 ----------------------> */ 
+    {&out}  '<script type="text/javascript" >~n'
+    'function newRDP(rdpI, rdpU, rdpD) ~{~n'
+    'var sIP =  window.location.host; ~n'
+    'var sHTML="<div style:visibility=~'hidden~' >Connect to customer</div>";~n'
+    'var sScript="<SCRIPT DEFER>  ";~n'
+    'sScript = sScript +  "function goRDP()~{ window.open("~n'
+    'sScript = sScript +  "~'";~n'
+    'sScript = sScript + "http://";~n'
+    'sScript = sScript + sIP;~n'
+    'sScript = sScript + ":8090/TSweb.html?server=";~n'
+    'sScript = sScript + rdpI;~n'
+    'sScript = sScript + "&username=";~n'
+    'sScript = sScript + rdpU;~n'
+    'sScript = sScript + "&domain=";~n'
+    'sScript = sScript + rdpD;~n'
+    'sScript = sScript + "~'";~n'
+    'sScript = sScript + ", ~'WinName~', ~'width=655,height=420,left=0,top=0~'); ~} ";~n'
+    'sScript = sScript + " </SCRIPT" + ">";~n'
+    'ScriptDiv.innerHTML = sHTML + sScript;~n'
+    'document.getElementById(~'ScriptDiv~').style.visibility=~'hidden~';~n'
+    ' ~}~n'
+    '</script>'  skip.
+          
+           
+    {&out}
+        '<script>' skip
+        'function ConfirmDeleteAction(ObjectID,ActionID) ~{' skip
+        '   var DocumentAjax = "' appurl '/crm/ajax/delaction.p?actionid=" + ActionID' skip
+        '   if (confirm("Are you sure you want to delete this action?")) ~{' skip
+        "       ObjectID.style.display = 'none';" skip
+        "       ahah(DocumentAjax,'placeholder');" skip
+        '       var objtoolBarOption = document.getElementById("acttbtboption");' skip
+        '       objtoolBarOption.innerHTML = acttbobjRowDefault;' skip
+        '       actionTableBuild();' skip
+        '   ~}' skip
+        '~}' skip
+        '</script>'.
+        
+    {&out} 
+    '<script>' skip
+        'function ConfirmDeleteAttachment(ObjectID,DocID) ~{' skip
+        '   var DocumentAjax = "' appurl '/crm/ajax/deldocument.p?docid=" + DocID' skip
+        '   if (confirm("Are you sure you want to delete this document?")) ~{' skip
+        "       ObjectID.style.display = 'none';" skip
+        "       ahah(DocumentAjax,'placeholder');" skip
+        '       var objtoolBarOption = document.getElementById("doctbtboption");' skip
+        '       objtoolBarOption.innerHTML = doctbobjRowDefault;' skip
+        '   ~}' skip
+        '~}' skip
+        '</script>' skip.
+
+             
     
 
+END PROCEDURE.
+
+PROCEDURE ip-NotePage:
+/*------------------------------------------------------------------------------
+		Purpose:  																	  
+		Notes:  																	  
+------------------------------------------------------------------------------*/
+    {&out}
+    SKIP(5)
+    tbar-Begin("")
+    tbar-Link("addnote",?,'javascript:noteAdd();',"")
+    tbar-End().
+
+    {&out}
+    '<div id="IDNoteAjax"></div>'.
+    
 END PROCEDURE.
 
 PROCEDURE ip-UpdatePage:
@@ -245,7 +351,7 @@ PROCEDURE ip-UpdatePage:
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("servreq",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Service Required")
-        ELSE htmlib-SideLabel("Servie Required"))
+        ELSE htmlib-SideLabel("Service Required"))
     '</TD>' skip
             '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("servreq",40,lc-servreq) skip
@@ -480,7 +586,7 @@ PROCEDURE process-web-request:
         THEN 
             ASSIGN 
                 lc-title = 'Update'
-                lc-link-label = 'Cancel update'
+                lc-link-label = 'Back'
                 lc-submit-label = 'Update Opportunity'.
     END CASE.
     
@@ -709,11 +815,21 @@ PROCEDURE process-web-request:
             RUN ip-ActionPage.
             {&out} '</div>' SKIP.
         
+           {&out} 
+           '<div class="tabbertab" title="Notes">' skip.
+            RUN ip-NotePage.
+            {&out} 
+            '</div>'.
+    
             {&out} '<div class="tabbertab" title="Attachments">' SKIP.
+            RUN ip-Documents.
             {&out} '</div>' SKIP.
         
         
             {&out} '<div class="tabbertab" title="Customer Details">' SKIP.
+            {&out}
+            '<div id="IDCustomerAjax">Loading Notes</div>'.
+    
             {&out} '</div>' SKIP.
         
          
@@ -728,6 +844,8 @@ PROCEDURE process-web-request:
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
            htmlib-Hidden ("savenavigation", lc-navigation) skip.
        
+       
+    {&out} '<div id="placeholder" style="display: none;"></div>' skip.
        
     IF lc-mode <> "UPDATE" THEN
     DO:      
