@@ -3914,6 +3914,251 @@ ADD INDEX "knbCode" ON "knbText"
   AREA "Schema Area"
   INDEX-FIELD "knbCode" ASCENDING 
 
+ADD TABLE "op_Action"
+  AREA "Schema Area"
+  LABEL "Opportunity Actions"
+  DUMP-NAME "op_action"
+
+ADD FIELD "CompanyCode" OF "op_Action" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "op_id" OF "op_Action" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "opActionID" OF "op_Action" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "ActionCode" OF "op_Action" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "CreatedBy" OF "op_Action" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "CreateDt" OF "op_Action" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 7
+  MAX-WIDTH 8
+  ORDER 70
+
+ADD FIELD "notes" OF "op_Action" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 8
+  MAX-WIDTH 16
+  ORDER 80
+
+ADD FIELD "AssignTo" OF "op_Action" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Assigned To"
+  POSITION 9
+  MAX-WIDTH 16
+  ORDER 90
+
+ADD FIELD "ActionDate" OF "op_Action" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "ActionStatus" OF "op_Action" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD INDEX "prim_key" ON "op_Action" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "opActionID" ASCENDING 
+
+ADD INDEX "op_key" ON "op_Action" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+  INDEX-FIELD "opActionID" ASCENDING 
+
+ADD TABLE "op_Activity"
+  AREA "Schema Area"
+  DUMP-NAME "op_activitty"
+
+ADD FIELD "CompanyCode" OF "op_Activity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "op_id" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "ID"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "opActionID" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 40
+
+ADD FIELD "opActivityID" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 5
+  MAX-WIDTH 4
+  ORDER 50
+
+ADD FIELD "CreatedBy" OF "op_Activity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD FIELD "CreateDate" OF "op_Activity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Created Date"
+  POSITION 7
+  MAX-WIDTH 4
+  ORDER 70
+
+ADD FIELD "CreateTime" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 8
+  MAX-WIDTH 4
+  ORDER 80
+
+ADD FIELD "ActDate" OF "op_Activity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  POSITION 9
+  MAX-WIDTH 4
+  ORDER 90
+
+ADD FIELD "Duration" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 10
+  MAX-WIDTH 4
+  ORDER 100
+
+ADD FIELD "Description" OF "op_Activity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 110
+
+ADD FIELD "notes" OF "op_Activity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "ActivityBy" OF "op_Activity" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD FIELD "StartDate" OF "op_Activity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "Start Date"
+  POSITION 14
+  MAX-WIDTH 4
+  ORDER 140
+
+ADD FIELD "StartTime" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Start Time"
+  POSITION 15
+  MAX-WIDTH 4
+  ORDER 150
+
+ADD FIELD "ActivityType" OF "op_Activity" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "ActType"
+  POSITION 16
+  MAX-WIDTH 60
+  COLUMN-LABEL "ActType"
+  ORDER 160
+
+ADD FIELD "SiteVisit" OF "op_Activity" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 17
+  MAX-WIDTH 1
+  ORDER 170
+
+ADD FIELD "EndDate" OF "op_Activity" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "End Date"
+  POSITION 18
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD FIELD "EndTime" OF "op_Activity" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "End Time"
+  POSITION 19
+  MAX-WIDTH 4
+  ORDER 190
+
+ADD INDEX "prim_key" ON "op_Activity" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "opActivityID" ASCENDING 
+
+ADD INDEX "action_key" ON "op_Activity" 
+  AREA "Schema Area"
+  INDEX-FIELD "opActionID" ASCENDING 
+  INDEX-FIELD "StartDate" ASCENDING 
+  INDEX-FIELD "StartTime" ASCENDING 
+
+ADD INDEX "op_key" ON "op_Activity" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+
 ADD TABLE "op_master"
   AREA "Schema Area"
   LABEL "Opportunitiy Master"
@@ -6296,4 +6541,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000124929
+0000129751

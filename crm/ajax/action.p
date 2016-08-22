@@ -33,11 +33,10 @@ DEFINE VARIABLE lc-Audit          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ll-HasClosed      AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lc-descr          AS CHARACTER NO-UNDO.
 
-DEFINE BUFFER b-table     FOR issue.
-DEFINE BUFFER b-query     FOR issAction.
-DEFINE BUFFER IssActivity FOR IssActivity.   
-DEFINE BUFFER issPhase    FOR issPhase.
-DEFINE BUFFER esched      FOR eSched.
+DEFINE BUFFER op_master     FOR op_master.
+DEFINE BUFFER op_action     FOR op_action.
+DEFINE BUFFER op_activity FOR op_Activity.   
+
 
   
 
@@ -104,23 +103,25 @@ PROCEDURE ip-StandardActionTable:
         "Date|Assigned To|Created|Action|Date|Activity|Site Visit|By|Start/End|Duration<br>(H:MM)^right"
         ) skip.
 
-    FOR EACH b-query NO-LOCK
-        WHERE b-query.CompanyCode = b-table.CompanyCode
-        AND b-query.IssueNumber = b-table.IssueNumber
-        BY b-Query.ActionDate DESCENDING
-        BY b-Query.CreateDate DESCENDING
-        BY b-Query.CreateTime DESCENDING
+    FOR EACH op_action NO-LOCK
+        WHERE op_action.CompanyCode = op_master.CompanyCode
+        AND op_action.op_id = op_master.op_id
+        BY op_action.ActionDate DESCENDING
+        BY op_action.CreateDt DESCENDING
+       
         :
 
-        IF b-query.ActionID <> ? THEN 
+        IF op_Action.ActionCode <> "" THEN 
         DO:
             FIND WebAction 
-                WHERE WebAction.ActionID = b-query.ActionID
+                WHERE WebAction.CompanyCode = op_Action.CompanyCode
+                   AND WebAction.ActionCode = op_Action.ActionCode
+                  
                 NO-LOCK NO-ERROR.
             ASSIGN 
                 lc-descr = WebAction.Description.
         END.
-        ELSE  ASSIGN lc-descr = b-query.ActDescription.
+       
         
         ASSIGN
            li-class-count = li-class-count + 1 
@@ -128,18 +129,15 @@ PROCEDURE ip-StandardActionTable:
         
         ASSIGN
             li-duration = 0.
-        FOR EACH IssActivity NO-LOCK
-            WHERE issActivity.CompanyCode = b-table.CompanyCode
-            AND issActivity.IssueNumber = b-table.IssueNumber
-            AND IssActivity.IssActionId = b-query.IssActionID:
+        FOR EACH op_activity NO-LOCK
+            WHERE op_activity.CompanyCode = op_master.CompanyCode
+            AND op_activity.op_id = op_master.op_id
+            AND op_activity.opActionId = op_action.opActionID:
             ASSIGN
-                li-duration = li-duration + IssActivity.Duration
+                li-duration = li-duration + op_activity.Duration
                 li-count    = li-count + 1.
             
-            IF com-IsActivityChargeable(IssActivity.IssActivityID) = FALSE
-            THEN ASSIGN li-tduration[1] = li-tduration[1] + issActivity.Duration.
-            ELSE ASSIGN li-tduration[2] = li-tduration[2] + issActivity.Duration.
-            
+           
         END.
         ASSIGN
             li-total-duration = li-total-duration + li-duration.
@@ -148,33 +146,32 @@ PROCEDURE ip-StandardActionTable:
             li-count = li-count + 1.
 
         ASSIGN
-            lc-Action = STRING(b-Query.ActionDate,"99/99/9999").
-        IF b-query.ActionStatus = "CLOSED"
+            lc-Action = STRING(op_action.ActionDate,"99/99/9999").
+        IF op_action.ActionStatus = "CLOSED"
             THEN ASSIGN lc-Action = '<span style="color: green;">' + lc-Action + "**</span>"
                 ll-HasClosed = TRUE.
 
         ASSIGN
-            lc-Audit = STRING(b-Query.CreateDate,"99/99/9999") + " " + 
-                       string(b-Query.CreateTime,"hh:mm") + " " + 
-                       dynamic-function("com-UserName",b-query.CreatedBy).
+            lc-Audit = STRING(op_action.CreateDt,"99/99/9999 hh:mm") + " " + 
+                       dynamic-function("com-UserName",op_action.CreatedBy).
                        
         {&out}
         SKIP(1)
-        tbar-trID(lc-ToolBarID,ROWID(b-query))
+        tbar-trID(lc-ToolBarID,ROWID(op_action))
         SKIP(1)
         htmlib-MntTableField(lc-Action,'left')
         htmlib-MntTableField(
-            DYNAMIC-FUNCTION("com-UserName",b-query.AssignTo)
+            DYNAMIC-FUNCTION("com-UserName",op_action.AssignTo)
             ,'left')
         htmlib-MntTableField(lc-Audit,'left').
 
-        IF b-query.notes <> "" OR 1 = 1 THEN
+        IF op_action.notes <> "" OR 1 = 1 THEN
         DO:
         
             ASSIGN 
                 lc-info = 
                 REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
-                lc-object = "hdobj" + string(b-query.issActionID).
+                lc-object = "hdobj" + string(op_action.opActionID).
         
             lc-info = REPLACE(lc-info,"<td","<td colspan=6 ").
 
@@ -185,14 +182,7 @@ PROCEDURE ip-StandardActionTable:
 
             ASSIGN 
                 substr(lc-info,1,li-tag-end) = "".
-            /*
-            {&out} 
-            '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-            lc-object 
-            
-            '~')">':U skip.
-            */
-            
+           
             {&out} 
             '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
             lc-object 
@@ -203,7 +193,7 @@ PROCEDURE ip-StandardActionTable:
             
             {&out} lc-info.
     
-            {&out} htmlib-ExpandBox(lc-object,b-query.Notes).
+            {&out} htmlib-ExpandBox(lc-object,op_action.Notes).
 
             {&out} '</td>' skip.
         END.
@@ -217,22 +207,22 @@ PROCEDURE ip-StandardActionTable:
             THEN '<strong>' + html-encode(com-TimeToString(li-duration)) + '</strong>'
             ELSE "",'right')
             
-        tbar-BeginHidden(ROWID(b-query)).
+        tbar-BeginHidden(ROWID(op_action)).
 
         IF lc-allowDelete = "yes" 
-            THEN {&out} tbar-Link("delete",ROWID(b-query),
+            THEN {&out} tbar-Link("delete",ROWID(op_action),
             'javascript:ConfirmDeleteAction(' +
-            "ROW" + string(ROWID(b-query)) + ','
+            "ROW" + string(ROWID(op_action)) + ','
                            
                           
-            + string(b-query.issActionID) + ');',
+            + string(op_action.opActionID) + ');',
             "").
         {&out}
             
         tbar-Link("update",?,
             'javascript:PopUpWindow('
             + '~'' + appurl 
-            + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(b-table)) + "&rowid=" + string(ROWID(b-query))
+            + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
             + '~'' 
             + ');'
             ,"")
@@ -240,7 +230,7 @@ PROCEDURE ip-StandardActionTable:
         tbar-Link("multiiss",?,
             'javascript:PopUpWindow('
             + '~'' + appurl 
-            + '/iss/activityupdmain.p?mode=display&issuerowid=' + string(ROWID(b-table)) + "&rowid=" + string(ROWID(b-query)) + "&actionrowid=" + string(ROWID(b-query))
+            + '/iss/activityupdmain.p?mode=display&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action)) + "&actionrowid=" + string(ROWID(op_action))
             + '~'' 
             + ');'
             ,"") skip
@@ -249,55 +239,53 @@ PROCEDURE ip-StandardActionTable:
             tbar-EndHidden()
             '</tr>' skip.
 
-        FOR EACH IssActivity NO-LOCK
-            WHERE issActivity.CompanyCode = b-query.CompanyCode
-            AND issActivity.IssueNumber = b-query.IssueNumber
-            AND IssActivity.IssActionId = b-query.IssActionID
-            BY issActivity.ActDate DESCENDING
-            BY IssActivity.CreateDate DESCENDING
-            BY issActivity.CreateTime DESCENDING:
+        FOR EACH op_activity NO-LOCK
+            WHERE op_activity.CompanyCode = op_action.CompanyCode
+            AND op_activity.op_id = op_action.op_id
+            AND op_activity.opActionId = op_action.opActionID
+            BY op_activity.ActDate DESCENDING
+            BY op_activity.CreateDate DESCENDING
+            BY op_activity.CreateTime DESCENDING:
 
             ASSIGN
                 lc-start = ""
-                lc-descr = IssActivity.Description.
-            IF issActivity.activityType <> ""
-            THEN ASSIGN lc-descr = issactivity.activityType + " - " + IssActivity.Description.
+                lc-descr = op_activity.Description.
+            IF op_activity.activityType <> ""
+            THEN ASSIGN lc-descr = op_activity.activityType + " - " + op_activity.Description.
             
-            IF com-IsActivityChargeable(IssActivity.IssActivityID) = FALSE 
-            THEN ASSIGN lc-descr = "** " + lc-descr.
+            
             
 
-            IF issActivity.StartDate <> ? THEN
+            IF op_activity.StartDate <> ? THEN
             DO:
                 ASSIGN
-                    lc-start = STRING(issActivity.StartDate,"99/99/9999") + 
+                    lc-start = STRING(op_activity.StartDate,"99/99/9999") + 
                                " " +
-                               string(issActivity.StartTime,"hh:mm").
+                               string(op_activity.StartTime,"hh:mm").
 
-                IF issActivity.EndDate <> ? THEN
-                    ASSIGN
-                        lc-start = lc-start + " - " + 
-                               string(issActivity.EndDate,"99/99/9999") + 
+                IF op_activity.EndDate <> ? THEN
+                ASSIGN
+                    lc-start = lc-start + " - " + STRING(op_activity.endDate,"99/99/9999") + 
                                " " +
-                               string(issActivity.EndTime,"hh:mm").
+                               string(op_activity.EndTime,"hh:mm").
                                 
             END.
 
             {&out}
             SKIP(1)
-            tbar-trID(lc-ToolBarID,ROWID(IssActivity))
+            tbar-trID(lc-ToolBarID,ROWID(op_activity))
             SKIP(1)
             REPLACE(htmlib-MntTableField("",'left'),"<td","<td colspan=4") 
-            htmlib-MntTableField(STRING(IssActivity.ActDate,'99/99/9999'),'left') skip.
+            htmlib-MntTableField(STRING(op_activity.ActDate,'99/99/9999'),'left') skip.
 
 
-            IF IssActivity.notes <> "" THEN
+            IF op_activity.notes <> "" THEN
             DO:
             
                 ASSIGN 
                     lc-info = 
                     REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
-                    lc-object = "hdobj" + string(IssActivity.issActivityID).
+                    lc-object = "hdobj" + string(op_activity.opactivityID).
             
                 ASSIGN 
                     li-tag-end = INDEX(lc-info,">").
@@ -312,7 +300,7 @@ PROCEDURE ip-StandardActionTable:
                 lc-object '~')">':U skip.
                 {&out} lc-info.
         
-                {&out} REPLACE(htmlib-ExpandBox(lc-object,IssActivity.Notes),
+                {&out} REPLACE(htmlib-ExpandBox(lc-object,op_activity.Notes),
                         'class="','class="' + lc-this-class + " ").
     
                 {&out} '</td>' skip.
@@ -321,23 +309,23 @@ PROCEDURE ip-StandardActionTable:
             htmlib-MntTableField(lc-descr,'left').
 
             {&out}
-            htmlib-MntTableField(IF IssActivity.SiteVisit THEN "Yes" ELSE "&nbsp;",'left').
+            htmlib-MntTableField(IF op_activity.SiteVisit THEN "Yes" ELSE "&nbsp;",'left').
 
             {&out}
             htmlib-MntTableField(
-                DYNAMIC-FUNCTION("com-UserName",IssActivity.ActivityBy)
+                DYNAMIC-FUNCTION("com-UserName",op_activity.ActivityBy)
                 ,'left')
             htmlib-MntTableField(html-encode(lc-Start),'left')
-            htmlib-MntTableField(IF IssActivity.Duration > 0 
-                THEN html-encode(com-TimeToString(IssActivity.Duration))
+            htmlib-MntTableField(IF op_activity.Duration > 0 
+                THEN html-encode(com-TimeToString(op_activity.Duration))
                 ELSE "",'right')
             
-            tbar-BeginHidden(ROWID(IssActivity))
+            tbar-BeginHidden(ROWID(op_activity))
            
             tbar-Link("update",?,
                 'javascript:PopUpWindow('
                 + '~'' + appurl 
-                + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(b-table)) + "&rowid=" + string(ROWID(b-query))
+                + '/iss/actionupdate.p?mode=update&issuerowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
                 + '~'' 
                 + ');'
                 ,"")
@@ -462,7 +450,7 @@ PROCEDURE process-web-request :
         lc-AllowDelete = get-value("allowdelete").
     
 
-    FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
+    FIND op_master WHERE ROWID(op_master) = to-rowid(lc-rowid) NO-LOCK.
 
     
     RUN outputHeader.

@@ -92,6 +92,43 @@ RUN process-web-request.
 
 /* **********************  Internal Procedures  *********************** */
 
+PROCEDURE ip-ActionPage:
+/*------------------------------------------------------------------------------
+		Purpose:  																	  
+		Notes:  																	  
+------------------------------------------------------------------------------*/
+{&out}
+           skip
+           tbar-BeginID(lc-Action-TBAR,"") SKIP.
+     
+        {&out} 
+           tbar-Link("add",?,
+                     'javascript:PopUpWindow('
+                          + '~'' + appurl 
+                     + '/crm/actionupdate.p?mode=add&oprowid=' + string(ROWID(b-table))
+                          + '~'' 
+                          + ');'
+                          ,"")
+                      SKIP.
+
+    {&out}
+            tbar-BeginOptionID(lc-Action-TBAR) skip.
+
+    {&out} tbar-Link("delete",?,"off","").
+
+    {&out}  
+        tbar-Link("update",?,"off","")
+        tbar-Link("multiiss",?,"off","")
+        tbar-EndOption()
+        tbar-End().
+
+    {&out}
+    '<div id="IDAction"></div>'.
+    
+    
+
+END PROCEDURE.
+
 PROCEDURE ip-ExportJS:
     /*------------------------------------------------------------------------------
             Purpose:  																	  
@@ -102,6 +139,8 @@ PROCEDURE ip-ExportJS:
            tbar-JavaScript(lc-Doc-TBAR) SKIP
            '<script language="javascript">' SKIP
            'var appurl = "' appurl '";' SKIP
+           'var appMode = "' lc-mode '";' SKIP
+           
            'var ActionAjax = "' appurl '/crm/ajax/action.p?allowdelete=yes&rowid=' string(rowid(b-table)) 
                     '&toolbarid=' lc-Action-TBar  
                     '"' SKIP
@@ -666,6 +705,8 @@ PROCEDURE process-web-request:
         
         
             {&out} '<div class="tabbertab" title="Action & Activities">' SKIP.
+            
+            RUN ip-ActionPage.
             {&out} '</div>' SKIP.
         
             {&out} '<div class="tabbertab" title="Attachments">' SKIP.
