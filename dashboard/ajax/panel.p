@@ -10,6 +10,7 @@
     When        Who         What
     16/05/2015  phoski      Initial
     27/05/2015  phoski      cater for customer users
+    27/08/2106  phoski      CRM Panels
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -28,10 +29,10 @@ DEFINE VARIABLE lc-panelCode AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-position  AS CHARACTER NO-UNDO.
 
 DEFINE TEMP-TABLE tt-stat NO-UNDO
-    FIELD sCode  AS CHARACTER 
-    FIELD descr  AS CHARACTER
-    FIELD svalue AS INTEGER
-    FIELD class-value AS INTEGER EXTENT 4
+    FIELD sCode       AS CHARACTER 
+    FIELD descr       AS CHARACTER
+    FIELD svalue      AS INTEGER
+    FIELD class-value AS INTEGER   EXTENT 4
     INDEX scodeIDX sCode.
     
 DEFINE TEMP-TABLE tt-eng NO-UNDO
@@ -57,7 +58,7 @@ FUNCTION WriteStat RETURNS ROWID
     (pc-Code AS CHARACTER,
     pc-Description AS CHARACTER,
     pi-Count AS INTEGER,
-     pi-class AS INTEGER) FORWARD.
+    pi-class AS INTEGER) FORWARD.
 
 &Scoped-define PROCEDURE-TYPE Procedure
 &Scoped-define DB-AWARE no
@@ -157,9 +158,9 @@ PROCEDURE ip-BuildCompanyStats:
     
         li-class = LOOKUP(Issue.iClass,lc-global-iclass-code,"|").
         IF li-class < 1
-        OR li-class > extent(tt-stat.class-value)
-        OR li-class = ? 
-        THEN li-class = 1.
+            OR li-class > extent(tt-stat.class-value)
+            OR li-class = ? 
+            THEN li-class = 1.
         
         lr-row =  DYNAMIC-FUNCTION("WriteStat","001:001","Number of Issues",1,li-class).
         
@@ -212,6 +213,130 @@ PROCEDURE ip-BuildCompanyStats:
     lh-Query:QUERY-CLOSE ().
      
     DELETE OBJECT lh-Query NO-ERROR. 
+    
+
+END PROCEDURE.
+
+PROCEDURE ip-BuildCRMStatistics:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pc-type          AS CHARACTER NO-UNDO.
+    
+    DEFINE INPUT PARAMETER pc-Phrase        AS CHARACTER NO-UNDO.
+    
+    DEFINE BUFFER op_master FOR op_master.
+
+
+    DEFINE VARIABLE lr-row          AS ROWID    NO-UNDO.
+    DEFINE VARIABLE ld-this-month   AS DATE     NO-UNDO.
+    DEFINE VARIABLE ld-prev-month   AS DATE     NO-UNDO.
+    DEFINE VARIABLE ld-date         AS DATE     NO-UNDO.
+    DEFINE VARIABLE li-class        AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-loop         AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE lc-code         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-desc         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-key          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-key-desc     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-section      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-section-key  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-section-desc AS CHARACTER NO-UNDO.
+        
+    
+    
+    
+    
+    
+    ASSIGN 
+        ld-date = TODAY.
+    ASSIGN
+        ld-this-month = ld-date - day(ld-date) + 1
+        ld-date = ld-this-month - 1
+        ld-prev-month = ld-date - day(ld-date) + 1.
+
+              
+    CREATE QUERY lh-Query.
+   
+
+    lh-Buffer1 = BUFFER op_master:HANDLE.
+   
+    lh-Query:SET-BUFFERS(lh-Buffer1).
+    lh-Query:QUERY-PREPARE(pc-Phrase).
+    lh-Query:QUERY-OPEN().
+    
+    lh-Query:GET-FIRST(NO-LOCK). 
+    
+    REPEAT WHILE lh-Buffer1:AVAILABLE: 
+        
+        ASSIGN 
+            li-class = LOOKUP(op_master.OpStatus,lc-global-opStatus-Code,"|").
+        IF li-class < 1
+            OR li-class > 4 THEN li-class = 1.
+        
+        SECTION-LOOP:
+        DO li-section = 1 TO 3:
+            
+            ASSIGN
+                lc-section-key = STRING(li-section,"999").
+                
+            CASE li-section:
+                WHEN 1 THEN
+                    DO:
+                        ASSIGN 
+                            lc-section-desc = "All".
+                    END.
+                WHEN 2 THEN
+                    DO:
+                        ASSIGN 
+                            lc-section-desc = "New Last 30 Days".
+                    
+                        IF DATE(op_master.createDate) < TODAY - 30 THEN NEXT.
+                  
+                    END.
+                WHEN 3 THEN
+                    DO:
+                        ASSIGN 
+                            lc-section-desc = "Closing Next 30 Days".
+                    
+                        IF op_master.CloseDate > TODAY + 30 THEN NEXT.
+                    END.
+                
+            END CASE.    
+                
+            lr-row = DYNAMIC-FUNCTION("WriteStat",lc-section-key + ":-",lc-section-desc,0,li-class).
+            lr-row = DYNAMIC-FUNCTION("WriteStat",lc-section-key + ":001","Number of Opportunities",1,li-class).
+            
+           
+            lr-row = DYNAMIC-FUNCTION("WriteStat",lc-section-key + ":002£","Value of Opportunities", int(op_master.Revenue),li-class).
+           
+            lr-row = DYNAMIC-FUNCTION("WriteStat",lc-section-key + ":003£","Cost of Opportunities", int(op_master.CostOfSale),li-class).
+            
+            DO li-loop = 1 TO NUM-ENTRIES(lc-global-Rating-Code,"|"):
+                ASSIGN
+                    lc-code = ENTRY(li-loop,lc-global-rating-code,"|").
+                ASSIGN
+                    lc-desc = com-DecodeLookup(lc-code,lc-global-rating-code,lc-global-rating-desc).
+                    
+                ASSIGN
+                    lc-key = lc-section-key + ":" + string(li-loop,"99")
+                    lc-key-desc = "Number Opportunities By Rating " + lc-desc.
+                lr-row = DYNAMIC-FUNCTION("WriteStat",lc-key,lc-key-desc, 0,li-class). 
+                IF op_master.Rating = lc-code THEN
+                DO:
+                    lr-row = DYNAMIC-FUNCTION("WriteStat",lc-key,lc-key-desc, 1,li-class). 
+                     
+                END.
+                   
+                    
+            
+            END.
+            
+        END.
+        
+                 
+        lh-Query:GET-NEXT(NO-LOCK).             
+    END.
     
 
 END PROCEDURE.
@@ -281,6 +406,169 @@ PROCEDURE ip-BuildEngineerSummary:
     
 END PROCEDURE.
 
+PROCEDURE ip-CRMRepStatistics:
+/*------------------------------------------------------------------------------
+        Purpose:  																	  
+        Notes:  																	  
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE lc-Where        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-loop         AS INTEGER   NO-UNDO.
+   
+    DEFINE BUFFER WebUser FOR WebUser.
+    
+    FOR EACH WebUser NO-LOCK 
+        WHERE WebUser.CompanyCode = lc-global-company
+          AND WebUser.engType > ""
+          AND LOOKUP(WebUser.engType,lc-global-SalType-Code,"|") > 0:
+             
+         
+        ASSIGN 
+            lc-where =  
+            "for each op_master NO-LOCK where op_master.CompanyCode = '" + string(lc-Global-Company) + "'" 
+            + " and op_master.SalesManager = '" + WebUser.LoginID + "'".
+            
+      
+        
+        EMPTY TEMP-TABLE tt-stat.
+            
+        RUN ip-BuildCRMStatistics ( "REP:" + WebUser.LoginID , lc-where ).
+        
+        FOR EACH tt-stat exclusive:
+            IF ENTRY(2,tt-stat.scode,":") = "-" THEN
+            DO:
+                ASSIGN tt-stat.descr = WebUser.Name + " - " +  tt-stat.descr.
+                
+            END.
+            
+        END.
+       
+        
+        {&out} '<table class="easyui-datagrid"' SKIP.
+           
+        {&out} 'data-options="fitColumns:true,singleSelect:true,striped:true"
+                style="width:650px">
+        <thead>
+            <tr>
+                <th data-options="field:~'StatDescr~',sortable:false">' WebUser.Name '</th>' SKIP.
+                
+        DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
+            
+            {&out}    
+            '<th data-options="field:~'StatValue' li-loop ''~',align:~'right~',sortable:false">' ENTRY(li-loop,lc-global-opStatus-Desc,"|") '</th>' SKIP.     
+        END. 
+        
+                    
+        {&out} ' 
+        <th data-options="field:~'StatValue~',align:~'right~',sortable:false">Total</th>      
+            </tr>
+        </thead>
+        <tbody>' skip.
+        
+        
+        FOR EACH tt-stat NO-LOCK:
+            
+            IF ENTRY(2,tt-stat.scode,":") = "-" THEN
+            DO:
+                {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' skip.
+                NEXT.
+            END.
+            {&out}
+            '<tr><td>' tt-stat.descr '</td>' skip.
+                 
+            DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
+                IF INDEX(tt-stat.scode,"£") > 0
+                    THEN {&out} '<td>&pound' tt-stat.class-value[li-loop] '</td>'.
+                ELSE {&out} '<td>' tt-stat.class-value[li-loop] '</td>'.
+            END.  
+            
+               
+            IF INDEX(tt-stat.scode,"£") > 0
+                THEN {&out} '<td>&pound' tt-stat.svalue '</td>'.
+             ELSE {&out} '<td>' tt-stat.svalue '</td>'.
+    
+        END.
+        
+        {&out} '</tbody></table><br /><br />' SKIP.
+        
+        
+    END.
+        
+    
+
+END PROCEDURE.
+
+PROCEDURE ip-CRMStatistics:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE lc-Where        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-loop         AS INTEGER   NO-UNDO.
+    
+    ASSIGN 
+        lc-where =  
+        "for each op_master NO-LOCK where op_master.CompanyCode = '" + string(lc-Global-Company) + "'".
+        
+        
+    RUN ip-BuildCRMStatistics ( "ALL" , lc-where ).
+    
+   
+    
+    {&out} '<table class="easyui-datagrid"' SKIP.
+       
+    {&out} 'data-options="fitColumns:true,singleSelect:true,striped:true"
+            style="width:650px">
+    <thead>
+        <tr>
+            <th data-options="field:~'StatDescr~',sortable:false">Statistic</th>' SKIP.
+            
+    DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
+        
+        {&out}    
+        '<th data-options="field:~'StatValue' li-loop ''~',align:~'right~',sortable:false">' ENTRY(li-loop,lc-global-opStatus-Desc,"|") '</th>' SKIP.     
+    END. 
+    
+                
+    {&out} ' 
+    <th data-options="field:~'StatValue~',align:~'right~',sortable:false">Total</th>      
+        </tr>
+    </thead>
+    <tbody>' skip.
+    
+    
+    FOR EACH tt-stat NO-LOCK:
+        
+        IF ENTRY(2,tt-stat.scode,":") = "-" THEN
+        DO:
+            {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' skip.
+            NEXT.
+        END.
+        {&out}
+        '<tr><td>' tt-stat.descr '</td>' skip.
+             
+        DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
+            IF INDEX(tt-stat.scode,"£") > 0
+                THEN {&out} '<td>&pound' tt-stat.class-value[li-loop] '</td>'.
+            ELSE {&out} '<td>' tt-stat.class-value[li-loop] '</td>'.
+        END.  
+        
+           
+        IF INDEX(tt-stat.scode,"£") > 0
+            THEN {&out} '<td>&pound' tt-stat.svalue '</td>'.
+         ELSE {&out} '<td>' tt-stat.svalue '</td>'.
+
+    END.
+    
+    {&out} '</tbody></table>' SKIP.
+    
+    
+    
+    
+    
+
+END PROCEDURE.
+
 PROCEDURE ip-EngineerStatistics:
     /*------------------------------------------------------------------------------
             Purpose:  																	  
@@ -348,7 +636,7 @@ PROCEDURE ip-HelpdeskStatistics:
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
         
         {&out}    
-         '<th data-options="field:~'StatValue' li-loop ''~',align:~'right~',sortable:false">' ENTRY(li-loop,lc-global-iclass-desc,"|") '</th>' SKIP.     
+        '<th data-options="field:~'StatValue' li-loop ''~',align:~'right~',sortable:false">' ENTRY(li-loop,lc-global-iclass-desc,"|") '</th>' SKIP.     
     END.        
             
                 
@@ -519,10 +807,10 @@ PROCEDURE ip-IssueGridRow:
 END PROCEDURE.
 
 PROCEDURE ip-IssueQueryAdjust:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
     DEFINE INPUT-OUTPUT PARAMETER pc-q     AS CHARACTER NO-UNDO.
     
     DEFINE BUFFER Webuser FOR WebUser.
@@ -535,7 +823,8 @@ PROCEDURE ip-IssueQueryAdjust:
     
     IF WebUser.UserClass = "customer" THEN
     DO:
-        ASSIGN pc-q = pc-q + "  and issue.AccountNumber = '" + WebUser.AccountNumber + "'".  
+        ASSIGN 
+            pc-q = pc-q + "  and issue.AccountNumber = '" + WebUser.AccountNumber + "'".  
 
     END.
     
@@ -565,7 +854,8 @@ PROCEDURE ip-LatestIssue:
         
     RUN ip-IssueQueryAdjust ( INPUT-OUTPUT lc-qPhrase ).
     
-    ASSIGN lc-QPhrase = lc-QPhrase + " by issue.IssueNumber DESCENDING".
+    ASSIGN 
+        lc-QPhrase = lc-QPhrase + " by issue.IssueNumber DESCENDING".
     
     RUN ip-IssueGridHeader ( "").
     CREATE QUERY lh-Query  
@@ -792,11 +1082,8 @@ PROCEDURE ip-TodayIssueClass:
     DEFINE VARIABLE li-loop         AS INTEGER      NO-UNDO.
     DEFINE VARIABLE lc-iclass       AS CHARACTER    NO-UNDO.
     DEFINE VARIABLE lc-tab          AS CHARACTER    NO-UNDO.
-    
-    
-    
+        
     DEFINE BUFFER Issue FOR Issue.
-
        
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|").
     
@@ -814,14 +1101,15 @@ PROCEDURE ip-TodayIssueClass:
         +
          " and issue.iclass = '" + lc-iclass + "'".
           
-       RUN ip-IssueQueryAdjust ( INPUT-OUTPUT lc-qPhrase ).
+        RUN ip-IssueQueryAdjust ( INPUT-OUTPUT lc-qPhrase ).
           
         
         CREATE QUERY lh-Query  
             ASSIGN 
             CACHE = 100 .
 
-        ASSIGN li-count = 0.
+        ASSIGN 
+            li-count = 0.
         
         lh-Buffer1 = BUFFER issue:HANDLE.
    

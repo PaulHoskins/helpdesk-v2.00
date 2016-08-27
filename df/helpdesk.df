@@ -4384,12 +4384,19 @@ ADD INDEX "op_id" ON "op_master"
   AREA "Schema Area"
   UNIQUE
   PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
 
 ADD INDEX "AccountNumber" ON "op_master" 
   AREA "Schema Area"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+
+ADD INDEX "salesRep" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "SalesManager" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
 
 ADD TABLE "op_note"
@@ -6641,4 +6648,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000131707
+0000131924

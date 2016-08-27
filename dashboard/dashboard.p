@@ -9,6 +9,7 @@
     
     When        Who         What
     16/05/2015  phoski      Initial
+    27/08/2106  phoski      Changed height of panels
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -198,7 +199,7 @@ PROCEDURE process-web-request :
     END.  
      
     ASSIGN 
-        li-panel-size = 300
+        li-panel-size = /* 300 */ 600
         li-region-size = max(800, ( li-panel-size * li-panel-count)) + 200.
     .
     

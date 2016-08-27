@@ -9,16 +9,7 @@ END.
 
 END
   */
-  OUTPUT TO c:\temp\rep.txt.
-
-FOR EACH acs_res NO-LOCK:
-    DISP rq_id FORMAT 'x(70)' acs_res.acs_line_id.
-END.
-
-FOR EACH acs_rq NO-LOCK:
-    DISP rq_id FORMAT 'x(70)' rq_status.
-END.
-
+ FOR EACH op_master NO-LOCK WHERE op_master.CompanyCode = 'ouritdept' AND op_master.SalesManager = 'SALMAN'
 
 
 

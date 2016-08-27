@@ -9,7 +9,8 @@
     
     When        Who         What
     19/05/2015  phoski      Initial
-    
+    23/08/2016  phoski      CRM dashboards
+        
 ***********************************************************************/
 
 DEFINE TEMP-TABLE   tt-dashlib  NO-UNDO
@@ -44,24 +45,33 @@ PROCEDURE dashlib-Initialise:
     DEFINE VARIABLE lr-row AS ROWID NO-UNDO.
     
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-L20I","Latest 20 Issues","ip-LatestIssue").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-L20I","[HD] Latest 20 Issues","ip-LatestIssue").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-O20IOpen","Oldest 20 Open Issues","ip-OldestIssue").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-O20IOpen","[HD] Oldest 20 Open Issues","ip-OldestIssue").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-IToday","Todays Issues","ip-TodayIssue").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-IToday","[HD] Todays Issues","ip-TodayIssue").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-ITodayClass","Todays Issues By Class","ip-TodayIssueClass").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","002-ITodayClass","[HD] Todays Issues By Class","ip-TodayIssueClass").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
     
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","000-AStats","HelpDesk Statistics","ip-HelpdeskStatistics").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","000-AStats","[HD] HelpDesk Statistics","ip-HelpdeskStatistics").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
     
-    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","001-EStats","Engineer Statistics","ip-EngineerStatistics").
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","001-EStats","[HD] Engineer Statistics","ip-EngineerStatistics").
     FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
+    
+    /* CRM Dashboards */
+    
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","CRM-001-AStats","[CRM] Statistics","ip-CRMStatistics").
+    FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
+    
+    lr-row = DYNAMIC-FUNCTION("dashlib-CreateLib","CRM-002-RepAStats","[CRM] All Sales Rep Statistics","ip-CRMRepStatistics").
+    FIND tt-row WHERE ROWID(tt-row) = lr-row EXCLUSIVE-LOCK.
+    
     
     
 END PROCEDURE.

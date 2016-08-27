@@ -347,6 +347,7 @@ PROCEDURE process-web-request :
     
     FIND op_master
         WHERE ROWID(op_master) = to-rowid(lc-op-rowid) NO-LOCK.
+    
     FIND customer WHERE Customer.CompanyCode = op_master.CompanyCode
         AND Customer.AccountNumber = op_master.AccountNumber
         NO-LOCK NO-ERROR.

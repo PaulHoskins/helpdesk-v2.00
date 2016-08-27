@@ -292,8 +292,8 @@ PROCEDURE ip-UpdatePage:
            
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("SalesManager",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Sales Manager")
-        ELSE htmlib-SideLabel("Sales Manager"))
+        THEN htmlib-SideLabelError("Sales Rep")
+        ELSE htmlib-SideLabel("Sales Rep"))
     '</TD>'
     '<TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
     htmlib-Select("salesmanager",lc-sm-Code,lc-sm-desc,lc-SalesManager)

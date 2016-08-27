@@ -692,7 +692,7 @@ PROCEDURE ip-opPage:
     
     {&out}
     htmlib-TableHeading(
-        "Description|Status|Type|Close Date|Sales Manager|Customer Contact|Department|Next Step|Created^right"
+        "Description|Status|Type|Close Date|Sales Rep|Customer Contact|Department|Next Step|Created^right"
         ) skip.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
