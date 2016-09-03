@@ -56,6 +56,12 @@ ADD SEQUENCE "op_master"
   CYCLE-ON-LIMIT no
   MAX-VAL 999999999
 
+ADD SEQUENCE "crm_data_load"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT yes
+  MAX-VAL 99999999
+
 ADD TABLE "acs_head"
   AREA "Schema Area"
   LABEL "Survey Header"
@@ -957,6 +963,222 @@ ADD INDEX "Prim" ON "ContractType"
   PRIMARY
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "ContractNumber" ASCENDING 
+
+ADD TABLE "crm_data_acc"
+  AREA "Schema Area"
+  LABEL "CRM Data - Acounts"
+  DUMP-NAME "crm_data_acc"
+
+ADD FIELD "CompanyCode" OF "crm_data_acc" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "load_id" OF "crm_data_acc" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "record_no" OF "crm_data_acc" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 4
+  MAX-WIDTH 4
+  ORDER 30
+
+ADD FIELD "accID" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "Name" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "Address1" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 1"
+  POSITION 7
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "Address2" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 2"
+  POSITION 8
+  MAX-WIDTH 80
+  ORDER 70
+
+ADD FIELD "City" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 9
+  MAX-WIDTH 80
+  ORDER 80
+
+ADD FIELD "County" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "County"
+  POSITION 10
+  MAX-WIDTH 80
+  ORDER 90
+
+ADD FIELD "Country" OF "crm_data_acc" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Country"
+  POSITION 11
+  MAX-WIDTH 80
+  COLUMN-LABEL "Country"
+  ORDER 100
+
+ADD FIELD "Postcode" OF "crm_data_acc" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Post Code"
+  POSITION 12
+  MAX-WIDTH 30
+  ORDER 110
+
+ADD FIELD "Telephone" OF "crm_data_acc" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Telephone"
+  POSITION 13
+  MAX-WIDTH 40
+  ORDER 120
+
+ADD FIELD "bus_type" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 14
+  MAX-WIDTH 16
+  ORDER 130
+
+ADD FIELD "contact_position" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 15
+  MAX-WIDTH 16
+  ORDER 140
+
+ADD FIELD "contact_title" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 16
+  MAX-WIDTH 16
+  ORDER 150
+
+ADD FIELD "contact_forename" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 17
+  MAX-WIDTH 16
+  ORDER 160
+
+ADD FIELD "contact_surname" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 18
+  MAX-WIDTH 16
+  ORDER 170
+
+ADD FIELD "AccountNumber" OF "crm_data_acc" AS character 
+  DESCRIPTION "only whn moved to customer table"
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 19
+  MAX-WIDTH 16
+  ORDER 190
+
+ADD FIELD "record_status" OF "crm_data_acc" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 20
+  MAX-WIDTH 4
+  ORDER 180
+
+ADD INDEX "PrimKey" ON "crm_data_acc" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "load_id" ASCENDING 
+  INDEX-FIELD "record_no" ASCENDING 
+
+ADD TABLE "crm_data_load"
+  AREA "Schema Area"
+  LABEL "CRM Data Load"
+  DESCRIPTION "Header Info for load"
+  DUMP-NAME "crm_data_load"
+
+ADD FIELD "CompanyCode" OF "crm_data_load" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "load_id" OF "crm_data_load" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "LoginID" OF "crm_data_load" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 4
+  MAX-WIDTH 30
+  ORDER 40
+
+ADD FIELD "created" OF "crm_data_load" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
+  INITIAL ?
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 50
+
+ADD FIELD "no_records" OF "crm_data_load" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 60
+
+ADD FIELD "descr" OF "crm_data_load" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Description"
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD INDEX "PrimKey" ON "crm_data_load" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "load_id" ASCENDING 
 
 ADD TABLE "CustAst"
   AREA "Schema Area"
@@ -6648,4 +6870,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000131924
+0000136307

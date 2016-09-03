@@ -16,7 +16,8 @@
     26/04/2014  phoski      Asset Toolbar
     26/11/2014  phoski      nofind option on standard toolbar
     27/03/2015  phoski      project related link
-    18/06/2016  phoksi      survey link
+    18/06/2016  phoski      survey link
+    03/09/2016  phoski      CRM 
     
     
 ***********************************************************************/
@@ -820,7 +821,12 @@ FUNCTION tbar-Link RETURNS CHARACTER
             ASSIGN 
                 lc-image    = '/images/toolbar3/crm.gif'
                 lc-alt-text = 'CRM'.
-                
+            WHEN 'CRMDataSetLoad' THEN
+                ASSIGN 
+                lc-image    = '/images/toolbar3/crmdataset.gif'
+                lc-alt-text = 'Load External Data'.
+            
+                            
                   
   
     END CASE.

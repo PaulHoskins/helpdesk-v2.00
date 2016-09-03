@@ -25,7 +25,6 @@ DEFINE VARIABLE li-panel           AS INTEGER   NO-UNDO.
 DEFINE VARIABLE li-panel-count     AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-panel-URL       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-panel-size      AS INTEGER   NO-UNDO.
-DEFINE VARIABLE li-region-size     AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-dashb-title     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-panel-title     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-panel-panelCode AS CHARACTER EXTENT 100 NO-UNDO.
@@ -200,8 +199,7 @@ PROCEDURE process-web-request :
      
     ASSIGN 
         li-panel-size = /* 300 */ 600
-        li-region-size = max(800, ( li-panel-size * li-panel-count)) + 200.
-    .
+        .
     
   
     
@@ -216,9 +214,11 @@ PROCEDURE process-web-request :
         ASSIGN
             lc-Panel-ID = "panel" + string(li-panel)
             lc-panel-title = lc-panel-descr[li-panel].
+            
+        FIND tt-dashlib WHERE tt-dashlib.panelcode =  lc-panel-panelCode[li-panel] NO-LOCK.   
     
         {&out} '<div id="' lc-Panel-ID '" class="easyui-panel" title="' lc-Panel-title '" ' SKIP
-               'style="width:99%;height:' li-panel-size 'px;padding:0px;background:#fafafa;"
+               'style="width:' tt-dashlib.panelW ';height:' tt-dashlib.panelH ';padding:0px;background:#fafafa;"
         data-options="iconCls:~'icon-large-shapes~',cache:false,border:true,doSize:true,closable:false,collapsible:true,minimizable:false,maximizable:true"></div><br />' skip.
       
     END.

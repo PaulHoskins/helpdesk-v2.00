@@ -32,6 +32,7 @@
     02/07/2016  phoski      com-GetActivityByType 
     14/07/2016  phoski      JQueryUI - 1.4.5
     24/07/2016  phoski      CRM Changes
+    03/09/2016  phoski      Global Email var
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -49,6 +50,7 @@ DEFINE VARIABLE lc-global-seldesc                     AS CHARACTER
 DEFINE VARIABLE lc-global-company                     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-user                        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-secure                      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-email                       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-internal                    AS CHARACTER 
     INITIAL "INTERNAL,CONTRACT" NO-UNDO.
 
@@ -2152,7 +2154,9 @@ FUNCTION com-CanDelete RETURNS LOGICAL
             
         WHEN "webprojptask"
         OR 
-        WHEN "webdashb" THEN 
+        WHEN "webdashb"
+        OR 
+        WHEN "CRMDataSet" THEN
             RETURN TRUE.
         WHEN 'Contract' THEN
             DO:
@@ -2813,8 +2817,8 @@ FUNCTION com-InitialSetup RETURNS LOGICAL
          lc-global-secure = DYNAMIC-FUNCTION("sysec-EncodeValue","GlobalSecure",TODAY,"GlobalSecure",lc-temp).
         */
         ASSIGN
-            lc-global-secure = STRING(ROWID(webuser)).
-        ASSIGN 
+            lc-global-secure = STRING(ROWID(webuser))
+            lc-global-email  = WebUser.Email
             lc-global-company = webuser.CompanyCode.
         DYNAMIC-FUNCTION('com-CheckSystemSetup':U,lc-global-company).
     END.
