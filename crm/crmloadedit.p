@@ -1,14 +1,14 @@
 /***********************************************************************
 
-    Program:        crm/crmloadmnt.p
+    Program:        crm/crmloadedit.p
     
-    Purpose:        Status Maintenance           
+    Purpose:        CRM Data Set Account Edit     
     
     Notes:
     
     
     When        Who         What
-    03/09/2016  phoski      Initial      
+    06/09/2016  phoski      Initial      
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -27,8 +27,8 @@ DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-title       AS CHARACTER NO-UNDO.
 
 
-DEFINE BUFFER b-valid FOR crm_data_load.
-DEFINE BUFFER b-table FOR crm_data_load.
+DEFINE BUFFER b-valid FOR crm_data_acc.
+DEFINE BUFFER b-table FOR crm_data_acc.
 
 
 DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
@@ -36,6 +36,7 @@ DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-navigation      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-parameters      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent          AS CHARACTER NO-UNDO.
 
 
 DEFINE VARIABLE lc-link-label      AS CHARACTER NO-UNDO.
@@ -43,8 +44,8 @@ DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
 
 
-
-DEFINE VARIABLE lc-description     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-note            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-status          AS CHARACTER NO-UNDO.
 
 
 
@@ -106,15 +107,7 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-
-    IF lc-description = ""
-        OR lc-description = ?
-        THEN RUN htmlib-AddErrorMessage(
-            'description', 
-            'You must enter the description',
-            INPUT-OUTPUT pc-error-field,
-            INPUT-OUTPUT pc-error-msg ).
-
+    
 
 END PROCEDURE.
 
@@ -122,77 +115,6 @@ END PROCEDURE.
 &ENDIF
 
 &IF DEFINED(EXCLUDE-outputHeader) = 0 &THEN
-
-PROCEDURE ipViewAcc:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
-
-    DEFINE VARIABLE li-loop     AS INT      NO-UNDO.
-    DEFINE VARIABLE lc-cont     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-url      AS CHARACTER NO-UNDO.
-    
-    
-    
-    
-    {&out} skip
-           htmlib-StartMntTable().
-
-    {&out}
-    htmlib-TableHeading(
-        "|ID|Name|Address 1|Address 2|City|County|Post Code|Telephone|Business Type|Contact Details|Position"
-        ) skip.
-    DO li-loop = 1 TO NUM-ENTRIES(lc-global-CRMRS-Code,"|"):
-            
-        {&out} '<tr><td colspan=12><div class="infobox">'
-        com-DecodeLookup(ENTRY(li-loop,lc-global-CRMRS-Code,"|"),lc-global-CRMRS-Code,lc-global-CRMRS-Desc)
-        '</div</td></tr>' SKIP.
-        
-        FOR EACH crm_data_acc NO-LOCK OF b-table
-            WHERE crm_data_acc.record_status = ENTRY(li-loop,lc-global-CRMRS-Code,"|")
-            BY crm_data_acc.Name
-                      :
-              
-              
-            IF crm_data_acc.record_status =  lc-global-CRMRS-ACC-CRT 
-            THEN lc-url = "".
-            ELSE ASSIGN
-                    lc-url = appurl + "/crm/crmloadedit.p?rowid=" + string(ROWID(crm_data_acc)) + "&mode=update&parent=" +  string(ROWID(b-table)).
-           
-            ASSIGN
-                lc-cont = crm_data_acc.contact_title + " " + crm_data_acc.contact_forename + " " + crm_data_acc.contact_surname.
-                 
-                               
-            {&out}
-                '<tr>'
-                '<td>' IF lc-url <> "" THEN htmlib-ImageLink('/images/toolbar/update.gif',lc-url,"Update " + crm_data_acc.name) ELSE '&nbsp;' '</td>' SKIP
-                htmlib-MntTableField(html-encode( crm_data_acc.accid),'left')
-                
-                htmlib-MntTableField(html-encode( crm_data_acc.Name),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.Address1),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.Address2),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.City),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.County),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.PostCode),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.Telephone),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.bus_type),'left')
-                htmlib-MntTableField(html-encode( lc-cont),'left')
-                htmlib-MntTableField(html-encode( crm_data_acc.contact_position),'left')
-                
-                
-                '</tr>' SKIP.                      
-        END.
-    
-    END.
-    
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
-    
-    
-
-END PROCEDURE.
 
 PROCEDURE outputHeader :
     /*------------------------------------------------------------------------------
@@ -265,6 +187,7 @@ PROCEDURE process-web-request :
     ASSIGN 
         lc-mode = get-value("mode")
         lc-rowid = get-value("rowid")
+        lc-parent = get-value("parent")
         lc-search = get-value("search")
         lc-firstrow = get-value("firstrow")
         lc-lastrow  = get-value("lastrow")
@@ -284,24 +207,7 @@ PROCEDURE process-web-request :
                            "&lastrow=" + lc-lastrow.
 
     CASE lc-mode:
-        WHEN 'add'
-        THEN 
-            ASSIGN 
-                lc-title = 'Add'
-                lc-link-label = "Cancel addition"
-                lc-submit-label = "Add Data".
-        WHEN 'view'
-        THEN 
-            ASSIGN 
-                lc-title = 'View'
-                lc-link-label = "Back"
-                lc-submit-label = "".
-        WHEN 'delete'
-        THEN 
-            ASSIGN 
-                lc-title = 'Delete'
-                lc-link-label = 'Cancel deletion'
-                lc-submit-label = 'Delete Data'.
+       
         WHEN 'Update'
         THEN 
             ASSIGN 
@@ -313,9 +219,9 @@ PROCEDURE process-web-request :
 
     ASSIGN 
         lc-title = lc-title + ' Data'
-        lc-link-url = appurl + '/crm/crmload.p' + 
+        lc-link-url = appurl + '/crm/crmloadmnt.p' + 
                                   '?search=' + lc-search + 
-                                  '&firstrow=' + lc-firstrow + 
+                                  '&mode=view&rowid=' + lc-parent +
                                   '&lastrow=' + lc-lastrow + 
                                   '&navigation=refresh' +
                                   '&time=' + string(TIME)
@@ -343,7 +249,8 @@ PROCEDURE process-web-request :
         IF lc-mode <> "delete" THEN
         DO:
             ASSIGN                  
-                lc-description       = get-value("description").
+                lc-note       = get-value("note")
+                lc-status     = get-value("status").
                
             
              
@@ -364,64 +271,40 @@ PROCEDURE process-web-request :
                             INPUT-OUTPUT lc-error-field,
                             INPUT-OUTPUT lc-error-msg ).
                 END.
-                ELSE
-                DO:
-                    CREATE b-table.
-                    ASSIGN 
-                        
-                        b-table.CompanyCode = lc-global-company
-                        b-table.load_id = NEXT-VALUE(crm_data_load)
-                        b-table.loginid = lc-global-user
-                        b-table.created = NOW
-                        lc-firstrow      = STRING(ROWID(b-table))
-                        .
-                   
-                END.
+                
            
                ASSIGN 
-                    b-table.descr     = lc-description
+                    b-table.note     = lc-note
+                    b-table.record_status = lc-status
                     .
             
             END.
         END.
-        ELSE
-        DO:
-            FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid)
-                EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
-            IF LOCKED b-table 
-                THEN  RUN htmlib-AddErrorMessage(
-                    'none', 
-                    'This record is locked by another user',
-                    INPUT-OUTPUT lc-error-field,
-                    INPUT-OUTPUT lc-error-msg ).
-            ELSE 
-            DO:
-                FOR EACH crm_data_acc OF b-table EXCLUSIVE-LOCK:
-                    DELETE crm_data_acc.
-                END.
-                DELETE b-table.
-            END.
-        END.
+        
 
         IF lc-error-field = "" THEN
         DO:
-            RUN outputHeader.
+            /*RUN outputHeader.*/
             set-user-field("navigation",'refresh').
             set-user-field("firstrow",lc-firstrow).
             set-user-field("search",lc-search).
-            RUN run-web-object IN web-utilities-hdl ("crm/crmload.p").
+            set-user-field("mode","view").
+            set-user-field("rowid",lc-parent).
+            request_method =  "GET".
+            RUN run-web-object IN web-utilities-hdl ("crm/crmloadmnt.p").
             RETURN.
         END.
     END.
 
     IF lc-mode <> 'add' THEN
     DO:
-        FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
+        FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK NO-ERROR.
 
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post"
-            THEN ASSIGN lc-description       = b-table.descr
+            THEN ASSIGN lc-note       = b-table.note
+                        lc-status     = b-table.record_status.
                 .
        
     END.
@@ -429,11 +312,12 @@ PROCEDURE process-web-request :
     RUN outputHeader.
     
     {&out} htmlib-Header(lc-title) skip
-           htmlib-StartForm("mainform","post", appurl + '/crm/crmloadmnt.p' )
+           htmlib-StartForm("mainform","post", appurl + '/crm/crmloadedit.p' )
            htmlib-ProgramTitle(lc-title) skip.
 
     {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-hidden ("parent", lc-parent)
            htmlib-Hidden ("savesearch", lc-search) skip
            htmlib-Hidden ("savefirstrow", lc-firstrow) skip
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
@@ -449,27 +333,33 @@ PROCEDURE process-web-request :
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("description",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Description")
-        ELSE htmlib-SideLabel("Description"))
+        THEN htmlib-SideLabelError("Note")
+        ELSE htmlib-SideLabel("Note"))
     '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("description",40,lc-description) 
+    htmlib-TextArea("note",lc-note,10,60)
     '</TD>' skip.
     else 
-    {&out} htmlib-TableField(html-encode(lc-description),'left')
+    {&out} htmlib-TableField(html-encode(lc-note),'left')
            skip.
     {&out} '</TR>' skip.
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("status",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Status")
+        ELSE htmlib-SideLabel("Status"))
+    '</TD>' 
+    '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-Select("status",lc-global-CRMRS-Code,lc-global-CRMRS-desc,
+        lc-status)
+    '</TD></TR>' skip. 
     
 
     {&out} htmlib-EndTable() skip.
 
 
-    IF lc-mode = "VIEW"
-    THEN RUN ipViewAcc.
-    
-    
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 

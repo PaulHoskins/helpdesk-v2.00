@@ -1114,6 +1114,13 @@ ADD FIELD "record_status" OF "crm_data_acc" AS character
   MAX-WIDTH 16
   ORDER 200
 
+ADD FIELD "note" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 22
+  MAX-WIDTH 16
+  ORDER 210
+
 ADD INDEX "PrimKey" ON "crm_data_acc" 
   AREA "Schema Area"
   UNIQUE
@@ -6875,4 +6882,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000136412
+0000136539

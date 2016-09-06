@@ -1284,7 +1284,7 @@ FUNCTION htmlib-ImageLink RETURNS CHARACTER
 
     RETURN
         SUBSTITUTE(
-        '<a href="&1"><img border="0" src="&2" alt="&3"></a>',
+        '<a href="&1"><img border="0" src="&2" title="&3" alt="&3"></a>',
         pc-url,
         pc-image,
         pc-alt).
