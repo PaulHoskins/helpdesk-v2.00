@@ -18,6 +18,7 @@
     27/03/2015  phoski      project related link
     18/06/2016  phoski      survey link
     03/09/2016  phoski      CRM 
+    06/09/2116  phoski      tbar-BeginLong use longchar
     
     
 ***********************************************************************/
@@ -59,6 +60,9 @@ FUNCTION tbar-BeginID RETURNS CHARACTER
 &ENDIF
 
 &IF DEFINED(EXCLUDE-tbar-BeginOption) = 0 &THEN
+
+FUNCTION tbar-BeginLong RETURNS LONGCHAR 
+	(pc-RightPanel AS LONGCHAR) FORWARD.
 
 FUNCTION tbar-BeginOption RETURNS CHARACTER
     ( /* parameter-definitions */ )  FORWARD.
@@ -302,6 +306,29 @@ END FUNCTION.
 &ENDIF
 
 &IF DEFINED(EXCLUDE-tbar-BeginOption) = 0 &THEN
+
+FUNCTION tbar-BeginLong RETURNS LONGCHAR 
+	  ( pc-RightPanel AS LONGCHAR ) :
+    /*------------------------------------------------------------------------------
+      Purpose:  
+        Notes:  
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE lc-Long AS LONGCHAR NO-UNDO.
+    
+    IF pc-RightPanel = ""
+        OR pc-RightPanel = ?
+        THEN lc-long = '<div id="toolbar" style="clear: both;" class="toolbar">&nbsp;'.
+    ELSE lc-long = '<div id="toolbar" style="clear: both;" class="toolbar"><span id="tbright" class="tbright">' + pc-RightPanel + '&nbsp;</span>&nbsp;'. 
+    
+    RETURN lc-long.
+    
+
+
+
+
+		
+END FUNCTION.
 
 FUNCTION tbar-BeginOption RETURNS CHARACTER
     ( /* parameter-definitions */ ) :

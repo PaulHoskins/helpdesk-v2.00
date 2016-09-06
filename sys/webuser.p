@@ -18,7 +18,8 @@
     25/06/2015  phoski      Shorten account/user type width to stop 
                             overflow on toolbar
     03/07/2016  phoski      Show Mobile Number    
-    31/07/2016  phoski      Filter On Disabled flag                    
+    31/07/2016  phoski      Filter On Disabled flag 
+    06/09/2016  phoski      Customer selection 32k problem                   
     
 
 ***********************************************************************/
@@ -79,7 +80,7 @@ DEFINE BUFFER b-search FOR webuser.
 
 &IF DEFINED(EXCLUDE-fnToolbarAccountSelection) = 0 &THEN
 
-FUNCTION fnToolbarAccountSelection RETURNS CHARACTER
+FUNCTION fnToolbarAccountSelection RETURNS LONGCHAR
     ( /* parameter-definitions */ )  FORWARD.
 
 
@@ -337,17 +338,20 @@ PROCEDURE process-web-request :
            htmlib-hidden("submitsource","") skip.
     
   
-    {&out}
-    tbar-Begin(
+    {&out-long}
+    tbar-BeginLong(
         DYNAMIC-FUNCTION('fnToolbarYearSelection')
-        + '&nbsp;' + 
-        DYNAMIC-FUNCTION('fnToolbarAccountSelection':U) 
-        + 
+        + '&nbsp;' +
+        
+        DYNAMIC-FUNCTION('fnToolbarAccountSelection':U)
+        +    
+               
         '&nbsp;' +
         dynamic-function('fnToolbarStatusSelection':U)
         +
         tbar-FindLabel(appurl + "/sys/webuser.p","Find Name")
-        )
+        ) SKIP.
+    {&out}
     tbar-Link("add",?,appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
     tbar-BeginOption()
     tbar-Link("view",?,"off",'')
@@ -605,7 +609,7 @@ END PROCEDURE.
 
 &IF DEFINED(EXCLUDE-fnToolbarAccountSelection) = 0 &THEN
 
-FUNCTION fnToolbarAccountSelection RETURNS CHARACTER
+FUNCTION fnToolbarAccountSelection RETURNS LONGCHAR
     ( /* parameter-definitions */ ) :
     /*------------------------------------------------------------------------------
       Purpose:  
@@ -613,11 +617,10 @@ FUNCTION fnToolbarAccountSelection RETURNS CHARACTER
     ------------------------------------------------------------------------------*/
 
     
-    DEFINE VARIABLE lc-return       AS CHARACTER     NO-UNDO.
-
-    DEFINE VARIABLE lc-codes        AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-names        AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-this         AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE lc-return       AS LONGCHAR         NO-UNDO.
+    DEFINE VARIABLE lc-codes        AS LONGCHAR         NO-UNDO.
+    DEFINE VARIABLE lc-names        AS LONGCHAR         NO-UNDO.
+    DEFINE VARIABLE lc-this         AS CHARACTER        NO-UNDO.
 
     DEFINE BUFFER customer FOR customer.
 
@@ -631,11 +634,11 @@ FUNCTION fnToolbarAccountSelection RETURNS CHARACTER
         BY customer.NAME:
         ASSIGN 
             lc-codes = lc-codes + "|" + customer.AccountNumber
-            lc-names = lc-names + "|" + trim(substr(customer.NAME,1,30)).
+            lc-names = lc-names + "|" + trim(substr(customer.NAME,1,80)).
 
     END.
 
-    lc-return =  htmlib-SelectJS(
+    lc-return =  htmlib-SelectJSLong(
         "selacc",
         'OptionChange(this)',
         lc-codes,

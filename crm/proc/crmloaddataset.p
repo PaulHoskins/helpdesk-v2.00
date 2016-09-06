@@ -77,6 +77,7 @@ PROCEDURE ipCreateRecords:
             ttin.msg                    = "OK"
             crm_data_acc.CompanyCode    = crm_data_load.CompanyCode
             crm_data_acc.load_id        = crm_data_load.load_id
+            crm_data_acc.record_status  = "NEW"
             crm_data_acc.record_no      = li-rec. 
             
         ASSIGN

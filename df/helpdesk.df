@@ -1107,12 +1107,12 @@ ADD FIELD "AccountNumber" OF "crm_data_acc" AS character
   MAX-WIDTH 16
   ORDER 190
 
-ADD FIELD "record_status" OF "crm_data_acc" AS integer 
-  FORMAT "->,>>>,>>9"
-  INITIAL "0"
-  POSITION 20
-  MAX-WIDTH 4
-  ORDER 180
+ADD FIELD "record_status" OF "crm_data_acc" AS character 
+  FORMAT "x(8)"
+  INITIAL "OPEN"
+  POSITION 21
+  MAX-WIDTH 16
+  ORDER 200
 
 ADD INDEX "PrimKey" ON "crm_data_acc" 
   AREA "Schema Area"
@@ -1121,6 +1121,11 @@ ADD INDEX "PrimKey" ON "crm_data_acc"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "load_id" ASCENDING 
   INDEX-FIELD "record_no" ASCENDING 
+
+ADD INDEX "nameKey" ON "crm_data_acc" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "Name" ASCENDING 
 
 ADD TABLE "crm_data_load"
   AREA "Schema Area"
@@ -6870,4 +6875,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000136307
+0000136412

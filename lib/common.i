@@ -198,7 +198,12 @@ DEFINE VARIABLE lc-global-opProb-Code                 AS CHARACTER
     INITIAL '0|25|50|75|100'        NO-UNDO.
 DEFINE VARIABLE lc-global-opProb-Desc                 AS CHARACTER 
     INITIAL "0%|25%|50%|75%|100%"   NO-UNDO.
-         
+
+DEFINE VARIABLE lc-global-CRMRS-Code                 AS CHARACTER 
+    INITIAL 'NEW|INV|CONT-NI|CONT-IN|ACC-CRT'        NO-UNDO.
+DEFINE VARIABLE lc-global-CRMRS-Desc                 AS CHARACTER 
+    INITIAL "New|Invalid|Contacted - Not Interested|Contacted - Interested|Account Created"   NO-UNDO.
+             
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
 DEFINE VARIABLE lc-global-jquery                      AS CHARACTER 

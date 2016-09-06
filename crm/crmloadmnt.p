@@ -105,11 +105,6 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE li-int  AS INTEGER NO-UNDO.
-
-       
-        
-
 
 
     IF lc-description = ""
@@ -127,6 +122,67 @@ END PROCEDURE.
 &ENDIF
 
 &IF DEFINED(EXCLUDE-outputHeader) = 0 &THEN
+
+PROCEDURE ipViewAcc:
+/*------------------------------------------------------------------------------
+		Purpose:  																	  
+		Notes:  																	  
+------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE li-loop     AS INT      NO-UNDO.
+    DEFINE VARIABLE lc-cont     AS CHARACTER NO-UNDO.
+    
+       
+    {&out} skip
+           htmlib-StartMntTable().
+
+    {&out}
+    htmlib-TableHeading(
+        "ID|Name|Address 1|Address 2|City|County|Post Code|Telephone|Business Type|Contact Details|Position"
+        ) skip.
+    DO li-loop = 1 TO NUM-ENTRIES(lc-global-CRMRS-Code,"|"):
+            
+        {&out} '<tr><td colspan=11><div class="infobox">'
+        com-DecodeLookup(ENTRY(li-loop,lc-global-CRMRS-Code,"|"),lc-global-CRMRS-Code,lc-global-CRMRS-Desc)
+        '</div</td></tr>' SKIP.
+        
+        FOR EACH crm_data_acc NO-LOCK OF b-table
+            WHERE crm_data_acc.record_status = ENTRY(li-loop,lc-global-CRMRS-Code,"|")
+            BY crm_data_acc.Name
+                      :
+              
+              
+           
+            ASSIGN
+                lc-cont = crm_data_acc.contact_title + " " + crm_data_acc.contact_forename + " " + crm_data_acc.contact_surname.
+                                          
+            {&out}
+                '<tr>'
+                htmlib-MntTableField(html-encode( crm_data_acc.accid),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.Name),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.Address1),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.Address2),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.City),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.County),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.PostCode),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.Telephone),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.bus_type),'left')
+                htmlib-MntTableField(html-encode( lc-cont),'left')
+                htmlib-MntTableField(html-encode( crm_data_acc.contact_position),'left')
+                
+                
+                '</tr>' SKIP.                      
+        END.
+    
+    END.
+    
+    {&out} skip 
+           htmlib-EndTable()
+           skip.
+    
+    
+
+END PROCEDURE.
 
 PROCEDURE outputHeader :
     /*------------------------------------------------------------------------------
@@ -400,6 +456,10 @@ PROCEDURE process-web-request :
     {&out} htmlib-EndTable() skip.
 
 
+    IF lc-mode = "VIEW"
+    THEN RUN ipViewAcc.
+    
+    
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
