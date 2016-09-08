@@ -46,7 +46,6 @@ DEFINE VARIABLE lc-submit-label AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-descr        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-SalesManager AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-sm-code      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-sm-desc      AS CHARACTER NO-UNDO.
 
@@ -290,14 +289,7 @@ PROCEDURE ip-UpdatePage:
     htmlib-InputField("descr",40,lc-descr) skip
            '</TD></tr>'.
            
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("SalesManager",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Sales Rep")
-        ELSE htmlib-SideLabel("Sales Rep"))
-    '</TD>'
-    '<TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("salesmanager",lc-sm-Code,lc-sm-desc,lc-SalesManager)
-    '</TD></TR>' skip.
+    
     
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Sales Contact")
@@ -618,7 +610,6 @@ PROCEDURE process-web-request:
             
             ASSIGN
                 lc-descr             = get-value("descr")
-                lc-SalesManager      = get-value("salesmanager")
                 lc-SalesContact      = get-value("salescontact")
                 lc-department        = get-value("department")
                 lc-nextstep          = get-value("nextstep")
@@ -671,7 +662,6 @@ PROCEDURE process-web-request:
                 END.
                 ASSIGN
                     b-table.descr           = lc-descr
-                    b-table.SalesManager    = lc-SalesManager
                     b-table.salesContact    = lc-SalesContact
                     b-table.Department      = lc-department
                     b-table.NextStep        = lc-nextstep
@@ -735,8 +725,7 @@ PROCEDURE process-web-request:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         
         ASSIGN
-            lc-descr = b-table.descr
-            lc-SalesManager = b-table.SalesManager
+            lc-descr        = b-table.descr
             lc-SalesContact = b-table.Salescontact
             lc-department   = b-table.department
             lc-nextstep     = b-table.nextstep

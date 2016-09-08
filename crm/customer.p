@@ -480,8 +480,8 @@ PROCEDURE ip-CRM-Page:
     
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("SalesManager",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Sales Manager")
-        ELSE htmlib-SideLabel("Sales Manager"))
+        THEN htmlib-SideLabelError("Sales Rep")
+        ELSE htmlib-SideLabel("Sales Rep"))
     '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
@@ -692,7 +692,7 @@ PROCEDURE ip-opPage:
     
     {&out}
     htmlib-TableHeading(
-        "Description|Status|Type|Close Date|Sales Rep|Customer Contact|Department|Next Step|Created^right"
+        "Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
         ) skip.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -730,7 +730,7 @@ PROCEDURE ip-opPage:
              htmlib-MntTableField(com-DecodeLookup(b-query.opType,lc-global-opType-Code,lc-global-opType-desc),'left')
             
             htmlib-MntTableField(html-encode(IF b-query.closeDate = ? THEN '' ELSE string(b-query.CloseDate,"99/99/9999")),'left')
-            htmlib-MntTableField(html-encode(com-UserName(b-query.salesmanager)),'left')
+          
             htmlib-MntTableField(html-encode(com-UserName(b-query.salesContact)),'left')
             htmlib-MntTableField(html-encode(b-query.department),'left')
             htmlib-MntTableField(html-encode(b-query.nextStep),'left')
@@ -966,7 +966,7 @@ PROCEDURE process-web-request :
                 b-table.telephone      = lc-telephone
                 b-table.accStatus       = lc-accStatus
                 b-table.website         = lc-WebSite
-                b-table.accountref       = lc-accountref
+                b-table.accountref      = lc-accountref
                 b-table.SalesManager    = lc-SalesManager
                 b-table.salesContact    = lc-SalesContact
                 b-table.NoOfEmployees   = int(lc-noemp)

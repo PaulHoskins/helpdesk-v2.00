@@ -1782,6 +1782,12 @@ ADD INDEX "Name" ON "Customer"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "Name" ASCENDING 
 
+ADD INDEX "SalesManager" ON "Customer" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "SalesManager" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
 ADD INDEX "st-num" ON "Customer" 
   AREA "Schema Area"
   INDEX-FIELD "CompanyCode" ASCENDING 
@@ -4461,14 +4467,6 @@ ADD FIELD "descr" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 40
 
-ADD FIELD "SalesManager" OF "op_master" AS character 
-  FORMAT "x(8)"
-  INITIAL ""
-  LABEL "Sales Manager"
-  POSITION 6
-  MAX-WIDTH 16
-  ORDER 50
-
 ADD FIELD "salesContact" OF "op_master" AS character 
   DESCRIPTION "-> webuser.loginid"
   FORMAT "x(8)"
@@ -4625,12 +4623,6 @@ ADD INDEX "AccountNumber" ON "op_master"
   AREA "Schema Area"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
-  INDEX-FIELD "op_id" ASCENDING 
-
-ADD INDEX "salesRep" ON "op_master" 
-  AREA "Schema Area"
-  INDEX-FIELD "CompanyCode" ASCENDING 
-  INDEX-FIELD "SalesManager" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
 
 ADD TABLE "op_note"
@@ -6882,4 +6874,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000136539
+0000136395

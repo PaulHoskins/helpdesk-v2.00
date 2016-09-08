@@ -415,24 +415,29 @@ PROCEDURE ip-CRMRepStatistics:
     DEFINE VARIABLE li-loop         AS INTEGER   NO-UNDO.
    
     DEFINE BUFFER WebUser FOR WebUser.
+    DEFINE BUFFER Customer FOR Customer.
     
     FOR EACH WebUser NO-LOCK 
         WHERE WebUser.CompanyCode = lc-global-company
           AND WebUser.engType > ""
           AND LOOKUP(WebUser.engType,lc-global-SalType-Code,"|") > 0:
-             
-         
-        ASSIGN 
-            lc-where =  
-            "for each op_master NO-LOCK where op_master.CompanyCode = '" + string(lc-Global-Company) + "'" 
-            + " and op_master.SalesManager = '" + WebUser.LoginID + "'".
-            
-      
+       
+          
         
         EMPTY TEMP-TABLE tt-stat.
-            
-        RUN ip-BuildCRMStatistics ( "REP:" + WebUser.LoginID , lc-where ).
         
+        FOR EACH Customer NO-LOCK
+            WHERE Customer.CompanyCode = lc-global-company
+              AND Customer.SalesManager = WebUser.LoginID:
+                  
+            ASSIGN 
+                lc-where =  
+                "for each op_master NO-LOCK where op_master.CompanyCode = '" + string(lc-Global-Company) + "'" 
+                + " and op_master.AccountNumber = '" + Customer.AccountNumber + "'".
+            
+            RUN ip-BuildCRMStatistics ( "REP:" + WebUser.LoginID , lc-where ).
+        END.
+                
         FOR EACH tt-stat exclusive:
             IF ENTRY(2,tt-stat.scode,":") = "-" THEN
             DO:
