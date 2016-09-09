@@ -18,35 +18,29 @@ CREATE WIDGET-POOL.
 
 /* Local Variable Definitions ---                                       */
 
-DEFINE VARIABLE lc-error-field AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-error-msg   AS CHARACTER NO-UNDO.
-
-
-DEFINE VARIABLE lc-mode        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-title       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-field   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-msg     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mode          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rowid         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-title         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-search        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-firstrow      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lastrow       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-navigation    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parameters    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-label    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit-label  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-url      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-note          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-status        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-AccountNumber AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-CustRowID     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO.
 
 
 DEFINE BUFFER b-valid FOR crm_data_acc.
 DEFINE BUFFER b-table FOR crm_data_acc.
-
-
-DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-navigation      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parameters      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parent          AS CHARACTER NO-UNDO.
-
-
-DEFINE VARIABLE lc-link-label      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
-
-
-DEFINE VARIABLE lc-note            AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-status          AS CHARACTER NO-UNDO.
-
 
 
 
@@ -107,6 +101,32 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
+    IF lc-status = lc-global-CRMRS-ACC-CRT THEN
+    DO:
+        IF lc-accountNumber = "" THEN
+        DO:
+            RUN htmlib-AddErrorMessage(
+                'accountnumber', 
+                'You must enter the new account number',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+            RETURN.
+        END.
+        IF CAN-FIND(Customer WHERE Customer.CompanyCode = lc-global-company
+            AND Customer.AccountNumber = lc-AccountNumber NO-LOCK) THEN
+        DO:
+            RUN htmlib-AddErrorMessage(
+                'accountnumber', 
+                'This account number aleady exists',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+            RETURN.
+            
+        END.
+                                 
+             
+    END.
+    
     
 
 END PROCEDURE.
@@ -174,31 +194,31 @@ END PROCEDURE.
 &IF DEFINED(EXCLUDE-process-web-request) = 0 &THEN
 
 PROCEDURE process-web-request :
-/*------------------------------------------------------------------------------
-  Purpose:     Process the web request.
-  Parameters:  <none>
-  emails:       
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+      Purpose:     Process the web request.
+      Parameters:  <none>
+      emails:       
+    ------------------------------------------------------------------------------*/
     
     {lib/checkloggedin.i} 
 
 
     
     ASSIGN 
-        lc-mode = get-value("mode")
-        lc-rowid = get-value("rowid")
-        lc-parent = get-value("parent")
-        lc-search = get-value("search")
-        lc-firstrow = get-value("firstrow")
-        lc-lastrow  = get-value("lastrow")
+        lc-mode       = get-value("mode")
+        lc-rowid      = get-value("rowid")
+        lc-parent     = get-value("parent")
+        lc-search     = get-value("search")
+        lc-firstrow   = get-value("firstrow")
+        lc-lastrow    = get-value("lastrow")
         lc-navigation = get-value("navigation").
 
     IF lc-mode = "" 
-        THEN ASSIGN lc-mode = get-field("savemode")
-            lc-rowid = get-field("saverowid")
-            lc-search = get-value("savesearch")
-            lc-firstrow = get-value("savefirstrow")
-            lc-lastrow  = get-value("savelastrow")
+        THEN ASSIGN lc-mode       = get-field("savemode")
+            lc-rowid      = get-field("saverowid")
+            lc-search     = get-value("savesearch")
+            lc-firstrow   = get-value("savefirstrow")
+            lc-lastrow    = get-value("savelastrow")
             lc-navigation = get-value("savenavigation").
 
     ASSIGN 
@@ -211,14 +231,14 @@ PROCEDURE process-web-request :
         WHEN 'Update'
         THEN 
             ASSIGN 
-                lc-title = 'Update'
-                lc-link-label = 'Cancel update'
+                lc-title        = 'Update'
+                lc-link-label   = 'Cancel update'
                 lc-submit-label = 'Update Data'.
     END CASE.
 
 
     ASSIGN 
-        lc-title = lc-title + ' Data'
+        lc-title    = lc-title + ' Data'
         lc-link-url = appurl + '/crm/crmloadmnt.p' + 
                                   '?search=' + lc-search + 
                                   '&mode=view&rowid=' + lc-parent +
@@ -249,8 +269,9 @@ PROCEDURE process-web-request :
         IF lc-mode <> "delete" THEN
         DO:
             ASSIGN                  
-                lc-note       = get-value("note")
-                lc-status     = get-value("status").
+                lc-note          = get-value("note")
+                lc-status        = get-value("status")
+                lc-AccountNumber = get-value("accountnumber").
                
             
              
@@ -272,10 +293,36 @@ PROCEDURE process-web-request :
                             INPUT-OUTPUT lc-error-msg ).
                 END.
                 
-           
-               ASSIGN 
-                    b-table.note     = lc-note
+                IF lc-status = lc-global-CRMRS-ACC-CRT THEN
+                DO:
+                    ASSIGN
+                        lc-AccountNumber = CAPS(lc-accountNumber).
+                    CREATE Customer.
+                    ASSIGN 
+                        Customer.CompanyCode   = lc-global-company
+                        Customer.AccountNumber = lc-AccountNumber
+                        Customer.accStatus     = "CRM"
+                        Customer.Name          = b-table.name
+                        Customer.Address1      = b-table.Address1
+                        Customer.Address2      = b-table.Address2
+                        Customer.City          = b-table.city
+                        Customer.County        = b-table.county
+                        Customer.Country       = "UK"
+                        Customer.Postcode      = b-table.Postcode
+                        Customer.Telephone     = b-table.Telephone
+                        Customer.Contact       = TRIM(b-table.contact_title + " " + b-table.contact_forename + " " + b-table.contact_surname)
+                        .
+                    ASSIGN 
+                        lc-enc-key =
+                        DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+                  
+                    
+                    
+                END.    
+                ASSIGN 
+                    b-table.note          = lc-note
                     b-table.record_status = lc-status
+                    b-table.AccountNumber = lc-accountNumber
                     .
             
             END.
@@ -285,6 +332,18 @@ PROCEDURE process-web-request :
         IF lc-error-field = "" THEN
         DO:
             /*RUN outputHeader.*/
+            
+            IF lc-status = lc-global-CRMRS-ACC-CRT THEN
+            DO:
+                set-user-field("crmaccount",lc-enc-key).
+                set-user-field("mode","CRM").
+                set-user-field("source","dataset").
+                set-user-field("parent", lc-parent).
+                request_method =  "GET".
+                RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
+                RETURN.
+            END.
+            
             set-user-field("navigation",'refresh').
             set-user-field("firstrow",lc-firstrow).
             set-user-field("search",lc-search).
@@ -303,9 +362,10 @@ PROCEDURE process-web-request :
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post"
-            THEN ASSIGN lc-note       = b-table.note
-                        lc-status     = b-table.record_status.
-                .
+            THEN ASSIGN lc-note          = b-table.note
+                lc-status        = b-table.record_status
+                lc-accountNumber = b-table.accountnumber.
+            .
        
     END.
 
@@ -355,7 +415,15 @@ PROCEDURE process-web-request :
     htmlib-Select("status",lc-global-CRMRS-Code,lc-global-CRMRS-desc,
         lc-status)
     '</TD></TR>' skip. 
-    
+            
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Account Number")
+        ELSE htmlib-SideLabel("Account Number"))
+    '</TD>' skip
+     '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("accountnumber",8,lc-accountnumber) skip
+           '</TD></tr>' SKIP.
 
     {&out} htmlib-EndTable() skip.
 

@@ -31,20 +31,20 @@ DEFINE BUFFER b-valid FOR crm_data_load.
 DEFINE BUFFER b-table FOR crm_data_load.
 
 
-DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-navigation      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parameters      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-search       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-firstrow     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lastrow      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-navigation   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parameters   AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE lc-link-label      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-label   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit-label AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 
 
 
-DEFINE VARIABLE lc-description     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-description  AS CHARACTER NO-UNDO.
 
 
 
@@ -124,17 +124,31 @@ END PROCEDURE.
 &IF DEFINED(EXCLUDE-outputHeader) = 0 &THEN
 
 PROCEDURE ipViewAcc:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE li-loop     AS INT      NO-UNDO.
+    DEFINE VARIABLE li-loop     AS INTEGER   NO-UNDO.
     DEFINE VARIABLE lc-cont     AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-url      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-count    AS INTEGER   NO-UNDO.
     
+    {&out} '<div class="infobox">Sections&nbsp;<a name="top"></a>' SKIP.
+    DO li-loop = 1 TO NUM-ENTRIES(lc-global-CRMRS-Code,"|"):
+        ASSIGN
+            li-count = 0.
+        FOR EACH crm_data_acc NO-LOCK OF b-table
+            WHERE crm_data_acc.record_status = ENTRY(li-loop,lc-global-CRMRS-Code,"|"):
+            ASSIGN 
+                li-count = li-count + 1.
+        END.
+        lc-url = com-DecodeLookup(ENTRY(li-loop,lc-global-CRMRS-Code,"|"),lc-global-CRMRS-Code,lc-global-CRMRS-Desc) + " - [" + string(li-count) + "]".
+        {&out}
+        '<a class=tlink href="#' + ENTRY(li-loop,lc-global-CRMRS-Code,"|") + '">' lc-url '</a>&nbsp;' SKIP.                
+    END.
     
-    
+    {&out} '</div>'.
     
     {&out} skip
            htmlib-StartMntTable().
@@ -146,17 +160,19 @@ PROCEDURE ipViewAcc:
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-CRMRS-Code,"|"):
             
         {&out} '<tr><td colspan=12><div class="infobox">'
+        '<a name="'  ENTRY(li-loop,lc-global-CRMRS-Code,"|") '"></a>' SKIP
+        '<a href="#top"><img src="/asset/img/up_16.gif"></a>' skip
         com-DecodeLookup(ENTRY(li-loop,lc-global-CRMRS-Code,"|"),lc-global-CRMRS-Code,lc-global-CRMRS-Desc)
         '</div</td></tr>' SKIP.
         
         FOR EACH crm_data_acc NO-LOCK OF b-table
             WHERE crm_data_acc.record_status = ENTRY(li-loop,lc-global-CRMRS-Code,"|")
             BY crm_data_acc.Name
-                      :
+            :
               
               
             IF crm_data_acc.record_status =  lc-global-CRMRS-ACC-CRT 
-            THEN lc-url = "".
+                THEN lc-url = "".
             ELSE ASSIGN
                     lc-url = appurl + "/crm/crmloadedit.p?rowid=" + string(ROWID(crm_data_acc)) + "&mode=update&parent=" +  string(ROWID(b-table)).
            
@@ -165,8 +181,10 @@ PROCEDURE ipViewAcc:
                  
                                
             {&out}
-                '<tr>'
-                '<td>' IF lc-url <> "" THEN htmlib-ImageLink('/images/toolbar/update.gif',lc-url,"Update " + crm_data_acc.name) ELSE '&nbsp;' '</td>' SKIP
+            '<tr>'
+            '<td>' 
+            IF lc-url <> "" THEN htmlib-ImageLink('/images/toolbar/update.gif',lc-url,"Update " + crm_data_acc.name) 
+            ELSE '&nbsp;' '</td>' SKIP
                 htmlib-MntTableField(html-encode( crm_data_acc.accid),'left')
                 
                 htmlib-MntTableField(html-encode( crm_data_acc.Name),'left')
@@ -378,7 +396,7 @@ PROCEDURE process-web-request :
                    
                 END.
            
-               ASSIGN 
+                ASSIGN 
                     b-table.descr     = lc-description
                     .
             
@@ -467,7 +485,7 @@ PROCEDURE process-web-request :
 
 
     IF lc-mode = "VIEW"
-    THEN RUN ipViewAcc.
+        THEN RUN ipViewAcc.
     
     
     IF lc-error-msg <> "" THEN

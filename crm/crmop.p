@@ -39,6 +39,9 @@ DEFINE VARIABLE lc-firstrow     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lastrow      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-navigation   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-parameters   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-source       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent       AS CHARACTER NO-UNDO.
+
 
 
 DEFINE VARIABLE lc-link-label   AS CHARACTER NO-UNDO.
@@ -71,7 +74,7 @@ DEFINE VARIABLE lc-dbase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-camp         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ops          AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-Action-TBar     AS CHARACTER INITIAL 'tim' NO-UNDO.
+DEFINE VARIABLE lc-Action-TBar  AS CHARACTER INITIAL 'tim' NO-UNDO.
 DEFINE VARIABLE lc-doc-tbar     AS CHARACTER INITIAL 'doc' NO-UNDO.
 
 
@@ -92,34 +95,34 @@ RUN process-web-request.
 /* **********************  Internal Procedures  *********************** */
 
 PROCEDURE ip-ActionPage:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
-{&out}
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    {&out}
            skip
            tbar-BeginID(lc-Action-TBAR,"") SKIP.
      
-        {&out} 
-           tbar-Link("add",?,
-                     'javascript:PopUpWindow('
-                          + '~'' + appurl 
-                     + '/crm/actionupdate.p?mode=add&oprowid=' + string(ROWID(b-table))
-                          + '~'' 
-                          + ');'
-                          ,"")
+    {&out} 
+    tbar-Link("add",?,
+        'javascript:PopUpWindow('
+        + '~'' + appurl 
+        + '/crm/actionupdate.p?mode=add&oprowid=' + string(ROWID(b-table))
+        + '~'' 
+        + ');'
+        ,"")
                       SKIP.
 
     {&out}
-            tbar-BeginOptionID(lc-Action-TBAR) skip.
+    tbar-BeginOptionID(lc-Action-TBAR) skip.
 
     {&out} tbar-Link("delete",?,"off","").
 
     {&out}  
-        tbar-Link("update",?,"off","")
-        tbar-Link("multiiss",?,"off","")
-        tbar-EndOption()
-        tbar-End().
+    tbar-Link("update",?,"off","")
+    tbar-Link("multiiss",?,"off","")
+    tbar-EndOption()
+    tbar-End().
 
     {&out}
     '<div id="IDAction"></div>'.
@@ -129,10 +132,10 @@ PROCEDURE ip-ActionPage:
 END PROCEDURE.
 
 PROCEDURE ip-Documents:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
     {&out}
            skip
            tbar-BeginID(lc-Doc-TBAR,"")
@@ -180,7 +183,7 @@ PROCEDURE ip-ExportJS:
            
            '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP.
            
-         /* 3678 ----------------------> */ 
+    /* 3678 ----------------------> */ 
     {&out}  '<script type="text/javascript" >~n'
     'var pIP =  window.location.host; ~n'
     'function goGMAP(pCODE, pNAME, pADD) ~{~n'
@@ -217,7 +220,7 @@ PROCEDURE ip-ExportJS:
           
            
     {&out}
-        '<script>' skip
+    '<script>' skip
         'function ConfirmDeleteAction(ObjectID,ActionID) ~{' skip
         '   var DocumentAjax = "' appurl '/crm/ajax/delaction.p?actionid=" + ActionID' skip
         '   if (confirm("Are you sure you want to delete this action?")) ~{' skip
@@ -249,10 +252,10 @@ PROCEDURE ip-ExportJS:
 END PROCEDURE.
 
 PROCEDURE ip-NotePage:
-/*------------------------------------------------------------------------------
-		Purpose:  																	  
-		Notes:  																	  
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
     {&out}
     SKIP(5)
     tbar-Begin("")
@@ -523,7 +526,9 @@ PROCEDURE process-web-request:
     ASSIGN 
         lc-mode = get-value("mode")
         lc-rowid = get-value("rowid")
-        lc-enc-key = get-value("crmaccount").
+        lc-enc-key = get-value("crmaccount")
+        lc-source = get-value("source")
+        lc-parent = get-value("parent").
     .
     
     ASSIGN
@@ -591,6 +596,7 @@ PROCEDURE process-web-request:
         lc-link-url = appurl + '/crm/customer.p' + 
                                   '?crmaccount=' + url-encode(lc-enc-key,"Query") +
                                   '&navigation=refresh&mode=CRM' +
+                                  "&source=" + lc-source + "&parent=" + lc-parent +
                                   '&time=' + string(TIME).
                                   
               
@@ -713,6 +719,8 @@ PROCEDURE process-web-request:
             set-user-field("search",lc-search).
             set-user-field("mode","CRM").
             set-user-field("crmaccount" , get-value("crmaccount")).
+            set-user-field("source",lc-source).
+            set-user-field("parent",lc-parent).
             request_method = "GET".
             RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
             RETURN.
@@ -754,7 +762,7 @@ PROCEDURE process-web-request:
     {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
     
     IF lc-mode = "UPDATE"
-    THEN RUN ip-ExportJS.
+        THEN RUN ip-ExportJS.
     
     
     {&out} htmlib-Header("Opportunity CRM") skip.
@@ -804,8 +812,8 @@ PROCEDURE process-web-request:
             RUN ip-ActionPage.
             {&out} '</div>' SKIP.
         
-           {&out} 
-           '<div class="tabbertab" title="Notes">' skip.
+            {&out} 
+            '<div class="tabbertab" title="Notes">' skip.
             RUN ip-NotePage.
             {&out} 
             '</div>'.
@@ -831,7 +839,10 @@ PROCEDURE process-web-request:
            htmlib-hidden ("crmaccount", get-value("crmaccount"))
            htmlib-Hidden ("savefirstrow", lc-firstrow) skip
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip.
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-hidden("source",lc-source) skip
+           htmlib-hidden("parent",lc-parent) SKIP
+           .
        
        
     {&out} '<div id="placeholder" style="display: none;"></div>' skip.

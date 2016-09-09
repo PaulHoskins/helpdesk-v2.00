@@ -64,6 +64,9 @@ DEFINE VARIABLE lc-ind-code      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ind-desc      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-accountref    AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE lc-source        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent        AS CHARACTER NO-UNDO.
+
 DEFINE VARIABLE lc-opt-TBAR      AS CHARACTER 
     INITIAL 'opu' NO-UNDO.
     
@@ -185,7 +188,7 @@ PROCEDURE ip-ConPage:
     {&out} SKIP
             tbar-BeginID(pc-ToolBarID,"") SKIP
             tbar-Link("add",?,appurl + '/crm/crmcontact.p',"crmaccount=" +
-                      url-encode(lc-enc-key,"Query") + "&returnback=crm")
+                      url-encode(lc-enc-key,"Query") + "&returnback=crm" + "&source=" + lc-source + "&parent=" + lc-parent)
             tbar-BeginOptionID(pc-ToolBarID)
             tbar-Link("update",?,"off",lc-link-otherp)
             tbar-Link("delete",?,"off",lc-link-otherp)
@@ -224,7 +227,9 @@ PROCEDURE ip-ConPage:
         ASSIGN 
             lc-link-otherp = 'search=' + lc-search +
                              '&crmaccount=' +  url-encode(lc-enc-key,"Query") +
-                             '&returnback=' + lc-returnback.
+                             '&returnback=' + lc-returnback +
+                             '&source=' + lc-source +
+                             '&parent=' + lc-parent.
                                 
         
         {&out}
@@ -678,7 +683,7 @@ PROCEDURE ip-opPage:
     {&out} SKIP
             tbar-BeginID(pc-ToolBarID,"") SKIP
             tbar-Link("add",?,appurl + '/crm/crmop.p',"crmaccount=" +
-                      url-encode(lc-enc-key,"Query") + "&returnback=crm")
+                      url-encode(lc-enc-key,"Query") + "&returnback=crm" + "&source=" + lc-source + "&parent=" + lc-parent )
             tbar-BeginOptionID(pc-ToolBarID)
             tbar-Link("update",?,"off",lc-link-otherp)
             tbar-Link("delete",?,"off",lc-link-otherp)
@@ -715,7 +720,9 @@ PROCEDURE ip-opPage:
         ASSIGN 
             lc-link-otherp = 'search=' + lc-search +
                              '&crmaccount=' +  url-encode(lc-enc-key,"Query") +
-                             '&returnback=' + lc-returnback.
+                             '&returnback=' + lc-returnback +
+                             '&source=' + lc-source +
+                             '&parent=' + lc-parent.
                                 
         
         {&out}
@@ -907,7 +914,15 @@ PROCEDURE process-web-request :
    
     ASSIGN 
         lc-rowid = get-value("crmaccount")
-        lc-mode = get-value("mode").
+        lc-mode = get-value("mode")
+        lc-source = get-value("source")
+        lc-parent = get-value("parent").
+        
+    IF lc-source = "dataset"
+    THEN lc-link-url = appurl + '/crm/crmloadmnt.p' + 
+                                  '?mode=view&rowid=' + lc-parent +
+                                  '&navigation=refresh' +
+                                  '&time=' + string(TIME).    
     IF lc-mode = "CRM"
         THEN lc-mode = "UPDATE".
         
@@ -1059,7 +1074,7 @@ PROCEDURE process-web-request :
            htmlib-ProgramTitle(lc-title) skip.
 
     
-    IF get-value("source") <> "menu"
+    IF lc-source <> "menu"
         THEN {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<br>' skip.
         
     RUN ip-CRM-Page.
@@ -1107,6 +1122,8 @@ PROCEDURE process-web-request :
            htmlib-Hidden("crmaccount", get-value("crmaccount")) SKIP
            htmlib-Hidden("submitsource", "") SKIP
            htmlib-Hidden("mode", lc-mode) SKIP
+           htmlib-hidden("source",lc-source) skip
+           htmlib-hidden("parent",lc-parent) skip
            htmlib-EndForm() skip.
            
     

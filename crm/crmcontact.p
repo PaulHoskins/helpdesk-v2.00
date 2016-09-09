@@ -18,52 +18,47 @@ CREATE WIDGET-POOL.
 
 /* Local Variable Definitions ---                                       */
 
-DEFINE VARIABLE lc-error-field     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-error-msg       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-field   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-msg     AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE li-curr-year       AS INTEGER   FORMAT "9999" NO-UNDO.
-DEFINE VARIABLE li-end-week        AS INTEGER   FORMAT "99" NO-UNDO.
-DEFINE VARIABLE ld-curr-hours      AS DECIMAL   FORMAT "99.99" EXTENT 7 NO-UNDO.
-DEFINE VARIABLE lc-day             AS CHARACTER INITIAL "Mon,Tue,Wed,Thu,Fri,Sat,Sun" NO-UNDO.
-
-DEFINE VARIABLE lc-mode            AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rowid           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-title           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-crmAccount      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lr-customer        AS ROWID     NO-UNDO.
-DEFINE VARIABLE lc-enc-key         AS CHARACTER NO-UNDO.
-
-
-DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-navigation      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parameters      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-label      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-loginid         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-forename        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-surname         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-email           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-usertitle       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-accountnumber   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-jobtitle        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-telephone       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-mobile          AS CHARACTER NO-UNDO.
-
-
-
-
-DEFINE VARIABLE lc-html            AS CHARACTER NO-UNDO.
-DEFINE VARIABLE ll-check           AS LOG       NO-UNDO.
-DEFINE VARIABLE li-Count           AS INTEGER   NO-UNDO.
-DEFINE VARIABLE li-row             AS INTEGER   INITIAL 3 NO-UNDO.
+DEFINE VARIABLE li-curr-year     AS INTEGER   FORMAT "9999" NO-UNDO.
+DEFINE VARIABLE li-end-week      AS INTEGER   FORMAT "99" NO-UNDO.
+DEFINE VARIABLE ld-curr-hours    AS DECIMAL   FORMAT "99.99" EXTENT 7 NO-UNDO.
+DEFINE VARIABLE lc-day           AS CHARACTER INITIAL "Mon,Tue,Wed,Thu,Fri,Sat,Sun" NO-UNDO.
+DEFINE VARIABLE lc-mode          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rowid         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-title         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-crmAccount    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lr-customer      AS ROWID     NO-UNDO.
+DEFINE VARIABLE lc-enc-key       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-search        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-firstrow      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lastrow       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-navigation    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parameters    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-label    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit-label  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-url      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-loginid       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-forename      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-surname       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-email         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-usertitle     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-accountnumber AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-jobtitle      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-telephone     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mobile        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-source        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-html          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ll-check         AS LOG       NO-UNDO.
+DEFINE VARIABLE li-Count         AS INTEGER   NO-UNDO.
+DEFINE VARIABLE li-row           AS INTEGER   INITIAL 3 NO-UNDO.
 
 
-DEFINE VARIABLE lc-usertitleCode   AS CHARACTER
+DEFINE VARIABLE lc-usertitleCode AS CHARACTER
     INITIAL '' NO-UNDO.
-DEFINE VARIABLE lc-usertitleDesc   AS CHARACTER
+DEFINE VARIABLE lc-usertitleDesc AS CHARACTER
     INITIAL '' NO-UNDO.
 
 
@@ -375,8 +370,10 @@ PROCEDURE process-web-request :
         lc-lastrow  = get-value("lastrow")
         lc-navigation = get-value("navigation")
         li-curr-year  = INTEGER(get-value("submityear"))
-        lc-enc-key = get-value("crmaccount").
-    .
+        lc-enc-key = get-value("crmaccount")
+        lc-source = get-value("source")
+        lc-parent = get-value("parent").
+ 
     
     ASSIGN
         lc-CRMAccount = DYNAMIC-FUNCTION("sysec-DecodeValue",lc-user,TODAY,"Customer",lc-enc-key).
@@ -431,7 +428,7 @@ PROCEDURE process-web-request :
                 lc-link-label = 'Cancel update'
                 lc-submit-label = 'Update Contact'.
     END CASE.
- ASSIGN 
+    ASSIGN 
         lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
 
     ASSIGN 
@@ -439,6 +436,7 @@ PROCEDURE process-web-request :
         lc-link-url = appurl + '/crm/customer.p' + 
                                   '?crmaccount=' + url-encode(lc-enc-key,"Query") +
                                   '&navigation=refresh&mode=CRM&showtab=contact' +
+                                  "&source=" + lc-source + "&parent=" + lc-parent +
                                   '&time=' + string(TIME).
         
    
@@ -498,7 +496,8 @@ PROCEDURE process-web-request :
                 END.
                 ELSE
                 DO:
-                    ASSIGN lc-loginid = TRIM(REPLACE(lc-forename + "." + lc-surname," ","")).
+                    ASSIGN 
+                        lc-loginid = TRIM(REPLACE(lc-forename + "." + lc-surname," ","")).
                     IF CAN-FIND(FIRST b-table WHERE b-table.loginid = lc-loginid NO-LOCK) THEN
                     REPEAT:
                         li-loop = li-loop + 1.
@@ -540,7 +539,7 @@ PROCEDURE process-web-request :
                         b-table.name = b-table.forename + ' ' + 
                                           b-table.surname.
                                  
-                 END.
+                END.
             END.
         END.
         ELSE
@@ -571,6 +570,8 @@ PROCEDURE process-web-request :
             set-user-field("mode","CRM").
             set-user-field("crmaccount" , get-value("crmaccount")).
             set-user-field("showtab" , "contact").
+            set-user-field("source",lc-source).
+            set-user-field("parent",lc-parent).
             request_method = "GET".
             RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
             RETURN.
@@ -637,6 +638,8 @@ PROCEDURE process-web-request :
            htmlib-Hidden ("savelastrow", lc-lastrow) skip
            htmlib-Hidden ("savenavigation", lc-navigation) skip
            htmlib-Hidden ("nullfield", lc-navigation) SKIP
+           htmlib-hidden("source",lc-source) skip
+           htmlib-hidden("parent",lc-parent) SKIP
            .
         
     {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
