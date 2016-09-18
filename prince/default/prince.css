@@ -1,21 +1,16 @@
 @page {
 	size: A4 portrait;
 	margin: 40pt 30pt 40pt 30pt;
-	@
-	top
-	{
+	@top{
 	content
 	:
-	flow(
-	header
-	)
-}
+	flow(header	)
+    }
 
-@
-bottom-right {
+    @bottom-right {
 	content: "Page " counter(page);
 	border-top: 1px solid black;
-}
+    }
 
 }
 body {

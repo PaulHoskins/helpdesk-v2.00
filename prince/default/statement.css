@@ -4,15 +4,11 @@
 	margin-left: 25px;
 	margin-right: 25px;
 	margin-bottom: 25px;
-	@
-	top
-	{
+	@top{
 	content
 	:
-	flow(
-	header
-	)
-}
+	flow(header)
+    }
 
 }
 body {
