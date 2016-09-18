@@ -11,6 +11,7 @@
     22/04/2006  phoski      Initial - replace old leftpanel.p  
     26/06/2006  phoski      Prototype    
     25/09/2014  phoski      Security Lib
+    10/09/2016  phoski      CRM
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -210,18 +211,24 @@ PROCEDURE process-web-request :
             '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
             '~}' skip.
 
-        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID)
-            THEN {&out}
+        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) AND NOT WebUser.engType BEGINS "SAL" 
+        THEN {&out}
         'function SuperUser(target) ~{' skip
                 '   var url = "' appurl '/mn/ajax/superuser.p?user=' webuser.LoginID '"' skip
                 '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
                 '~}' skip.
+        IF WebUser.engType BEGINS "SAL" 
+        THEN {&out}
+        'function SuperUser(target) ~{' skip
+                '   var url = "' appurl '/mn/ajax/crmuser.p?user=' webuser.LoginID '"' skip
+                '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
+                '~}' skip.        
         {&out}
         'function InitialisePage() ~{' skip
             '  GetAlerts("ajaxmenu");' skip.
         
 
-        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID)
+        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) OR WebUser.engType BEGINS "SAL" 
             THEN {&out} '  SuperUser("superuser");' skip.
 
         {&out}
@@ -239,7 +246,7 @@ PROCEDURE process-web-request :
 
         {&out} '<div id="ajaxmenu"></div>' skip.
         
-        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID)
+        IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) OR WebUser.engType BEGINS "SAL" 
             THEN {&out} '<div id="superuser"></div>' skip.
 
     END.

@@ -49,6 +49,7 @@ DEFINE VARIABLE lc-global-seldesc                     AS CHARACTER
 
 DEFINE VARIABLE lc-global-company                     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-user                        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-global-EngType                     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-secure                      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-email                       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-global-internal                    AS CHARACTER 
@@ -139,7 +140,7 @@ DEFINE VARIABLE lc-global-teamassign                  AS CHARACTER
 DEFINE VARIABLE lc-global-UserSubType-Code            AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project|Sal|SalMan|custAdmin|custSal' NO-UNDO.
 DEFINE VARIABLE lc-global-UserSubType-desc            AS CHARACTER 
-    INITIAL 'Not Applicable|Field|Remote|Project|Sales|Sales Manager|Customer Admin|Customer Sales Contact' NO-UNDO.
+    INITIAL 'Not Applicable|Field|Remote|Project|Sales Rep|Sales Manager|Customer Admin|Customer Sales Contact' NO-UNDO.
 
 DEFINE VARIABLE lc-global-EngType-Code                AS CHARACTER 
     INITIAL '|FIELD|REMOTE|Project' NO-UNDO.
@@ -200,9 +201,9 @@ DEFINE VARIABLE lc-global-opProb-Desc                 AS CHARACTER
     INITIAL "0%|25%|50%|75%|100%"   NO-UNDO.
 
 DEFINE VARIABLE lc-global-CRMRS-Code                 AS CHARACTER 
-    INITIAL 'NEW|INV-DATA|CONT-NI|CONT-IN|ACC-CRT'        NO-UNDO.
+    INITIAL 'NEW|INV-DATA|CONT-CH|CONT-NI|CONT-IN|ACC-CRT'        NO-UNDO.
 DEFINE VARIABLE lc-global-CRMRS-Desc                 AS CHARACTER 
-    INITIAL "New Record|Invalid Data|Contacted - Not Interested|Contacted - Interested|Account Created"   NO-UNDO.
+    INITIAL "New Record|Invalid Data|Contacted - Chasing|Contacted - Not Interested|Contacted - Interested|Account Created"   NO-UNDO.
 
 DEFINE VARIABLE lc-global-CRMRS-ACC-CRT              AS CHARACTER 
     INITIAL 'ACC-CRT'        NO-UNDO.
@@ -2827,7 +2828,8 @@ FUNCTION com-InitialSetup RETURNS LOGICAL
         ASSIGN
             lc-global-secure = STRING(ROWID(webuser))
             lc-global-email  = WebUser.Email
-            lc-global-company = webuser.CompanyCode.
+            lc-global-company = WebUser.CompanyCode
+            lc-global-EngType = WebUser.engType.
         DYNAMIC-FUNCTION('com-CheckSystemSetup':U,lc-global-company).
     END.
 

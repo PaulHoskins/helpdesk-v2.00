@@ -21,6 +21,7 @@
     24/05/2015  phoski      Dashboard Links
     22/10/2015  phoski      Link to issue page is by trafic light/asc
     13/03/2016  phoski      Change assignment build query
+    10/09/2016  phoski      CRM
                               
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -166,12 +167,13 @@ PROCEDURE ip-InternalUser :
 
     IF WebUser.UserClass = "INTERNAL" THEN
     DO:
+        /*
         {&out} 
         '<br /><a class="tlink" style="width: 100%;" href="' appurl
         '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' skip
                 'Your Diary' 
                 '</a><br /><br />' skip.     
-                
+        */        
         IF DYNAMIC-FUNCTION("com-HasSchedule",webuser.CompanyCode,WebUser.LoginID) > 0 THEN
         DO:
             ASSIGN 
@@ -371,11 +373,11 @@ PROCEDURE ip-SuperUserAnalysis :
 
     FOR EACH WebStatus NO-LOCK
         WHERE WebStatus.CompanyCode = lc-global-company
-          AND WebStatus.CompletedStatus = FALSE,
-          EACH Issue NO-LOCK
-            WHERE Issue.CompanyCode = lc-global-company
-              AND Issue.StatusCode = WebStatus.StatusCode
-              :
+        AND WebStatus.CompletedStatus = FALSE,
+        EACH Issue NO-LOCK
+        WHERE Issue.CompanyCode = lc-global-company
+        AND Issue.StatusCode = WebStatus.StatusCode
+        :
         
         IF Issue.AssignTo = "" THEN NEXT.
         
@@ -389,11 +391,11 @@ PROCEDURE ip-SuperUserAnalysis :
     
             IF NOT CAN-FIND(FIRST webUsteam WHERE webusteam.loginid = lc-user
                 AND webusteam.st-num = customer.st-num NO-LOCK) 
-            THEN NEXT.
+                THEN NEXT.
             
             IF NOT CAN-FIND(FIRST webUsteam WHERE webusteam.loginid = Issue.assignTo
                 AND webusteam.st-num = customer.st-num NO-LOCK) 
-            THEN NEXT.
+                THEN NEXT.
         
         END.
         
@@ -543,9 +545,9 @@ PROCEDURE mnlib-BuildIssueMenu :
     DO:
         DO li-loop = 1 TO NUM-ENTRIES(b-user.dashbList):
             FIND dashb WHERE dashb.CompanyCode = b-user.companyCode
-                          AND dashb.dashCode = entry(li-loop,b-user.dashbList) 
-                          AND dashb.isActive = TRUE
-                          NO-LOCK NO-ERROR.
+                AND dashb.dashCode = entry(li-loop,b-user.dashbList) 
+                AND dashb.isActive = TRUE
+                NO-LOCK NO-ERROR.
                           
             IF ll-found = FALSE THEN
             DO:
@@ -554,12 +556,12 @@ PROCEDURE mnlib-BuildIssueMenu :
                     li-itemno = IF AVAILABLE tt-menu 
                                THEN tt-menu.itemno + 1
                                ELSE 1.
-                 CREATE tt-menu.
-                 ASSIGN 
-                        tt-menu.ItemNo      = li-itemno
-                        tt-menu.Level       = pi-level
-                        tt-menu.Description = "Your Dashboards"
-                        ll-found = TRUE.
+                CREATE tt-menu.
+                ASSIGN 
+                    tt-menu.ItemNo      = li-itemno
+                    tt-menu.Level       = pi-level
+                    tt-menu.Description = "Your Dashboards"
+                    ll-found = TRUE.
             END.
             FIND LAST tt-menu NO-LOCK NO-ERROR.
             ASSIGN 
@@ -939,7 +941,8 @@ PROCEDURE process-web-request :
         DO:
         
             IF webUser.UserClass = "INTERNAL" 
-                AND webUser.SuperUser THEN
+                AND webUser.SuperUser 
+                AND NOT WebUser.engType BEGINS "SAL" THEN
             DO:
                 FIND LAST tt-menu NO-LOCK NO-ERROR.
                 ASSIGN 
@@ -960,25 +963,28 @@ PROCEDURE process-web-request :
             ASSIGN 
                 li-user-open = com-AssignedToUser(webuser.CompanyCode,
                                                      webuser.LoginID).
-            FIND LAST tt-menu NO-LOCK NO-ERROR.
-            ASSIGN 
-                li-item = IF AVAILABLE tt-menu THEN tt-menu.itemno + 1 
+                                                     
+            IF NOT WebUser.engType BEGINS "SAL" THEN
+            DO:                                         
+                FIND LAST tt-menu NO-LOCK NO-ERROR.
+                ASSIGN 
+                    li-item = IF AVAILABLE tt-menu THEN tt-menu.itemno + 1 
                          ELSE 1.
-            CREATE tt-menu.
-            ASSIGN 
-                tt-menu.itemno      = li-item
-                tt-menu.Level       = 1
-                tt-menu.Description = "Your Issues"
-                tt-menu.ObjType     = "WS"
-                tt-menu.ObjTarget   = "mainwindow"
-                tt-menu.ObjURL      = 'iss/issue.p?assign=' + WebUser.LoginID + 
+                CREATE tt-menu.
+                ASSIGN 
+                    tt-menu.itemno      = li-item
+                    tt-menu.Level       = 1
+                    tt-menu.Description = "Your Issues"
+                    tt-menu.ObjType     = "WS"
+                    tt-menu.ObjTarget   = "mainwindow"
+                    tt-menu.ObjURL      = 'iss/issue.p?assign=' + WebUser.LoginID + 
                     '&status=AllOpen&iclass=All&lodate=01/01/1990&hidate=01/01/2050&sortfield=b-query.tlight&sortorder=ASC'
-                tt-menu.AltInfo     = "View your issues"
-                .
-            IF li-user-open > 0 
-                THEN ASSIGN tt-menu.description = tt-menu.description + ' (' + 
+                    tt-menu.AltInfo     = "View your issues"
+                    .
+                IF li-user-open > 0 
+                    THEN ASSIGN tt-menu.description = tt-menu.description + ' (' + 
                         string(li-user-open) + ' open)'.
-
+            END.
         END.
         ELSE
         DO:
@@ -1034,6 +1040,7 @@ PROCEDURE process-web-request :
                                      
         END.
 
+        IF NOT WebUser.engType BEGINS "SAL" THEN
         RUN mnlib-BuildIssueMenu ( webuser.pagename, 1 ).
 
         RUN mnlib-BuildMenu ( webuser.pagename, 1 ).
@@ -1073,6 +1080,7 @@ PROCEDURE process-web-request :
         
         IF WebUser.UserClass = "INTERNAL" 
             AND WebUser.SuperUser
+            AND NOT WebUser.engType BEGINS "SAL" 
             THEN RUN ip-SuperUserFinal.
 
     END.

@@ -1,32 +1,31 @@
 /***********************************************************************
 
-    Program:        mn/mainframe.p
+    Program:        mn/ajax/crmuser.p
     
-    Purpose:        right hand panel
+    Purpose:        CRM user Ajax Panel
     
     Notes:
     
     
     When        Who         What
-    27/02/2016  phoski      Pass thru link from SLA
-    10/09/2016  phoski      CRM
+    10/09/2016  phoski      Initial   
+    
 ***********************************************************************/
+CREATE WIDGET-POOL.
+
+/* ***************************  Definitions  ************************** */
 
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
 
-DEFINE VARIABLE lc-error-field     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-error-meg       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-mode            AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-passtype        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-passref         AS CHARACTER NO-UNDO.
-
-DEFINE VARIABLE lc-passwordchanged AS CHARACTER NO-UNDO.
 
 
-DEFINE BUFFER b-user FOR webuser.
+DEFINE VARIABLE lc-user      AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE ll-SuperUser AS LOG       NO-UNDO.
+
+DEFINE VARIABLE lc-Enc-Key   AS CHARACTER NO-UNDO.
 
 
 
@@ -48,8 +47,8 @@ DEFINE BUFFER b-user FOR webuser.
 
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW Procedure ASSIGN
-         HEIGHT             = 14.14
-         WIDTH              = 60.6.
+         HEIGHT             = 14.15
+         WIDTH              = 60.57.
 /* END WINDOW DEFINITION */
                                                                         */
 
@@ -73,6 +72,67 @@ RUN process-web-request.
 
 
 /* **********************  Internal Procedures  *********************** */
+
+
+&IF DEFINED(EXCLUDE-ip-CustomerQuickView) = 0 &THEN
+
+PROCEDURE ip-CustomerQuickView :
+    /*------------------------------------------------------------------------------
+      Purpose:     
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE ll-Steam    AS LOG NO-UNDO.
+    DEFINE VARIABLE ll-HasIss   AS LOG NO-UNDO.
+
+    {&out} '<div id="quickview" style="display: none; margin: 7px;">'.
+    {&out} htmlib-BeginCriteria("Acccont View").
+    
+    {&out} '<table style="font-size: 10px;" id="customerList">'.
+
+   
+
+
+    FOR EACH customer  NO-LOCK
+        WHERE customer.CompanyCode = webuser.CompanyCode 
+        AND customer.iSActive
+        USE-INDEX Name:
+
+        IF WebUser.engType = "SAL" AND WebUser.LoginID <> Customer.SalesManager THEN NEXT.
+       
+        ASSIGN 
+            lc-enc-key =
+                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+                 
+        {&out}
+        '<tr><td>'
+        '<a title="View Customer" target="mainwindow" class="tlink" style="border:none;" href="' appurl '/crm/customer.p?source=menu&crmaccount=' 
+        url-encode(lc-enc-key,"Query") '">'
+        html-encode(customer.Name)
+        '</a></td></tr>'.
+
+    END.
+
+    {&out} '</table>'.
+    {&out} htmlib-EndCriteria().
+    {&out} '</div>'.
+
+    {&out}
+    '<script>' skip
+        'superuserresp = function() ~{' skip
+        /* ' Effect.SlideDown(~'overview~', ~{duration:3~});' skip */
+        ' Effect.Grow(~'quickview~');' skip
+
+        '~}' skip 
+        'superuserresp();' skip
+        '</script>'.
+
+
+END PROCEDURE.
+
+
+&ENDIF
 
 &IF DEFINED(EXCLUDE-outputHeader) = 0 &THEN
 
@@ -124,7 +184,7 @@ PROCEDURE outputHeader :
      *      RUN SetCookie IN web-utilities-hdl 
      *        ("custNum":U, "23":U, TODAY + 1, TIME, ?, ?, "secure":U).
      */ 
-    output-content-type ("text/html":U).
+    output-content-type("text/plain~; charset=iso-8859-1":U).
   
 END PROCEDURE.
 
@@ -134,85 +194,29 @@ END PROCEDURE.
 &IF DEFINED(EXCLUDE-process-web-request) = 0 &THEN
 
 PROCEDURE process-web-request :
-/*------------------------------------------------------------------------------
-  Purpose:     Process the web request.
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-    
-    
-    {lib/checkloggedin.i}
+    /*------------------------------------------------------------------------------
+      Purpose:     Process the web request.
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
+
 
     ASSIGN 
-        lc-passwordchanged = get-value("passwordchanged").
+        lc-user = get-value("user").
 
 
-    set-user-field("passwordchanged","no").
+    RUN outputHeader.
+    
+    
+    FIND webuser WHERE webuser.loginid = lc-user NO-LOCK NO-ERROR.
 
-    FIND b-user WHERE b-user.loginid = lc-user NO-LOCK NO-ERROR.
-
-    IF NOT AVAILABLE b-user THEN RETURN.
-
+    
+    IF NOT AVAILABLE webuser THEN RETURN.
+    
+    IF NOT WebUser.engType BEGINS "SAL" THEN RETURN.
      
-    IF b-user.UserClass = "CUSTOMER" THEN
-    DO:
-        ASSIGN 
-            request_method = 'get'.
-        RUN run-web-object IN web-utilities-hdl ("iss/issue.p").
-        RETURN.
-        
-    END.
-    
-     ASSIGN
-        lc-mode = get-value("mode")
-        lc-passtype = get-value("passtype")
-        lc-passref = get-value("passref").
-
-    
-    IF lc-mode = "passthru" AND NOT b-user.engType BEGINS "SAL" THEN
-    DO:
-        
-        CASE lc-passtype:
-        WHEN "issue" THEN
-        DO:
-            FIND Issue WHERE Issue.CompanyCode = b-User.CompanyCode
-                         AND Issue.IssueNumber = int(lc-passref) NO-LOCK NO-ERROR.
-            IF AVAILABLE Issue
-            AND LOOKUP(lc-user,issue.alertUsers) > 0  THEN
-            DO:
-                set-user-field("mode","update").
-                set-user-field("rowid",STRING(ROWID(issue))).
-               
-                ASSIGN 
-                    request_method = 'get'.
-                RUN run-web-object IN web-utilities-hdl ("iss/issueframe.p").
-                RETURN.
-            END.
-            
-                         
-                         
-        END.
-        END CASE.
-        
-    END.
-    
-    IF b-user.engType BEGINS "SAL" THEN
-    DO:
-        ASSIGN 
-        request_method = 'get'.
-        RUN run-web-object IN web-utilities-hdl ("crm/mainpage.p").
-    
-        RETURN.
-        
-    END.
-    
-    set-user-field("status","AllOpen").
-    set-user-field("assign",b-user.loginid).
-    ASSIGN 
-        request_method = 'get'.
-    RUN run-web-object IN web-utilities-hdl ("iss/issue.p").
-    RETURN.
-
+    RUN ip-CustomerQuickView.
+   
   
 END PROCEDURE.
 

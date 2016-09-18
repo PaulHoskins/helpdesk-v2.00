@@ -37,10 +37,14 @@ DEFINE VARIABLE lc-status        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-AccountNumber AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-CustRowID     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-loginid       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-loop          AS INTEGER   NO-UNDO.
+DEFINE VARIABLE lc-next          AS CHARACTER NO-UNDO.
 
 
-DEFINE BUFFER b-valid FOR crm_data_acc.
-DEFINE BUFFER b-table FOR crm_data_acc.
+DEFINE BUFFER b-valid   FOR crm_data_acc.
+DEFINE BUFFER b-table   FOR crm_data_acc.
+DEFINE BUFFER b-webuser FOR WebUser.
 
 
 
@@ -293,10 +297,16 @@ PROCEDURE process-web-request :
                             INPUT-OUTPUT lc-error-msg ).
                 END.
                 
+                ASSIGN 
+                    lc-AccountNumber      = CAPS(lc-accountNumber)
+                    b-table.note          = lc-note
+                    b-table.record_status = lc-status
+                    b-table.AccountNumber = lc-accountNumber
+                    .
+                    
                 IF lc-status = lc-global-CRMRS-ACC-CRT THEN
                 DO:
-                    ASSIGN
-                        lc-AccountNumber = CAPS(lc-accountNumber).
+                                 
                     CREATE Customer.
                     ASSIGN 
                         Customer.CompanyCode   = lc-global-company
@@ -310,20 +320,59 @@ PROCEDURE process-web-request :
                         Customer.Country       = "UK"
                         Customer.Postcode      = b-table.Postcode
                         Customer.Telephone     = b-table.Telephone
+                        Customer.SalesNote     = b-table.note
+                        Customer.SalesManager  = IF lc-global-engType BEGINS "SAL" THEN lc-global-user ELSE ""
                         Customer.Contact       = TRIM(b-table.contact_title + " " + b-table.contact_forename + " " + b-table.contact_surname)
                         .
                     ASSIGN 
                         lc-enc-key =
                         DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
                   
+                    IF Customer.Contact <> "" THEN
+                    DO:
+                        ASSIGN 
+                            lc-loginid = TRIM(REPLACE(b-table.contact_forename + "." + b-table.contact_surname," ","")).
+                        IF CAN-FIND(FIRST b-webuser WHERE b-webuser.loginid = lc-loginid NO-LOCK) THEN
+                        REPEAT:
+                            li-loop = li-loop + 1.
+                            lc-next = lc-loginid + "_" + string(li-loop).
+                            IF CAN-FIND(FIRST b-webuser WHERE b-webuser.loginid = lc-next NO-LOCK) THEN NEXT.
+                            lc-loginid = lc-next.
+                            LEAVE.
+                        
+                        END.
+                    
+
+                        CREATE b-webuser.
+                        ASSIGN 
+                            b-webuser.loginid = lc-loginid
+                            b-webuser.CompanyCode = lc-global-company
+                            b-webuser.UserClass = "CUSTOMER"
+                            b-webuser.engType  = "custSal"
+                           
+                            .
+                        
+                        ASSIGN 
+                            b-webuser.forename         = b-table.contact_forename
+                            b-webuser.surname          = b-table.contact_surname
+                            b-webuser.DefaultUser      = TRUE
+                            b-webuser.usertitle        = b-table.contact_title
+                            b-webuser.accountnumber    = Customer.AccountNumber
+                            b-webuser.jobtitle         = b-table.contact_position
+                            b-webuser.telephone        = b-table.Telephone
+                            .
+                        ASSIGN 
+                            b-webuser.name = b-webuser.forename + ' ' + 
+                                             b-webuser.surname
+                            Customer.SalesContact = b-WebUser.LoginID
+                            .
+                                          
+                                          
+                    END.
                     
                     
                 END.    
-                ASSIGN 
-                    b-table.note          = lc-note
-                    b-table.record_status = lc-status
-                    b-table.AccountNumber = lc-accountNumber
-                    .
+                
             
             END.
         END.

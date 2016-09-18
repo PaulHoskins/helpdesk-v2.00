@@ -2,7 +2,7 @@
 
     Program:        crm/crmload.p
     
-    Purpose:        CRM Account Maintenance         
+    Purpose:        Maintain CRM Dataset       
     
     Notes:
     
@@ -192,13 +192,13 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain CRM Data") skip.
+    {&out} htmlib-Header("Maintain CRM Dataset") skip.
 
     {&out} htmlib-JScript-Maintenance() skip.
 
     {&out} htmlib-StartForm("mainform","post", appurl + '/crm/crmload.p' ) skip.
 
-    {&out} htmlib-ProgramTitle("Maintain CRM Data") skip.
+    {&out} htmlib-ProgramTitle("Maintain CRM Dataset") skip.
     
     
     IF get-value("dataload") <> "" 

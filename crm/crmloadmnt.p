@@ -2,7 +2,7 @@
 
     Program:        crm/crmloadmnt.p
     
-    Purpose:        Status Maintenance           
+    Purpose:        Maintain CRM Dataset        
     
     Notes:
     
@@ -307,7 +307,7 @@ PROCEDURE process-web-request :
             ASSIGN 
                 lc-title = 'Add'
                 lc-link-label = "Cancel addition"
-                lc-submit-label = "Add Data".
+                lc-submit-label = "Add Dataset".
         WHEN 'view'
         THEN 
             ASSIGN 
@@ -319,18 +319,18 @@ PROCEDURE process-web-request :
             ASSIGN 
                 lc-title = 'Delete'
                 lc-link-label = 'Cancel deletion'
-                lc-submit-label = 'Delete Data'.
+                lc-submit-label = 'Delete Dataset'.
         WHEN 'Update'
         THEN 
             ASSIGN 
                 lc-title = 'Update'
                 lc-link-label = 'Cancel update'
-                lc-submit-label = 'Update Data'.
+                lc-submit-label = 'Update Dataset'.
     END CASE.
 
 
     ASSIGN 
-        lc-title = lc-title + ' Data'
+        lc-title = lc-title + ' Dataset'
         lc-link-url = appurl + '/crm/crmload.p' + 
                                   '?search=' + lc-search + 
                                   '&firstrow=' + lc-firstrow + 
