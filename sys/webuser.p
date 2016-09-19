@@ -19,7 +19,9 @@
                             overflow on toolbar
     03/07/2016  phoski      Show Mobile Number    
     31/07/2016  phoski      Filter On Disabled flag 
-    06/09/2016  phoski      Customer selection 32k problem                   
+    06/09/2016  phoski      Customer selection 32k problem    
+    19/09/2016  phoski      Limit customer name to 30 chars as toolbar
+                            splits over lines               
     
 
 ***********************************************************************/
@@ -634,7 +636,7 @@ FUNCTION fnToolbarAccountSelection RETURNS LONGCHAR
         BY customer.NAME:
         ASSIGN 
             lc-codes = lc-codes + "|" + customer.AccountNumber
-            lc-names = lc-names + "|" + trim(substr(customer.NAME,1,80)).
+            lc-names = lc-names + "|" + trim(substr(customer.NAME,1,30)).
 
     END.
 

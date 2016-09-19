@@ -22,6 +22,7 @@
     22/10/2015  phoski      Link to issue page is by trafic light/asc
     13/03/2016  phoski      Change assignment build query
     10/09/2016  phoski      CRM
+    19/09/2016  phoski      Re-instate 'Diary'
                               
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -167,13 +168,13 @@ PROCEDURE ip-InternalUser :
 
     IF WebUser.UserClass = "INTERNAL" THEN
     DO:
-        /*
+        
         {&out} 
         '<br /><a class="tlink" style="width: 100%;" href="' appurl
         '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' skip
                 'Your Diary' 
                 '</a><br /><br />' skip.     
-        */        
+                
         IF DYNAMIC-FUNCTION("com-HasSchedule",webuser.CompanyCode,WebUser.LoginID) > 0 THEN
         DO:
             ASSIGN 
