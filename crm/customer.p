@@ -989,7 +989,10 @@ PROCEDURE process-web-request :
                 b-table.salesnote       = lc-salesnote
                 b-table.industrySector = lc-indsector
                 .
-                
+             /* Active now means active on the help desk only */
+            ASSIGN
+               b-table.isActive = b-table.accStatus = "Active".
+                              
             IF b-table.salesContact = lc-global-selcode
                 THEN b-table.salesContact = "".
             lc-error-msg = "OK:Update".

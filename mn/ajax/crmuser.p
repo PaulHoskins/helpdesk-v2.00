@@ -96,7 +96,7 @@ PROCEDURE ip-CustomerQuickView :
 
     FOR EACH customer  NO-LOCK
         WHERE customer.CompanyCode = webuser.CompanyCode 
-        AND customer.iSActive
+        AND Customer.accStatus <> "EX-CUSTOMER"
         USE-INDEX Name:
 
         IF WebUser.engType = "SAL" AND WebUser.LoginID <> Customer.SalesManager THEN NEXT.

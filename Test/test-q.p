@@ -9,7 +9,7 @@ END.
 
 END
   */
- FOR EACH op_master NO-LOCK WHERE op_master.CompanyCode = 'ouritdept' AND op_master.SalesManager = 'SALMAN'
+
 
 
 
