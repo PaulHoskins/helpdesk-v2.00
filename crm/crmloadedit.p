@@ -8,7 +8,8 @@
     
     
     When        Who         What
-    06/09/2016  phoski      Initial      
+    06/09/2016  phoski      Initial    
+    15/10/2016  phoski      CRM Phase 2  
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -105,7 +106,7 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    IF lc-status = lc-global-CRMRS-ACC-CRT THEN
+    IF lc-status = lc-global-CRMRS-ACC-CRT AND glob-company.autogenAccount = FALSE THEN
     DO:
         IF lc-accountNumber = "" THEN
         DO:
@@ -306,7 +307,10 @@ PROCEDURE process-web-request :
                     
                 IF lc-status = lc-global-CRMRS-ACC-CRT THEN
                 DO:
-                                 
+                    IF glob-company.autogenAccount THEN
+                    DO:
+                        RUN lib/autogenAccount.p ( lc-global-company, OUTPUT lc-accountNumber).
+                    END.                  
                     CREATE Customer.
                     ASSIGN 
                         Customer.CompanyCode   = lc-global-company
@@ -465,15 +469,23 @@ PROCEDURE process-web-request :
         lc-status)
     '</TD></TR>' skip. 
             
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
-        ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Account Number")
-        ELSE htmlib-SideLabel("Account Number"))
-    '</TD>' skip
+    IF glob-company.autogenaccount THEN
+    DO:
+        {&out} '<tr><td>&nbsp;</td><td><div class="infobox">An Account Number will be automatically generated if required</div></td></tr>' SKIP.
+    END.
+    ELSE
+    DO:
+                
+        {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+            ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Account Number")
+            ELSE htmlib-SideLabel("Account Number"))
+        '</TD>' skip
      '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("accountnumber",8,lc-accountnumber) skip
-           '</TD></tr>' SKIP.
-
+         htmlib-InputField("accountnumber",8,lc-accountnumber) SKIP
+    '</TD></tr>' SKIP.
+    END.
+    
     {&out} htmlib-EndTable() skip.
 
 

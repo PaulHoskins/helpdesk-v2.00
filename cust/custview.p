@@ -28,6 +28,7 @@
     18/06/2016 phoski       Show decomissioned at end of inventory
     01/07/2016 phoski       AdminTime activity is not chargeable
     14/08/2016 phoski       CRM 
+    15/10/2016 phoski       CRM Phase 2 - not iventory/issue for sales users
                         
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -911,8 +912,8 @@ PROCEDURE ip-CustomerUsers :
            skip.
 
     IF Customer.def-iss-loginid <> ""
-    OR Customer.def-bulk-loginid <> ""
-    THEN
+        OR Customer.def-bulk-loginid <> ""
+        THEN
     DO:
         {&out} '<div class="infobox">'.
         
@@ -1456,10 +1457,10 @@ PROCEDURE ip-Tickets :
             ll-chargeable = TRUE.
             
         IF b-query.IssActivityID <> 0 
-        THEN ll-chargeable = com-IsActivityChargeable(b-query.IssActivityID).
+            THEN ll-chargeable = com-IsActivityChargeable(b-query.IssActivityID).
         
         IF ll-chargeable
-        THEN li-cf = li-cf + b-query.Amount.
+            THEN li-cf = li-cf + b-query.Amount.
 
         IF b-query.IssueNumber > 0 THEN
         DO:
@@ -1477,13 +1478,13 @@ PROCEDURE ip-Tickets :
             DO:
                 /* Pre 07.2106 - activity type was not recorded */
                 IF issActivity.activityType <> ""
-                THEN ASSIGN lc-Activity = issActivity.activityType + " - " + issActivity.description.
+                    THEN ASSIGN lc-Activity = issActivity.activityType + " - " + issActivity.description.
                 ELSE ASSIGN lc-Activity = issActivity.description.
-             END.
+            END.
                 
         END.
         IF NOT ll-chargeable
-        THEN lc-activity = "** " + lc-activity.
+            THEN lc-activity = "** " + lc-activity.
         
         {&out}
         '<tr>' skip
@@ -1759,26 +1760,32 @@ PROCEDURE process-web-request :
     {&out}
     '<div class="tabber">' skip.
 
-    
-    IF NOT ll-customer 
-        OR ( ll-customer AND this-user.CustomerViewInventory )THEN
+    IF NOT glob-webuser.engType BEGINS "SAL" THEN
     DO:
+        IF NOT ll-customer 
+            OR ( ll-customer AND this-user.CustomerViewInventory )THEN
+        DO:
         
-        {&out}
-        '<div class="tabbertab" title="Inventory">' skip
-        .
-        RUN ip-Inventory ( customer.CompanyCode, customer.AccountNumber ).
+            {&out}
+            '<div class="tabbertab" title="Inventory">' skip
+            .
+            RUN ip-Inventory ( customer.CompanyCode, customer.AccountNumber ).
     
+            {&out} 
+            '</div>'.
+        END.
+    
+    END.
+    
+    IF NOT glob-webuser.engType BEGINS "SAL" THEN
+    DO:
+        {&out}
+        '<div class="tabbertab" title="Open Issues">' skip.
+        RUN ip-CustomerOpenIssue ( customer.CompanyCode, customer.AccountNumber, lc-Issue-TBAR ).
         {&out} 
         '</div>'.
     END.
     
-    {&out}
-    '<div class="tabbertab" title="Open Issues">' skip.
-    RUN ip-CustomerOpenIssue ( customer.CompanyCode, customer.AccountNumber, lc-Issue-TBAR ).
-    {&out} 
-    '</div>'.
-
     IF get-value("showtab") = "document" THEN
         {&out}
     '<div class="tabbertab tabbertabdefault" title="Documents">' skip
@@ -1815,6 +1822,8 @@ PROCEDURE process-web-request :
     {&out} 
     '</div>'.
 
+
+   
     IF get-value("showtab") = "ASSET" THEN
         {&out}
     '<div class="tabbertab tabbertabdefault" title="Asset">' skip
@@ -1828,7 +1837,8 @@ PROCEDURE process-web-request :
     
     {&out} 
     '</div>'.
-
+    
+    
     {&out} 
     '</div>' skip.          /* end tabber */
 

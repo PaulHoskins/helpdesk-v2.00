@@ -9,6 +9,7 @@
     
     When        Who         What
     03/09/2016  phoski      Initial   
+    15/10/2016  phoski      CRM Phase 2
 ***********************************************************************/
 
 CREATE WIDGET-POOL.
@@ -206,24 +207,17 @@ PROCEDURE process-web-request :
     get-value("dataload")
     '</div>' SKIP.
     
-    /*
-    {&out}
-    tbar-StandardBar(
-        appurl + "/crm/crmload.p",
-        appurl + "/crm/crmloadmnt.p",
-        lc-link-otherp
-        ).
-    */
+  
     {&out}
     tbar-Begin(
         tbar-Find(appurl + "/crm/crmload.p")
         )
     tbar-Link("add",?,appurl +  "/crm/crmloadmnt.p",lc-link-otherp)
     tbar-BeginOption()
-    tbar-Link("view",?,"off",lc-link-otherp)
-    tbar-Link("update",?,"off",lc-link-otherp)
+        tbar-Link("update",?,"off",lc-link-otherp)
     tbar-Link("delete",?,"off",lc-link-otherp)
     tbar-Link("CRMDataSetLoad",?,"off",lc-link-otherp)
+    tbar-Link("dataset",?,"off",lc-link-otherp)
     
     tbar-EndOption()
     tbar-End().
@@ -238,7 +232,7 @@ PROCEDURE process-web-request :
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
-        WHERE b-query.companycode = lc-global-company.
+        WHERE b-query.companycode = lc-global-company BY b-query.descr.
   
 
     GET FIRST q NO-LOCK.
@@ -323,10 +317,10 @@ PROCEDURE process-web-request :
             htmlib-MntTableField(string(b-query.no_records),'right')
         
             tbar-BeginHidden(rowid(b-query))
-                tbar-Link("view",rowid(b-query),appurl +  "/crm/crmloadmnt.p",lc-link-otherp)
                 tbar-Link("update",rowid(b-query),appurl +  "/crm/crmloadmnt.p",lc-link-otherp)
                 tbar-Link("delete",rowid(b-query), appurl + "/crm/crmloadmnt.p",lc-link-otherp)
                 tbar-Link("CRMDataSetLoad",rowid(b-query), appurl + "/crm/crmloaddataset.p",lc-link-otherp)
+                tbar-Link("dataset",rowid(b-query),appurl +  "/crm/crmloadmnt.p",lc-link-otherp)
                 
             tbar-EndHidden()      
             '</tr>' skip.

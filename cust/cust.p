@@ -17,7 +17,7 @@
     02/07/2016  phoski      com-getTicketBalance
     24/07/2016  phoski      CRM
     01/08/2016  phoski      CRM Page link
-   
+    15/10/2016  phoski      CRM Phase 2
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -215,7 +215,9 @@ PROCEDURE process-web-request :
 
     {&out} htmlib-ProgramTitle("Maintain Customers") skip.
     
-
+    IF get-value("addnote") <> "" THEN
+    {&out} '<div class="infobox">'  get-value("addnote") '</div><br />'.
+    
     {&out}
     tbar-Begin(
         tbar-Find(appurl + "/cust/cust.p")

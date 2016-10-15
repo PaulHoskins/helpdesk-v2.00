@@ -9,6 +9,7 @@
     
     When        Who         What
     01/08/2016  phoski      Initial
+    15/10/2016  phoski      CRM Phase 2
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -697,11 +698,11 @@ PROCEDURE ip-opPage:
     
     {&out}
     htmlib-TableHeading(
-        "Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
+        "No|Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
         ) skip.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
-        OF customer.
+        OF Customer BY b-query.op_no.
 
     GET FIRST q NO-LOCK.
 
@@ -729,7 +730,7 @@ PROCEDURE ip-opPage:
             skip
              tbar-trID(pc-ToolBarID,rowid(b-query))
             skip
-            
+            htmlib-MntTableField(html-encode(b-query.op_no),'left')
             htmlib-MntTableField(html-encode(b-query.descr),'left')
             
             htmlib-MntTableField(com-DecodeLookup(b-query.opstatus,lc-global-opStatus-Code,lc-global-opStatus-desc),'left')
@@ -740,7 +741,11 @@ PROCEDURE ip-opPage:
           
             htmlib-MntTableField(html-encode(com-UserName(b-query.salesContact)),'left')
             htmlib-MntTableField(html-encode(b-query.department),'left')
-            htmlib-MntTableField(html-encode(b-query.nextStep),'left')
+            htmlib-MntTableField(html-encode(
+            DYNAMIC-FUNCTION("com-GenTabDesc",
+                         b-query.CompanyCode, "CRM.NextStep", 
+                         b-query.nextStep)
+            ),'left')
             htmlib-MntTableField(html-encode(IF b-query.createDate = ? THEN '' ELSE string(b-query.createDate,"99/99/9999 HH:MM")),'right')
             
                

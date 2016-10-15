@@ -33,6 +33,7 @@
     14/07/2016  phoski      JQueryUI - 1.4.5
     24/07/2016  phoski      CRM Changes
     03/09/2016  phoski      Global Email var
+    15/10/2016  phoski      New CRM Table Codes
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -41,6 +42,10 @@
 &global-define INTERNAL INTERNAL
 &global-define CUSTOMER CUSTOMER
 &global-define CONTRACT CONTRACT
+
+DEFINE BUFFER glob-company  FOR Company.
+DEFINE BUFFER glob-webuser  FOR webuser.
+
 
 DEFINE VARIABLE lc-global-selcode                     AS CHARACTER 
     INITIAL "WALESFOREVER" NO-UNDO.
@@ -101,7 +106,7 @@ DEFINE VARIABLE lc-System-Note-Desc                   AS CHARACTER
     NO-UNDO.
 
 DEFINE VARIABLE lc-global-GT-Code                     AS CHARACTER INITIAL
-    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector,CRM.SourceType,CRM.Database,CRM.Campaign' NO-UNDO.
+    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector,CRM.SourceType,CRM.Database,CRM.Campaign,CRM.NextStep,CRM.ServiceRequired,CRM.DealLostReason' NO-UNDO.
 
 DEFINE VARIABLE lc-global-iclass-complex              AS CHARACTER INITIAL
     'ComplexProject' NO-UNDO.   
@@ -2820,6 +2825,9 @@ FUNCTION com-InitialSetup RETURNS LOGICAL
 
     IF AVAILABLE webuser THEN 
     DO:
+        FIND glob-webuser WHERE glob-webuser.LoginID = WebUser.LoginID NO-LOCK NO-ERROR.
+        FIND glob-company WHERE glob-company.companyCode = WebUser.CompanyCode NO-LOCK NO-ERROR.
+        
         /*lc-temp = STRING(ROWID(webuser)) + ":" + WebUser.LoginID.
         
         ASSIGN

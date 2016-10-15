@@ -22,7 +22,8 @@
     19/08/2015  phoski      Email bulkemail custaddissue
     27/02/2016  phoski      helpdesklink field for SLA alerts
     25/06/2016  phoski      Issue Survey
-    03/07/2016  phoski      2 Factor Auth Config      
+    03/07/2016  phoski      2 Factor Auth Config     
+    15/10/2016  phoski      Autogen Account Numbers - CRM Phase 2 
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -98,6 +99,9 @@ DEFINE VARIABLE lc-factorEmail    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-factorAccount  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-factorPassword AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-factorPIN      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-autogenAccount AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-nextAccount    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lengthAccount  AS CHARACTER NO-UNDO.
 
 
 
@@ -699,6 +703,51 @@ htmlib-Select("factorpin","4|5|6|7|8","4|5|6|7|8",lc-factorpin)
            skip.
 {&out} '</TR>' skip.
 
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("autogenaccount",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Auto Generate Account Numbers?")
+    ELSE htmlib-SideLabel("Auto Generate Account Numbers?"))
+'</TD>'.
+
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-checkBox("autogenaccount",lc-autogenaccount = "on")
+'</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(IF lc-autogenaccount = "on" THEN "Yes" ELSE "No"),'left')
+           skip.
+{&out} '</TR>' skip.
+
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("nextaccount",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Next Account Number")
+    ELSE htmlib-SideLabel("Next Account Number"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-InputField("nextaccount",8,lc-nextaccount) 
+'</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(lc-nextaccount),'left')
+           skip.
+{&out} '</TR>' skip.
+
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("lengthaccount",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Account Length")
+    ELSE htmlib-SideLabel("Account Length"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-Select("lengthaccount","0|3|4|5|6|7|8","No Padding|3 Digits - 999|4 Digits - 9999|5 Digits - 99999|6 Digits - 999999|7 Digits - 9999999 |8 Digits - 99999999",lc-lengthaccount)
+'</TD>' skip.
+    else 
+    {&out} htmlib-TableField(html-encode(lc-lengthaccount),'left')
+           skip.
+{&out} '</TR>' skip.
+
 
 {&out} htmlib-EndTable() '<br /> 'skip.
 END PROCEDURE.
@@ -826,6 +875,18 @@ PROCEDURE ip-Validate :
         
     END.         
 
+ 
+    ASSIGN 
+        li-int = int(lc-nextAccount) no-error.
+    IF ERROR-STATUS:ERROR
+    OR li-int <= 0
+    OR li-int > 99999999 
+        THEN RUN htmlib-AddErrorMessage(
+            'nextaccount', 
+            'The next account must be in the range 1 to  99999999',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
 END PROCEDURE.
 
 
@@ -1021,6 +1082,9 @@ PROCEDURE process-web-request :
                 lc-FactorAccount  = get-value("factoraccount")
                 lc-FactorPassword = get-value("factorpassword")
                 lc-FactorPIN      = get-value("factorpin")
+                lc-autogenAccount = get-value("autogenaccount")
+                lc-nextaccount    = get-value("nextaccount")
+                lc-lengthaccount  = get-value("lengthaccount")
                  .
             IF lc-mode = 'update' THEN
             DO:
@@ -1094,6 +1158,9 @@ PROCEDURE process-web-request :
                         b-table.twoFactor_Account = lc-factoraccount
                         b-table.twoFactor_Password = lc-factorPassword
                         b-table.twoFactor_PinLength = int(lc-factorPin)
+                        b-table.autogenaccount = lc-autogenaccount = "on"
+                        b-table.nextaccount = int(lc-nextaccount)
+                        b-table.lengthaccount = int(lc-lengthaccount)
                         
                         .
                    
@@ -1175,6 +1242,10 @@ PROCEDURE process-web-request :
                 lc-FactorAccount  = b-table.twoFactor_Account
                 lc-FactorPassword = b-table.twoFactor_Password
                 lc-FactorPin      = STRING(b-table.twoFactor_PinLength)
+                lc-autogenaccount = IF b-table.autogenaccount THEN "on" ELSE ""
+                lc-nextaccount    = STRING(b-table.nextaccount)
+                lc-lengthaccount   = STRING(b-table.lengthaccount)
+                
                 
                 .
             FOR EACH acs_head NO-LOCK

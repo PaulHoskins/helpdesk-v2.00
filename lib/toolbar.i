@@ -19,6 +19,7 @@
     18/06/2016  phoski      survey link
     03/09/2016  phoski      CRM 
     06/09/2116  phoski      tbar-BeginLong use longchar
+    15/10/2016  phoski      CRM Phase 2
     
     
 ***********************************************************************/
@@ -852,6 +853,12 @@ FUNCTION tbar-Link RETURNS CHARACTER
                 ASSIGN 
                 lc-image    = '/images/toolbar3/crmdataset.gif'
                 lc-alt-text = 'Load External Data'.
+            WHEN 'dataset' THEN
+                ASSIGN 
+                lc-image    = '/images/toolbar3/dataset.gif'
+                lc-alt-text = 'Maintain/View Data Set'.
+            
+                 
             
                             
                   
@@ -879,7 +886,9 @@ FUNCTION tbar-Link RETURNS CHARACTER
         END.
         ELSE
         DO:
-        
+            IF pc-mode = "dataset"
+            THEN pc-mode = "view".
+            
             ASSIGN 
                 pc-url = pc-url + '?mode=' + pc-mode
                     + '&rowid=' + IF pr-rowid = ? THEN "" ELSE STRING(pr-rowid).

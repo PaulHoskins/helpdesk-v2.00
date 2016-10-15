@@ -26,6 +26,7 @@
                             in custview.p
     31/07/2016  phoski      AccStatus field instead of active field
     02/08/2016  phoski      CRM fields update
+    15/10/2016  phoski      CRM Phase 2
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -118,6 +119,8 @@ DEFINE VARIABLE lc-SalesNote      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-indsector      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ind-code       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ind-desc       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-add-note       AS CHARACTER NO-UNDO.
+
 
 
 
@@ -194,7 +197,7 @@ PROCEDURE ip-MainPage :
         "center").
 
 
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+    {&out} '<TR align="left"><TD VALIGN="middle" ALIGN="right" width="25%">' 
         ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Account Number")
         ELSE htmlib-SideLabel("Account Number"))
@@ -202,11 +205,16 @@ PROCEDURE ip-MainPage :
     .
 
     IF lc-mode = "ADD" THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("accountnumber",8,lc-accountnumber) skip
-           '</TD>'.
-    else
-    {&out} htmlib-TableField(html-encode(lc-accountnumber),'left')
+    DO:
+        IF glob-company.autoGenAccount THEN
+        DO:
+            {&out} '<td><div class="infobox">An Account Number will be automatically generated</div></td>' SKIP. 
+        END.
+        ELSE
+            {&out} '<TD VALIGN="TOP" ALIGN="left">' htmlib-InputField("accountnumber",8,lc-accountnumber) '</TD>' SKIP.
+    END.
+    ELSE
+        {&out} htmlib-TableField(html-encode(lc-accountnumber),'left')
            skip.
 
     {&out} '<td valign="top" align="right" >' skip
@@ -322,7 +330,7 @@ PROCEDURE ip-MainPage :
     '</TD>' skip.
     
     {&out} '</TR>' skip.
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("website",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Web Site")
         ELSE htmlib-SideLabel("Web Site"))
@@ -646,36 +654,36 @@ DO:
     {&out} '</TR>' skip.
 END.
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("noemp",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("No Of Employees")
-        ELSE htmlib-SideLabel("No Of Employees"))
-    '</TD>'.
+    (IF LOOKUP("noemp",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("No Of Employees")
+    ELSE htmlib-SideLabel("No Of Employees"))
+'</TD>'.
     
-    IF NOT CAN-DO("view,delete",lc-mode) THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-InputField("noemp",6,lc-noemp) 
-    '</TD>' skip.
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+htmlib-InputField("noemp",6,lc-noemp) 
+'</TD>' skip.
     else 
     {&out} htmlib-TableField(html-encode(lc-noemp),'left')
            skip.
 
-    {&out} '</TR>' skip.
+{&out} '</TR>' skip.
     
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("turn",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Annual Turnover")
-        ELSE htmlib-SideLabel("Annual Turnover"))
-    '</TD>'.
+    (IF LOOKUP("turn",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Annual Turnover")
+    ELSE htmlib-SideLabel("Annual Turnover"))
+'</TD>'.
     
-    IF NOT CAN-DO("view,delete",lc-mode) THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-InputField("turn",8,lc-turn) 
-    '</TD>' skip.
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+htmlib-InputField("turn",8,lc-turn) 
+'</TD>' skip.
     else 
     {&out} htmlib-TableField(html-encode(lc-turn),'left')
            skip.
 
-    {&out} '</TR>' skip.
+{&out} '</TR>' skip.
         
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("indsector",lc-error-field,'|') > 0 
@@ -692,20 +700,20 @@ htmlib-Select("indsector",lc-ind-Code,lc-ind-desc,lc-indsector)
            skip.
 {&out} '</TR>' skip.
 
- {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("salesnote",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Sales Note")
-        ELSE htmlib-SideLabel("Sales Note"))
-    '</TD>'.
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("salesnote",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Sales Note")
+    ELSE htmlib-SideLabel("Sales Note"))
+'</TD>'.
     
-    IF NOT CAN-DO("view,delete",lc-mode) THEN
-        {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-TextArea("salesnote",lc-salesnote,5,60)
-    '</TD>' skip.
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+htmlib-TextArea("salesnote",lc-salesnote,5,60)
+'</TD>' skip.
     else 
     {&out} htmlib-TableField(replace(html-encode(lc-salesnote),"~n",'<br>'),'left')
            skip.
-    {&out} '</TR>' skip.
+{&out} '</TR>' skip.
         
    
  
@@ -794,7 +802,7 @@ PROCEDURE ip-Validate :
     DEFINE VARIABLE li-int  AS INT  NO-UNDO.
     
     
-    IF lc-mode = "ADD":U THEN
+    IF lc-mode = "ADD":U AND glob-company.autoGenAccount = FALSE THEN
     DO:
         IF lc-accountnumber = ""
             OR lc-accountnumber = ?
@@ -846,17 +854,19 @@ PROCEDURE ip-Validate :
         END.
               
     END.
-    ASSIGN li-int = int(lc-noemp) NO-ERROR.
+    ASSIGN 
+        li-int = int(lc-noemp) NO-ERROR.
     IF ERROR-STATUS:ERROR
-    OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
             'noemp', 
             'The number of employees is invalid',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
     
-    ASSIGN li-int = int(lc-turn) NO-ERROR.
+    ASSIGN 
+        li-int = int(lc-turn) NO-ERROR.
     IF ERROR-STATUS:ERROR
-    OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
             'turn', 
             'The annual turnover is invalid',
             INPUT-OUTPUT pc-error-field,
@@ -944,14 +954,14 @@ PROCEDURE process-web-request :
     RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-SalType-Code,'|',",") ,OUTPUT lc-sm-code, OUTPUT lc-sm-desc).
     
     RUN com-GenTabSelect ( lc-global-company, "CRM.IndustrySector", 
-       OUTPUT lc-ind-code,
-       OUTPUT lc-ind-desc ).
+        OUTPUT lc-ind-code,
+        OUTPUT lc-ind-desc ).
        
     IF lc-ind-code = ""
-    THEN lc-ind-desc = "None".
+        THEN lc-ind-desc = "None".
     ELSE 
-    ASSIGN lc-ind-code = "|" + lc-ind-code
-           lc-ind-desc = "None|" + lc-ind-desc.
+        ASSIGN lc-ind-code = "|" + lc-ind-code
+            lc-ind-desc = "None|" + lc-ind-desc.
            
     
     
@@ -1107,6 +1117,12 @@ PROCEDURE process-web-request :
                 END.
                 ELSE
                 DO:
+                    IF glob-company.autogenAccount THEN
+                    DO:
+                        RUN lib/autogenAccount.p ( lc-global-company, OUTPUT lc-accountNumber).
+                        lc-add-note = "Account " + lc-accountNumber + " created".
+                    END.   
+                    
                     CREATE b-table.
                     ASSIGN 
                         b-table.accountnumber = CAPS(lc-accountnumber)
@@ -1204,6 +1220,8 @@ PROCEDURE process-web-request :
             set-user-field("navigation",'refresh').
             set-user-field("firstrow",lc-firstrow).
             set-user-field("search",lc-search).
+            set-user-field("addnote",lc-add-note).
+            
             RUN run-web-object IN web-utilities-hdl ("cust/cust.p").
             RETURN.
         END.
@@ -1216,11 +1234,11 @@ PROCEDURE process-web-request :
             lc-accountnumber = b-table.accountnumber.
         RUN com-GetUserListForAccount (lc-global-company,lc-AccountNumber,OUTPUT lc-cu-code, OUTPUT lc-cu-desc).
         IF lc-cu-code = ""
-        THEN lc-cu-desc = "None".
+            THEN lc-cu-desc = "None".
         ELSE
-        ASSIGN
-            lc-cu-code = "|" + lc-cu-code
-            lc-cu-desc = "None|" + lc-cu-desc.
+            ASSIGN
+                lc-cu-code = "|" + lc-cu-code
+                lc-cu-desc = "None|" + lc-cu-desc.
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post" THEN 

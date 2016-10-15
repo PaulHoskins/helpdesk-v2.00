@@ -9,6 +9,7 @@
     
     When        Who         What
     06/08/2016  phoski      Initial
+    15/10/2016  phoski      Phase 2 changes
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -73,6 +74,12 @@ DEFINE VARIABLE lc-sType        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-dbase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-camp         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ops          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opno         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lr-val-rowid    AS ROWID     NO-UNDO.
+DEFINE VARIABLE lc-lostd        AS CHARACTER NO-UNDO.
+
+
+
 
 DEFINE VARIABLE lc-Action-TBar  AS CHARACTER INITIAL 'tim' NO-UNDO.
 DEFINE VARIABLE lc-doc-tbar     AS CHARACTER INITIAL 'doc' NO-UNDO.
@@ -284,13 +291,24 @@ PROCEDURE ip-UpdatePage:
         "center").
         
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("opno",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Opportunity No")
+        ELSE htmlib-SideLabel("Opportunity No"))
+    '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-InputField("opno",8,lc-opno) skip
+           '</TD></tr>'.
+              
+    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("descr",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Description")
         ELSE htmlib-SideLabel("Description"))
     '</TD>' skip
             '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("descr",40,lc-descr) skip
-           '</TD></tr>'.
+        htmlib-InputField("descr",40,lc-descr) skip
+           '</TD></tr>' SKIP.
+    
+    
            
     
     
@@ -308,16 +326,16 @@ PROCEDURE ip-UpdatePage:
             '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("department",40,lc-department) skip
            '</TD></tr>'.
-                          
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
-        ( IF LOOKUP("nextstep",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Next Step")
-        ELSE htmlib-SideLabel("Next Step"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("nextstep",40,lc-nextstep) skip
-           '</TD></tr>'.
-                                 
+   
+    RUN com-GenTabSelect ( lc-global-company, "CRM.NextStep", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Next Step")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("nextstep",lc-Code ,lc-desc,lc-nextStep)
+    '</TD></TR>' skip.
+                                
     {&out} '<TR align="left"><td valign="top" align="right">' 
         (IF LOOKUP("closedate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Close Date")
@@ -343,15 +361,14 @@ PROCEDURE ip-UpdatePage:
     htmlib-Select("optype",lc-global-opType-Code ,lc-global-opType-desc,lc-opType)
     '</TD></TR>' skip.
     
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
-        ( IF LOOKUP("servreq",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Service Required")
-        ELSE htmlib-SideLabel("Service Required"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("servreq",40,lc-servreq) skip
-           '</TD></tr>'.
-    
+    RUN com-GenTabSelect ( lc-global-company, "CRM.ServiceRequired", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Service Required")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("servreq",lc-Code ,lc-desc,lc-servreq)
+    '</TD></TR>' skip. 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("opnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
@@ -396,15 +413,22 @@ PROCEDURE ip-UpdatePage:
     htmlib-InputField("rev",8,lc-rev) 
     '</TD>' skip.
     
-           
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
-        ( IF LOOKUP("lost",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Deal Lost Reason")
-        ELSE htmlib-SideLabel("Detal Lost Reason"))
+    RUN com-GenTabSelect ( lc-global-company, "CRM.DealLostReason", 
+        OUTPUT lc-code,
+        OUTPUT lc-desc ).
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    htmlib-SideLabel("Deal Lost Reason")
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+    htmlib-Select("lost",lc-Code ,lc-desc,lc-lost)
+    '</TD></TR>' skip. 
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("lostd",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Lost Description")
+        ELSE htmlib-SideLabel("Lost Description"))
     '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("lost",40,lc-lost) skip
-           '</TD></tr>'.
+    '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-TextArea("lostd",lc-lostd,5,60)
+    '</TD></tr>' SKIP.
     
          
     RUN com-GenTabSelect ( lc-global-company, "CRM.SourceType", 
@@ -459,8 +483,32 @@ PROCEDURE ip-Validate:
     DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE ld-date AS DATE      NO-UNDO.
-    DEFINE VARIABLE li-int  AS INT  NO-UNDO.
+    DEFINE VARIABLE ld-date AS DATE         NO-UNDO.
+    DEFINE VARIABLE li-int  AS INT          NO-UNDO.
+    
+    IF lc-opno <> "" THEN
+    DO:
+        FOR EACH b-valid NO-LOCK
+            WHERE b-valid.companyCode = lc-global-company
+            AND b-valid.op_no = lc-opno:
+            IF ROWID(b-valid) = lr-val-rowid THEN NEXT.
+            li-int = li-int + 1.
+            
+        END.
+        
+        IF li-int > 0
+        THEN RUN htmlib-AddErrorMessage(
+            'opno', 
+            'This opportunity no already exists',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+                   
+    END.
+    ELSE RUN htmlib-AddErrorMessage(
+            'opno', 
+            'You must enter the opportunity no',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
     
     
     IF lc-descr = ""
@@ -612,9 +660,14 @@ PROCEDURE process-web-request:
             DO:
                 FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid)
                     NO-LOCK NO-ERROR.
+                ASSIGN 
+                    lr-val-rowid = ROWID(b-table).
             END.
+            ELSE lr-val-rowid = ?.
+            
             
             ASSIGN
+                lc-opno              = get-value("opno")
                 lc-descr             = get-value("descr")
                 lc-SalesContact      = get-value("salescontact")
                 lc-department        = get-value("department")
@@ -634,6 +687,7 @@ PROCEDURE process-web-request:
                 lc-dbase             = get-value("dbase")
                 lc-camp              = get-value("camp")
                 lc-ops               = get-value("ops")
+                lc-lostd             = get-value("lostd")
                   
                 .
                         
@@ -667,6 +721,7 @@ PROCEDURE process-web-request:
                    
                 END.
                 ASSIGN
+                    b-table.op_no           = lc-opno
                     b-table.descr           = lc-descr
                     b-table.salesContact    = lc-SalesContact
                     b-table.Department      = lc-department
@@ -686,6 +741,7 @@ PROCEDURE process-web-request:
                     b-table.dbase           = lc-dbase
                     b-table.Campaign        = lc-camp
                     b-table.opSource        = lc-ops
+                    b-table.lostdescription = lc-lostd
                     .
                     
                 IF b-table.salesContact = lc-global-selcode
@@ -733,6 +789,7 @@ PROCEDURE process-web-request:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         
         ASSIGN
+            lc-opno         = b-table.op_no
             lc-descr        = b-table.descr
             lc-SalesContact = b-table.Salescontact
             lc-department   = b-table.department
@@ -752,6 +809,7 @@ PROCEDURE process-web-request:
             lc-dbase        = b-table.dBase
             lc-camp         = b-table.Campaign
             lc-ops          = b-table.opSource
+            lc-lostd        = b-table.lostdescription
             .
             
        
@@ -842,7 +900,7 @@ PROCEDURE process-web-request:
            htmlib-Hidden ("savenavigation", lc-navigation) SKIP
            htmlib-hidden("source",lc-source) skip
            htmlib-hidden("parent",lc-parent) SKIP
-           .
+    .
        
        
     {&out} '<div id="placeholder" style="display: none;"></div>' skip.
