@@ -2,7 +2,7 @@
 
     Program:        crm/crmop.p
     
-    Purpose:        CRM Opportunity Maintanenace
+    Purpose:        CRM Opportunity Maintainance
     
     Notes:
     
@@ -21,68 +21,79 @@ CREATE WIDGET-POOL.
 /* Local Variable Definitions ---                                       */
 
 
-DEFINE VARIABLE lc-error-field  AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-error-msg    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-field     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-msg       AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE lc-mode         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rowid        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-crmAccount   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lr-customer     AS ROWID     NO-UNDO.
+DEFINE VARIABLE lc-mode            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rowid           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-crmAccount      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lr-customer        AS ROWID     NO-UNDO.
 
 
-DEFINE VARIABLE lc-title        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-title           AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-Enc-Key      AS CHARACTER NO-UNDO.  
+DEFINE VARIABLE lc-Enc-Key         AS CHARACTER NO-UNDO.  
 
-DEFINE VARIABLE lc-search       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-firstrow     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lastrow      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-navigation   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parameters   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-source       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-parent       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-navigation      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parameters      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-source          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-parent          AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE lc-sela-Code       AS LONGCHAR  NO-UNDO.
+DEFINE VARIABLE lc-sela-Name       AS LONGCHAR  NO-UNDO.
+
+DEFINE VARIABLE lc-link-label      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE lc-descr           AS CHARACTER NO-UNDO.
+/*
+DEFINE VARIABLE lc-sm-code       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sm-desc       AS CHARACTER NO-UNDO.
+*/
+DEFINE VARIABLE lc-op-salescontact AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-scont-code      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-scont-desc      AS CHARACTER NO-UNDO.
+
+DEFINE VARIABLE lc-department      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-nextStep        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-CloseDate       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-currentProv     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opType          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ServReq         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opNote          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rating          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opStatus        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-prob            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-cos             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rev             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-lost            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-sType           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-dbase           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-camp            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ops             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opno            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lr-val-rowid       AS ROWID     NO-UNDO.
+DEFINE VARIABLE lc-lostd           AS CHARACTER NO-UNDO.
 
 
 
-DEFINE VARIABLE lc-link-label   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit-label AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-Action-TBar     AS CHARACTER INITIAL 'tim' NO-UNDO.
+DEFINE VARIABLE lc-doc-tbar        AS CHARACTER INITIAL 'doc' NO-UNDO.
 
-DEFINE VARIABLE lc-descr        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-sm-code      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-sm-desc      AS CHARACTER NO-UNDO.
+/* Stuff for call from crmview.p */
+DEFINE VARIABLE lc-FilterOptions   AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-SalesContact AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-cu-code      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-cu-desc      AS CHARACTER NO-UNDO.
-
-DEFINE VARIABLE lc-department   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-nextStep     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-CloseDate    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-currentProv  AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-opType       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-ServReq      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-opNote       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rating       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-opStatus     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-prob         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-cos          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rev          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-lost         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-sType        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-dbase        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-camp         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-ops          AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-opno         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lr-val-rowid    AS ROWID     NO-UNDO.
-DEFINE VARIABLE lc-lostd        AS CHARACTER NO-UNDO.
+{crm/customer-form-vars.i}
 
 
 
 
-DEFINE VARIABLE lc-Action-TBar  AS CHARACTER INITIAL 'tim' NO-UNDO.
-DEFINE VARIABLE lc-doc-tbar     AS CHARACTER INITIAL 'doc' NO-UNDO.
+
 
 
 DEFINE BUFFER b-valid  FOR op_master.
@@ -258,6 +269,37 @@ PROCEDURE ip-ExportJS:
 
 END PROCEDURE.
 
+PROCEDURE ip-ExportJS-Add:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+
+
+    {&out} lc-global-jquery  SKIP
+           '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  skip
+           '<script language="javascript">' SKIP
+           'var appurl = "' appurl '";' SKIP
+           '</script>' SKIP
+                   
+           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP
+           
+    .
+           
+           
+END PROCEDURE.
+
+PROCEDURE ip-NewAccountPage:
+/*------------------------------------------------------------------------------
+		Purpose:  																	  
+		Notes:  																	  
+------------------------------------------------------------------------------*/
+
+    {crm/customer-form-page.i}  
+    
+
+END PROCEDURE.
+
 PROCEDURE ip-NotePage:
     /*------------------------------------------------------------------------------
             Purpose:  																	  
@@ -289,14 +331,44 @@ PROCEDURE ip-UpdatePage:
         0,
         0,
         "center").
+   
+    IF lc-source = "crmview" AND lc-mode = "ADD" THEN
+    DO:   
+        {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">'
+            ( IF LOOKUP("account",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Customer")
+            ELSE htmlib-SideLabel("Customer"))
+        '</TD>' skip
+            '<TD VALIGN="TOP" ALIGN="left">'.
+        {&out-long}               
+        htmlib-SelectJSLong(
+            "account",
+            'ChangeAccount()',
+            "ADD|" + lc-sela-code,
+            "Add New|" + lc-sela-name,
+            get-value("account")
+            )
+        '</td><tr>' SKIP.
         
+        {&out} '<tr><td colspan="2" id="box1"><div class="infobox">New CRM Customer Details</div>' SKIP.
+        
+        
+        RUN ip-NewAccountPage.
+       
+        
+        {&out} '</td></tr>' SKIP. 
+        
+        {&out} '<tr><td colspan="2" id="box2"><div class="infobox">Opportunity Details</div></td></tr>' SKIP.
+        
+    END.
+       
     IF lc-opno <> "" THEN
     DO:
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
-        ( IF LOOKUP("opno",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Opportunity No")
-        ELSE htmlib-SideLabel("Opportunity No"))
-    '</TD>' skip
+        {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+            ( IF LOOKUP("opno",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Opportunity No")
+            ELSE htmlib-SideLabel("Opportunity No"))
+        '</TD>' skip
             '<TD VALIGN="TOP" ALIGN="left">'            lc-opno
            '</TD></tr>'.
     END.
@@ -317,7 +389,7 @@ PROCEDURE ip-UpdatePage:
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Sales Contact")
     '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("salescontact",lc-cu-Code,lc-cu-desc,lc-salescontact)
+    htmlib-Select("opsalescontact",lc-scont-code,lc-scont-desc,lc-op-salescontact)
     '</TD></TR>' skip.
     
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
@@ -488,7 +560,7 @@ PROCEDURE ip-Validate:
     DEFINE VARIABLE ld-date AS DATE         NO-UNDO.
     DEFINE VARIABLE li-int  AS INT          NO-UNDO.
     
-       IF lc-descr = ""
+    IF lc-descr = ""
         OR lc-descr = ?
         THEN RUN htmlib-AddErrorMessage(
             'name', 
@@ -553,35 +625,53 @@ PROCEDURE process-web-request:
         lc-rowid = get-value("rowid")
         lc-enc-key = get-value("crmaccount")
         lc-source = get-value("source")
-        lc-parent = get-value("parent").
-    .
-    
-    ASSIGN
-        lc-CRMAccount = DYNAMIC-FUNCTION("sysec-DecodeValue",lc-user,TODAY,"Customer",lc-enc-key).
-        
-    ASSIGN 
-        lr-customer = TO-ROWID(lc-crmAccount).
-        
-        
-    FIND Customer WHERE ROWID(Customer) = lr-customer NO-LOCK.
-    
-    RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-SalType-Code,'|',",") ,OUTPUT lc-sm-code, OUTPUT lc-sm-desc).
-    
-    
-    ASSIGN
-        lc-sm-code = "|" + lc-sm-code
-        lc-sm-desc = "None Selected|" + lc-sm-desc
+        lc-parent = get-value("parent")
+        lc-filterOptions = get-value("filteroptions")
         .
+    IF lc-source = "crmview" AND lc-mode = "ADD" THEN
+    DO:
+        RUN crm/lib/getCustomerList.p ( lc-global-company, lc-global-user, OUTPUT lc-sela-Code, OUTPUT lc-sela-Name).
+        RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-SalType-Code,'|',",") ,OUTPUT lc-sm-code, OUTPUT lc-sm-desc).
+    
+        RUN com-GenTabSelect ( lc-global-company, "CRM.IndustrySector", 
+            OUTPUT lc-ind-code,
+            OUTPUT lc-ind-desc ).
+       
+        IF lc-ind-code = ""
+            THEN lc-ind-desc = "None".
+        ELSE 
+            ASSIGN lc-ind-code = "|" + lc-ind-code
+                lc-ind-desc = "None|" + lc-ind-desc.
+            
+        ASSIGN
+            lc-sm-code = "|" + lc-sm-code
+            lc-sm-desc = "None Selected|" + lc-sm-desc
+            .
+            
+         
+    END.
+    ELSE
+    DO:
+        ASSIGN
+            lc-CRMAccount = DYNAMIC-FUNCTION("sysec-DecodeValue",lc-user,TODAY,"Customer",lc-enc-key).
         
-    RUN com-GetUserListForAccount (lc-global-company,customer.AccountNumber,OUTPUT lc-cu-code, OUTPUT lc-cu-desc).
-    IF lc-cu-code = ""
-        THEN ASSIGN lc-cu-code = lc-global-selcode
-            lc-cu-desc = "None".
+        ASSIGN 
+            lr-customer = TO-ROWID(lc-crmAccount).
+        
+        
+        FIND Customer WHERE ROWID(Customer) = lr-customer NO-LOCK.
+    END.
+
+    IF AVAILABLE Customer THEN    
+        RUN com-GetUserListForAccount (lc-global-company,customer.AccountNumber,OUTPUT lc-scont-code, OUTPUT lc-scont-desc).
+    IF lc-scont-code = ""
+        THEN ASSIGN lc-scont-code = lc-global-selcode
+            lc-scont-desc = "None".
     
     ELSE 
         ASSIGN
-            lc-cu-code = lc-global-selcode + "|" + lc-cu-code
-            lc-cu-desc = "None|" + lc-cu-desc.
+            lc-scont-code = lc-global-selcode + "|" + lc-scont-code
+            lc-scont-desc = "None|" + lc-scont-desc.
             
             
             
@@ -612,22 +702,37 @@ PROCEDURE process-web-request:
                 lc-submit-label = 'Update Opportunity'.
     END CASE.
     
-    ASSIGN 
-        lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+    
         
                  
     ASSIGN 
-        lc-title = lc-title + ' Opportunity'
-        lc-link-url = appurl + '/crm/customer.p' + 
-                                  '?crmaccount=' + url-encode(lc-enc-key,"Query") +
-                                  '&navigation=refresh&mode=CRM' +
-                                  "&source=" + lc-source + "&parent=" + lc-parent +
-                                  '&time=' + string(TIME).
+        lc-title = lc-title + ' Opportunity'.
+        
+    IF lc-source = "crmview" THEN
+    DO:
+        ASSIGN
+            lc-link-url = appurl + '/crm/view.p?' + 
+            replace(REPLACE(lc-filterOptions,"|","&"),"^","=").
+        ASSIGN 
+            lc-title = lc-filteroptions.        
+    END.
+    ELSE
+    DO:   
+        ASSIGN 
+            lc-link-url = appurl + '/crm/customer.p' + 
+            '?crmaccount=' + url-encode(lc-enc-key,"Query") +
+            '&navigation=refresh&mode=CRM' +
+            "&source=" + lc-source + "&parent=" + lc-parent +
+            '&time=' + string(TIME).
                                   
               
-    ASSIGN
-        lc-title = "Account: " + Customer.Name + " - " + lc-title.
-                                      
+        ASSIGN
+            lc-title = "Account: " + Customer.Name + " - " + lc-title.
+    END.
+        
+    IF AVAILABLE Customer THEN
+        ASSIGN 
+            lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).                              
     IF request_method = "POST" THEN
     DO:
 
@@ -646,7 +751,7 @@ PROCEDURE process-web-request:
             ASSIGN
                 lc-opno              = get-value("opno")
                 lc-descr             = get-value("descr")
-                lc-SalesContact      = get-value("salescontact")
+                lc-op-salescontact   = get-value("opsalescontact")
                 lc-department        = get-value("department")
                 lc-nextstep          = get-value("nextstep")
                 lc-closedate         = get-value("closedate")
@@ -702,14 +807,14 @@ PROCEDURE process-web-request:
                 DO:
                     FIND LAST b-valid 
                         WHERE b-valid.CompanyCode = lc-global-company
-                          AND b-valid.op_no > 0 NO-LOCK NO-ERROR.
+                        AND b-valid.op_no > 0 NO-LOCK NO-ERROR.
                     ASSIGN 
                         b-table.op_no = IF AVAILABLE b-valid THEN b-valid.op_no + 1 ELSE 1.        
                 END.
                 
                 ASSIGN
-                                        b-table.descr           = lc-descr
-                    b-table.salesContact    = lc-SalesContact
+                    b-table.descr           = lc-descr
+                    b-table.salesContact    = lc-op-salescontact
                     b-table.Department      = lc-department
                     b-table.NextStep        = lc-nextstep
                     b-table.closeDate       = IF lc-closedate = "" THEN ? ELSE DATE(lc-closedate)
@@ -753,20 +858,39 @@ PROCEDURE process-web-request:
             END.
             
         END.
-        IF lc-error-field = "" THEN
+        IF lc-source = "crmview" AND lc-error-Field = "" THEN
         DO:
-            /*RUN outputHeader.*/
-            set-user-field("navigation",'refresh').
-            set-user-field("firstrow",lc-firstrow).
-            set-user-field("search",lc-search).
-            set-user-field("mode","CRM").
-            set-user-field("crmaccount" , get-value("crmaccount")).
-            set-user-field("source",lc-source).
-            set-user-field("parent",lc-parent).
+            DEFINE VARIABLE lc-Options AS CHARACTER NO-UNDO.
+            DEFINE VARIABLE li-loop    AS INTEGER   NO-UNDO.
+            DEFINE VARIABLE lc-part     AS CHARACTER NO-UNDO.
+            
+            lc-Options =  REPLACE(REPLACE(lc-filterOptions,"|","&"),"^","=").
+            DO li-loop = 1 TO NUM-ENTRIES(lc-options,"&"):
+                lc-part = ENTRY(li-loop,lc-options,"&").
+                set-user-field(ENTRY(1,lc-part,"="),ENTRY(2,lc-part,"=")).
+                
+            END.
+            
             request_method = "GET".
-            RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
+            RUN run-web-object IN web-utilities-hdl ("crm/view.p").
             RETURN.
+            
         END.
+        ELSE
+            IF lc-error-field = "" THEN
+            DO:
+                /*RUN outputHeader.*/
+                set-user-field("navigation",'refresh').
+                set-user-field("firstrow",lc-firstrow).
+                set-user-field("search",lc-search).
+                set-user-field("mode","CRM").
+                set-user-field("crmaccount" , get-value("crmaccount")).
+                set-user-field("source",lc-source).
+                set-user-field("parent",lc-parent).
+                request_method = "GET".
+                RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
+                RETURN.
+            END.
         
     END.
     
@@ -777,7 +901,7 @@ PROCEDURE process-web-request:
         ASSIGN
             lc-opno         = STRING(b-table.op_no)
             lc-descr        = b-table.descr
-            lc-SalesContact = b-table.Salescontact
+            lc-op-salescontact = b-table.Salescontact
             lc-department   = b-table.department
             lc-nextstep     = b-table.nextstep
             lc-CloseDate    = IF b-table.CloseDate = ? THEN "" ELSE STRING(b-table.CloseDate,"99/99/9999")
@@ -807,6 +931,7 @@ PROCEDURE process-web-request:
     
     IF lc-mode = "UPDATE"
         THEN RUN ip-ExportJS.
+    ELSE RUN ip-ExportJS-Add.
     
     
     {&out} htmlib-Header("Opportunity CRM") skip.
@@ -886,6 +1011,7 @@ PROCEDURE process-web-request:
            htmlib-Hidden ("savenavigation", lc-navigation) SKIP
            htmlib-hidden("source",lc-source) skip
            htmlib-hidden("parent",lc-parent) SKIP
+           htmlib-hidden("filteroptions", lc-filteroptions)
     .
        
        

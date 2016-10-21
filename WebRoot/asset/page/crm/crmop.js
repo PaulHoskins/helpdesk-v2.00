@@ -61,6 +61,18 @@ function initialise() {
 	actionTableBuild();
 	documentTableBuild();
 }
+function ChangeAccount() {
+	var pAccount = document.mainform.account.value
+	
+	
+	$("#box1").hide();
+	$("#box2").hide();
+	alert ("paulh CHANGE = " + pAccount);
+	if ( pAccount == "ADD" ) {
+		$("#box1").show();
+		$("#box2").show();
+	}
+}
 
 $(document).ready( function() {
 	//initialise();

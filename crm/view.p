@@ -194,7 +194,9 @@ PROCEDURE ip-BuildTable:
 ------------------------------------------------------------------------------*/
 
     
-    
+    DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO.  
+
+       
     ASSIGN 
         li-count = 0
         lr-first-row = ?
@@ -202,6 +204,10 @@ PROCEDURE ip-BuildTable:
 
     REPEAT WHILE vhLBuffer1:AVAILABLE: 
         
+        
+    ASSIGN 
+        lc-enc-key =
+                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(b-qcust))).
         ASSIGN 
             lc-rowid = STRING(ROWID(b-query)).
            
@@ -255,7 +261,7 @@ PROCEDURE ip-BuildTable:
         {&out} skip
                     tbar-BeginHidden(rowid(b-query)).
        
-        {&out} tbar-Link("update",ROWID(b-query),appurl + '/' + "iss/issueframe.p",lc-link-otherp + "|firstrow=" + string(lr-firstrow)).
+        {&out} tbar-Link("update",ROWID(b-query),appurl + "/crm/crmop.p","crmaccount=" + url-encode(lc-enc-key,"Query") + "&" + lc-link-otherp + "|firstrow^" + string(lr-first-row)).
           
         {&out}
         tbar-EndHidden()
@@ -277,6 +283,7 @@ PROCEDURE ip-ExportJS:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
+    
     {&out} lc-global-jquery  SKIP
            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  skip
            '<script language="javascript">' SKIP
@@ -605,7 +612,7 @@ PROCEDURE process-web-request :
         IF lc-crit-type = ""
             THEN lc-crit-type = "ALL".
             
-        IF lc-crit-account= ""
+        IF lc-crit-account = ""
         THEN lc-crit-account = "ALL".    
         
     
@@ -617,16 +624,15 @@ PROCEDURE process-web-request :
      ASSIGN 
          lc-link-otherp = 'source=crmview' +
                           '&filteroptions=' + 
-                          '|search=' + lc-search +
-                          '|account=' + lc-crit-account + 
-                             '|status=' + lc-crit-status + 
-                             '|rep=' + lc-crit-rep + 
-                             '|type=' + lc-crit-type + 
-                             '|status=' + lc-crit-status +
-                             '|lodate=' + lc-lodate +     
-                             '|hidate=' + lc-hidate +
-                             '|sort=' + lc-crit-Sort + 
-                             '|sortorder=' + lc-crit-SortOrder 
+                          'search^' + lc-search +
+                          '|account^' + lc-crit-account + 
+                             '|status^' + lc-crit-status + 
+                             '|rep^' + lc-crit-rep + 
+                             '|type^' + lc-crit-type + 
+                             '|lodate^' + lc-lodate +     
+                             '|hidate^' + lc-hidate +
+                             '|sort^' + lc-crit-Sort + 
+                             '|sortorder^' + lc-crit-SortOrder 
                                 .
                                 
     RUN outputHeader.
@@ -643,14 +649,13 @@ PROCEDURE process-web-request :
     {&out} htmlib-CalendarScript("lodate") skip
             htmlib-CalendarScript("hidate") skip.
      
-     MESSAGE "link = "   lc-link-otherp " f=" STRING(lr-first-row)
-     .    
+       
     
     {&out}
         tbar-Begin(
         REPLACE(tbar-FindLabelIssue(appurl + "/crm/view.p","Search Opportunity Number/Description"),"IssueButtonPress","crmButton")
         )
-        tbar-Link("add",?,appurl +  "/crm/view.p",lc-link-otherp)
+        tbar-Link("add",?,appurl +  "/crm/crmop.p",lc-link-otherp)
         
         tbar-BeginOption()
         tbar-Link("update",?,"off",lc-link-otherp)
@@ -668,14 +673,13 @@ PROCEDURE process-web-request :
       
     CREATE QUERY vhLQuery  
         ASSIGN 
-        CACHE = 100 .
+        CACHE = 100.
 
     vhLBuffer1 = BUFFER b-query:HANDLE.
     vhLBuffer2 = BUFFER b-qcust:HANDLE.
 
     vhLQuery:SET-BUFFERS(vhLBuffer1,vhLBuffer2).
-    MESSAGE "Q = " lc-qPhrase.
-    
+   
     vhLQuery:QUERY-PREPARE(lc-QPhrase).
     vhLQuery:QUERY-OPEN().
 

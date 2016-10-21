@@ -1,7 +1,6 @@
 function crmButton(ButtonEvent, NewURL) {
 
-	alert("PAUL HERE" );
-
+	
 	var FieldName = "firstrow"
 
 	var pFirstRow = document.mainform.elements[FieldName].value

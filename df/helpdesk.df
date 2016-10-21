@@ -4661,10 +4661,30 @@ ADD INDEX "AccountNumber" ON "op_master"
   INDEX-FIELD "AccountNumber" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
 
+ADD INDEX "createDate" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "createDate" ASCENDING 
+
+ADD INDEX "Opstatus" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "OpStatus" ASCENDING 
+
+ADD INDEX "opType" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "OpType" ASCENDING 
+
 ADD INDEX "op_no" ON "op_master" 
   AREA "Schema Area"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "op_no" ASCENDING 
+
+ADD INDEX "Rating" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Rating" ASCENDING 
 
 ADD TABLE "op_note"
   AREA "Schema Area"
@@ -6915,4 +6935,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000137223
+0000137775
