@@ -4633,14 +4633,6 @@ ADD FIELD "createLoginid" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 250
 
-ADD FIELD "op_no" OF "op_master" AS character 
-  FORMAT "x(8)"
-  INITIAL ""
-  LABEL "Opportunity No"
-  POSITION 27
-  MAX-WIDTH 16
-  ORDER 260
-
 ADD FIELD "LostDescription" OF "op_master" AS character 
   FORMAT "x(80)"
   INITIAL ""
@@ -4648,6 +4640,13 @@ ADD FIELD "LostDescription" OF "op_master" AS character
   POSITION 28
   MAX-WIDTH 160
   ORDER 270
+
+ADD FIELD "op_no" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 29
+  MAX-WIDTH 4
+  ORDER 280
 
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
@@ -6916,4 +6915,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000137245
+0000137223

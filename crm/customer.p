@@ -698,7 +698,7 @@ PROCEDURE ip-opPage:
     
     {&out}
     htmlib-TableHeading(
-        "No|Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
+        "No^right|Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
         ) skip.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -730,7 +730,7 @@ PROCEDURE ip-opPage:
             skip
              tbar-trID(pc-ToolBarID,rowid(b-query))
             skip
-            htmlib-MntTableField(html-encode(b-query.op_no),'left')
+            htmlib-MntTableField(string(b-query.op_no),'right')
             htmlib-MntTableField(html-encode(b-query.descr),'left')
             
             htmlib-MntTableField(com-DecodeLookup(b-query.opstatus,lc-global-opStatus-Code,lc-global-opStatus-desc),'left')

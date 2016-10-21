@@ -290,14 +290,16 @@ PROCEDURE ip-UpdatePage:
         0,
         "center").
         
+    IF lc-opno <> "" THEN
+    DO:
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("opno",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Opportunity No")
         ELSE htmlib-SideLabel("Opportunity No"))
     '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("opno",8,lc-opno) skip
+            '<TD VALIGN="TOP" ALIGN="left">'            lc-opno
            '</TD></tr>'.
+    END.
               
     {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("descr",lc-error-field,'|') > 0 
@@ -486,32 +488,7 @@ PROCEDURE ip-Validate:
     DEFINE VARIABLE ld-date AS DATE         NO-UNDO.
     DEFINE VARIABLE li-int  AS INT          NO-UNDO.
     
-    IF lc-opno <> "" THEN
-    DO:
-        FOR EACH b-valid NO-LOCK
-            WHERE b-valid.companyCode = lc-global-company
-            AND b-valid.op_no = lc-opno:
-            IF ROWID(b-valid) = lr-val-rowid THEN NEXT.
-            li-int = li-int + 1.
-            
-        END.
-        
-        IF li-int > 0
-        THEN RUN htmlib-AddErrorMessage(
-            'opno', 
-            'This opportunity no already exists',
-            INPUT-OUTPUT pc-error-field,
-            INPUT-OUTPUT pc-error-msg ).
-                   
-    END.
-    ELSE RUN htmlib-AddErrorMessage(
-            'opno', 
-            'You must enter the opportunity no',
-            INPUT-OUTPUT pc-error-field,
-            INPUT-OUTPUT pc-error-msg ).
-    
-    
-    IF lc-descr = ""
+       IF lc-descr = ""
         OR lc-descr = ?
         THEN RUN htmlib-AddErrorMessage(
             'name', 
@@ -720,9 +697,18 @@ PROCEDURE process-web-request:
                         lc-firstrow      = STRING(ROWID(b-table)).
                    
                 END.
+                
+                IF b-table.op_no = 0 THEN
+                DO:
+                    FIND LAST b-valid 
+                        WHERE b-valid.CompanyCode = lc-global-company
+                          AND b-valid.op_no > 0 NO-LOCK NO-ERROR.
+                    ASSIGN 
+                        b-table.op_no = IF AVAILABLE b-valid THEN b-valid.op_no + 1 ELSE 1.        
+                END.
+                
                 ASSIGN
-                    b-table.op_no           = lc-opno
-                    b-table.descr           = lc-descr
+                                        b-table.descr           = lc-descr
                     b-table.salesContact    = lc-SalesContact
                     b-table.Department      = lc-department
                     b-table.NextStep        = lc-nextstep
@@ -789,7 +775,7 @@ PROCEDURE process-web-request:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         
         ASSIGN
-            lc-opno         = b-table.op_no
+            lc-opno         = STRING(b-table.op_no)
             lc-descr        = b-table.descr
             lc-SalesContact = b-table.Salescontact
             lc-department   = b-table.department
