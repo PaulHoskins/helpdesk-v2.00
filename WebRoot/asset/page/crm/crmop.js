@@ -67,7 +67,6 @@ function ChangeAccount() {
 	
 	$("#box1").hide();
 	$("#box2").hide();
-	alert ("paulh CHANGE = " + pAccount);
 	if ( pAccount == "ADD" ) {
 		$("#box1").show();
 		$("#box2").show();

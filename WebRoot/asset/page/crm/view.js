@@ -43,8 +43,7 @@ function crmButton(ButtonEvent, NewURL) {
 	if (ButtonEvent == "add") {
 		NewURL += "&mode=add"
 	}
-	alert ("PA LOC= " + NewURL)
-	
+		
 	this.location = NewURL
 
 }

@@ -139,7 +139,8 @@ PROCEDURE ip-BuildQueryPhrase:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-
+    DEFINE VARIABLE li-int          AS INTEGER NO-UNDO.
+    
 
     ASSIGN
         lc-QPhrase = 
@@ -160,8 +161,19 @@ PROCEDURE ip-BuildQueryPhrase:
                     
     ASSIGN 
         lc-QPhrase = lc-QPhrase + 
-            " and b-query.CreateDate >= '" + string(DATE(lc-lodate)) + "' " + 
-            " and b-query.CreateDate <= '" + string(DATE(lc-hidate)) + "' ".
+            " and b-query.CrtDate >= " + string(DATE(lc-lodate)) + " " + 
+            " and b-query.CrtDate <= " + string(DATE(lc-hidate)) + " ".
+            
+    IF lc-search <> "" THEN
+    DO:
+        ASSIGN li-int = int(lc-search) no-error.
+        IF ERROR-STATUS:ERROR 
+        THEN ASSIGN 
+        lc-QPhrase = lc-QPhrase +  " and b-query.descr contains '" + lc-search + "'".
+        ELSE ASSIGN 
+        lc-QPhrase = lc-QPhrase +  " and b-query.op_no >= " + string(li-int).
+            
+    END.         
                             
     ASSIGN 
         lc-QPhrase = lc-QPhrase  + " , first b-qcust NO-LOCK where b-qcust.companyCode = b-query.companycode and b-qcust.accountnumber = b-query.accountnumber".
@@ -240,7 +252,7 @@ PROCEDURE ip-BuildTable:
          {&out}   
             htmlib-MntTableField(html-encode(STRING(b-query.op_no)),'right')  
             
-            htmlib-MntTableField(html-encode(STRING(b-query.createDate,"99/99/9999")),'left')  
+            htmlib-MntTableField(html-encode(STRING(b-query.crtDate,"99/99/9999")),'left')  
             
             htmlib-MntTableField(html-encode(com-userName(b-qcust.SalesManager)),'left') 
             htmlib-MntTableField(html-encode(b-qcust.name),'left')   
@@ -570,6 +582,7 @@ PROCEDURE process-web-request :
         lc-navigation  = get-value("navigation")
         lc-submitSource = get-value("submitsource")
         lc-crit-account = get-value("account")
+        lc-search       = get-value("search")
         lc-crit-rep     = get-value("rep")
         lc-crit-status = get-value("status")
         lc-crit-type = get-value("type")
@@ -653,7 +666,7 @@ PROCEDURE process-web-request :
     
     {&out}
         tbar-Begin(
-        REPLACE(tbar-FindLabelIssue(appurl + "/crm/view.p","Search Opportunity Number/Description"),"IssueButtonPress","crmButton")
+        REPLACE(tbar-FindLabelIssue(appurl + "/crm/view.p","Search Description"),"IssueButtonPress","crmButton")
         )
         tbar-Link("add",?,appurl +  "/crm/crmop.p",lc-link-otherp)
         

@@ -90,12 +90,6 @@ DEFINE VARIABLE lc-FilterOptions   AS CHARACTER NO-UNDO.
 
 {crm/customer-form-vars.i}
 
-
-
-
-
-
-
 DEFINE BUFFER b-valid  FOR op_master.
 DEFINE BUFFER b-table  FOR op_master.
 DEFINE BUFFER Customer FOR Customer.
@@ -557,13 +551,15 @@ PROCEDURE ip-Validate:
     DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
 
+    DEFINE BUFFER b-customer    FOR Customer.
+    
     DEFINE VARIABLE ld-date AS DATE         NO-UNDO.
-    DEFINE VARIABLE li-int  AS INT          NO-UNDO.
+    DEFINE VARIABLE li-int  AS INTEGER      NO-UNDO.
     
     IF lc-descr = ""
         OR lc-descr = ?
         THEN RUN htmlib-AddErrorMessage(
-            'name', 
+            'descr', 
             'You must enter the description',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
@@ -599,7 +595,58 @@ PROCEDURE ip-Validate:
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
                      
-
+    IF lc-source = "crmview" AND lc-mode = "Add" AND lc-accountNumber = "ADD" THEN
+    DO:
+        
+        IF lc-name = ""
+            OR lc-name = ?
+            THEN RUN htmlib-AddErrorMessage(
+                'name', 
+                'You must enter the name',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+            
+        IF lc-accountref <> "" THEN
+        DO:
+            FIND FIRST b-customer 
+                WHERE b-customer.companyCode = lc-global-company
+                AND b-customer.accountref = lc-accountRef
+                NO-LOCK NO-ERROR. 
+            IF AVAILABLE b-customer THEN
+            DO:
+                IF lc-mode = "ADD"
+                    OR b-table.AccountNumber <> b-customer.AccountNumber THEN
+                DO:
+                    RUN htmlib-AddErrorMessage(
+                        'accountref', 
+                        'This account reference already exists on account ' + b-customer.accountnumber + ' ' + b-customer.name,
+                        INPUT-OUTPUT pc-error-field,
+                        INPUT-OUTPUT pc-error-msg ).
+                
+                END.
+            END.
+              
+        END.
+        ASSIGN 
+            li-int = int(lc-noemp) NO-ERROR.
+        IF ERROR-STATUS:ERROR
+            OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+                'noemp', 
+                'The number of employees is invalid',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+    
+        ASSIGN 
+            li-int = int(lc-turn) NO-ERROR.
+        IF ERROR-STATUS:ERROR
+            OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+                'turn', 
+                'The annual turnover is invalid',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+            
+            
+    END.
 
 END PROCEDURE.
 
@@ -713,8 +760,7 @@ PROCEDURE process-web-request:
         ASSIGN
             lc-link-url = appurl + '/crm/view.p?' + 
             replace(REPLACE(lc-filterOptions,"|","&"),"^","=").
-        ASSIGN 
-            lc-title = lc-filteroptions.        
+             
     END.
     ELSE
     DO:   
@@ -770,8 +816,33 @@ PROCEDURE process-web-request:
                 lc-camp              = get-value("camp")
                 lc-ops               = get-value("ops")
                 lc-lostd             = get-value("lostd")
-                  
                 .
+            IF lc-source = "crmview" AND lc-mode = "Add" THEN
+            DO:
+                ASSIGN 
+                    lc-accountnumber = get-value("account").
+                ASSIGN
+                    lc-name              = get-value("name")
+                    lc-address1          = get-value("address1")
+                    lc-address2          = get-value("address2")
+                    lc-city              = get-value("city")
+                    lc-county            = get-value("county")
+                    lc-country           = get-value("country")
+                    lc-postcode          = get-value("postcode")
+                    lc-telephone         = get-value("telephone")
+                    lc-contact           = get-value("contact")
+                    lc-accStatus         = get-value("accstatus")
+                    lc-accountref        = get-value("accountref")
+                    lc-SalesManager      = get-value("salesmanager")
+                    lc-SalesContact      = get-value("salescontact")
+                    lc-website           = get-value("website")
+                    lc-noemp             = get-value("noemp")
+                    lc-turn              = get-value("turn")
+                    lc-salesnote         = get-value("salesnote")
+                    lc-indsector        =  get-value("indsector").
+            
+                    
+            END.
                         
             RUN ip-Validate( OUTPUT lc-error-field,
                 OUTPUT lc-error-msg ).
@@ -792,6 +863,42 @@ PROCEDURE process-web-request:
                 END.
                 ELSE
                 DO:
+                    IF lc-source = "crmview" AND lc-accountNumber = "ADD" THEN
+                    DO:
+                        RUN lib/autogenAccount.p ( lc-global-company, OUTPUT lc-accountNumber).
+                        CREATE Customer.
+                        ASSIGN 
+                            Customer.CompanyCode   = lc-global-company
+                            Customer.AccountNumber = lc-AccountNumber
+                            Customer.Name          = lc-name
+                            Customer.Address1      = lc-address1
+                            Customer.Address2      = lc-address2
+                            Customer.City          = lc-city
+                            Customer.County        = lc-county
+                            Customer.Country       = "UK"
+                            Customer.Postcode      = lc-Postcode
+                            Customer.Telephone     = lc-Telephone
+                            Customer.Contact       = lc-contact
+                            Customer.accStatus       = lc-accStatus
+                            customer.website         = lc-WebSite
+                            customer.accountref      = lc-accountref
+                            customer.SalesManager    = lc-SalesManager
+                            customer.salesContact    = lc-SalesContact
+                            customer.NoOfEmployees   = int(lc-noemp)
+                            customer.AnnualTurnover  = int(lc-turn)
+                            customer.salesnote       = lc-salesnote
+                            customer.industrySector  = lc-indsector.
+                        
+                        ASSIGN
+                            customer.isActive = customer.accStatus = "Active".
+                    END.
+                     
+                    IF lc-source = "crmview" THEN
+                        FIND Customer WHERE Customer.CompanyCode = lc-global-company
+                            AND Customer.AccountNumber = lc-accountNumber NO-LOCK NO-ERROR.
+                                    
+            
+          
                     CREATE b-table.
                     ASSIGN 
                         b-table.accountnumber = Customer.AccountNumber

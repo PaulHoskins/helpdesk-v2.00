@@ -4648,6 +4648,13 @@ ADD FIELD "op_no" OF "op_master" AS integer
   MAX-WIDTH 4
   ORDER 280
 
+ADD FIELD "crtDate" OF "op_master" AS date 
+  FORMAT "99/99/99"
+  INITIAL "today"
+  POSITION 30
+  MAX-WIDTH 4
+  ORDER 290
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -4661,10 +4668,15 @@ ADD INDEX "AccountNumber" ON "op_master"
   INDEX-FIELD "AccountNumber" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
 
-ADD INDEX "createDate" ON "op_master" 
+ADD INDEX "ctDate" ON "op_master" 
   AREA "Schema Area"
   INDEX-FIELD "CompanyCode" ASCENDING 
-  INDEX-FIELD "createDate" ASCENDING 
+  INDEX-FIELD "crtDate" ASCENDING 
+
+ADD INDEX "descr" ON "op_master" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "descr" ASCENDING 
 
 ADD INDEX "Opstatus" ON "op_master" 
   AREA "Schema Area"
@@ -6935,4 +6947,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000137775
+0000137999
