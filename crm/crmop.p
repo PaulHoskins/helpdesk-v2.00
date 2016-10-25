@@ -143,6 +143,538 @@ PROCEDURE ip-ActionPage:
 
 END PROCEDURE.
 
+PROCEDURE ip-ViewActionPage:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE lc-rowid          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-toolbarid      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-info           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-object         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-tag-end        AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-dummy-return   AS CHARACTER INITIAL "MYXXX111PPP2222" NO-UNDO.
+    DEFINE VARIABLE li-duration       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-total-duration AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-tduration      AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE lc-AllowDelete    AS CHARACTER NO-UNDO.
+
+
+    DEFINE VARIABLE li-count          AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-start          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-Action         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-Audit          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-HasClosed      AS LOGICAL   NO-UNDO.
+    DEFINE VARIABLE lc-descr          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-this-class   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-class-count  AS INTEGER NO-UNDO.
+    
+    
+    {&out} skip
+          replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    {&out}
+    htmlib-TableHeading(
+        "Date|Assigned To|Created|Action|Date|Activity|Site Visit|By|Start/End|Duration<br>(H:MM)^right"
+        ) skip.
+
+    FOR EACH op_action NO-LOCK
+        WHERE op_action.CompanyCode = b-table.CompanyCode
+        AND op_action.op_id = b-table.op_id
+        BY op_action.ActionDate DESCENDING
+        BY op_action.CreateDt DESCENDING
+       
+        :
+
+    
+        FIND WebAction 
+            WHERE WebAction.CompanyCode = op_Action.CompanyCode
+            AND WebAction.ActionCode = op_Action.ActionCode
+            NO-LOCK NO-ERROR.
+                   
+            
+        ASSIGN 
+            lc-descr = IF AVAILABLE WebAction THEN WebAction.Description ELSE op_Action.ActionCode.
+      
+         
+            
+        ASSIGN
+            li-class-count = li-class-count + 1 
+            lc-this-class = "cl" + STRING(li-class-count).
+        
+        ASSIGN
+            li-duration = 0.
+        FOR EACH op_activity NO-LOCK
+            WHERE op_activity.CompanyCode = b-table.CompanyCode
+            AND op_activity.op_id = b-table.op_id
+            AND op_activity.opActionId = op_action.opActionID:
+            ASSIGN
+                li-duration = li-duration + op_activity.Duration
+                li-count    = li-count + 1.
+            
+           
+        END.
+        ASSIGN
+            li-total-duration = li-total-duration + li-duration.
+
+        ASSIGN
+            li-count = li-count + 1.
+
+        ASSIGN
+            lc-Action = STRING(op_action.ActionDate,"99/99/9999").
+        IF op_action.ActionStatus = "CLOSED"
+            THEN ASSIGN lc-Action = '<span style="color: green;">' + lc-Action + "**</span>"
+                ll-HasClosed = TRUE.
+
+        ASSIGN
+            lc-Audit = STRING(op_action.CreateDt,"99/99/9999 hh:mm") + " " + 
+                       dynamic-function("com-UserName",op_action.CreatedBy).
+                       
+        {&out}
+        SKIP(1)
+        tbar-trID(lc-ToolBarID,ROWID(op_action))
+        SKIP(1)
+        htmlib-MntTableField(lc-Action,'left')
+        htmlib-MntTableField(
+            DYNAMIC-FUNCTION("com-UserName",op_action.AssignTo)
+            ,'left')
+        htmlib-MntTableField(lc-Audit,'left').
+
+        IF op_action.notes <> "" OR 1 = 1 THEN
+        DO:
+        
+            ASSIGN 
+                lc-info = 
+                REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
+                lc-object = "hdobj" + string(op_action.opActionID).
+        
+            lc-info = REPLACE(lc-info,"<td","<td colspan=6 ").
+
+            ASSIGN 
+                li-tag-end = INDEX(lc-info,">").
+
+            {&out} substr(lc-info,1,li-tag-end).
+
+            ASSIGN 
+                substr(lc-info,1,li-tag-end) = "".
+            /*
+             {&out} 
+             '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+             lc-object 
+             
+             '~')' SKIP
+             ";actionExpand(this,~'" lc-this-class "~')"
+             '">':U skip.
+             */
+            {&out} lc-info.
+    
+            {&out} htmlib-ExpandBox(lc-object,op_action.Notes).
+
+            {&out} '</td>' skip.
+        END.
+        ELSE {&out}
+        REPLACE(htmlib-MntTableField(lc-descr,'left'),
+            "<td","<td colspan=6 ").
+        {&out}
+            
+        htmlib-MntTableField(
+            IF li-Duration > 0 
+            THEN '<strong>' + html-encode(com-TimeToString(li-duration)) + '</strong>'
+            ELSE "",'right').
+        /*    
+        tbar-BeginHidden(ROWID(op_action)).
+               IF lc-allowDelete = "yes" 
+            THEN {&out} tbar-Link("delete",ROWID(op_action),
+            'javascript:ConfirmDeleteAction(' +
+            "ROW" + string(ROWID(op_action)) + ','
+                           
+                          
+            + string(op_action.opActionID) + ');',
+            "").
+            
+        {&out}
+            
+        tbar-Link("update",?,
+            'javascript:PopUpWindow('
+            + '~'' + appurl 
+            + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
+            + '~'' 
+            + ');'
+            ,"")
+                                                                                            
+        tbar-Link("multiiss",?,
+            'javascript:PopUpWindow('
+            + '~'' + appurl 
+            + '/crm/activityupdmain.p?mode=display&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action)) + "&actionrowid=" + string(ROWID(op_action))
+            + '~'' 
+            + ');'
+            ,"") skip
+                         
+
+            tbar-EndHidden()
+            */
+        {&out}   
+        '</tr>' skip.
+
+        FOR EACH op_activity NO-LOCK
+            WHERE op_activity.CompanyCode = op_action.CompanyCode
+            AND op_activity.op_id = op_action.op_id
+            AND op_activity.opActionId = op_action.opActionID
+            BY op_activity.ActDate DESCENDING
+            BY op_activity.CreateDate DESCENDING
+            BY op_activity.CreateTime DESCENDING:
+
+            ASSIGN
+                lc-start = ""
+                lc-descr = op_activity.Description.
+            IF op_activity.activityType <> ""
+                THEN ASSIGN lc-descr = op_activity.activityType + " - " + op_activity.Description.
+            
+            
+            
+
+            IF op_activity.StartDate <> ? THEN
+            DO:
+                ASSIGN
+                    lc-start = STRING(op_activity.StartDate,"99/99/9999") + 
+                               " " +
+                               string(op_activity.StartTime,"hh:mm").
+
+                IF op_activity.EndDate <> ? THEN
+                    ASSIGN
+                        lc-start = lc-start + " - " + STRING(op_activity.endDate,"99/99/9999") + 
+                               " " +
+                               string(op_activity.EndTime,"hh:mm").
+                                
+            END.
+            
+            {&out}
+            /*SKIP(1)
+            tbar-trID(lc-ToolBarID,ROWID(op_activity))
+            SKIP(1) */
+            REPLACE(htmlib-MntTableField("",'left'),"<td","<td colspan=4") 
+            htmlib-MntTableField(STRING(op_activity.ActDate,'99/99/9999'),'left') skip.
+
+
+            IF op_activity.notes <> "" THEN
+            DO:
+            
+                ASSIGN 
+                    lc-info = 
+                    REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
+                    lc-object = "hdobj" + string(op_activity.opactivityID).
+            
+                ASSIGN 
+                    li-tag-end = INDEX(lc-info,">").
+    
+                {&out} substr(lc-info,1,li-tag-end).
+    
+                ASSIGN 
+                    substr(lc-info,1,li-tag-end) = "".
+                /*
+                {&out} 
+                '<img class="expandboxi i' lc-this-class '" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+                lc-object '~')">':U skip.
+                */
+                {&out} lc-info.
+        
+                {&out} REPLACE(htmlib-ExpandBox(lc-object,op_activity.Notes),
+                    'class="','class="' + lc-this-class + " ").
+    
+                {&out} '</td>' skip.
+            END.
+            ELSE {&out}
+            htmlib-MntTableField(lc-descr,'left').
+
+            {&out}
+            htmlib-MntTableField(IF op_activity.SiteVisit THEN "Yes" ELSE "&nbsp;",'left').
+
+            {&out}
+            htmlib-MntTableField(
+                DYNAMIC-FUNCTION("com-UserName",op_activity.ActivityBy)
+                ,'left')
+            htmlib-MntTableField(html-encode(lc-Start),'left')
+            htmlib-MntTableField(IF op_activity.Duration > 0 
+                THEN html-encode(com-TimeToString(op_activity.Duration))
+                ELSE "",'right')
+            
+            tbar-BeginHidden(ROWID(op_activity))
+           
+            tbar-Link("update",?,
+                'javascript:PopUpWindow('
+                + '~'' + appurl 
+                + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
+                + '~'' 
+                + ');'
+                ,"")
+                                                                                                            
+            tbar-EndHidden()
+            '</tr>' skip.
+
+
+        END.
+
+    END.
+    
+    IF li-total-duration <> 0 THEN
+    DO:
+        {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
+        REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=9 ")
+        htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
+            ,'right')
+        '</tr>'.
+            
+            
+    END.
+    
+    IF ll-HasClosed THEN
+    DO:
+        {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
+        REPLACE(htmlib-MntTableField("** Closed Actions","left"),"<td",'<td colspan=10 style="color:green;"')
+                
+        '</tr>'.
+    END.
+    {&out} skip 
+           htmlib-EndTable()
+           skip.
+
+  
+  
+
+
+
+END PROCEDURE.
+
+PROCEDURE ip-ViewDocumentPage:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    DEFINE VARIABLE lc-rowid     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-toolbarid AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-toggle    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-doc-key   AS CHARACTER NO-UNDO. 
+
+
+    DEFINE BUFFER b-query FOR doch.
+
+    DEFINE VARIABLE lc-type AS CHARACTER 
+        INITIAL "CRMOP" NO-UNDO.
+    
+    {&out} skip
+          replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+
+    {&out}
+    htmlib-TableHeading(
+        "Date|Time|By|Description|Type|Size (KB)^right"
+        ) skip.
+
+    FOR EACH b-query NO-LOCK
+        WHERE b-query.CompanyCode = b-table.CompanyCode
+        AND b-query.RelType = lc-Type
+        AND b-query.RelKey  = string(b-table.op_id):
+
+
+
+                
+        {&out}
+        '<tr>'
+        htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
+        htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
+        htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
+        htmlib-MntTableField(b-query.descr,'left').
+
+
+       
+        {&out}
+        htmlib-MntTableField(b-query.DocType,'left')
+        htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
+        '</tr>' skip.
+
+    END.
+
+    {&out} skip 
+           htmlib-EndTable()
+           skip.
+    
+    
+END PROCEDURE.
+
+PROCEDURE ip-ViewNotePage:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+    {&out}
+    REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"')
+    htmlib-TableHeading(
+        "Date & Time^right|Details|By"
+        ) skip.
+
+
+    
+    DEFINE BUFFER b-note  FOR op_Note.
+    DEFINE BUFFER b-status FOR WebNote.
+    DEFINE BUFFER b-user   FOR WebUser.
+
+ 
+    DEFINE VARIABLE lc-status AS CHARACTER NO-UNDO.
+
+
+
+    FOR EACH b-note NO-LOCK
+        WHERE b-note.CompanyCode =  b-table.CompanyCode
+        AND b-note.op_id = b-table.op_id:
+
+        FIND b-status WHERE b-status.CompanyCode = b-table.CompanyCode
+            AND b-status.NoteCode = b-note.NoteCode NO-LOCK NO-ERROR.
+
+        ASSIGN 
+            lc-status = IF AVAILABLE b-status THEN b-status.description ELSE "".
+
+        ASSIGN 
+            lc-status = lc-status + '<br>' + replace(b-note.Contents,'~n','<BR>').
+
+        {&out} 
+        '<tr>'
+        htmlib-TableField(STRING(b-note.CreateDate,'99/99/9999') + " " + STRING(b-note.CreateTime,'hh:mm am') ,'right')
+           
+        htmlib-TableField(lc-status,'left')
+        htmlib-TableField(html-encode(com-UserName(b-note.LoginID)),'left')
+        '</tr>' skip.
+    END.
+    {&out} skip 
+              htmlib-EndTable()
+             skip.
+             
+
+END PROCEDURE.
+
+PROCEDURE ip-ViewPage:
+    /*------------------------------------------------------------------------------
+            Purpose:  																	  
+            Notes:  																	  
+    ------------------------------------------------------------------------------*/
+
+    IF lc-mode = "VIEW"
+        THEN {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' skip.
+       
+       
+    {&out} htmlib-StartTable("mnt",
+        100,
+        0,
+        0,
+        0,
+        "center").
+        
+
+
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Opportunity No")        '</TD>' skip
+            '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.op_no '</td></tr>' SKIP.
+
+              
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Description")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.descr '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Sales Contact")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.salesContact '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Department")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Department '</td></tr>' SKIP.
+     
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Next Step")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.NextStep",b-table.NextStep) '</td></tr>' SKIP.
+               
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Close Date")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' IF b-table.CloseDate = ? then "&nbsp;" else string(b-table.CloseDate,"99/99/9999") '</td></tr>' SKIP.
+                       
+                       
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Current Provider")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.CurrentProvider '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Opportuntity Type")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.opType,lc-global-opType-Code,lc-global-opType-Desc ) '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Service Required")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-GenTabDesc(b-table.companyCode,"CRM.ServiceRequired",b-table.servRequired) '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Note")        '</TD>' skip
+          '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' replace(b-table.opNote,"~n","<br />") '</td></tr>' SKIP.
+                
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Rating")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.Rating,lc-global-Rating-Code,lc-global-Rating-Desc ) '</td></tr>' SKIP.
+                     
+                     
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Status")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.OpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc ) '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Probability")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Probability '%</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Revenue")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue) '</td></tr>' SKIP.
+               
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Cost Of Sale")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.CostOfSale) '</td></tr>' SKIP.
+               
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("GP Profit")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue - b-table.CostOfSale) '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Deal Lost Reason")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.DealLostReason",b-table.DealLostReason) '</td></tr>' SKIP.
+               
+    {&out} '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Lost Description")        '</TD>' skip
+          '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' replace(b-table.LostDescription,"~n","<br />") '</td></tr>' SKIP.
+                                             
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Source Type")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.SourceType",b-table.SourceType) '</td></tr>' SKIP.
+          
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Source")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.opSource '</td></tr>' SKIP.
+     
+    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Database")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Database",b-table.dBase) '</td></tr>' SKIP.
+    {&out} '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
+    htmlib-SideLabel("Campaign")        '</TD>' skip
+          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
+          
+
+              
+    {&out} htmlib-EndTable() skip.
+    
+   
+    IF lc-mode = "DELETE" THEN RETURN.
+    
+    RUN ip-ViewActionPage.
+    RUN ip-ViewDocumentPage.
+    RUN ip-ViewNotePage.
+    
+    
+    
+    
+END PROCEDURE.
+
 PROCEDURE ip-Documents:
     /*------------------------------------------------------------------------------
             Purpose:  																	  
@@ -319,6 +851,7 @@ PROCEDURE ip-UpdatePage:
     DEFINE VARIABLE lc-code AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-desc AS CHARACTER NO-UNDO.
     
+   
     {&out} htmlib-StartTable("mnt",
         100,
         0,
@@ -960,6 +1493,12 @@ PROCEDURE process-web-request:
                     INPUT-OUTPUT lc-error-msg ).
             ELSE 
             DO:
+                FOR EACH op_Activity OF b-table EXCLUSIVE-LOCK:
+                    DELETE op_Activity.
+                END.
+                FOR EACH op_Action OF b-table EXCLUSIVE-LOCK:
+                    DELETE op_action.
+                END.
                 
                 DELETE b-table.
             END.
@@ -1036,9 +1575,12 @@ PROCEDURE process-web-request:
     
     {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
     
-    IF lc-mode = "UPDATE"
+    IF lc-mode = "UPDATE" 
         THEN RUN ip-ExportJS.
-    ELSE RUN ip-ExportJS-Add.
+    
+    ELSE 
+        IF lc-mode = "ADD" THEN
+            RUN ip-ExportJS-Add.
     
     
     {&out} htmlib-Header("Opportunity CRM") skip.
@@ -1052,62 +1594,68 @@ PROCEDURE process-web-request:
     {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
 
 
-    IF lc-mode = "ADD" THEN
+    IF lc-mode = "DELETE" 
+        OR lc-mode = "VIEW" THEN
     DO:
-        RUN ip-UpdatePage.
-        {&out} htmlib-CalendarScript("closedate") SKIP.
+        RUN ip-ViewPage.
     END.
-    ELSE 
-        IF lc-mode = "UPDATE" THEN
+    ELSE
+        IF lc-mode = "ADD" THEN
         DO:
-            {&out}
-            '<div class="tabber">' skip.
-         
-            {&out} '<div class="tabbertab" title="Opportunity">' SKIP.
             RUN ip-UpdatePage.
             {&out} htmlib-CalendarScript("closedate") SKIP.
-        
-            IF lc-error-msg <> "" THEN
+        END.
+        ELSE 
+            IF lc-mode = "UPDATE" THEN
             DO:
-                {&out} '<BR><BR><CENTER>' 
-                htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
-            END.
+                {&out}
+                '<div class="tabber">' skip.
+         
+                {&out} '<div class="tabbertab" title="Opportunity">' SKIP.
+                RUN ip-UpdatePage.
+                {&out} htmlib-CalendarScript("closedate") SKIP.
+        
+                IF lc-error-msg <> "" THEN
+                DO:
+                    {&out} '<BR><BR><CENTER>' 
+                    htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+                END.
 
-            IF lc-submit-label <> "" THEN
-            DO:
-                {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-                '</center>' skip.
-            END.
+                IF lc-submit-label <> "" THEN
+                DO:
+                    {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+                    '</center>' skip.
+                END.
     
-            {&out} '</div>' SKIP.
+                {&out} '</div>' SKIP.
         
         
         
-            {&out} '<div class="tabbertab" title="Action & Activities">' SKIP.
+                {&out} '<div class="tabbertab" title="Action & Activities">' SKIP.
             
-            RUN ip-ActionPage.
-            {&out} '</div>' SKIP.
+                RUN ip-ActionPage.
+                {&out} '</div>' SKIP.
         
-            {&out} 
-            '<div class="tabbertab" title="Notes">' skip.
-            RUN ip-NotePage.
-            {&out} 
-            '</div>'.
+                {&out} 
+                '<div class="tabbertab" title="Notes">' skip.
+                RUN ip-NotePage.
+                {&out} 
+                '</div>'.
     
-            {&out} '<div class="tabbertab" title="Attachments">' SKIP.
-            RUN ip-Documents.
-            {&out} '</div>' SKIP.
+                {&out} '<div class="tabbertab" title="Attachments">' SKIP.
+                RUN ip-Documents.
+                {&out} '</div>' SKIP.
         
         
-            {&out} '<div class="tabbertab" title="Customer Details">' SKIP.
-            {&out}
-            '<div id="IDCustomerAjax">Loading Notes</div>'.
+                {&out} '<div class="tabbertab" title="Customer Details">' SKIP.
+                {&out}
+                '<div id="IDCustomerAjax">Loading Notes</div>'.
     
-            {&out} '</div>' SKIP.
+                {&out} '</div>' SKIP.
         
          
-            {&out} '</div>' SKIP.
-        END.
+                {&out} '</div>' SKIP.
+            END.
     
     {&out} htmlib-Hidden ("mode", lc-mode) skip
            htmlib-Hidden ("rowid", lc-rowid) skip

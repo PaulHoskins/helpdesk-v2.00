@@ -272,9 +272,15 @@ PROCEDURE ip-BuildTable:
             
         {&out} skip
                     tbar-BeginHidden(rowid(b-query)).
-       
+                    
+        {&out} tbar-Link("view",ROWID(b-query),appurl + "/crm/crmop.p","crmaccount=" + url-encode(lc-enc-key,"Query") + "&" + lc-link-otherp + "|firstrow^" + string(lr-first-row)).
+        
         {&out} tbar-Link("update",ROWID(b-query),appurl + "/crm/crmop.p","crmaccount=" + url-encode(lc-enc-key,"Query") + "&" + lc-link-otherp + "|firstrow^" + string(lr-first-row)).
-          
+        IF glob-webuser.engType = "SAL"
+        THEN {&out}  tbar-Link("delete",?,"off",lc-link-otherp).
+        ELSE {&out}  tbar-Link("delete",ROWID(b-query),appurl + "/crm/crmop.p","crmaccount=" + url-encode(lc-enc-key,"Query") + "&" + lc-link-otherp + "|firstrow^" + string(lr-first-row)).
+           
+                  
         {&out}
         tbar-EndHidden()
                 skip
@@ -671,7 +677,10 @@ PROCEDURE process-web-request :
         tbar-Link("add",?,appurl +  "/crm/crmop.p",lc-link-otherp)
         
         tbar-BeginOption()
+        tbar-Link("view",?,"off",lc-link-otherp)
         tbar-Link("update",?,"off",lc-link-otherp)
+        tbar-Link("delete",?,"off",lc-link-otherp)
+        
         tbar-EndOption() 
         tbar-End().
     
