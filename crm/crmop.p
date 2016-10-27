@@ -852,7 +852,7 @@ PROCEDURE ip-UpdatePage:
     DEFINE VARIABLE lc-desc AS CHARACTER NO-UNDO.
     
    
-    {&out} htmlib-StartTable("mnt",
+    {&out} '<br />' htmlib-StartTable("mnt",
         100,
         0,
         0,
@@ -896,7 +896,7 @@ PROCEDURE ip-UpdatePage:
             THEN htmlib-SideLabelError("Opportunity No")
             ELSE htmlib-SideLabel("Opportunity No"))
         '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'            lc-opno
+            '<TD VALIGN="TOP" ALIGN="left" class="sidelabel">'  lc-opno
            '</TD></tr>'.
     END.
               
