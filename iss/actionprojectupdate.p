@@ -130,7 +130,7 @@ PROCEDURE ip-Page :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -143,32 +143,32 @@ PROCEDURE ip-Page :
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("actiondate",10,lc-actiondate) 
     htmlib-CalendarLink("actiondate")
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-actiondate),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Issue Details")
-    '</TD>' skip
+    '</TD>' SKIP
            '<TD VALIGN="TOP" ALIGN="left" class="tablefield">'
-           replace(Issue.LongDescription,"~n","<br>")
-          '</TD></tr>' skip
-           skip.
+           REPLACE(Issue.LongDescription,"~n","<br>")
+          '</TD></tr>' SKIP
+           SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("notes",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Action")
         ELSE htmlib-SideLabel("Action"))
-    '</TD>' skip
+    '</TD>' SKIP
            '<TD VALIGN="TOP" ALIGN="left">'
            htmlib-InputField("notes",40,lc-notes) 
-          '</TD></tr>' skip
-           skip.
+          '</TD></tr>' SKIP
+           SKIP.
 
     
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -184,7 +184,7 @@ PROCEDURE ip-Page :
         IF li-loop <> EXTENT(lc-assign) 
             THEN {&out} '<br />' SKIP.
     END.    
-    {&out} '</TD></TR>' skip. 
+    {&out} '</TD></TR>' SKIP. 
     
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -197,13 +197,13 @@ PROCEDURE ip-Page :
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-CheckBox("customerview", IF lc-customerview = 'on'
         THEN TRUE ELSE FALSE) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-customerview = 'on'
-                                         then 'yes' else 'no'),'left')
-           skip.
+    '</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(IF lc-customerview = 'on'
+                                         THEN 'yes' ELSE 'no'),'left')
+           SKIP.
     
-    {&out} '</TR>' skip.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("status",lc-error-field,'|') > 0 
@@ -214,29 +214,29 @@ PROCEDURE ip-Page :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-Select("status",lc-global-action-code,lc-global-action-display,lc-status)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(dynamic-function("com-DecodeLookup",lc-status,
+    '</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(DYNAMIC-FUNCTION("com-DecodeLookup",lc-status,
                                      lc-global-action-code,
                                      lc-global-action-display
                                      ),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
 
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
     
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
 
 
@@ -528,12 +528,12 @@ PROCEDURE process-web-request :
             
             RUN outputHeader.
             {&out} 
-            '<html>' skip
-                '<script language="javascript">' skip
-                'var ParentWindow = opener' skip
-                'ParentWindow.actionCreated()' skip
+            '<html>' SKIP
+                '<script language="javascript">' SKIP
+                'var ParentWindow = opener' SKIP
+                'ParentWindow.actionCreated()' SKIP
                 
-                '</script>' skip
+                '</script>' SKIP
                 '<body><h1>ActionUpdated</h1></body></html>'.
             RETURN.
         END.
@@ -571,31 +571,31 @@ PROCEDURE process-web-request :
     
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
 
   
     {&out}
     htmlib-StartForm("mainform","post", selfurl)
-    htmlib-ProgramTitle(lc-title) skip.
+    htmlib-ProgramTitle(lc-title) SKIP.
 
 
     RUN ip-Page.
 
-    {&out} htmlib-Hidden("issuerowid",lc-issue-rowid) skip
-           htmlib-Hidden("mode",lc-mode) skip
-           htmlib-Hidden("rowid",lc-rowid) skip
-           htmlib-Hidden("longdescription",issue.LongDescription) skip.
+    {&out} htmlib-Hidden("issuerowid",lc-issue-rowid) SKIP
+           htmlib-Hidden("mode",lc-mode) SKIP
+           htmlib-Hidden("rowid",lc-rowid) SKIP
+           htmlib-Hidden("longdescription",issue.LongDescription) SKIP.
 
-    {&out} htmlib-EndForm() skip.
+    {&out} htmlib-EndForm() SKIP.
 
 
     IF NOT CAN-DO("view,delete",lc-mode)  THEN
     DO:
         {&out}
-        htmlib-CalendarScript("actiondate") skip.
+        htmlib-CalendarScript("actiondate") SKIP.
     END.
     {&out}
-    htmlib-Footer() skip.
+    htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
