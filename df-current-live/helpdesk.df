@@ -788,6 +788,27 @@ ADD FIELD "TwoFactor_PinLength" OF "Company" AS integer
   MAX-WIDTH 4
   ORDER 370
 
+ADD FIELD "autogenAccount" OF "Company" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 39
+  MAX-WIDTH 1
+  ORDER 380
+
+ADD FIELD "nextAccount" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "1"
+  POSITION 40
+  MAX-WIDTH 4
+  ORDER 390
+
+ADD FIELD "lengthAccount" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "5"
+  POSITION 41
+  MAX-WIDTH 4
+  ORDER 400
+
 ADD INDEX "CompanyCode" ON "Company" 
   AREA "Schema Area"
   UNIQUE
@@ -4612,6 +4633,28 @@ ADD FIELD "createLoginid" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 250
 
+ADD FIELD "LostDescription" OF "op_master" AS character 
+  FORMAT "x(80)"
+  INITIAL ""
+  LABEL "Lost Description"
+  POSITION 28
+  MAX-WIDTH 160
+  ORDER 270
+
+ADD FIELD "op_no" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 29
+  MAX-WIDTH 4
+  ORDER 280
+
+ADD FIELD "crtDate" OF "op_master" AS date 
+  FORMAT "99/99/99"
+  INITIAL "today"
+  POSITION 30
+  MAX-WIDTH 4
+  ORDER 290
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -4624,6 +4667,36 @@ ADD INDEX "AccountNumber" ON "op_master"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
   INDEX-FIELD "op_id" ASCENDING 
+
+ADD INDEX "ctDate" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "crtDate" ASCENDING 
+
+ADD INDEX "descr" ON "op_master" 
+  AREA "Schema Area"
+  WORD
+  INDEX-FIELD "descr" ASCENDING 
+
+ADD INDEX "Opstatus" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "OpStatus" ASCENDING 
+
+ADD INDEX "opType" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "OpType" ASCENDING 
+
+ADD INDEX "op_no" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "op_no" ASCENDING 
+
+ADD INDEX "Rating" ON "op_master" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "Rating" ASCENDING 
 
 ADD TABLE "op_note"
   AREA "Schema Area"
@@ -6874,4 +6947,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000136395
+0000137999
