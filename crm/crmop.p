@@ -10,6 +10,8 @@
     When        Who         What
     06/08/2016  phoski      Initial
     15/10/2016  phoski      Phase 2 changes
+    26/11/2016  phoski      Change to submit on account selection and
+                            build relevant page etc
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -23,18 +25,14 @@ CREATE WIDGET-POOL.
 
 DEFINE VARIABLE lc-error-field     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-error-msg       AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-submitSource    AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-mode            AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-rowid           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-crmAccount      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lr-customer        AS ROWID     NO-UNDO.
-
-
 DEFINE VARIABLE lc-title           AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE lc-Enc-Key         AS CHARACTER NO-UNDO.  
-
 DEFINE VARIABLE lc-search          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-firstrow        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lastrow         AS CHARACTER NO-UNDO.
@@ -51,10 +49,7 @@ DEFINE VARIABLE lc-submit-label    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url        AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-descr           AS CHARACTER NO-UNDO.
-/*
-DEFINE VARIABLE lc-sm-code       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-sm-desc       AS CHARACTER NO-UNDO.
-*/
+
 DEFINE VARIABLE lc-op-salescontact AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-scont-code      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-scont-desc      AS CHARACTER NO-UNDO.
@@ -79,6 +74,10 @@ DEFINE VARIABLE lc-ops             AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-opno            AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lr-val-rowid       AS ROWID     NO-UNDO.
 DEFINE VARIABLE lc-lostd           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-loginid         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-loop            AS INTEGER   NO-UNDO.
+DEFINE VARIABLE lc-next            AS CHARACTER NO-UNDO.
+
 
 
 
@@ -93,10 +92,10 @@ DEFINE VARIABLE lc-FilterOptions   AS CHARACTER NO-UNDO.
 DEFINE BUFFER b-valid  FOR op_master.
 DEFINE BUFFER b-table  FOR op_master.
 DEFINE BUFFER Customer FOR Customer.
-
+DEFINE BUFFER b-user   FOR webuser.
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -112,32 +111,32 @@ PROCEDURE ip-ActionPage:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out}
-           skip
-           tbar-BeginID(lc-Action-TBAR,"") SKIP.
+        SKIP
+        tbar-BeginID(lc-Action-TBAR,"") SKIP.
      
     {&out} 
-    tbar-Link("add",?,
+        tbar-Link("add",?,
         'javascript:PopUpWindow('
         + '~'' + appurl 
         + '/crm/actionupdate.p?mode=add&oprowid=' + string(ROWID(b-table))
         + '~'' 
         + ');'
         ,"")
-                      SKIP.
+        SKIP.
 
     {&out}
-    tbar-BeginOptionID(lc-Action-TBAR) skip.
+        tbar-BeginOptionID(lc-Action-TBAR) SKIP.
 
     {&out} tbar-Link("delete",?,"off","").
 
     {&out}  
-    tbar-Link("update",?,"off","")
-    tbar-Link("multiiss",?,"off","")
-    tbar-EndOption()
-    tbar-End().
+        tbar-Link("update",?,"off","")
+        tbar-Link("multiiss",?,"off","")
+        tbar-EndOption()
+        tbar-End().
 
     {&out}
-    '<div id="IDAction"></div>'.
+        '<div id="IDAction"></div>'.
     
     
 
@@ -167,16 +166,16 @@ PROCEDURE ip-ViewActionPage:
     DEFINE VARIABLE lc-Audit          AS CHARACTER NO-UNDO.
     DEFINE VARIABLE ll-HasClosed      AS LOGICAL   NO-UNDO.
     DEFINE VARIABLE lc-descr          AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-this-class   AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-class-count  AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lc-this-class     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-class-count    AS INTEGER   NO-UNDO.
     
     
-    {&out} skip
-          replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Assigned To|Created|Action|Date|Activity|Site Visit|By|Start/End|Duration<br>(H:MM)^right"
-        ) skip.
+        ) SKIP.
 
     FOR EACH op_action NO-LOCK
         WHERE op_action.CompanyCode = b-table.CompanyCode
@@ -200,7 +199,7 @@ PROCEDURE ip-ViewActionPage:
             
         ASSIGN
             li-class-count = li-class-count + 1 
-            lc-this-class = "cl" + STRING(li-class-count).
+            lc-this-class  = "cl" + STRING(li-class-count).
         
         ASSIGN
             li-duration = 0.
@@ -223,7 +222,7 @@ PROCEDURE ip-ViewActionPage:
         ASSIGN
             lc-Action = STRING(op_action.ActionDate,"99/99/9999").
         IF op_action.ActionStatus = "CLOSED"
-            THEN ASSIGN lc-Action = '<span style="color: green;">' + lc-Action + "**</span>"
+            THEN ASSIGN lc-Action    = '<span style="color: green;">' + lc-Action + "**</span>"
                 ll-HasClosed = TRUE.
 
         ASSIGN
@@ -231,21 +230,20 @@ PROCEDURE ip-ViewActionPage:
                        dynamic-function("com-UserName",op_action.CreatedBy).
                        
         {&out}
-        SKIP(1)
-        tbar-trID(lc-ToolBarID,ROWID(op_action))
-        SKIP(1)
-        htmlib-MntTableField(lc-Action,'left')
-        htmlib-MntTableField(
+            SKIP(1)
+            tbar-trID(lc-ToolBarID,ROWID(op_action))
+            SKIP(1)
+            htmlib-MntTableField(lc-Action,'left')
+            htmlib-MntTableField(
             DYNAMIC-FUNCTION("com-UserName",op_action.AssignTo)
             ,'left')
-        htmlib-MntTableField(lc-Audit,'left').
+            htmlib-MntTableField(lc-Audit,'left').
 
         IF op_action.notes <> "" OR 1 = 1 THEN
         DO:
         
             ASSIGN 
-                lc-info = 
-                REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
+                lc-info   = REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
                 lc-object = "hdobj" + string(op_action.opActionID).
         
             lc-info = REPLACE(lc-info,"<td","<td colspan=6 ").
@@ -270,14 +268,15 @@ PROCEDURE ip-ViewActionPage:
     
             {&out} htmlib-ExpandBox(lc-object,op_action.Notes).
 
-            {&out} '</td>' skip.
+            {&out} 
+                '</td>' SKIP.
         END.
         ELSE {&out}
-        REPLACE(htmlib-MntTableField(lc-descr,'left'),
-            "<td","<td colspan=6 ").
+                REPLACE(htmlib-MntTableField(lc-descr,'left'),
+                "<td","<td colspan=6 ").
         {&out}
             
-        htmlib-MntTableField(
+            htmlib-MntTableField(
             IF li-Duration > 0 
             THEN '<strong>' + html-encode(com-TimeToString(li-duration)) + '</strong>'
             ELSE "",'right').
@@ -314,7 +313,7 @@ PROCEDURE ip-ViewActionPage:
             tbar-EndHidden()
             */
         {&out}   
-        '</tr>' skip.
+            '</tr>' SKIP.
 
         FOR EACH op_activity NO-LOCK
             WHERE op_activity.CompanyCode = op_action.CompanyCode
@@ -349,19 +348,18 @@ PROCEDURE ip-ViewActionPage:
             END.
             
             {&out}
-            /*SKIP(1)
-            tbar-trID(lc-ToolBarID,ROWID(op_activity))
-            SKIP(1) */
-            REPLACE(htmlib-MntTableField("",'left'),"<td","<td colspan=4") 
-            htmlib-MntTableField(STRING(op_activity.ActDate,'99/99/9999'),'left') skip.
+                /*SKIP(1)
+                tbar-trID(lc-ToolBarID,ROWID(op_activity))
+                SKIP(1) */
+                REPLACE(htmlib-MntTableField("",'left'),"<td","<td colspan=4") 
+                htmlib-MntTableField(STRING(op_activity.ActDate,'99/99/9999'),'left') SKIP.
 
 
             IF op_activity.notes <> "" THEN
             DO:
             
                 ASSIGN 
-                    lc-info = 
-                    REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
+                    lc-info   = REPLACE(htmlib-MntTableField(html-encode(lc-descr),'left'),'</td>','')
                     lc-object = "hdobj" + string(op_activity.opactivityID).
             
                 ASSIGN 
@@ -381,26 +379,27 @@ PROCEDURE ip-ViewActionPage:
                 {&out} REPLACE(htmlib-ExpandBox(lc-object,op_activity.Notes),
                     'class="','class="' + lc-this-class + " ").
     
-                {&out} '</td>' skip.
+                {&out} 
+                    '</td>' SKIP.
             END.
             ELSE {&out}
-            htmlib-MntTableField(lc-descr,'left').
+                    htmlib-MntTableField(lc-descr,'left').
 
             {&out}
-            htmlib-MntTableField(IF op_activity.SiteVisit THEN "Yes" ELSE "&nbsp;",'left').
+                htmlib-MntTableField(IF op_activity.SiteVisit THEN "Yes" ELSE "&nbsp;",'left').
 
             {&out}
-            htmlib-MntTableField(
+                htmlib-MntTableField(
                 DYNAMIC-FUNCTION("com-UserName",op_activity.ActivityBy)
                 ,'left')
-            htmlib-MntTableField(html-encode(lc-Start),'left')
-            htmlib-MntTableField(IF op_activity.Duration > 0 
+                htmlib-MntTableField(html-encode(lc-Start),'left')
+                htmlib-MntTableField(IF op_activity.Duration > 0 
                 THEN html-encode(com-TimeToString(op_activity.Duration))
                 ELSE "",'right')
             
-            tbar-BeginHidden(ROWID(op_activity))
+                tbar-BeginHidden(ROWID(op_activity))
            
-            tbar-Link("update",?,
+                tbar-Link("update",?,
                 'javascript:PopUpWindow('
                 + '~'' + appurl 
                 + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
@@ -408,8 +407,8 @@ PROCEDURE ip-ViewActionPage:
                 + ');'
                 ,"")
                                                                                                             
-            tbar-EndHidden()
-            '</tr>' skip.
+                tbar-EndHidden()
+                '</tr>' SKIP.
 
 
         END.
@@ -418,25 +417,27 @@ PROCEDURE ip-ViewActionPage:
     
     IF li-total-duration <> 0 THEN
     DO:
-        {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
-        REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=9 ")
-        htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
+        {&out} 
+            '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
+            REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=9 ")
+            htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
             ,'right')
-        '</tr>'.
+            '</tr>'.
             
             
     END.
     
     IF ll-HasClosed THEN
     DO:
-        {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
-        REPLACE(htmlib-MntTableField("** Closed Actions","left"),"<td",'<td colspan=10 style="color:green;"')
+        {&out} 
+            '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
+            REPLACE(htmlib-MntTableField("** Closed Actions","left"),"<td",'<td colspan=10 style="color:green;"')
                 
-        '</tr>'.
+            '</tr>'.
     END.
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
   
   
@@ -461,13 +462,13 @@ PROCEDURE ip-ViewDocumentPage:
     DEFINE VARIABLE lc-type AS CHARACTER 
         INITIAL "CRMOP" NO-UNDO.
     
-    {&out} skip
-          replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
 
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Time|By|Description|Type|Size (KB)^right"
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode = b-table.CompanyCode
@@ -478,24 +479,24 @@ PROCEDURE ip-ViewDocumentPage:
 
                 
         {&out}
-        '<tr>'
-        htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
-        htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
-        htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
-        htmlib-MntTableField(b-query.descr,'left').
+            '<tr>'
+            htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
+            htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
+            htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
+            htmlib-MntTableField(b-query.descr,'left').
 
 
        
         {&out}
-        htmlib-MntTableField(b-query.DocType,'left')
-        htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
-        '</tr>' skip.
+            htmlib-MntTableField(b-query.DocType,'left')
+            htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
+            '</tr>' SKIP.
 
     END.
 
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
     
     
 END PROCEDURE.
@@ -506,14 +507,14 @@ PROCEDURE ip-ViewNotePage:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out}
-    REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"')
-    htmlib-TableHeading(
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"')
+        htmlib-TableHeading(
         "Date & Time^right|Details|By"
-        ) skip.
+        ) SKIP.
 
 
     
-    DEFINE BUFFER b-note  FOR op_Note.
+    DEFINE BUFFER b-note   FOR op_Note.
     DEFINE BUFFER b-status FOR WebNote.
     DEFINE BUFFER b-user   FOR WebUser.
 
@@ -536,16 +537,16 @@ PROCEDURE ip-ViewNotePage:
             lc-status = lc-status + '<br>' + replace(b-note.Contents,'~n','<BR>').
 
         {&out} 
-        '<tr>'
-        htmlib-TableField(STRING(b-note.CreateDate,'99/99/9999') + " " + STRING(b-note.CreateTime,'hh:mm am') ,'right')
+            '<tr>'
+            htmlib-TableField(STRING(b-note.CreateDate,'99/99/9999') + " " + STRING(b-note.CreateTime,'hh:mm am') ,'right')
            
-        htmlib-TableField(lc-status,'left')
-        htmlib-TableField(html-encode(com-UserName(b-note.LoginID)),'left')
-        '</tr>' skip.
+            htmlib-TableField(lc-status,'left')
+            htmlib-TableField(html-encode(com-UserName(b-note.LoginID)),'left')
+            '</tr>' SKIP.
     END.
-    {&out} skip 
-              htmlib-EndTable()
-             skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
              
 
 END PROCEDURE.
@@ -557,7 +558,7 @@ PROCEDURE ip-ViewPage:
     ------------------------------------------------------------------------------*/
 
     IF lc-mode = "VIEW"
-        THEN {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' skip.
+        THEN {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' SKIP.
        
        
     {&out} htmlib-StartTable("mnt",
@@ -569,99 +570,121 @@ PROCEDURE ip-ViewPage:
         
 
 
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Opportunity No")        '</TD>' skip
-            '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.op_no '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Opportunity No")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.op_no '</td></tr>' SKIP.
 
               
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Description")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.descr '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Description")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.descr '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Sales Contact")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.salesContact '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Sales Contact")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.salesContact '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Department")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Department '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Department")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Department '</td></tr>' SKIP.
      
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Next Step")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.NextStep",b-table.NextStep) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Next Step")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.NextStep",b-table.NextStep) '</td></tr>' SKIP.
                
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Close Date")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' IF b-table.CloseDate = ? then "&nbsp;" else string(b-table.CloseDate,"99/99/9999") '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Close Date")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' IF b-table.CloseDate = ? THEN "&nbsp;" ELSE STRING(b-table.CloseDate,"99/99/9999") '</td></tr>' SKIP.
                        
                        
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Current Provider")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.CurrentProvider '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Current Provider")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.CurrentProvider '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Opportuntity Type")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.opType,lc-global-opType-Code,lc-global-opType-Desc ) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Opportuntity Type")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.opType,lc-global-opType-Code,lc-global-opType-Desc ) '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Service Required")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-GenTabDesc(b-table.companyCode,"CRM.ServiceRequired",b-table.servRequired) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Service Required")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-GenTabDesc(b-table.companyCode,"CRM.ServiceRequired",b-table.servRequired) '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Note")        '</TD>' skip
-          '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' replace(b-table.opNote,"~n","<br />") '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Note")        '</TD>' SKIP
+        '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' REPLACE(b-table.opNote,"~n","<br />") '</td></tr>' SKIP.
                 
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Rating")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.Rating,lc-global-Rating-Code,lc-global-Rating-Desc ) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Rating")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.Rating,lc-global-Rating-Code,lc-global-Rating-Desc ) '</td></tr>' SKIP.
                      
                      
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Status")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.OpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc ) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Status")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.OpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc ) '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Probability")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Probability '%</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Probability")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.Probability '%</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Revenue")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Revenue")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue) '</td></tr>' SKIP.
                
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Cost Of Sale")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.CostOfSale) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Cost Of Sale")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.CostOfSale) '</td></tr>' SKIP.
                
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("GP Profit")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue - b-table.CostOfSale) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("GP Profit")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' "&pound" + com-money(b-table.Revenue - b-table.CostOfSale) '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Deal Lost Reason")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.DealLostReason",b-table.DealLostReason) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Deal Lost Reason")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.DealLostReason",b-table.DealLostReason) '</td></tr>' SKIP.
                
-    {&out} '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Lost Description")        '</TD>' skip
-          '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' replace(b-table.LostDescription,"~n","<br />") '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD vaLIGN="TOP" ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Lost Description")        '</TD>' SKIP
+        '<TD vaLIGN="TOP" ALIGN="left" style="font-size: 12px;padding-left: 15px;">' REPLACE(b-table.LostDescription,"~n","<br />") '</td></tr>' SKIP.
                                              
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Source Type")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.SourceType",b-table.SourceType) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Source Type")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.SourceType",b-table.SourceType) '</td></tr>' SKIP.
           
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Source")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.opSource '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Source")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' b-table.opSource '</td></tr>' SKIP.
      
-    {&out} '<TR align="left"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Database")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Database",b-table.dBase) '</td></tr>' SKIP.
-    {&out} '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
-    htmlib-SideLabel("Campaign")        '</TD>' skip
-          '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Database")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Database",b-table.dBase) '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Campaign")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
           
 
               
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
     
    
     IF lc-mode = "DELETE" THEN RETURN.
@@ -681,18 +704,18 @@ PROCEDURE ip-Documents:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out}
-           skip
-           tbar-BeginID(lc-Doc-TBAR,"")
-           tbar-Link("add",?,'javascript:documentAdd();',"") skip
-            tbar-BeginOptionID(lc-Doc-TBAR) skip
-            tbar-Link("delete",?,"off","")
-            tbar-Link("documentview",?,"off","")
-            tbar-EndOption()
+        SKIP
+        tbar-BeginID(lc-Doc-TBAR,"")
+        tbar-Link("add",?,'javascript:documentAdd();',"") SKIP
+        tbar-BeginOptionID(lc-Doc-TBAR) SKIP
+        tbar-Link("delete",?,"off","")
+        tbar-Link("documentview",?,"off","")
+        tbar-EndOption()
             
-           tbar-End().
+        tbar-End().
 
     {&out}
-    '<div id="IDDocument"></div>'.
+        '<div id="IDDocument"></div>'.
     
 
 END PROCEDURE.
@@ -703,92 +726,94 @@ PROCEDURE ip-ExportJS:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out} lc-global-jquery  SKIP
-        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip
-           tbar-JavaScript(lc-Action-TBar) SKIP
-           tbar-JavaScript(lc-Doc-TBAR) SKIP
-           '<script language="javascript">' SKIP
-           'var appurl = "' appurl '";' SKIP
-           'var appMode = "' lc-mode '";' SKIP
-           'var CustomerAjax = "' appurl '/cust/custequiplist.p?expand=yes&ajaxsubwindow=yes&customer=' url-encode(lc-enc-key,"Query")  '"' skip
-            'var NoteAddURL = "' appurl '/crm/addnote.p?rowid=' + lc-rowid '"' SKIP
-            'var NoteAjax = "' appurl '/crm/ajax/note.p?rowid=' STRING(ROWID(b-table)) '"' skip
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP
+        tbar-JavaScript(lc-Action-TBar) SKIP
+        tbar-JavaScript(lc-Doc-TBAR) SKIP
+        '<script language="javascript">' SKIP
+        'var appurl = "' appurl '";' SKIP
+        'var appMode = "' lc-mode '";' SKIP
+        'var CustomerAjax = "' appurl '/cust/custequiplist.p?expand=yes&ajaxsubwindow=yes&customer=' url-encode(lc-enc-key,"Query")  '"' SKIP
+        'var NoteAddURL = "' appurl '/crm/addnote.p?rowid=' + lc-rowid '"' SKIP
+        'var NoteAjax = "' appurl '/crm/ajax/note.p?rowid=' STRING(ROWID(b-table)) '"' SKIP
                        
-           'var ActionAjax = "' appurl '/crm/ajax/action.p?allowdelete=yes&rowid=' string(rowid(b-table)) 
-                    '&toolbarid=' lc-Action-TBar  
-                    '"' SKIP
-            'var DocumentAjax = "' appurl '/crm/ajax/document.p?rowid=' string(rowid(b-table)) 
-                    '&toolbarid=' lc-Doc-TBAR 
-                    '"' SKIP
-            'var DocumentAddURL = "' appurl '/crm/adddocument.p?rowid=' + lc-rowid '"' SKIP
+        'var ActionAjax = "' appurl '/crm/ajax/action.p?allowdelete=yes&rowid=' STRING(ROWID(b-table)) 
+        '&toolbarid=' lc-Action-TBar  
+        '"' SKIP
+        'var DocumentAjax = "' appurl '/crm/ajax/document.p?rowid=' STRING(ROWID(b-table)) 
+        '&toolbarid=' lc-Doc-TBAR 
+        '"' SKIP
+        'var DocumentAddURL = "' appurl '/crm/adddocument.p?rowid=' + lc-rowid '"' SKIP
                     
-           '</script>' SKIP
+        '</script>' SKIP
           
            
            
-           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP.
+        '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP.
            
     /* 3678 ----------------------> */ 
-    {&out}  '<script type="text/javascript" >~n'
-    'var pIP =  window.location.host; ~n'
-    'function goGMAP(pCODE, pNAME, pADD) ~{~n'
-    'var pOPEN = "http://www.google.co.uk/maps/preview?q=";' SKIP
-            'pOPEN = pOPEN + pCODE;~n' SKIP
-            'window.open(pOPEN, ~'WinName~' , ~'width=645,height=720,left=0,top=0~');~n'
-            ' ~}~n'
-            '</script>'  skip.
+    {&out}  
+        '<script type="text/javascript" >~n'
+        'var pIP =  window.location.host; ~n'
+        'function goGMAP(pCODE, pNAME, pADD) ~{~n'
+        'var pOPEN = "http://www.google.co.uk/maps/preview?q=";' SKIP
+        'pOPEN = pOPEN + pCODE;~n' SKIP
+        'window.open(pOPEN, ~'WinName~' , ~'width=645,height=720,left=0,top=0~');~n'
+        ' ~}~n'
+        '</script>'  SKIP.
     /* ----------------------- 3678 */ 
 
     /* 3677 ----------------------> */ 
-    {&out}  '<script type="text/javascript" >~n'
-    'function newRDP(rdpI, rdpU, rdpD) ~{~n'
-    'var sIP =  window.location.host; ~n'
-    'var sHTML="<div style:visibility=~'hidden~' >Connect to customer</div>";~n'
-    'var sScript="<SCRIPT DEFER>  ";~n'
-    'sScript = sScript +  "function goRDP()~{ window.open("~n'
-    'sScript = sScript +  "~'";~n'
-    'sScript = sScript + "http://";~n'
-    'sScript = sScript + sIP;~n'
-    'sScript = sScript + ":8090/TSweb.html?server=";~n'
-    'sScript = sScript + rdpI;~n'
-    'sScript = sScript + "&username=";~n'
-    'sScript = sScript + rdpU;~n'
-    'sScript = sScript + "&domain=";~n'
-    'sScript = sScript + rdpD;~n'
-    'sScript = sScript + "~'";~n'
-    'sScript = sScript + ", ~'WinName~', ~'width=655,height=420,left=0,top=0~'); ~} ";~n'
-    'sScript = sScript + " </SCRIPT" + ">";~n'
-    'ScriptDiv.innerHTML = sHTML + sScript;~n'
-    'document.getElementById(~'ScriptDiv~').style.visibility=~'hidden~';~n'
-    ' ~}~n'
-    '</script>'  skip.
+    {&out}  
+        '<script type="text/javascript" >~n'
+        'function newRDP(rdpI, rdpU, rdpD) ~{~n'
+        'var sIP =  window.location.host; ~n'
+        'var sHTML="<div style:visibility=~'hidden~' >Connect to customer</div>";~n'
+        'var sScript="<SCRIPT DEFER>  ";~n'
+        'sScript = sScript +  "function goRDP()~{ window.open("~n'
+        'sScript = sScript +  "~'";~n'
+        'sScript = sScript + "http://";~n'
+        'sScript = sScript + sIP;~n'
+        'sScript = sScript + ":8090/TSweb.html?server=";~n'
+        'sScript = sScript + rdpI;~n'
+        'sScript = sScript + "&username=";~n'
+        'sScript = sScript + rdpU;~n'
+        'sScript = sScript + "&domain=";~n'
+        'sScript = sScript + rdpD;~n'
+        'sScript = sScript + "~'";~n'
+        'sScript = sScript + ", ~'WinName~', ~'width=655,height=420,left=0,top=0~'); ~} ";~n'
+        'sScript = sScript + " </SCRIPT" + ">";~n'
+        'ScriptDiv.innerHTML = sHTML + sScript;~n'
+        'document.getElementById(~'ScriptDiv~').style.visibility=~'hidden~';~n'
+        ' ~}~n'
+        '</script>'  SKIP.
           
            
     {&out}
-    '<script>' skip
-        'function ConfirmDeleteAction(ObjectID,ActionID) ~{' skip
-        '   var DocumentAjax = "' appurl '/crm/ajax/delaction.p?actionid=" + ActionID' skip
-        '   if (confirm("Are you sure you want to delete this action?")) ~{' skip
-        "       ObjectID.style.display = 'none';" skip
-        "       ahah(DocumentAjax,'placeholder');" skip
-        '       var objtoolBarOption = document.getElementById("acttbtboption");' skip
-        '       objtoolBarOption.innerHTML = acttbobjRowDefault;' skip
-        '       actionTableBuild();' skip
-        '   ~}' skip
-        '~}' skip
+        '<script>' SKIP
+        'function ConfirmDeleteAction(ObjectID,ActionID) ~{' SKIP
+        '   var DocumentAjax = "' appurl '/crm/ajax/delaction.p?actionid=" + ActionID' SKIP
+        '   if (confirm("Are you sure you want to delete this action?")) ~{' SKIP
+        "       ObjectID.style.display = 'none';" SKIP
+        "       ahah(DocumentAjax,'placeholder');" SKIP
+        '       var objtoolBarOption = document.getElementById("acttbtboption");' SKIP
+        '       objtoolBarOption.innerHTML = acttbobjRowDefault;' SKIP
+        '       actionTableBuild();' SKIP
+        '   ~}' SKIP
+        '~}' SKIP
         '</script>'.
         
     {&out} 
-    '<script>' skip
-        'function ConfirmDeleteAttachment(ObjectID,DocID) ~{' skip
-        '   var DocumentAjax = "' appurl '/crm/ajax/deldocument.p?docid=" + DocID' skip
-        '   if (confirm("Are you sure you want to delete this document?")) ~{' skip
-        "       ObjectID.style.display = 'none';" skip
-        "       ahah(DocumentAjax,'placeholder');" skip
-        '       var objtoolBarOption = document.getElementById("doctbtboption");' skip
-        '       objtoolBarOption.innerHTML = doctbobjRowDefault;' skip
-        '   ~}' skip
-        '~}' skip
-        '</script>' skip.
+        '<script>' SKIP
+        'function ConfirmDeleteAttachment(ObjectID,DocID) ~{' SKIP
+        '   var DocumentAjax = "' appurl '/crm/ajax/deldocument.p?docid=" + DocID' SKIP
+        '   if (confirm("Are you sure you want to delete this document?")) ~{' SKIP
+        "       ObjectID.style.display = 'none';" SKIP
+        "       ahah(DocumentAjax,'placeholder');" SKIP
+        '       var objtoolBarOption = document.getElementById("doctbtboption");' SKIP
+        '       objtoolBarOption.innerHTML = doctbobjRowDefault;' SKIP
+        '   ~}' SKIP
+        '~}' SKIP
+        '</script>' SKIP.
 
              
     
@@ -803,14 +828,14 @@ PROCEDURE ip-ExportJS-Add:
 
 
     {&out} lc-global-jquery  SKIP
-           '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  skip
-           '<script language="javascript">' SKIP
-           'var appurl = "' appurl '";' SKIP
-           '</script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  SKIP
+        '<script language="javascript">' SKIP
+        'var appurl = "' appurl '";' SKIP
+        '</script>' SKIP
                    
-           '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP
+        '<script language="JavaScript" src="/asset/page/crm/crmop.js?v=1.0.0"></script>' SKIP
            
-    .
+        .
            
            
 END PROCEDURE.
@@ -832,13 +857,13 @@ PROCEDURE ip-NotePage:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     {&out}
-    SKIP(5)
-    tbar-Begin("")
-    tbar-Link("addnote",?,'javascript:noteAdd();',"")
-    tbar-End().
+        SKIP(5)
+        tbar-Begin("")
+        tbar-Link("addnote",?,'javascript:noteAdd();',"")
+        tbar-End().
 
     {&out}
-    '<div id="IDNoteAjax"></div>'.
+        '<div id="IDNoteAjax"></div>'.
     
 END PROCEDURE.
 
@@ -852,7 +877,8 @@ PROCEDURE ip-UpdatePage:
     DEFINE VARIABLE lc-desc AS CHARACTER NO-UNDO.
     
    
-    {&out} '<br />' htmlib-StartTable("mnt",
+    {&out} 
+        '<br />' htmlib-StartTable("mnt",
         100,
         0,
         0,
@@ -861,217 +887,246 @@ PROCEDURE ip-UpdatePage:
    
     IF lc-source = "crmview" AND lc-mode = "ADD" THEN
     DO:   
-        {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">'
+        {&out} 
+            '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">'
             ( IF LOOKUP("account",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Customer")
             ELSE htmlib-SideLabel("Customer"))
-        '</TD>' skip
+            '</TD>' SKIP
             '<TD VALIGN="TOP" ALIGN="left">'.
         {&out-long}               
-        htmlib-SelectJSLong(
+            htmlib-SelectJSLong(
             "account",
             'ChangeAccount()',
             "ADD|" + lc-sela-code,
             "Add New|" + lc-sela-name,
             get-value("account")
             )
-        '</td><tr>' SKIP.
+            '</td><tr>' SKIP.
         
-        {&out} '<tr><td colspan="2" id="box1"><div class="infobox">New CRM Customer Details</div>' SKIP.
+        IF lc-AccountNumber = "ADD" THEN
+        DO:
+        
+            {&out} 
+                '<tr><td colspan="2" id="box1"><div class="infobox">New CRM Customer Details</div>' SKIP.
         
         
-        RUN ip-NewAccountPage.
+            RUN ip-NewAccountPage.
        
         
-        {&out} '</td></tr>' SKIP. 
+            {&out} 
+                '</td></tr>' SKIP. 
         
-        {&out} '<tr><td colspan="2" id="box2"><div class="infobox">Opportunity Details</div></td></tr>' SKIP.
+            {&out} 
+                '<tr><td colspan="2" id="box2"><div class="infobox">Opportunity Details</div></td></tr>' SKIP.
+        END.
         
     END.
        
     IF lc-opno <> "" THEN
     DO:
-        {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        {&out} 
+            '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
             ( IF LOOKUP("opno",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Opportunity No")
             ELSE htmlib-SideLabel("Opportunity No"))
-        '</TD>' skip
+            '</TD>' SKIP
             '<TD VALIGN="TOP" ALIGN="left" class="sidelabel">'  lc-opno
-           '</TD></tr>'.
+            '</TD></tr>'.
     END.
               
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("descr",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Description")
         ELSE htmlib-SideLabel("Description"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-InputField("descr",40,lc-descr) skip
-           '</TD></tr>' SKIP.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("descr",40,lc-descr) SKIP
+        '</TD></tr>' SKIP.
     
     
            
     
+    IF lc-AddMode <> "SimpleContact" OR lc-AccountNumber <> "ADD" THEN
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            htmlib-SideLabel("Sales Contact")
+            '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+            htmlib-Select("opsalescontact",lc-scont-code,lc-scont-desc,lc-op-salescontact)
+            '</TD></TR>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Sales Contact")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("opsalescontact",lc-scont-code,lc-scont-desc,lc-op-salescontact)
-    '</TD></TR>' skip.
-    
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("department",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Department")
         ELSE htmlib-SideLabel("Department"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("department",40,lc-department) skip
-           '</TD></tr>'.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("department",40,lc-department) SKIP
+        '</TD></tr>'.
    
     RUN com-GenTabSelect ( lc-global-company, "CRM.NextStep", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Next Step")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("nextstep",lc-Code ,lc-desc,lc-nextStep)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Next Step")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("nextstep",lc-Code ,lc-desc,lc-nextStep)
+        '</TD></TR>' SKIP.
                                 
-    {&out} '<TR align="left"><td valign="top" align="right">' 
+    {&out} 
+        '<TR align="left"><td valign="top" align="right">' 
         (IF LOOKUP("closedate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Close Date")
         ELSE htmlib-SideLabel("Close Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("closedate",10,lc-closedate) 
-    htmlib-CalendarLink("closedate")
-    '</td></tr>' SKIP.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("closedate",10,lc-closedate) 
+        htmlib-CalendarLink("closedate")
+        '</td></tr>' SKIP.
     
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("currentprov",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Current Provider")
         ELSE htmlib-SideLabel("Current Provider"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("currentprov",40,lc-currentProv) skip
-           '</TD></tr>'.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("currentprov",40,lc-currentProv) SKIP
+        '</TD></tr>'.
            
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Opportunity Type")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("optype",lc-global-opType-Code ,lc-global-opType-desc,lc-opType)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Opportunity Type")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("optype",lc-global-opType-Code ,lc-global-opType-desc,lc-opType)
+        '</TD></TR>' SKIP.
     
     RUN com-GenTabSelect ( lc-global-company, "CRM.ServiceRequired", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Service Required")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("servreq",lc-Code ,lc-desc,lc-servreq)
-    '</TD></TR>' skip. 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Service Required")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("servreq",lc-Code ,lc-desc,lc-servreq)
+        '</TD></TR>' SKIP. 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("opnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
         ELSE htmlib-SideLabel("Note"))
-    '</TD>' skip
-    '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-TextArea("opnote",lc-Opnote,5,60)
-    '</TD></tr>' SKIP.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-TextArea("opnote",lc-Opnote,5,60)
+        '</TD></tr>' SKIP.
    
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Rating")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("rating",lc-global-rating-Code ,lc-global-Rating-desc,lc-Rating)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Rating")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("rating",lc-global-rating-Code ,lc-global-Rating-desc,lc-Rating)
+        '</TD></TR>' SKIP.
 
           
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Opportunity Status")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("opstatus",lc-global-opstatus-Code ,lc-global-opStatus-desc,lc-opstatus)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Opportunity Status")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("opstatus",lc-global-opstatus-Code ,lc-global-opStatus-desc,lc-opstatus)
+        '</TD></TR>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Probability")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("prob",lc-global-opProb-Code ,lc-global-opProb-desc,lc-Prob)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Probability")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("prob",lc-global-opProb-Code ,lc-global-opProb-desc,lc-Prob)
+        '</TD></TR>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("cos",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Cost Of Sale")
         ELSE htmlib-SideLabel("Cost Of Sale"))
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-InputField("cos",8,lc-cos) 
-    '</TD>' skip.
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-InputField("cos",8,lc-cos) 
+        '</TD>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("rev",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Revenue")
         ELSE htmlib-SideLabel("Revenue"))
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-InputField("rev",8,lc-rev) 
-    '</TD>' skip.
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-InputField("rev",8,lc-rev) 
+        '</TD>' SKIP.
     
     RUN com-GenTabSelect ( lc-global-company, "CRM.DealLostReason", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Deal Lost Reason")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("lost",lc-Code ,lc-desc,lc-lost)
-    '</TD></TR>' skip. 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Deal Lost Reason")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("lost",lc-Code ,lc-desc,lc-lost)
+        '</TD></TR>' SKIP. 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("lostd",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Lost Description")
         ELSE htmlib-SideLabel("Lost Description"))
-    '</TD>' skip
-    '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
-    htmlib-TextArea("lostd",lc-lostd,5,60)
-    '</TD></tr>' SKIP.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-TextArea("lostd",lc-lostd,5,60)
+        '</TD></tr>' SKIP.
     
          
     RUN com-GenTabSelect ( lc-global-company, "CRM.SourceType", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Source Type")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("stype",lc-Code ,lc-desc,lc-sType)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Source Type")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("stype",lc-Code ,lc-desc,lc-sType)
+        '</TD></TR>' SKIP.
     
-    {&out} '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("ops",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Opportunity Source")
         ELSE htmlib-SideLabel("Opportunity Source"))
-    '</TD>' skip
-            '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("ops",40,lc-ops) skip
-           '</TD></tr>'.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("ops",40,lc-ops) SKIP
+        '</TD></tr>'.
            
     RUN com-GenTabSelect ( lc-global-company, "CRM.Database", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Database")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("dbase",lc-Code ,lc-desc,lc-dbase)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Database")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("dbase",lc-Code ,lc-desc,lc-dbase)
+        '</TD></TR>' SKIP.
     
     RUN com-GenTabSelect ( lc-global-company, "CRM.Campaign", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Campaign")
-    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
-    htmlib-Select("camp",lc-Code ,lc-desc,lc-camp)
-    '</TD></TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Campaign")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("camp",lc-Code ,lc-desc,lc-camp)
+        '</TD></TR>' SKIP.
     
     
               
     
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
   
 
 END PROCEDURE.
@@ -1084,10 +1139,10 @@ PROCEDURE ip-Validate:
     DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
 
-    DEFINE BUFFER b-customer    FOR Customer.
+    DEFINE BUFFER b-customer FOR Customer.
     
-    DEFINE VARIABLE ld-date AS DATE         NO-UNDO.
-    DEFINE VARIABLE li-int  AS INTEGER      NO-UNDO.
+    DEFINE VARIABLE ld-date AS DATE    NO-UNDO.
+    DEFINE VARIABLE li-int  AS INTEGER NO-UNDO.
     
     IF lc-descr = ""
         OR lc-descr = ?
@@ -1160,6 +1215,14 @@ PROCEDURE ip-Validate:
             END.
               
         END.
+        
+        IF lc-SalesContact = "" 
+            THEN RUN htmlib-AddErrorMessage(
+                'salescontact', 
+                'You must enter the sales contact',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+            
         ASSIGN 
             li-int = int(lc-noemp) NO-ERROR.
         IF ERROR-STATUS:ERROR
@@ -1201,15 +1264,19 @@ PROCEDURE process-web-request:
     {lib/checkloggedin.i}
     
     ASSIGN 
-        lc-mode = get-value("mode")
-        lc-rowid = get-value("rowid")
-        lc-enc-key = get-value("crmaccount")
-        lc-source = get-value("source")
-        lc-parent = get-value("parent")
+        lc-mode          = get-value("mode")
+        lc-rowid         = get-value("rowid")
+        lc-enc-key       = get-value("crmaccount")
+        lc-source        = get-value("source")
+        lc-parent        = get-value("parent")
         lc-filterOptions = get-value("filteroptions")
+        lc-submitSource  = get-value("submitsource")
         .
     IF lc-source = "crmview" AND lc-mode = "ADD" THEN
     DO:
+        ASSIGN
+            lc-AddMode = "SimpleContact".
+            
         RUN crm/lib/getCustomerList.p ( lc-global-company, lc-global-user, OUTPUT lc-sela-Code, OUTPUT lc-sela-Name).
         RUN com-GetUserListByClass ( lc-global-company, "INTERNAL", REPLACE(lc-global-SalType-Code,'|',",") ,OUTPUT lc-sm-code, OUTPUT lc-sm-desc).
     
@@ -1227,8 +1294,23 @@ PROCEDURE process-web-request:
             lc-sm-code = "|" + lc-sm-code
             lc-sm-desc = "None Selected|" + lc-sm-desc
             .
-            
-         
+
+        ASSIGN 
+            lc-AccountNumber = "ADD".
+        
+        IF lc-submitsource = "ACCOUNT" AND request_method = "POST" THEN
+        DO:
+            ASSIGN 
+                lc-accountnumber = get-value("account").
+        
+        END.
+        
+        IF lc-AccountNumber <> "ADD" THEN
+            FIND Customer WHERE Customer.CompanyCode = lc-global-company
+                AND Customer.AccountNumber = lc-accountNumber NO-LOCK NO-ERROR.
+                        
+        
+    
     END.
     ELSE
     DO:
@@ -1241,6 +1323,9 @@ PROCEDURE process-web-request:
         
         FIND Customer WHERE ROWID(Customer) = lr-customer NO-LOCK.
     END.
+    
+    
+    
 
     IF AVAILABLE Customer THEN    
         RUN com-GetUserListForAccount (lc-global-company,customer.AccountNumber,OUTPUT lc-scont-code, OUTPUT lc-scont-desc).
@@ -1259,26 +1344,26 @@ PROCEDURE process-web-request:
         WHEN 'add'
         THEN 
             ASSIGN 
-                lc-title = 'Add'
-                lc-link-label = "Cancel addition"
+                lc-title        = 'Add'
+                lc-link-label   = "Cancel addition"
                 lc-submit-label = "Add Opportunity".
         WHEN 'view'
         THEN 
             ASSIGN 
-                lc-title = 'View'
-                lc-link-label = "Back"
+                lc-title        = 'View'
+                lc-link-label   = "Back"
                 lc-submit-label = "".
         WHEN 'delete'
         THEN 
             ASSIGN 
-                lc-title = 'Delete'
-                lc-link-label = 'Cancel deletion'
+                lc-title        = 'Delete'
+                lc-link-label   = 'Cancel deletion'
                 lc-submit-label = 'Delete Opportunity'.
         WHEN 'Update'
         THEN 
             ASSIGN 
-                lc-title = 'Update'
-                lc-link-label = 'Back'
+                lc-title        = 'Update'
+                lc-link-label   = 'Back'
                 lc-submit-label = 'Update Opportunity'.
     END CASE.
     
@@ -1312,7 +1397,7 @@ PROCEDURE process-web-request:
     IF AVAILABLE Customer THEN
         ASSIGN 
             lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).                              
-    IF request_method = "POST" THEN
+    IF request_method = "POST" AND  lc-submitSource <> "Account" THEN
     DO:
 
         IF lc-mode <> "delete" THEN
@@ -1328,51 +1413,51 @@ PROCEDURE process-web-request:
             
             
             ASSIGN
-                lc-opno              = get-value("opno")
-                lc-descr             = get-value("descr")
-                lc-op-salescontact   = get-value("opsalescontact")
-                lc-department        = get-value("department")
-                lc-nextstep          = get-value("nextstep")
-                lc-closedate         = get-value("closedate")
-                lc-currentProv       = get-value("currentprov")
-                lc-opType            = get-value("optype")
-                lc-servReq           = get-value("servreq")
-                lc-opnote            = get-value("opnote")
-                lc-rating            = get-value("rating")
-                lc-opstatus          = get-value("opstatus")
-                lc-prob              = get-value("prob")
-                lc-cos               = get-value("cos")
-                lc-rev               = get-value("rev")
-                lc-lost              = get-value("lost")
-                lc-stype             = get-value("stype")
-                lc-dbase             = get-value("dbase")
-                lc-camp              = get-value("camp")
-                lc-ops               = get-value("ops")
-                lc-lostd             = get-value("lostd")
+                lc-opno            = get-value("opno")
+                lc-descr           = get-value("descr")
+                lc-op-salescontact = get-value("opsalescontact")
+                lc-department      = get-value("department")
+                lc-nextstep        = get-value("nextstep")
+                lc-closedate       = get-value("closedate")
+                lc-currentProv     = get-value("currentprov")
+                lc-opType          = get-value("optype")
+                lc-servReq         = get-value("servreq")
+                lc-opnote          = get-value("opnote")
+                lc-rating          = get-value("rating")
+                lc-opstatus        = get-value("opstatus")
+                lc-prob            = get-value("prob")
+                lc-cos             = get-value("cos")
+                lc-rev             = get-value("rev")
+                lc-lost            = get-value("lost")
+                lc-stype           = get-value("stype")
+                lc-dbase           = get-value("dbase")
+                lc-camp            = get-value("camp")
+                lc-ops             = get-value("ops")
+                lc-lostd           = get-value("lostd")
                 .
             IF lc-source = "crmview" AND lc-mode = "Add" THEN
             DO:
                 ASSIGN 
                     lc-accountnumber = get-value("account").
                 ASSIGN
-                    lc-name              = get-value("name")
-                    lc-address1          = get-value("address1")
-                    lc-address2          = get-value("address2")
-                    lc-city              = get-value("city")
-                    lc-county            = get-value("county")
-                    lc-country           = get-value("country")
-                    lc-postcode          = get-value("postcode")
-                    lc-telephone         = get-value("telephone")
-                    lc-contact           = get-value("contact")
-                    lc-accStatus         = get-value("accstatus")
-                    lc-accountref        = get-value("accountref")
-                    lc-SalesManager      = get-value("salesmanager")
-                    lc-SalesContact      = get-value("salescontact")
-                    lc-website           = get-value("website")
-                    lc-noemp             = get-value("noemp")
-                    lc-turn              = get-value("turn")
-                    lc-salesnote         = get-value("salesnote")
-                    lc-indsector        =  get-value("indsector").
+                    lc-name         = get-value("name")
+                    lc-address1     = get-value("address1")
+                    lc-address2     = get-value("address2")
+                    lc-city         = get-value("city")
+                    lc-county       = get-value("county")
+                    lc-country      = get-value("country")
+                    lc-postcode     = get-value("postcode")
+                    lc-telephone    = get-value("telephone")
+                    lc-contact      = get-value("contact")
+                    lc-accStatus    = get-value("accstatus")
+                    lc-accountref   = get-value("accountref")
+                    lc-SalesManager = get-value("salesmanager")
+                    lc-SalesContact = get-value("salescontact")
+                    lc-website      = get-value("website")
+                    lc-noemp        = get-value("noemp")
+                    lc-turn         = get-value("turn")
+                    lc-salesnote    = get-value("salesnote")
+                    lc-indsector    = get-value("indsector").
             
                     
             END.
@@ -1401,29 +1486,59 @@ PROCEDURE process-web-request:
                         RUN lib/autogenAccount.p ( lc-global-company, OUTPUT lc-accountNumber).
                         CREATE Customer.
                         ASSIGN 
-                            Customer.CompanyCode   = lc-global-company
-                            Customer.AccountNumber = lc-AccountNumber
-                            Customer.Name          = lc-name
-                            Customer.Address1      = lc-address1
-                            Customer.Address2      = lc-address2
-                            Customer.City          = lc-city
-                            Customer.County        = lc-county
-                            Customer.Country       = "UK"
-                            Customer.Postcode      = lc-Postcode
-                            Customer.Telephone     = lc-Telephone
-                            Customer.Contact       = lc-contact
-                            Customer.accStatus       = lc-accStatus
-                            customer.website         = lc-WebSite
-                            customer.accountref      = lc-accountref
-                            customer.SalesManager    = lc-SalesManager
-                            customer.salesContact    = lc-SalesContact
-                            customer.NoOfEmployees   = int(lc-noemp)
-                            customer.AnnualTurnover  = int(lc-turn)
-                            customer.salesnote       = lc-salesnote
-                            customer.industrySector  = lc-indsector.
+                            Customer.CompanyCode    = lc-global-company
+                            Customer.AccountNumber  = lc-AccountNumber
+                            Customer.Name           = lc-name
+                            Customer.Address1       = lc-address1
+                            Customer.Address2       = lc-address2
+                            Customer.City           = lc-city
+                            Customer.County         = lc-county
+                            Customer.Country        = "UK"
+                            Customer.Postcode       = lc-Postcode
+                            Customer.Telephone      = lc-Telephone
+                            Customer.Contact        = lc-contact
+                            Customer.accStatus      = lc-accStatus
+                            customer.website        = lc-WebSite
+                            customer.accountref     = lc-accountref
+                            customer.SalesManager   = lc-SalesManager
+                            customer.salesContact   = lc-SalesContact
+                            customer.NoOfEmployees  = int(lc-noemp)
+                            customer.AnnualTurnover = int(lc-turn)
+                            customer.salesnote      = lc-salesnote
+                            customer.industrySector = lc-indsector.
                         
                         ASSIGN
                             customer.isActive = customer.accStatus = "Active".
+                            
+                        lc-loginid = TRIM(REPLACE(lc-SalesContact," ","")).
+                        IF CAN-FIND(FIRST b-user WHERE b-user.loginid = lc-loginid NO-LOCK) THEN
+                        REPEAT:
+                            li-loop = li-loop + 1.
+                            lc-next = lc-loginid + "_" + string(li-loop).
+                            IF CAN-FIND(FIRST b-user WHERE b-user.loginid = lc-next NO-LOCK) THEN NEXT.
+                            lc-loginid = lc-next.
+                            LEAVE.
+                        
+                        END.
+                        CREATE b-user.
+                        ASSIGN 
+                            customer.salesContact  = lc-loginid
+                            b-user.loginid     = lc-loginid
+                            b-user.CompanyCode = lc-global-company
+                            b-user.UserClass   = "CUSTOMER"
+                            b-user.engType     = "custSal".
+                  
+                        ASSIGN 
+                            
+                            b-user.surname       = lc-SalesContact
+                            b-user.accountnumber = lc-accountnumber
+                            b-user.name = lc-SalesContact.
+                            
+                                          
+                        ASSIGN
+                            lc-op-salescontact = Customer.SalesContact.
+                       
+                            
                     END.
                      
                     IF lc-source = "crmview" THEN
@@ -1439,7 +1554,7 @@ PROCEDURE process-web-request:
                         b-table.op_id         = NEXT-VALUE(op_master)
                         b-table.createDate    = NOW
                         b-table.createLoginid = lc-global-user
-                        lc-firstrow      = STRING(ROWID(b-table)).
+                        lc-firstrow           = STRING(ROWID(b-table)).
                    
                 END.
                 
@@ -1508,7 +1623,7 @@ PROCEDURE process-web-request:
         DO:
             DEFINE VARIABLE lc-Options AS CHARACTER NO-UNDO.
             DEFINE VARIABLE li-loop    AS INTEGER   NO-UNDO.
-            DEFINE VARIABLE lc-part     AS CHARACTER NO-UNDO.
+            DEFINE VARIABLE lc-part    AS CHARACTER NO-UNDO.
             
             lc-Options =  REPLACE(REPLACE(lc-filterOptions,"|","&"),"^","=").
             DO li-loop = 1 TO NUM-ENTRIES(lc-options,"&"):
@@ -1545,27 +1660,27 @@ PROCEDURE process-web-request:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         
         ASSIGN
-            lc-opno         = STRING(b-table.op_no)
-            lc-descr        = b-table.descr
+            lc-opno            = STRING(b-table.op_no)
+            lc-descr           = b-table.descr
             lc-op-salescontact = b-table.Salescontact
-            lc-department   = b-table.department
-            lc-nextstep     = b-table.nextstep
-            lc-CloseDate    = IF b-table.CloseDate = ? THEN "" ELSE STRING(b-table.CloseDate,"99/99/9999")
-            lc-currentProv  = b-table.CurrentProvider
-            lc-optype       = b-table.optype
-            lc-servreq      = b-table.servRequired
-            lc-opnote       = b-table.opnote
-            lc-rating       = b-table.rating
-            lc-opstatus     = b-table.OpStatus
-            lc-prob         = STRING(b-table.Probability)
-            lc-cos          = STRING(b-table.CostOfSale)
-            lc-rev          = STRING(b-table.Revenue)
-            lc-lost         = b-table.DealLostReason
-            lc-stype        = b-table.SourceType
-            lc-dbase        = b-table.dBase
-            lc-camp         = b-table.Campaign
-            lc-ops          = b-table.opSource
-            lc-lostd        = b-table.lostdescription
+            lc-department      = b-table.department
+            lc-nextstep        = b-table.nextstep
+            lc-CloseDate       = IF b-table.CloseDate = ? THEN "" ELSE STRING(b-table.CloseDate,"99/99/9999")
+            lc-currentProv     = b-table.CurrentProvider
+            lc-optype          = b-table.optype
+            lc-servreq         = b-table.servRequired
+            lc-opnote          = b-table.opnote
+            lc-rating          = b-table.rating
+            lc-opstatus        = b-table.OpStatus
+            lc-prob            = STRING(b-table.Probability)
+            lc-cos             = STRING(b-table.CostOfSale)
+            lc-rev             = STRING(b-table.Revenue)
+            lc-lost            = b-table.DealLostReason
+            lc-stype           = b-table.SourceType
+            lc-dbase           = b-table.dBase
+            lc-camp            = b-table.Campaign
+            lc-ops             = b-table.opSource
+            lc-lostd           = b-table.lostdescription
             .
             
        
@@ -1573,7 +1688,7 @@ PROCEDURE process-web-request:
                                         
     RUN outputHeader.
     
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
     
     IF lc-mode = "UPDATE" 
         THEN RUN ip-ExportJS.
@@ -1583,15 +1698,15 @@ PROCEDURE process-web-request:
             RUN ip-ExportJS-Add.
     
     
-    {&out} htmlib-Header("Opportunity CRM") skip.
+    {&out} htmlib-Header("Opportunity CRM") SKIP.
  
    
     
     {&out} htmlib-StartForm("mainform","post", appurl + '/crm/crmop.p' ) SKIP
-           htmlib-ProgramTitle(lc-title) skip.
+        htmlib-ProgramTitle(lc-title) SKIP.
     
      
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
 
     IF lc-mode = "DELETE" 
@@ -1609,89 +1724,104 @@ PROCEDURE process-web-request:
             IF lc-mode = "UPDATE" THEN
             DO:
                 {&out}
-                '<div class="tabber">' skip.
+                    '<div class="tabber">' SKIP.
          
-                {&out} '<div class="tabbertab" title="Opportunity">' SKIP.
+                {&out} 
+                    '<div class="tabbertab" title="Opportunity">' SKIP.
                 RUN ip-UpdatePage.
                 {&out} htmlib-CalendarScript("closedate") SKIP.
         
                 IF lc-error-msg <> "" THEN
                 DO:
-                    {&out} '<BR><BR><CENTER>' 
-                    htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+                    {&out} 
+                        '<BR><BR><CENTER>' 
+                        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
                 END.
 
                 IF lc-submit-label <> "" THEN
                 DO:
-                    {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-                    '</center>' skip.
+                    {&out} 
+                        '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+                        '</center>' SKIP.
                 END.
     
-                {&out} '</div>' SKIP.
+                {&out} 
+                    '</div>' SKIP.
         
         
         
-                {&out} '<div class="tabbertab" title="Action & Activities">' SKIP.
+                {&out} 
+                    '<div class="tabbertab" title="Action & Activities">' SKIP.
             
                 RUN ip-ActionPage.
-                {&out} '</div>' SKIP.
+                {&out} 
+                    '</div>' SKIP.
         
                 {&out} 
-                '<div class="tabbertab" title="Notes">' skip.
+                    '<div class="tabbertab" title="Notes">' SKIP.
                 RUN ip-NotePage.
                 {&out} 
-                '</div>'.
+                    '</div>'.
     
-                {&out} '<div class="tabbertab" title="Attachments">' SKIP.
+                {&out} 
+                    '<div class="tabbertab" title="Attachments">' SKIP.
                 RUN ip-Documents.
-                {&out} '</div>' SKIP.
+                {&out} 
+                    '</div>' SKIP.
         
         
-                {&out} '<div class="tabbertab" title="Customer Details">' SKIP.
+                {&out} 
+                    '<div class="tabbertab" title="Customer Details">' SKIP.
                 {&out}
-                '<div id="IDCustomerAjax">Loading Notes</div>'.
+                    '<div id="IDCustomerAjax">Loading Notes</div>'.
     
-                {&out} '</div>' SKIP.
+                {&out} 
+                    '</div>' SKIP.
         
          
-                {&out} '</div>' SKIP.
+                {&out} 
+                    '</div>' SKIP.
             END.
     
-    {&out} htmlib-Hidden ("mode", lc-mode) skip
-           htmlib-Hidden ("rowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) SKIP
-           htmlib-hidden ("crmaccount", get-value("crmaccount"))
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
-           htmlib-hidden("source",lc-source) skip
-           htmlib-hidden("parent",lc-parent) SKIP
-           htmlib-hidden("filteroptions", lc-filteroptions)
-    .
+    {&out} htmlib-Hidden ("mode", lc-mode) SKIP
+        htmlib-Hidden ("rowid", lc-rowid) SKIP
+        htmlib-Hidden ("savesearch", lc-search) SKIP
+        htmlib-hidden ("crmaccount", get-value("crmaccount"))
+        htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+        htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+        htmlib-hidden("source",lc-source) SKIP
+        htmlib-hidden("parent",lc-parent) SKIP
+        htmlib-hidden("submitsource","") SKIP
+        htmlib-hidden("filteroptions", lc-filteroptions)
+        .
        
        
-    {&out} '<div id="placeholder" style="display: none;"></div>' skip.
+    {&out} 
+        '<div id="placeholder" style="display: none;"></div>' SKIP.
        
     IF lc-mode <> "UPDATE" THEN
     DO:      
         IF lc-error-msg <> "" THEN
         DO:
-            {&out} '<BR><BR><CENTER>' 
-            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+            {&out} 
+                '<BR><BR><CENTER>' 
+                htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
         END.
 
         IF lc-submit-label <> "" THEN
         DO:
-            {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-            '</center>' skip.
+            {&out} 
+                '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+                '</center>' SKIP.
         END.
     
     END.
     
 
 
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
               
 END PROCEDURE.

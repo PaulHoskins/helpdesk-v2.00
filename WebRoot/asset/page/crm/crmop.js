@@ -42,18 +42,18 @@ function actionTableBuild() {
 }
 
 function actionCreated() {
-	actionTableBuild()
-	ClosePopUpWindow()
+	actionTableBuild();
+	ClosePopUpWindow();
 }
 function documentTableBuild () {
-	ahah(DocumentAjax,'IDDocument')
+	ahah(DocumentAjax,'IDDocument');
 }
 function documentAdd () {
-	PopUpWindow(DocumentAddURL)
+	PopUpWindow(DocumentAddURL);
 }
 function documentCreated () {
-	documentTableBuild()
-	ClosePopUpWindow()
+	documentTableBuild();
+	ClosePopUpWindow();
 }
 
 
@@ -62,15 +62,9 @@ function initialise() {
 	documentTableBuild();
 }
 function ChangeAccount() {
-	var pAccount = document.mainform.account.value
-	
-	
-	$("#box1").hide();
-	$("#box2").hide();
-	if ( pAccount == "ADD" ) {
-		$("#box1").show();
-		$("#box2").show();
-	}
+	var FieldName = "submitsource";
+	document.mainform.elements[FieldName].value = "account";
+	document.mainform.submit();
 }
 
 $(document).ready( function() {
@@ -84,19 +78,19 @@ var tabberOptions = {
 
 	    		
 	    		if ( i == 1 ) {
-	    			actionTableBuild()
+	    			actionTableBuild();
 	    			return
 	    		}
 	    		if ( i == 2 ) {	/* Notes */
-	    			noteTableBuild()
+	    			noteTableBuild();
 	    			return
 	    		}	    		
 	    		if ( i == 3 ) {
-				documentTableBuild()
+				documentTableBuild();
 					return
 	    		}
 	    		if ( i == 4 ) {
-	    			customerInfo()
+	    			customerInfo();
 	    			return
 	    		}
 	    		

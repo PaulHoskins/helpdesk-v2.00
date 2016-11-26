@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lm:eCafModel xmlns:lm="http://www.progress.com/tools/caf/core/internal/logicalStructure/schema/v1.0" version="1.0">
-  <lm:serviceCollection adapterType="REST" usage="EXPOSE">
-    <lm:services description="" displayName="helpdeskService" id="helpdeskService" product="Progress Developer Studio for OpenEdge" serviceFolder="Expose/rest/helpdeskService" serviceName="helpdeskService">
-      <lm:details>
-        <lm:adapterDetails>
-          <lm:properties>
-            <lm:properties name="applicationRelativePath">/helpdeskService</lm:properties>
-          </lm:properties>
-        </lm:adapterDetails>
-        <lm:productDetails name="OE_MOBILE">
-          <lm:properties>
-            <lm:properties name="OE_MOBILE_SERVICE">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?>&lt;oe_mobile>&lt;service>&lt;name>helpdeskService&lt;/name>&lt;resources/>&lt;/service>&lt;/oe_mobile></lm:properties>
-          </lm:properties>
-        </lm:productDetails>
-      </lm:details>
-      <lm:nodes id="/helpdeskService_groupingNode" name="helpdeskService"/>
-      <lm:propertyDetails/>
-    </lm:services>
-  </lm:serviceCollection>
+  <lm:serviceCollection adapterType="REST" usage="EXPOSE"/>
   <lm:propertyDetails>
     <lm:propertyFileLocation>helpdesk.properties</lm:propertyFileLocation>
   </lm:propertyDetails>

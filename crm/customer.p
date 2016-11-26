@@ -171,13 +171,13 @@ PROCEDURE ip-ConPage:
             tbar-EndOption()
             tbar-End() SKIP.
   
-    {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
     
     {&out}
     htmlib-TableHeading(
         "User Name^left|Name^left|Position|Email^left|Telephone|Mobile|Type"
-        ) skip.
+        ) SKIP.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode   = pc-CompanyCode
@@ -207,9 +207,9 @@ PROCEDURE ip-ConPage:
                                 
         
         {&out}
-            skip
-             tbar-trID(pc-ToolBarID,rowid(b-query))
-            skip
+            SKIP
+             tbar-trID(pc-ToolBarID,ROWID(b-query))
+            SKIP
             
             htmlib-MntTableField(html-encode(b-query.loginid),'left')
             htmlib-MntTableField(html-encode(b-query.name),'left')
@@ -221,23 +221,23 @@ PROCEDURE ip-ConPage:
                                              
             
             
-            tbar-BeginHidden(rowid(b-query))
+            tbar-BeginHidden(ROWID(b-query))
             
-            tbar-Link("update",rowid(b-query),appurl +  '/crm/crmcontact.p',lc-link-otherp)
-            tbar-Link("delete",rowid(b-query),appurl + '/crm/crmcontact.p',lc-link-otherp)
+            tbar-Link("update",ROWID(b-query),appurl +  '/crm/crmcontact.p',lc-link-otherp)
+            tbar-Link("delete",ROWID(b-query),appurl + '/crm/crmcontact.p',lc-link-otherp)
             
                 
             tbar-EndHidden()
-            '</tr>' skip.
+            '</tr>' SKIP.
             
             
         GET NEXT q NO-LOCK.
             
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
            
 
 END PROCEDURE.
@@ -363,13 +363,13 @@ PROCEDURE ip-opPage:
             tbar-EndOption()
             tbar-End() SKIP.
   
-    {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%" align="center"').
     
     {&out}
     htmlib-TableHeading(
         "No^right|Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
-        ) skip.
+        ) SKIP.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
         OF Customer BY b-query.op_no.
@@ -397,17 +397,17 @@ PROCEDURE ip-opPage:
                                 
         
         {&out}
-            skip
-             tbar-trID(pc-ToolBarID,rowid(b-query))
-            skip
-            htmlib-MntTableField(string(b-query.op_no),'right')
+            SKIP
+             tbar-trID(pc-ToolBarID,ROWID(b-query))
+            SKIP
+            htmlib-MntTableField(STRING(b-query.op_no),'right')
             htmlib-MntTableField(html-encode(b-query.descr),'left')
             
             htmlib-MntTableField(com-DecodeLookup(b-query.opstatus,lc-global-opStatus-Code,lc-global-opStatus-desc),'left')
             
              htmlib-MntTableField(com-DecodeLookup(b-query.opType,lc-global-opType-Code,lc-global-opType-desc),'left')
             
-            htmlib-MntTableField(html-encode(IF b-query.closeDate = ? THEN '' ELSE string(b-query.CloseDate,"99/99/9999")),'left')
+            htmlib-MntTableField(html-encode(IF b-query.closeDate = ? THEN '' ELSE STRING(b-query.CloseDate,"99/99/9999")),'left')
           
             htmlib-MntTableField(html-encode(com-UserName(b-query.salesContact)),'left')
             htmlib-MntTableField(html-encode(b-query.department),'left')
@@ -416,28 +416,28 @@ PROCEDURE ip-opPage:
                          b-query.CompanyCode, "CRM.NextStep", 
                          b-query.nextStep)
             ),'left')
-            htmlib-MntTableField(html-encode(IF b-query.createDate = ? THEN '' ELSE string(b-query.createDate,"99/99/9999 HH:MM")),'right')
+            htmlib-MntTableField(html-encode(IF b-query.createDate = ? THEN '' ELSE STRING(b-query.createDate,"99/99/9999 HH:MM")),'right')
             
                
             
             
-            tbar-BeginHidden(rowid(b-query))
+            tbar-BeginHidden(ROWID(b-query))
             
-            tbar-Link("update",rowid(b-query),appurl +  '/crm/crmop.p',lc-link-otherp)
-            tbar-Link("delete",rowid(b-query),appurl + '/crm/crmop.p',lc-link-otherp)
+            tbar-Link("update",ROWID(b-query),appurl +  '/crm/crmop.p',lc-link-otherp)
+            tbar-Link("delete",ROWID(b-query),appurl + '/crm/crmop.p',lc-link-otherp)
             
                 
             tbar-EndHidden()
-            '</tr>' skip.
+            '</tr>' SKIP.
             
             
         GET NEXT q NO-LOCK.
             
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
            
         
     
@@ -744,16 +744,16 @@ PROCEDURE process-web-request :
     RUN outputHeader.
     
     
-    {&out} htmlib-Header("Customer CRM") skip.
+    {&out} htmlib-Header("Customer CRM") SKIP.
  
     RUN ip-ExportJS.
     
     {&out} htmlib-StartForm("mainform","post", appurl + '/crm/customer.p' ) SKIP
-           htmlib-ProgramTitle(lc-title) skip.
+           htmlib-ProgramTitle(lc-title) SKIP.
 
     
     IF lc-source <> "menu"
-        THEN {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<br>' skip.
+        THEN {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<br>' SKIP.
         
     RUN ip-CRM-Page.
     
@@ -765,18 +765,18 @@ PROCEDURE process-web-request :
         IF lc-error-msg <> "" THEN
         DO:
             {&out} '<BR><BR><CENTER>' 
-            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
         END.
 
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<br><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
     
      
     {&out}
-    '<div class="tabber">' skip.
+    '<div class="tabber">' SKIP.
          
     {&out}
     '<div class="tabbertab" title="Opportunities">' SKIP.
@@ -786,7 +786,7 @@ PROCEDURE process-web-request :
     IF get-value("showtab") = "contact" 
     THEN {&out}
     '<div class="tabbertab tabbertabdefault" title="Contacts">' SKIP. 
-    else {&out}
+    ELSE {&out}
     '<div class="tabbertab" title="Contacts">' SKIP.
     RUN ip-ConPage ( b-table.companyCode , b-table.AccountNumber ,lc-Con-TBAR).   
     {&out} '</div>' SKIP.
@@ -796,17 +796,17 @@ PROCEDURE process-web-request :
  
     {&out} '</div>' SKIP.
     
-    {&out} skip
+    {&out} SKIP
            htmlib-Hidden("crmaccount", get-value("crmaccount")) SKIP
            htmlib-Hidden("submitsource", "") SKIP
            htmlib-Hidden("mode", lc-mode) SKIP
-           htmlib-hidden("source",lc-source) skip
-           htmlib-hidden("parent",lc-parent) skip
-           htmlib-EndForm() skip.
+           htmlib-hidden("source",lc-source) SKIP
+           htmlib-hidden("parent",lc-parent) SKIP
+           htmlib-EndForm() SKIP.
            
     
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
