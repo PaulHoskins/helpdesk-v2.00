@@ -12,6 +12,9 @@
     15/10/2016  phoski      Phase 2 changes
     26/11/2016  phoski      Change to submit on account selection and
                             build relevant page etc
+    28/11/2016  phoski      Default on add to existing to main sales
+                            contact
+                            Show custoemr name on page title                        
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -1372,6 +1375,20 @@ PROCEDURE process-web-request:
                  
     ASSIGN 
         lc-title = lc-title + ' Opportunity'.
+        
+    IF AVAILABLE Customer THEN
+    DO:
+        ASSIGN lc-title = lc-title + " - Customer: " + Customer.Name.
+        
+        IF lc-mode = "ADD" AND  lc-submitsource = "ACCOUNT" AND request_method = "POST" THEN
+        DO:
+           ASSIGN lc-op-salescontact = Customer.SalesContact.
+          
+        END.
+        
+        
+    END.
+    
         
     IF lc-source = "crmview" THEN
     DO:
