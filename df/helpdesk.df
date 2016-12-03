@@ -4655,6 +4655,30 @@ ADD FIELD "crtDate" OF "op_master" AS date
   MAX-WIDTH 4
   ORDER 290
 
+ADD FIELD "last_act" OF "op_master" AS datetime 
+  DESCRIPTION "System gen from op_activity"
+  FORMAT "99/99/9999 HH:MM:SS"
+  INITIAL ?
+  LABEL "Last Activirt"
+  POSITION 31
+  MAX-WIDTH 8
+  ORDER 300
+
+ADD FIELD "SalesManager" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Sales Manager"
+  POSITION 32
+  MAX-WIDTH 16
+  ORDER 310
+
+ADD FIELD "cu_name" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 33
+  MAX-WIDTH 16
+  ORDER 320
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -6947,4 +6971,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000137999
+0000138493

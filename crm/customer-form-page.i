@@ -300,7 +300,27 @@ ELSE
         SKIP.
 {&out} 
     '</TR>' SKIP.
+IF NOT CAN-DO("view,delete",lc-mode) AND lc-AddMode = "SimpleContact" THEN
+DO:
+    {&out} 
+    '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("addEmail",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Email")
+    ELSE htmlib-SideLabel("Email"))
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("addemail",80,lc-addEmail) '</td></tr>'.
     
+     {&out} 
+    '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("addMobile",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Mobile/Telephone")
+    ELSE htmlib-SideLabel("Mobile/Telephone"))
+    '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+    htmlib-InputField("addmobile",15,lc-addMobile) '</td></tr>'.
+    
+        
+END.
+       
 {&out} 
     '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("noemp",lc-error-field,'|') > 0 

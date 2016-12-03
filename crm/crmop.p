@@ -596,8 +596,8 @@ PROCEDURE ip-ViewPage:
      
     {&out} 
         '<TR align="left"><TD ALIGN="right" width="25%">' 
-        htmlib-SideLabel("Next Step")        '</TD>' SKIP
-        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.NextStep",b-table.NextStep) '</td></tr>' SKIP.
+        htmlib-SideLabel("Stage")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Stage",b-table.NextStep) '</td></tr>' SKIP.
                
     {&out} 
         '<TR align="left"><TD ALIGN="right" width="25%">' 
@@ -969,12 +969,12 @@ PROCEDURE ip-UpdatePage:
         htmlib-InputField("department",40,lc-department) SKIP
         '</TD></tr>'.
    
-    RUN com-GenTabSelect ( lc-global-company, "CRM.NextStep", 
+    RUN com-GenTabSelect ( lc-global-company, "CRM.Stage", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
     {&out} 
         '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        htmlib-SideLabel("Next Step")
+        htmlib-SideLabel("Stage")
         '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
         htmlib-Select("nextstep",lc-Code ,lc-desc,lc-nextStep)
         '</TD></TR>' SKIP.
@@ -1222,9 +1222,22 @@ PROCEDURE ip-Validate:
         IF lc-SalesContact = "" 
             THEN RUN htmlib-AddErrorMessage(
                 'salescontact', 
-                'You must enter the sales contact',
+                'You must enter the sales contact name',
                 INPUT-OUTPUT pc-error-field,
                 INPUT-OUTPUT pc-error-msg ).
+         IF lc-AddEmail = "" 
+            THEN RUN htmlib-AddErrorMessage(
+                'addemail', 
+                'You must enter the sales contact email address',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+        IF lc-AddMobile = "" 
+            THEN RUN htmlib-AddErrorMessage(
+                'addmobile', 
+                'You must enter the sales contact mobile/telephone',
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+                
             
         ASSIGN 
             li-int = int(lc-noemp) NO-ERROR.
@@ -1392,10 +1405,11 @@ PROCEDURE process-web-request:
         
     IF lc-source = "crmview" THEN
     DO:
+        
         ASSIGN
-            lc-link-url = appurl + '/crm/view.p?' + 
+            lc-link-url = appurl + '/crm/view.p?navigation=refresh&' + 
             replace(REPLACE(lc-filterOptions,"|","&"),"^","=").
-             
+       
     END.
     ELSE
     DO:   
@@ -1474,7 +1488,9 @@ PROCEDURE process-web-request:
                     lc-noemp        = get-value("noemp")
                     lc-turn         = get-value("turn")
                     lc-salesnote    = get-value("salesnote")
-                    lc-indsector    = get-value("indsector").
+                    lc-indsector    = get-value("indsector")
+                    lc-addEmail     = get-value("addemail")
+                    lc-AddMobile    = get-value("addMobile").
             
                     
             END.
@@ -1549,7 +1565,11 @@ PROCEDURE process-web-request:
                             
                             b-user.surname       = lc-SalesContact
                             b-user.accountnumber = lc-accountnumber
-                            b-user.name = lc-SalesContact.
+                            b-user.name = lc-SalesContact
+                            b-user.Mobile = lc-addmobile
+                            b-user.Telephone = lc-addMobile
+                            b-user.email = lc-addEmail
+                            .
                             
                                           
                         ASSIGN
@@ -1610,6 +1630,7 @@ PROCEDURE process-web-request:
                 IF b-table.salesContact = lc-global-selcode
                     THEN b-table.salesContact = "".
             
+                RUN crm/lib/final-op.p ( ROWID(b-table)).
             END.
                 
         END.
@@ -1648,7 +1669,7 @@ PROCEDURE process-web-request:
                 set-user-field(ENTRY(1,lc-part,"="),ENTRY(2,lc-part,"=")).
                 
             END.
-            
+            set-user-field("navigation",'refresh').
             request_method = "GET".
             RUN run-web-object IN web-utilities-hdl ("crm/view.p").
             RETURN.

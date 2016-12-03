@@ -368,7 +368,7 @@ PROCEDURE ip-opPage:
     
     {&out}
     htmlib-TableHeading(
-        "No^right|Description|Status|Type|Close Date|Customer Contact|Department|Next Step|Created^right"
+        "No^right|Description|Status|Type|Close Date|Customer Contact|Department|Stage|Created^right"
         ) SKIP.
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -413,7 +413,7 @@ PROCEDURE ip-opPage:
             htmlib-MntTableField(html-encode(b-query.department),'left')
             htmlib-MntTableField(html-encode(
             DYNAMIC-FUNCTION("com-GenTabDesc",
-                         b-query.CompanyCode, "CRM.NextStep", 
+                         b-query.CompanyCode, "CRM.Stage", 
                          b-query.nextStep)
             ),'left')
             htmlib-MntTableField(html-encode(IF b-query.createDate = ? THEN '' ELSE STRING(b-query.createDate,"99/99/9999 HH:MM")),'right')
@@ -670,6 +670,14 @@ PROCEDURE process-web-request :
                               
             IF b-table.salesContact = lc-global-selcode
                 THEN b-table.salesContact = "".
+            FOR EACH op_master EXCLUSIVE-LOCK
+                WHERE op_master.CompanyCode = b-table.CompanyCode
+                  AND op_master.AccountNumber = b-table.AccountNumber:
+                 
+                 RUN crm/lib/final-op.p ( ROWID(op_master)).
+                 
+            END.
+             
             lc-error-msg = "OK:Update".
             
         END.

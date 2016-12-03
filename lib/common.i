@@ -106,7 +106,7 @@ DEFINE VARIABLE lc-System-Note-Desc                   AS CHARACTER
     NO-UNDO.
 
 DEFINE VARIABLE lc-global-GT-Code                     AS CHARACTER INITIAL
-    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector,CRM.SourceType,CRM.Database,CRM.Campaign,CRM.NextStep,CRM.ServiceRequired,CRM.DealLostReason' NO-UNDO.
+    'Asset.Type,Asset.Manu,Asset.Status,CRM.IndustrySector,CRM.SourceType,CRM.Database,CRM.Campaign,CRM.Stage,CRM.ServiceRequired,CRM.DealLostReason' NO-UNDO.
 
 DEFINE VARIABLE lc-global-iclass-complex              AS CHARACTER INITIAL
     'ComplexProject' NO-UNDO.   
@@ -1915,7 +1915,12 @@ FUNCTION com-CanDelete RETURNS LOGICAL
     DEFINE BUFFER acs_head   FOR acs_head.
     DEFINE BUFFER acs_line   FOR acs_line.
     DEFINE BUFFER acs_res    FOR acs_res.
-         
+    DEFINE BUFFER op_master  FOR op_master.
+    DEFINE BUFFER thisUser   FOR WebUser.
+    
+    
+    FIND thisuser WHERE thisuser.LoginID = pc-loginid NO-LOCK NO-ERROR.
+        
     
  
 
@@ -1982,11 +1987,20 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                     WHERE issue.CompanyCode     = customer.CompanyCode
                     AND issue.AccountNumber   = customer.AccountNumber
                     NO-LOCK) THEN RETURN FALSE.
+                    
+                IF CAN-FIND(FIRST op_master 
+                    WHERE op_master.CompanyCode = Customer.companyCode
+                      AND op_master.AccountNumber = Customer.AccountNumber NO-LOCK)
+                      THEN RETURN FALSE.
+                /*      
                 IF CAN-FIND(FIRST WebUser
                     WHERE WebUser.CompanyCode     = customer.CompanyCode
                     AND WebUser.AccountNumber   = customer.AccountNumber
                     NO-LOCK) THEN RETURN FALSE.
-                RETURN TRUE.
+                */
+                
+                RETURN IF thisuser.SuperUser THEN  TRUE ELSE FALSE.
+                
             END.
         WHEN "customerequip" THEN
             DO:

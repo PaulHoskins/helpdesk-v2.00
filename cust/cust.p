@@ -206,14 +206,14 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Customers") skip.
+    {&out} htmlib-Header("Maintain Customers") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
    
-    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/cust.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/cust.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Customers") skip.
+    {&out} htmlib-ProgramTitle("Maintain Customers") SKIP.
     
     IF get-value("addnote") <> "" THEN
     {&out} '<div class="infobox">'  get-value("addnote") '</div><br />'.
@@ -238,13 +238,13 @@ PROCEDURE process-web-request :
 
 
 
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
     {&out}
     htmlib-TableHeading(
         "Account|Name|Contact|Telephone|Account Ref|Default Contract|Status|Ticket Balance^right"
-        ) skip.
+        ) SKIP.
 
     IF lc-search = ""
         THEN OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -344,42 +344,42 @@ PROCEDURE process-web-request :
         THEN lc-def-cont = WebissCont.ContractCode.
                     
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
             htmlib-MntTableField(html-encode(b-query.accountnumber),'left')
             htmlib-MntTableField(html-encode(substr(b-query.name,1,30)),'left')
             htmlib-MntTableField(html-encode(substr(b-query.contact,1,30)),'left')
             htmlib-MntTableField(html-encode(b-query.telephone),'left')
             htmlib-MntTableField(html-encode(b-query.accountref),'left')
             htmlib-MntTableField((lc-def-cont),'left')
-            replace(htmlib-MntTableField(b-query.accStatus,'left'),'<td','<td nowrap ')
-            htmlib-MntTableField(if DYNAMIC-FUNCTION('com-AllowTicketSupport':U,rowid(b-query))
-                                 then dynamic-function("com-TimeToString",com-GetTicketBalance(b-query.companyCode,b-query.accountnumber))
-                                 else "&nbsp;",'right')
+            REPLACE(htmlib-MntTableField(b-query.accStatus,'left'),'<td','<td nowrap ')
+            htmlib-MntTableField(IF DYNAMIC-FUNCTION('com-AllowTicketSupport':U,ROWID(b-query))
+                                 THEN DYNAMIC-FUNCTION("com-TimeToString",com-GetTicketBalance(b-query.companyCode,b-query.accountnumber))
+                                 ELSE "&nbsp;",'right')
 
-            tbar-BeginHidden(rowid(b-query))
+            tbar-BeginHidden(ROWID(b-query))
                 lc-view-Link
-                tbar-Link("update",rowid(b-query),appurl + '/' + "cust/custmnt.p",lc-link-otherp)
-                tbar-Link("delete",rowid(b-query),
-                          if DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"customer",rowid(b-query))
-                          then ( appurl + '/' + "cust/custmnt.p") else "off",
+                tbar-Link("update",ROWID(b-query),appurl + '/' + "cust/custmnt.p",lc-link-otherp)
+                tbar-Link("delete",ROWID(b-query),
+                          IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"customer",ROWID(b-query))
+                          THEN ( appurl + '/' + "cust/custmnt.p") ELSE "off",
                           lc-link-otherp)
-                tbar-Link("custequip",rowid(b-query),appurl + '/' + "cust/custequip.p","customer=" + 
-                                                string(rowid(b-query)) + 
+                tbar-Link("custequip",ROWID(b-query),appurl + '/' + "cust/custequip.p","customer=" + 
+                                                string(ROWID(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
                                                 )
-                tbar-Link("doclist",rowid(b-query),appurl + '/' + "cust/custdoc.p",lc-link-otherp)
-                tbar-Link("ticketadd",rowid(b-query),
-                          if DYNAMIC-FUNCTION('com-AllowTicketSupport':U,rowid(b-query))
-                          then ( appurl + '/' + "cust/custticket.p") else "off",
+                tbar-Link("doclist",ROWID(b-query),appurl + '/' + "cust/custdoc.p",lc-link-otherp)
+                tbar-Link("ticketadd",ROWID(b-query),
+                          IF DYNAMIC-FUNCTION('com-AllowTicketSupport':U,ROWID(b-query))
+                          THEN ( appurl + '/' + "cust/custticket.p") ELSE "off",
                           lc-link-otherp)
-                tbar-Link("CustAsset",rowid(b-query),appurl + '/' + "cust/custasset.p","customer=" + 
-                                                string(rowid(b-query)) + 
+                tbar-Link("CustAsset",ROWID(b-query),appurl + '/' + "cust/custasset.p","customer=" + 
+                                                string(ROWID(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
                                                 )
-                 tbar-Link("CustContract",rowid(b-query),appurl + '/' + "cust/custcontract.p","customer=" + 
-                                                string(rowid(b-query)) + 
+                 tbar-Link("CustContract",ROWID(b-query),appurl + '/' + "cust/custcontract.p","customer=" + 
+                                                string(ROWID(b-query)) + 
                                                 "&returnback=" + string(lr-first-row)
                                                 )
                                                 /*
@@ -392,7 +392,7 @@ PROCEDURE process-web-request :
 
             tbar-EndHidden()
 
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -404,27 +404,27 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
     
     
     {lib/navpanel2.i "cust/cust.p"}
 
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+           SKIP.
 
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

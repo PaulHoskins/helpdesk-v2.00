@@ -233,265 +233,265 @@ PROCEDURE ip-ExportAccordion :
 
 
     {&out}
-    '<style type="text/css">' skip
+    '<style type="text/css">' SKIP
       
-      '.clear ~{ /* generic container (i.e. div) for floating buttons */' skip
-      'overflow: hidden;'    skip
-      'width: 100%;' skip
-      '~}' skip
+      '.clear ~{ /* generic container (i.e. div) for floating buttons */' SKIP
+      'overflow: hidden;'    SKIP
+      'width: 100%;' SKIP
+      '~}' SKIP
 
-      'a.button ~{' skip
-      'background: transparent url(~'/images/toolbar/bg_button_a.gif~') no-repeat scroll top right;' skip
-      'color: #444;' skip
-      'display: block;' skip
-      'float: left;' skip
-      'font: normal 12px arial, sans-serif;' skip
-      'height: 24px;' skip
-      'margin-right: 6px;' skip
-      'padding-right: 18px; /* sliding doors padding */' skip
-      'text-decoration: none;' skip
-      '~}' skip
+      'a.button ~{' SKIP
+      'background: transparent url(~'/images/toolbar/bg_button_a.gif~') no-repeat scroll top right;' SKIP
+      'color: #444;' SKIP
+      'display: block;' SKIP
+      'float: left;' SKIP
+      'font: normal 12px arial, sans-serif;' SKIP
+      'height: 24px;' SKIP
+      'margin-right: 6px;' SKIP
+      'padding-right: 18px; /* sliding doors padding */' SKIP
+      'text-decoration: none;' SKIP
+      '~}' SKIP
 
-      'a.button span ~{' skip
-      'background: transparent url(~'/images/toolbar/bg_button_span1.gif~') no-repeat;' skip
-      'display: block;' skip
-      'line-height: 14px;' skip
-      'padding: 5px 0 5px 18px;' skip
-       'cursor: pointer;' skip
-      '~} ' skip
+      'a.button span ~{' SKIP
+      'background: transparent url(~'/images/toolbar/bg_button_span1.gif~') no-repeat;' SKIP
+      'display: block;' SKIP
+      'line-height: 14px;' SKIP
+      'padding: 5px 0 5px 18px;' SKIP
+       'cursor: pointer;' SKIP
+      '~} ' SKIP
 
-      'a.button:active ~{' skip
-      'background-position: bottom right;' skip
-      'color: #000;' skip
-      'outline: none; /* hide dotted outline in Firefox */' skip
-       'cursor: pointer;' skip
-      '~}' skip
+      'a.button:active ~{' SKIP
+      'background-position: bottom right;' SKIP
+      'color: #000;' SKIP
+      'outline: none; /* hide dotted outline in Firefox */' SKIP
+       'cursor: pointer;' SKIP
+      '~}' SKIP
 
-      'a.button:active span ~{' skip
-      'background-position: bottom left;' skip
-      'padding: 6px 0 4px 18px; /* push text down 1px */' skip
-       'cursor: pointer;' skip
-      '~} ' skip
+      'a.button:active span ~{' SKIP
+      'background-position: bottom left;' SKIP
+      'padding: 6px 0 4px 18px; /* push text down 1px */' SKIP
+       'cursor: pointer;' SKIP
+      '~} ' SKIP
 
-      '.buttonbox ~{' skip
-      'border: 0px dotted blue;'  skip
-      'padding: 1px; ' skip
-      'margin-bottom: 1px;'  skip
-      'margin-top: 1px; ' skip
-      'font-weight: bold; ' skip
-      'background-color: #FFFFFF;' skip
-      'position: relative;' skip
-      'width: 100%;' skip
-      'height: 20px;     ' skip
-      '~}' skip
-
-
-      '.AccordionTitle, .AccordionContent, .AccordionContainer' skip
-      '~{' skip
-      'position: relative;' skip
-      'margin-left:auto;' skip
-      'margin-right:auto;' skip
-      'width: 650px; /*changeble*/' skip
-      'border-bottom: 1px dotted white;' skip
-      '~}' skip
+      '.buttonbox ~{' SKIP
+      'border: 0px dotted blue;'  SKIP
+      'padding: 1px; ' SKIP
+      'margin-bottom: 1px;'  SKIP
+      'margin-top: 1px; ' SKIP
+      'font-weight: bold; ' SKIP
+      'background-color: #FFFFFF;' SKIP
+      'position: relative;' SKIP
+      'width: 100%;' SKIP
+      'height: 20px;     ' SKIP
+      '~}' SKIP
 
 
-      '.AccordionTitle' skip
-      '~{' skip
-      'height: 20px; /*changeble*/' skip
-      'overflow: hidden;' skip
-      'cursor: pointer;' skip
-      'font-family: Verdana; /*changeble*/' skip
-      'font-size: 12px; /*changeble*/' skip
-      'font-weight: normal; /*changeble*/' skip
-      'vertical-align: middle; /*changeble*/' skip
-      'text-align: center; /*changeble*/' skip
-      'display: table-cell;' skip
-      '-moz-user-select: none;' skip
-      'border-top: none; /*changeble*/' skip
-      'border-bottom: none; /*changeble*/' skip
-      'border-left: none; /*changeble*/' skip
-      'border-right: none; /*changeble*/' skip
-      'background-color: #0099cc;' skip
-      'color: White;' skip
-      '~}' skip
+      '.AccordionTitle, .AccordionContent, .AccordionContainer' SKIP
+      '~{' SKIP
+      'position: relative;' SKIP
+      'margin-left:auto;' SKIP
+      'margin-right:auto;' SKIP
+      'width: 650px; /*changeble*/' SKIP
+      'border-bottom: 1px dotted white;' SKIP
+      '~}' SKIP
 
 
-      '.AccordionContent' skip
-      '~{' skip
-      'height: 0px;' skip
-      'overflow: hidden; /*display: none;  */' skip
-      '~}' skip
+      '.AccordionTitle' SKIP
+      '~{' SKIP
+      'height: 20px; /*changeble*/' SKIP
+      'overflow: hidden;' SKIP
+      'cursor: pointer;' SKIP
+      'font-family: Verdana; /*changeble*/' SKIP
+      'font-size: 12px; /*changeble*/' SKIP
+      'font-weight: normal; /*changeble*/' SKIP
+      'vertical-align: middle; /*changeble*/' SKIP
+      'text-align: center; /*changeble*/' SKIP
+      'display: table-cell;' SKIP
+      '-moz-user-select: none;' SKIP
+      'border-top: none; /*changeble*/' SKIP
+      'border-bottom: none; /*changeble*/' SKIP
+      'border-left: none; /*changeble*/' SKIP
+      'border-right: none; /*changeble*/' SKIP
+      'background-color: #0099cc;' SKIP
+      'color: White;' SKIP
+      '~}' SKIP
 
 
-      '.AccordionContent_' skip
-      '~{' skip
-      'height: auto;' skip
-      '~}' skip
+      '.AccordionContent' SKIP
+      '~{' SKIP
+      'height: 0px;' SKIP
+      'overflow: hidden; /*display: none;  */' SKIP
+      '~}' SKIP
 
 
-      '.AccordionContainer' skip
-      '~{' skip
-      'border-top: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-bottom: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-left: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-right: solid 1px #C1C1C1; /*changeble*/' skip
-      '~}' skip
+      '.AccordionContent_' SKIP
+      '~{' SKIP
+      'height: auto;' SKIP
+      '~}' SKIP
 
 
-      '.ContentTable' skip
-      '~{' skip
-      'width: 100%;' skip
-      'text-align: center;' skip
-      'color: White;' skip
-      '~}' skip
+      '.AccordionContainer' SKIP
+      '~{' SKIP
+      'border-top: solid 1px #C1C1C1; /*changeble*/' SKIP
+      'border-bottom: solid 1px #C1C1C1; /*changeble*/' SKIP
+      'border-left: solid 1px #C1C1C1; /*changeble*/' SKIP
+      'border-right: solid 1px #C1C1C1; /*changeble*/' SKIP
+      '~}' SKIP
 
-      '.ContentCell' skip
-      '~{' skip
-      'background-color: #666666;' skip
-      '~}' skip
 
-      '.ContentTable a:link, a:visited' skip
-      '~{' skip
-      'color: White;' skip
-      'text-decoration: none;' skip
-      '~}' skip
+      '.ContentTable' SKIP
+      '~{' SKIP
+      'width: 100%;' SKIP
+      'text-align: center;' SKIP
+      'color: White;' SKIP
+      '~}' SKIP
 
-      '.ContentTable a:hover' skip
-      '~{' skip
-      'color: Yellow;' skip
-      'text-decoration: none;' skip
-      '~}' skip
+      '.ContentCell' SKIP
+      '~{' SKIP
+      'background-color: #666666;' SKIP
+      '~}' SKIP
 
-      '</style>' skip
+      '.ContentTable a:link, a:visited' SKIP
+      '~{' SKIP
+      'color: White;' SKIP
+      'text-decoration: none;' SKIP
+      '~}' SKIP
 
-      '<script type="text/javascript" language="JavaScript">' skip
-      'var ContentHeight = 0;' skip
-      'var TimeToSlide = 200;' skip
-      'var openAccordion = "";' skip
-      'var totalAcc = 0 ;' skip
-      'var firstTime = ' if lc-mode = 'display' or lc-mode = 'insert' then 'true' else 'false' skip
+      '.ContentTable a:hover' SKIP
+      '~{' SKIP
+      'color: Yellow;' SKIP
+      'text-decoration: none;' SKIP
+      '~}' SKIP
+
+      '</style>' SKIP
+
+      '<script type="text/javascript" language="JavaScript">' SKIP
+      'var ContentHeight = 0;' SKIP
+      'var TimeToSlide = 200;' SKIP
+      'var openAccordion = "";' SKIP
+      'var totalAcc = 0 ;' SKIP
+      'var firstTime = ' IF lc-mode = 'display' OR lc-mode = 'insert' THEN 'true' ELSE 'false' SKIP
       
-      'function runAccordion(index)' skip
-      '~{' skip
-      'var nID = "Accordion" + index + "Content";' skip
-      'if(openAccordion == nID)' skip
-      'nID = "";' skip
+      'function runAccordion(index)' SKIP
+      '~{' SKIP
+      'var nID = "Accordion" + index + "Content";' SKIP
+      'if(openAccordion == nID)' SKIP
+      'nID = "";' SKIP
 
-      'ContentHeight = document.getElementById("Accordion" + index + "Content"+"_").offsetHeight;' skip
-      'setTimeout("animate(" + new Date().getTime() + "," + TimeToSlide + ",~'"' skip
-      '+ openAccordion + "~',~'" + nID + "~')", 33);' skip
-      'openAccordion = nID;' skip
-      '~}' skip
+      'ContentHeight = document.getElementById("Accordion" + index + "Content"+"_").offsetHeight;' SKIP
+      'setTimeout("animate(" + new Date().getTime() + "," + TimeToSlide + ",~'"' SKIP
+      '+ openAccordion + "~',~'" + nID + "~')", 33);' SKIP
+      'openAccordion = nID;' SKIP
+      '~}' SKIP
 
-      'function animate(lastTick, timeLeft, closingId, openingId)' skip
-      '~{' skip
-      'var curTick = new Date().getTime();' skip
-      'var elapsedTicks = curTick - lastTick;' skip
-      'var opening = (openingId == "") ? null : document.getElementById(openingId);' skip
-      'var closing = (closingId == "") ? null : document.getElementById(closingId);' skip
+      'function animate(lastTick, timeLeft, closingId, openingId)' SKIP
+      '~{' SKIP
+      'var curTick = new Date().getTime();' SKIP
+      'var elapsedTicks = curTick - lastTick;' SKIP
+      'var opening = (openingId == "") ? null : document.getElementById(openingId);' SKIP
+      'var closing = (closingId == "") ? null : document.getElementById(closingId);' SKIP
 
-      'if(timeLeft <= elapsedTicks)' skip
-      '~{' skip
-      'if(opening != null)' skip
-      'opening.style.height = ~'auto~';' skip
-      'if(closing != null)' skip
-      '~{' skip
-      '//closing.style.display = ~'none~';' skip
-      'closing.style.height = ~'0px~';' skip
-      '~}' skip
-      'return;' skip
-      '~}' skip
+      'if(timeLeft <= elapsedTicks)' SKIP
+      '~{' SKIP
+      'if(opening != null)' SKIP
+      'opening.style.height = ~'auto~';' SKIP
+      'if(closing != null)' SKIP
+      '~{' SKIP
+      '//closing.style.display = ~'none~';' SKIP
+      'closing.style.height = ~'0px~';' SKIP
+      '~}' SKIP
+      'return;' SKIP
+      '~}' SKIP
 
-      'timeLeft -= elapsedTicks;' skip
-      'var newClosedHeight = Math.round((timeLeft/TimeToSlide) * ContentHeight);' skip
+      'timeLeft -= elapsedTicks;' SKIP
+      'var newClosedHeight = Math.round((timeLeft/TimeToSlide) * ContentHeight);' SKIP
 
-      'if(opening != null)' skip
-      '~{' skip
-      'if(opening.style.display != ~'block~')' skip
-      'opening.style.display = ~'block~';' skip
-      'opening.style.height = (ContentHeight - newClosedHeight) + ~'px~';' skip
-      '~}' skip
+      'if(opening != null)' SKIP
+      '~{' SKIP
+      'if(opening.style.display != ~'block~')' SKIP
+      'opening.style.display = ~'block~';' SKIP
+      'opening.style.height = (ContentHeight - newClosedHeight) + ~'px~';' SKIP
+      '~}' SKIP
 
-      'if(closing != null)' skip
-      'closing.style.height = newClosedHeight + ~'px~';' skip
-      'setTimeout("animate(" + curTick + "," + timeLeft + ",~'"' skip
-      '+ closingId + "~',~'" + openingId + "~')", 33);' skip
-      '~}' skip
+      'if(closing != null)' SKIP
+      'closing.style.height = newClosedHeight + ~'px~';' SKIP
+      'setTimeout("animate(" + curTick + "," + timeLeft + ",~'"' SKIP
+      '+ closingId + "~',~'" + openingId + "~')", 33);' SKIP
+      '~}' SKIP
 
-      'function checkLoad()' skip
-      '~{' skip
+      'function checkLoad()' SKIP
+      '~{' SKIP
 
-      'if (window.onLoad)' skip
-      '~{' skip
-      'window.resizeBy(0, totalAcc * 20);' skip
-      '~}' skip
-      'else ~{' skip
-      'setTimeout("checkLoad();", 1000);' skip
-      '~}' skip
+      'if (window.onLoad)' SKIP
+      '~{' SKIP
+      'window.resizeBy(0, totalAcc * 20);' SKIP
+      '~}' SKIP
+      'else ~{' SKIP
+      'setTimeout("checkLoad();", 1000);' SKIP
+      '~}' SKIP
 /*         'alert(firstTime);' skip */
-      'if ( firstTime )' skip
-      '~{' skip
-      'firstTime = false;' skip
-      'fitWindow();' skip
-      '~}' skip
-      '~}' skip
+      'if ( firstTime )' SKIP
+      '~{' SKIP
+      'firstTime = false;' SKIP
+      'fitWindow();' SKIP
+      '~}' SKIP
+      '~}' SKIP
 
 
-      'function FitBody() ~{' skip
-      'var iSize = getSizeXY();' skip
-      'var iScroll = getScrollXY();' skip
+      'function FitBody() ~{' SKIP
+      'var iSize = getSizeXY();' SKIP
+      'var iScroll = getScrollXY();' SKIP
 /*       'window.alert( 'Width = ' + iSize[0]  +  '   Height = ' + iSize[1] );' skip     */
 /*       'window.alert( 'Width = ' + iScroll[0]  +  '   Height = ' + iScroll[1] );' skip */
-      'iWidth = iSize[0] + iScroll[0] + 28 ;' skip
-      'iHeight = iSize[1] + iScroll[1] + iScroll[1] + 20 ;' skip
+      'iWidth = iSize[0] + iScroll[0] + 28 ;' SKIP
+      'iHeight = iSize[1] + iScroll[1] + iScroll[1] + 20 ;' SKIP
 /*       'window.alert( 'Width = ' + iWidth  +  '   Height = ' + iHeight );' skip */
-      'if (iScroll[1] != 0 ) window.resizeTo(iWidth, iHeight);' skip
-      'self.focus();' skip
-      '~};' skip
+      'if (iScroll[1] != 0 ) window.resizeTo(iWidth, iHeight);' SKIP
+      'self.focus();' SKIP
+      '~};' SKIP
 
-      'function getSizeXY() ~{' skip
-      'var myWidth = 0, myHeight = 0;' skip
-      'if( typeof( window.innerWidth ) == "number" ) ~{' skip
-      '//Non-IE' skip
-      'myWidth = window.innerWidth;' skip
-      'myHeight = window.innerHeight;' skip
-      '//window.alert("NON IE");' skip
-      '~} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) ~{' skip
-      '//IE 6+ in standards compliant mode' skip
-      'myWidth = document.documentElement.clientWidth;' skip
-      'myHeight = document.documentElement.clientHeight;' skip
-      '//window.alert("IE 6");' skip
-      '~} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) ~{' skip
-      '//IE 4 compatible' skip
-      'myWidth = document.body.clientWidth;' skip
-      'myHeight = document.body.clientHeight;' skip
-      '//window.alert("IE 4");' skip
-      '~}' skip
+      'function getSizeXY() ~{' SKIP
+      'var myWidth = 0, myHeight = 0;' SKIP
+      'if( typeof( window.innerWidth ) == "number" ) ~{' SKIP
+      '//Non-IE' SKIP
+      'myWidth = window.innerWidth;' SKIP
+      'myHeight = window.innerHeight;' SKIP
+      '//window.alert("NON IE");' SKIP
+      '~} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) ~{' SKIP
+      '//IE 6+ in standards compliant mode' SKIP
+      'myWidth = document.documentElement.clientWidth;' SKIP
+      'myHeight = document.documentElement.clientHeight;' SKIP
+      '//window.alert("IE 6");' SKIP
+      '~} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) ~{' SKIP
+      '//IE 4 compatible' SKIP
+      'myWidth = document.body.clientWidth;' SKIP
+      'myHeight = document.body.clientHeight;' SKIP
+      '//window.alert("IE 4");' SKIP
+      '~}' SKIP
 /*       '//window.alert( 'Width = ' + myWidth  +  '   Height = ' + myHeight );' skip */
-      'return [ myWidth, myHeight ];' skip
-      '~}' skip
+      'return [ myWidth, myHeight ];' SKIP
+      '~}' SKIP
 
-      'function getScrollXY() ~{' skip
-      'var scrOfX = 0, scrOfY = 0;' skip
-      'if( typeof( window.pageYOffset ) == "number" ) ~{' skip
-      '//Netscape compliant' skip
-      'scrOfY = window.pageYOffset;' skip
-      'scrOfX = window.pageXOffset;' skip
-      '~} else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) ~{' skip
-      '//DOM compliant' skip
-      'scrOfY = document.body.scrollTop;' skip
-      'scrOfX = document.body.scrollLeft;' skip
-      '~} else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) ~{' skip
-      '//IE6 standards compliant mode' skip
-      'scrOfY = document.documentElement.scrollTop;' skip
-      'scrOfX = document.documentElement.scrollLeft;' skip
-      '~}' skip
+      'function getScrollXY() ~{' SKIP
+      'var scrOfX = 0, scrOfY = 0;' SKIP
+      'if( typeof( window.pageYOffset ) == "number" ) ~{' SKIP
+      '//Netscape compliant' SKIP
+      'scrOfY = window.pageYOffset;' SKIP
+      'scrOfX = window.pageXOffset;' SKIP
+      '~} else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) ~{' SKIP
+      '//DOM compliant' SKIP
+      'scrOfY = document.body.scrollTop;' SKIP
+      'scrOfX = document.body.scrollLeft;' SKIP
+      '~} else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) ~{' SKIP
+      '//IE6 standards compliant mode' SKIP
+      'scrOfY = document.documentElement.scrollTop;' SKIP
+      'scrOfX = document.documentElement.scrollLeft;' SKIP
+      '~}' SKIP
 /*       '//window.alert( 'Width = ' + scrOfX  +  '   Height = ' + scrOfY );' skip */
-      'return [ scrOfX, scrOfY ];' skip
-      '~}' skip
+      'return [ scrOfX, scrOfY ];' SKIP
+      '~}' SKIP
       
-      '</script>' skip
+      '</script>' SKIP
     .
 
 
@@ -513,37 +513,37 @@ PROCEDURE ip-ExportJScript :
 
 
     {&out} 
-    '<script type="text/javascript" language="JavaScript">' skip
-      'var manualTime = false;' skip
+    '<script type="text/javascript" language="JavaScript">' SKIP
+      'var manualTime = false;' SKIP
 
-      ' function ChangeDuration(Indx) ' skip
-      '~{' skip
-      '  var tFA = "ff" + Indx + "hours"; ' skip
-      '  var tFB = "ff" + Indx + "mins"; ' skip
-      '  var tFC = "ff" + Indx + "startdate"; ' skip
-      '  var tFD = "ff" + Indx + "enddate"; ' skip
-      '  var tFE = Indx + "endhour"; ' skip
-      '  var tFF = Indx + "endmin"; ' skip
-      '  var tFG = Indx + "starthour"; ' skip
-      '  var tFH = Indx + "startmin"; ' skip
-      '  var tFX = "mainform" + (Indx < 10 ? "0" : "") + Indx  ; ' skip
-      '  var tFZ = Indx + "manualTime"; ' skip
-      '  var curHourDuration   = parseInt(document.getElementById(tFA).value,10) ' skip
-      '  var curMinDuration    = parseInt(document.getElementById(tFB).value,10) ' skip
-      '  var startDate         = parseInt(document.getElementById(tFC).value,10) ' skip
-      '  var endDate           = parseInt(document.getElementById(tFD).value,10) ' skip
-      '  var endHourOption     = parseInt(document.getElementById(tFE).value,10);' skip
-      '  var endMinuteOption   = parseInt(document.getElementById(tFF).value,10);' skip
-      '  var startHourOption   = parseInt(document.getElementById(tFG).value,10);' skip
-      '  var startMinuteOption = parseInt(document.getElementById(tFH).value,10);' skip
-      '  var startTime         =  internalTime(startHourOption,startMinuteOption) ; '  skip
-      '  var endTime           =  internalTime(endHourOption,endMinuteOption) ; '  skip
-      '  var durationTime      =  internalTime(curHourDuration,curMinDuration) ; '  skip
+      ' function ChangeDuration(Indx) ' SKIP
+      '~{' SKIP
+      '  var tFA = "ff" + Indx + "hours"; ' SKIP
+      '  var tFB = "ff" + Indx + "mins"; ' SKIP
+      '  var tFC = "ff" + Indx + "startdate"; ' SKIP
+      '  var tFD = "ff" + Indx + "enddate"; ' SKIP
+      '  var tFE = Indx + "endhour"; ' SKIP
+      '  var tFF = Indx + "endmin"; ' SKIP
+      '  var tFG = Indx + "starthour"; ' SKIP
+      '  var tFH = Indx + "startmin"; ' SKIP
+      '  var tFX = "mainform" + (Indx < 10 ? "0" : "") + Indx  ; ' SKIP
+      '  var tFZ = Indx + "manualTime"; ' SKIP
+      '  var curHourDuration   = parseInt(document.getElementById(tFA).value,10) ' SKIP
+      '  var curMinDuration    = parseInt(document.getElementById(tFB).value,10) ' SKIP
+      '  var startDate         = parseInt(document.getElementById(tFC).value,10) ' SKIP
+      '  var endDate           = parseInt(document.getElementById(tFD).value,10) ' SKIP
+      '  var endHourOption     = parseInt(document.getElementById(tFE).value,10);' SKIP
+      '  var endMinuteOption   = parseInt(document.getElementById(tFF).value,10);' SKIP
+      '  var startHourOption   = parseInt(document.getElementById(tFG).value,10);' SKIP
+      '  var startMinuteOption = parseInt(document.getElementById(tFH).value,10);' SKIP
+      '  var startTime         =  internalTime(startHourOption,startMinuteOption) ; '  SKIP
+      '  var endTime           =  internalTime(endHourOption,endMinuteOption) ; '  SKIP
+      '  var durationTime      =  internalTime(curHourDuration,curMinDuration) ; '  SKIP
 
-      '  document.forms[tFX].elements[tFB].value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' skip
-      '  document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"; ' skip
-      '  document.forms[tFX].elements[tFZ].checked = true; ' skip
-      '  manualTime = true; ' skip   
+      '  document.forms[tFX].elements[tFB].value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' SKIP
+      '  document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"; ' SKIP
+      '  document.forms[tFX].elements[tFZ].checked = true; ' SKIP
+      '  manualTime = true; ' SKIP   
 /*       '  document.forms[tFX].elements[tFB].value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' skip                                                      */
 /*       '  if (manualTime) return;  ' skip                                                                                                                          */
 /*       '  if ( (endTime - startTime) != 0  || (endTime - startTime) != durationTime || !manualTime )' skip                                                         */
@@ -553,32 +553,32 @@ PROCEDURE ip-ExportJScript :
 /*       '     document.forms[tFX].elements[tFZ].checked = true; ' skip                                                                                              */
 /*       '     manualTime = true; ' skip                                                                                                                             */
 /*       '  ~}' skip                                                                                                                                                 */
-      '~}' skip
+      '~}' SKIP
 
-      ' function PrePost(Indx) ' skip
-      '~{' skip
-      '  var tFA = "ff" + Indx + "hours"; ' skip
-      '  var tFB = "ff" + Indx + "mins"; ' skip
-      '  var tFC = "ff" + Indx + "startdate"; ' skip
-      '  var tFD = "ff" + Indx + "enddate"; ' skip
-      '  var tFE = Indx + "endhour"; ' skip
-      '  var tFF = Indx + "endmin"; ' skip
-      '  var tFG = Indx + "starthour"; ' skip
-      '  var tFH = Indx + "startmin"; ' skip
-      '  var tFX = "mainform" + (Indx < 10 ? "0" : "") + Indx  ; ' skip
-      '  var tFZ = Indx + "manualTime"; ' skip
-      '  var curHourDuration   = parseInt(document.getElementById(tFA).value,10) ' skip
-      '  var curMinDuration    = parseInt(document.getElementById(tFB).value,10) ' skip
-      '  var startDate         = parseInt(document.getElementById(tFC).value,10) ' skip
-      '  var endDate           = parseInt(document.getElementById(tFD).value,10) ' skip
-      '  var endHourOption     = parseInt(document.getElementById(tFE).value,10);' skip
-      '  var endMinuteOption   = parseInt(document.getElementById(tFF).value,10);' skip
-      '  var startHourOption   = parseInt(document.getElementById(tFG).value,10);' skip
-      '  var startMinuteOption = parseInt(document.getElementById(tFH).value,10);' skip
-      '  var startTime         =  internalTime(startHourOption,startMinuteOption) ; '  skip
-      '  var endTime           =  internalTime(endHourOption,endMinuteOption) ; '  skip
+      ' function PrePost(Indx) ' SKIP
+      '~{' SKIP
+      '  var tFA = "ff" + Indx + "hours"; ' SKIP
+      '  var tFB = "ff" + Indx + "mins"; ' SKIP
+      '  var tFC = "ff" + Indx + "startdate"; ' SKIP
+      '  var tFD = "ff" + Indx + "enddate"; ' SKIP
+      '  var tFE = Indx + "endhour"; ' SKIP
+      '  var tFF = Indx + "endmin"; ' SKIP
+      '  var tFG = Indx + "starthour"; ' SKIP
+      '  var tFH = Indx + "startmin"; ' SKIP
+      '  var tFX = "mainform" + (Indx < 10 ? "0" : "") + Indx  ; ' SKIP
+      '  var tFZ = Indx + "manualTime"; ' SKIP
+      '  var curHourDuration   = parseInt(document.getElementById(tFA).value,10) ' SKIP
+      '  var curMinDuration    = parseInt(document.getElementById(tFB).value,10) ' SKIP
+      '  var startDate         = parseInt(document.getElementById(tFC).value,10) ' SKIP
+      '  var endDate           = parseInt(document.getElementById(tFD).value,10) ' SKIP
+      '  var endHourOption     = parseInt(document.getElementById(tFE).value,10);' SKIP
+      '  var endMinuteOption   = parseInt(document.getElementById(tFF).value,10);' SKIP
+      '  var startHourOption   = parseInt(document.getElementById(tFG).value,10);' SKIP
+      '  var startMinuteOption = parseInt(document.getElementById(tFH).value,10);' SKIP
+      '  var startTime         =  internalTime(startHourOption,startMinuteOption) ; '  SKIP
+      '  var endTime           =  internalTime(endHourOption,endMinuteOption) ; '  SKIP
       '  var durationTime      =  internalTime(curHourDuration,curMinDuration) ; '  SKIP
-      '  document.forms[tFX].submit();  ' skip
+      '  document.forms[tFX].submit();  ' SKIP
       /*** 24/03/2015 - removed 
       '  if (  (endTime - startTime) != 0  && (endTime - startTime) != durationTime )' skip
       '  ~{' skip
@@ -588,92 +588,92 @@ PROCEDURE ip-ExportJScript :
       '  ~}' skip
       '  else ~{ document.forms[tFX].submit();  ~} ' skip
       **/
-      '~}' skip
+      '~}' SKIP
 
-      'function internalTime(piHours,piMins) ' skip
-      '~{' skip
-      '  return ( ( piHours * 60 ) * 60 ) + ( piMins * 60 ); ' skip
-      '~}' skip.
+      'function internalTime(piHours,piMins) ' SKIP
+      '~{' SKIP
+      '  return ( ( piHours * 60 ) * 60 ) + ( piMins * 60 ); ' SKIP
+      '~}' SKIP.
     
     {&out} 
-    '// --  Clock --' skip
-      'var timerID = null;' skip
-      'var timerRunning = false;' skip
-      'var timerStart = null;' skip
-      'var timeSet = null;' skip
-      'var defaultTime = parseInt(' lc-DefaultTimeSet ',10);' skip
-      'var timeSecondSet = parseInt(' lc-timeSecondSet ',10);' skip
-      'var timeMinuteSet = parseInt(' lc-timeMinuteSet ',10);' skip
-      'var timeHourSet =  ' string(integer(lc-timeHourSet)) ';' SKIP
-      'var timerStartseconds = 0;' skip(2)
+    '// --  Clock --' SKIP
+      'var timerID = null;' SKIP
+      'var timerRunning = false;' SKIP
+      'var timerStart = null;' SKIP
+      'var timeSet = null;' SKIP
+      'var defaultTime = parseInt(' lc-DefaultTimeSet ',10);' SKIP
+      'var timeSecondSet = parseInt(' lc-timeSecondSet ',10);' SKIP
+      'var timeMinuteSet = parseInt(' lc-timeMinuteSet ',10);' SKIP
+      'var timeHourSet =  ' STRING(INTEGER(lc-timeHourSet)) ';' SKIP
+      'var timerStartseconds = 0;' SKIP(2)
       
-      'function manualTimeSet()~{' skip
-      'manualTime = (manualTime == true) ? false : true;' skip
-      'if (!manualTime) ~{document.getElementById("throbber").src="/images/ajax/ajax-loader-red.gif"~}' skip
-      'else ~{document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"~}' skip
-      '~}' skip
+      'function manualTimeSet()~{' SKIP
+      'manualTime = (manualTime == true) ? false : true;' SKIP
+      'if (!manualTime) ~{document.getElementById("throbber").src="/images/ajax/ajax-loader-red.gif"~}' SKIP
+      'else ~{document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"~}' SKIP
+      '~}' SKIP
 
-      'function stopclock(levelx)~{' skip
-      'if(timerRunning)' skip
-      'clearTimeout(timerID);' skip
-      'timerRunning = false;' skip
-      '~}' skip
+      'function stopclock(levelx)~{' SKIP
+      'if(timerRunning)' SKIP
+      'clearTimeout(timerID);' SKIP
+      'timerRunning = false;' SKIP
+      '~}' SKIP
 
-      'function startclock(levelx)~{' skip
-      'stopclock(levelx);' skip
+      'function startclock(levelx)~{' SKIP
+      'stopclock(levelx);' SKIP
       /*'timeHourSet = 0;' skip */
       
-      'document.getElementById("clockface").innerHTML =  "00" +   ((defaultTime < 10) ? ":0" : ":") + defaultTime  + ":00" ' skip
-      'var tF = "ff" + levelx + "mins";' skip
-      'document.getElementById(tF).value = ((defaultTime < 10) ? "0" : "") + defaultTime ' skip
-      'showtime(levelx);' skip
-      '~}' skip
+      'document.getElementById("clockface").innerHTML =  "00" +   ((defaultTime < 10) ? ":0" : ":") + defaultTime  + ":00" ' SKIP
+      'var tF = "ff" + levelx + "mins";' SKIP
+      'document.getElementById(tF).value = ((defaultTime < 10) ? "0" : "") + defaultTime ' SKIP
+      'showtime(levelx);' SKIP
+      '~}' SKIP
 
-      'function showtime(levelx)~{' skip
-      'var curMinuteOption;' skip
-      'var curHourOption;' skip
-      'var now = new Date()' skip
-      'var hours = now.getHours()' skip
-      'var minutes = now.getMinutes()' skip
-      'var seconds = now.getSeconds()' skip
-      'var millisec = now.getMilliseconds()' skip
-      'var timeValue = "" +   hours' skip
-      'var tFH = "ff" + levelx + "hours"' skip
-      'var tFM = "ff" + levelx + "mins"' skip
-      'var tFEH = levelx + "endhour"' skip
-      'var tFEM = levelx + "endmin"'skip
-      'timeSecondSet = timeSecondSet + 1' skip
-      'if (!manualTime)' skip
-      '~{' skip
-      'timeValue  += ((minutes < 10) ? ":0" : ":") + minutes' skip
-      'timeValue  += ((seconds < 10) ? ":0" : ":") + seconds' skip
-      'curHourOption = document.getElementById(tFEH + ((hours == 0) ? "0" : "") + hours) ' skip
-      'curHourOption.selected = true' skip
-      'curMinuteOption = document.getElementById(tFEM + ((minutes < 10) ? "0" : "") + minutes)' skip
-      'curMinuteOption.selected = true' skip
-      'if ( timeSecondSet >= 60 ) ~{ timeSecondSet = 0 ; timeMinuteSet = timeMinuteSet + 1; ~}' skip
+      'function showtime(levelx)~{' SKIP
+      'var curMinuteOption;' SKIP
+      'var curHourOption;' SKIP
+      'var now = new Date()' SKIP
+      'var hours = now.getHours()' SKIP
+      'var minutes = now.getMinutes()' SKIP
+      'var seconds = now.getSeconds()' SKIP
+      'var millisec = now.getMilliseconds()' SKIP
+      'var timeValue = "" +   hours' SKIP
+      'var tFH = "ff" + levelx + "hours"' SKIP
+      'var tFM = "ff" + levelx + "mins"' SKIP
+      'var tFEH = levelx + "endhour"' SKIP
+      'var tFEM = levelx + "endmin"'SKIP
+      'timeSecondSet = timeSecondSet + 1' SKIP
+      'if (!manualTime)' SKIP
+      '~{' SKIP
+      'timeValue  += ((minutes < 10) ? ":0" : ":") + minutes' SKIP
+      'timeValue  += ((seconds < 10) ? ":0" : ":") + seconds' SKIP
+      'curHourOption = document.getElementById(tFEH + ((hours == 0) ? "0" : "") + hours) ' SKIP
+      'curHourOption.selected = true' SKIP
+      'curMinuteOption = document.getElementById(tFEM + ((minutes < 10) ? "0" : "") + minutes)' SKIP
+      'curMinuteOption.selected = true' SKIP
+      'if ( timeSecondSet >= 60 ) ~{ timeSecondSet = 0 ; timeMinuteSet = timeMinuteSet + 1; ~}' SKIP
       'if ( timeMinuteSet >= 60 ) ' SKIP
       '~{ ' SKIP 
       '     timeMinuteSet = 0 ; ' SKIP
       '     timeHourSet = timeHourSet + 1; ' SKIP
       '~}' SKIP
       
-      'if ( defaultTime <= timeMinuteSet || defaultTime == 0 || timeHourSet > 0)' skip
-      '  ~{' skip
-      '     document.getElementById(tFH).value = ((timeHourSet  < 10) ? "0" : "") + timeHourSet' skip
-      '     document.getElementById(tFM).value  = ((timeMinuteSet < 10) ? "0" : "") + timeMinuteSet ' skip
-      '     document.getElementById("clockface").innerHTML = ((timeHourSet < 10) ? "0" : "") + timeHourSet ' skip
-      '       +   ((timeMinuteSet < 10) ? ":0" : ":") + timeMinuteSet  + ((timeSecondSet < 10) ? ":0" : ":") + timeSecondSet ' skip
-      '  ~}'  skip
+      'if ( defaultTime <= timeMinuteSet || defaultTime == 0 || timeHourSet > 0)' SKIP
+      '  ~{' SKIP
+      '     document.getElementById(tFH).value = ((timeHourSet  < 10) ? "0" : "") + timeHourSet' SKIP
+      '     document.getElementById(tFM).value  = ((timeMinuteSet < 10) ? "0" : "") + timeMinuteSet ' SKIP
+      '     document.getElementById("clockface").innerHTML = ((timeHourSet < 10) ? "0" : "") + timeHourSet ' SKIP
+      '       +   ((timeMinuteSet < 10) ? ":0" : ":") + timeMinuteSet  + ((timeSecondSet < 10) ? ":0" : ":") + timeSecondSet ' SKIP
+      '  ~}'  SKIP
       '~}' SKIP
-      'document.getElementById("timeHourSet").value = timeHourSet ;' skip 
-      'document.getElementById("timeSecondSet").value = timeSecondSet' skip
-      'document.getElementById("timeMinuteSet").value = timeMinuteSet' skip
-      'timerRunning = true' skip
-      'timerID = setTimeout("showtime(" + levelx + ")",1000)' skip
-      '~}' skip
+      'document.getElementById("timeHourSet").value = timeHourSet ;' SKIP 
+      'document.getElementById("timeSecondSet").value = timeSecondSet' SKIP
+      'document.getElementById("timeMinuteSet").value = timeMinuteSet' SKIP
+      'timerRunning = true' SKIP
+      'timerID = setTimeout("showtime(" + levelx + ")",1000)' SKIP
+      '~}' SKIP
  
-      '</script>' skip
+      '</script>' SKIP
     .
 
 
@@ -707,27 +707,27 @@ PROCEDURE ip-Page :
     DEFINE INPUT PARAMETER zx AS INTEGER NO-UNDO.
 
     {&out}
-    '<br>' skip
+    '<br>' SKIP
     .
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} '<tr><td valign="top" align="right">'
         ( IF LOOKUP("activityby",lc-error-field,'|') > 0 AND li-error = zx
         THEN htmlib-SideLabelError("Activity By")
         ELSE htmlib-SideLabel("Activity By"))
-    '</td>' skip
+    '</td>' SKIP
     .
 
     IF lc-mode = "ADD" THEN
         {&out} '<td valign="top" align="left">'
     htmlib-Select(STRING(zx) + "activityby",lc-list-assign,lc-list-assname,lc-activityby)
     '</td>'.
-    else
+    ELSE
     {&out} htmlib-TableField(html-encode(com-UserName(lc-activityby)),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
 
     {&out} '<tr><td valign="top" align="right">' 
@@ -736,8 +736,8 @@ PROCEDURE ip-Page :
         ELSE htmlib-SideLabel("Activity Type"))
     '</td>' 
     '<td valign="top" align="left">'
-    Format-Select-Activity(htmlib-Select(STRING(zx) + "activitytype",lc-list-actid,lc-list-activtype,lc-saved-activity), zx) skip
-             '</td></tr>' skip. 
+    Format-Select-Activity(htmlib-Select(STRING(zx) + "activitytype",lc-list-actid,lc-list-activtype,lc-saved-activity), zx) SKIP
+             '</td></tr>' SKIP. 
 
 
    
@@ -751,11 +751,11 @@ PROCEDURE ip-Page :
         {&out} '<td valign="top" align="left">'
     htmlib-InputField(STRING(zx) + "actdate",10,lc-actdate) 
     htmlib-CalendarLink(STRING(zx) + "actdate")
-    '</td>' skip.
-    else 
+    '</td>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-actdate),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("startdate",lc-error-field,'|') > 0 AND li-error = zx
@@ -769,11 +769,11 @@ PROCEDURE ip-Page :
     htmlib-CalendarLink(STRING(zx) + "startdate")
     "&nbsp;@&nbsp;"
     htmlib-TimeSelect-By-Id(STRING(zx) + "starthour",lc-starthour,STRING(zx) + "startmin",lc-startmin)
-    '</td>' skip.
-    else 
+    '</td>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-startdate),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("enddate",lc-error-field,'|') > 0 AND li-error = zx
@@ -790,11 +790,11 @@ PROCEDURE ip-Page :
      
       
     REPLACE(htmlib-TimeSelect-By-Id(STRING(zx) + "endhour",lc-endhour,STRING(zx) + "endmin",lc-endmin),">"," disabled>") 
-    '</td>' skip.
-    else 
+    '</td>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-enddate),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
 
 
@@ -809,11 +809,11 @@ PROCEDURE ip-Page :
     Format-Select-Duration(htmlib-InputField(STRING(zx) + "hours",4,lc-hours), zx)
     ':'
     Format-Select-Duration(htmlib-InputField(STRING(zx) + "mins",2,lc-mins), zx)
-    '</td>' skip.
-    else 
+    '</td>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-hours),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
 
 
@@ -830,7 +830,7 @@ PROCEDURE ip-Page :
         {&out} '<td valign="top" align="left">'
             '<input class="inputfield" type="checkbox" onclick="javascript:manualTimeSet()" id="' + string(zx) 
             + 'manualTime" name="' + string(zx) + 'manualTime"  ' lc-manChecked ' >' 
-        '</td>' skip.
+        '</td>' SKIP.
     END.
 
 
@@ -847,13 +847,13 @@ PROCEDURE ip-Page :
         {&out} '<td valign="top" align="left">'
     htmlib-CheckBox(STRING(zx) + "sitevisit", IF lc-sitevisit = 'on'
         THEN TRUE ELSE FALSE) 
-    '</td>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-sitevisit = 'on'
-                                         then 'yes' else 'no'),'left')
-           skip.
+    '</td>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(IF lc-sitevisit = 'on'
+                                         THEN 'yes' ELSE 'no'),'left')
+           SKIP.
     
-    {&out} '</tr>' skip.
+    {&out} '</tr>' SKIP.
   
 
     
@@ -863,7 +863,7 @@ PROCEDURE ip-Page :
         ELSE htmlib-SideLabel("Activity Description"))
     '</td><td valign="top" align="left">'
     htmlib-ThisInputField(STRING(zx) + "actdescription",40,lc-actdescription) 
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 
 
 
@@ -879,47 +879,47 @@ PROCEDURE ip-Page :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<td valign="top" align="left">'
     htmlib-InputField(STRING(zx) + "description",40,lc-description) 
-    '</td>' skip.
-    else 
+    '</td>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-description),'left')
-           skip.
-    {&out} '</tr>' skip.
+           SKIP.
+    {&out} '</tr>' SKIP.
 
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("notes",lc-error-field,'|') > 0 AND li-error = zx
         THEN htmlib-SideLabelError("Note")
         ELSE htmlib-SideLabel("Note"))
-    '</td>' skip
+    '</td>' SKIP
            '<td valign="top" align="left">'
-           htmlib-TextArea(string(zx) + "notes",lc-notes,6,40)
-          '</td></tr>' skip
-           skip.
+           htmlib-TextArea(STRING(zx) + "notes",lc-notes,6,40)
+          '</td></tr>' SKIP
+           SKIP.
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" AND li-error = zx THEN
     DO:
         {&out} '<br><br><center>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' SKIP.
     END.
     
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<center>' Return-Submit-Button("submitform",lc-submit-label,"PrePost(" + string(zx) + ")") 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
 
     {&out}
-    '<br>' skip
+    '<br>' SKIP
     .
 
 
     IF NOT CAN-DO("view,delete",lc-mode) AND zx > 0 THEN
     DO:
         {&out}
-        htmlib-CalendarScript(STRING(zx) + "actdate") skip
-            htmlib-CalendarScript(string(zx) + "startdate") SKIP
+        htmlib-CalendarScript(STRING(zx) + "actdate") SKIP
+            htmlib-CalendarScript(STRING(zx) + "startdate") SKIP
         /*
         htmlib-CalendarScript(string(zx) + "enddate") skip
         */.
@@ -1210,19 +1210,19 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-OpenHeader(lc-main-title) skip.
+    {&out} htmlib-OpenHeader(lc-main-title) SKIP.
 
     RUN ip-ExportAccordion.
 
     RUN ip-ExportJScript.
 
-    {&out} htmlib-CloseHeader("checkLoad()") skip.
+    {&out} htmlib-CloseHeader("checkLoad()") SKIP.
 
     {&out}
-    htmlib-ProgramTitle(lc-main-title) skip.
+    htmlib-ProgramTitle(lc-main-title) SKIP.
     
     {&out}
-    '<div id="AccordionContainer" class="AccordionContainer">' skip.
+    '<div id="AccordionContainer" class="AccordionContainer">' SKIP.
 
 
     FIND FIRST op_action NO-LOCK WHERE ROWID(op_action) = to-rowid(lc-action-rowid) NO-ERROR.
@@ -1284,13 +1284,13 @@ PROCEDURE process-web-request :
         END.
 
         {&out}
-        '<div onclick="runAccordion(' zx ');">' skip
-          '  <div class="AccordionTitle" onselectstart="return false;">' skip
-          '<span style="float:left;margin-left:20px;">'  lc-acc-title-left  '</span><span style="float:right;margin-right:20px;">' lc-acc-title-right '</span>' skip
-          '  </div>' skip
-          '</div>' skip
-          '<div id="Accordion' zx 'Content" class="AccordionContent">' skip
-          '  <div id="Accordion' zx 'Content_" class="AccordionContent_">' skip
+        '<div onclick="runAccordion(' zx ');">' SKIP
+          '  <div class="AccordionTitle" onselectstart="return false;">' SKIP
+          '<span style="float:left;margin-left:20px;">'  lc-acc-title-left  '</span><span style="float:right;margin-right:20px;">' lc-acc-title-right '</span>' SKIP
+          '  </div>' SKIP
+          '</div>' SKIP
+          '<div id="Accordion' zx 'Content" class="AccordionContent">' SKIP
+          '  <div id="Accordion' zx 'Content_" class="AccordionContent_">' SKIP
            htmlib-StartForm("mainform" + string(zx,"99") ,"post", 
                             selfurl 
                             + "?mode=update"
@@ -1304,15 +1304,15 @@ PROCEDURE process-web-request :
         RUN ip-Page(zx) .
 
         {&out} 
-        htmlib-Hidden(STRING(zx) + "savedactivetype",lc-saved-activity) skip
-            htmlib-Hidden("actDesc",lc-list-activdesc) skip     
-            htmlib-Hidden("actTime",lc-list-activtime) skip 
-            htmlib-Hidden("actID",lc-list-actid) skip 
-            htmlib-EndForm() skip.
+        htmlib-Hidden(STRING(zx) + "savedactivetype",lc-saved-activity) SKIP
+            htmlib-Hidden("actDesc",lc-list-activdesc) SKIP     
+            htmlib-Hidden("actTime",lc-list-activtime) SKIP 
+            htmlib-Hidden("actID",lc-list-actid) SKIP 
+            htmlib-EndForm() SKIP.
        
         {&out}
-        ' </div>' skip
-          '</div>' skip.
+        ' </div>' SKIP
+          '</div>' SKIP.
 
     END.  /* of for each */
 
@@ -1382,13 +1382,13 @@ PROCEDURE process-web-request :
                 li-opener         = 2 .                 
 
         {&out}
-        '<div onclick="runAccordion(' zx ');">' skip
-          ' <div class="AccordionTitle" onselectstart="return false;">' skip
-          'New Activity' skip
-          ' </div>' skip
-          '</div>' skip
-          '<div id="Accordion' zx 'Content" class="AccordionContent">' skip
-          ' <div id="Accordion' zx 'Content_" class="AccordionContent_">' skip
+        '<div onclick="runAccordion(' zx ');">' SKIP
+          ' <div class="AccordionTitle" onselectstart="return false;">' SKIP
+          'New Activity' SKIP
+          ' </div>' SKIP
+          '</div>' SKIP
+          '<div id="Accordion' zx 'Content" class="AccordionContent">' SKIP
+          ' <div id="Accordion' zx 'Content_" class="AccordionContent_">' SKIP
            htmlib-StartForm("mainform" + string(zx,"99") ,"post", 
                             selfurl
                             + "?mode=add"
@@ -1399,11 +1399,11 @@ PROCEDURE process-web-request :
                             ).
  
         {&out}
-        '<div align="right">' skip
-         '<span id="clockface" name="clockface" class="clockface">' skip
-         '0:00:00' skip
-         '</span><img id="throbber" src="/images/ajax/ajax-loader-red.gif"></div>' skip
-         '<tr><td valign="top"><fieldset><legend>Activity Entry</legend>' skip
+        '<div align="right">' SKIP
+         '<span id="clockface" name="clockface" class="clockface">' SKIP
+         '0:00:00' SKIP
+         '</span><img id="throbber" src="/images/ajax/ajax-loader-red.gif"></div>' SKIP
+         '<tr><td valign="top"><fieldset><legend>Activity Entry</legend>' SKIP
         .
 
         /* This is create IP_PAGE  */
@@ -1412,57 +1412,57 @@ PROCEDURE process-web-request :
 
 
         {&out} 
-        htmlib-Hidden("timeSecondSet",lc-timeSecondSet) skip
+        htmlib-Hidden("timeSecondSet",lc-timeSecondSet) SKIP
             htmlib-Hidden("timeMinuteSet",lc-timeMinuteSet) SKIP
-            htmlib-Hidden("timeHourSet",lc-timeHourSet) skip
-            htmlib-Hidden("defaultTime",lc-DefaultTimeSet) skip
-            htmlib-Hidden(string(zx) + "savedactivetype",lc-saved-activity) skip   
-            htmlib-Hidden("actDesc",lc-list-activdesc) skip     
-            htmlib-Hidden("actTime",lc-list-activtime) skip 
-            htmlib-Hidden("actID",lc-list-actid) skip 
-            htmlib-EndForm() skip 
-          ' </div>' skip
-          '</div>' skip.
+            htmlib-Hidden("timeHourSet",lc-timeHourSet) SKIP
+            htmlib-Hidden("defaultTime",lc-DefaultTimeSet) SKIP
+            htmlib-Hidden(STRING(zx) + "savedactivetype",lc-saved-activity) SKIP   
+            htmlib-Hidden("actDesc",lc-list-activdesc) SKIP     
+            htmlib-Hidden("actTime",lc-list-activtime) SKIP 
+            htmlib-Hidden("actID",lc-list-actid) SKIP 
+            htmlib-EndForm() SKIP 
+          ' </div>' SKIP
+          '</div>' SKIP.
     END.
    
     {&out}
-    '<! -- END OF CONTAINER -->' skip
-      '</div>' skip
+    '<! -- END OF CONTAINER -->' SKIP
+      '</div>' SKIP
     .
   
     {&out}
-    '<br><span class="inform"><div class="programtitle"> ' skip
-      '<input class="submitbutton" type="button"' skip
+    '<br><span class="inform"><div class="programtitle"> ' SKIP
+      '<input class="submitbutton" type="button"' SKIP
       ' onclick="location.href=~'' appurl '/crm/activityupdmain.p?mode=insert&oprowid=' lc-issue-rowid '&rowid=' lc-rowid
-      '&actionrowid='  lc-action-rowid  '~'"' skip
-      ' value="Create Activity" />' skip
-      '<input class="submitbutton" type="button" onclick="window.close()"' skip
-      ' value="Close" />' skip
-      '</div></span>' skip.
+      '&actionrowid='  lc-action-rowid  '~'"' SKIP
+      ' value="Create Activity" />' SKIP
+      '<input class="submitbutton" type="button" onclick="window.close()"' SKIP
+      ' value="Close" />' SKIP
+      '</div></span>' SKIP.
 
 
 
-    {&out} '<script type="text/javascript">' skip.
-    IF lc-manChecked = "on" THEN  {&out} 'manualTime = true;' skip.
-   else if lc-mode = "add" then   {&out} 'startclock(' string(zx) ');' skip.
-    {&out} '</script>' skip.
+    {&out} '<script type="text/javascript">' SKIP.
+    IF lc-manChecked = "on" THEN  {&out} 'manualTime = true;' SKIP.
+   ELSE IF lc-mode = "add" THEN   {&out} 'startclock(' STRING(zx) ');' SKIP.
+    {&out} '</script>' SKIP.
     
     ASSIGN 
         li-opener = li-opener + zx .
 
     {&out}
       
-    htmlib-Footer() skip.
+    htmlib-Footer() SKIP.
       
     {&out}
-    '<script type="text/javascript">' skip
-      'runAccordion(' if li-error > 0 then li-error else zx ');' skip
+    '<script type="text/javascript">' SKIP
+      'runAccordion(' IF li-error > 0 THEN li-error ELSE zx ');' SKIP
 
-      'function fitWindow()' skip
-      '~{' skip
-      'window.resizeBy(0, '  li-opener  ' * 20);' skip
-      '~}' skip
-      '</script>' skip.  
+      'function fitWindow()' SKIP
+      '~{' SKIP
+      'window.resizeBy(0, '  li-opener  ' * 20);' SKIP
+      '~}' SKIP
+      '</script>' SKIP.  
      
 
 END PROCEDURE.
@@ -1630,6 +1630,7 @@ PROCEDURE process-web-request2 :
                             b-table.StartDate = ?
                             b-table.StartTime = 0.
                     END.
+                    
                    
                     ASSIGN 
                         b-table.Duration = ( ( int(lc-hours) * 60 ) * 60 ) + 
@@ -1643,6 +1644,7 @@ PROCEDURE process-web-request2 :
                         OUTPUT b-table.EndDate,
                         OUTPUT b-table.EndTime
                         ).
+                    RUN crm/lib/final-op.p ( ROWID(op_master)).
         
                     
                 END.
@@ -1663,7 +1665,13 @@ PROCEDURE process-web-request2 :
                     'This record is locked by another user',
                     INPUT-OUTPUT lc-error-field,
                     INPUT-OUTPUT lc-error-msg ).
-            ELSE DELETE b-table.
+            ELSE 
+            DO:
+                DELETE b-table.
+                FIND op_master WHERE ROWID(op_master) = to-rowid(lc-issue-rowid) NO-LOCK.
+                RUN crm/lib/final-op.p ( ROWID(op_master)).
+            END.
+            
         END.
 
         IF lc-error-field = "" THEN
@@ -1671,12 +1679,12 @@ PROCEDURE process-web-request2 :
            
             RUN outputHeader.
             {&out}
-            '<html>' skip
-                '<script language="javascript">' skip
-                'var ParentWindow = opener' skip
-                'ParentWindow.actionCreated()' skip
+            '<html>' SKIP
+                '<script language="javascript">' SKIP
+                'var ParentWindow = opener' SKIP
+                'ParentWindow.actionCreated()' SKIP
 
-                '</script>' skip
+                '</script>' SKIP
                 '<body><h1>ActionUpdated</h1></body></html>'.
             RETURN.
         END.
@@ -1732,6 +1740,8 @@ PROCEDURE process-web-request2 :
                         lc-endMin  = substr(STRING(b-table.endTime,"hh:mm"),4,2).
                 END.
             END.
+            FIND op_master WHERE ROWID(op_master) = to-rowid(lc-issue-rowid) NO-LOCK.
+            RUN crm/lib/final-op.p ( ROWID(op_master)).
         END.
     END.
     

@@ -36,7 +36,7 @@ function crmButton(ButtonEvent, NewURL) {
 
 	NewURL += "&hidate=" + phidate
 	NewURL += "&lodate=" + plodate
-	NewURL += "&sortd=" + psort
+	NewURL += "&sort=" + psort
 	NewURL += "&sortorder=" + psortorder
 
 

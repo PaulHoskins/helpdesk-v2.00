@@ -15,7 +15,7 @@
 
 
 {&out} htmlib-StartPanel() 
-        skip.
+        SKIP.
 
     
 {&out}  '<tr><td align="left">'.
