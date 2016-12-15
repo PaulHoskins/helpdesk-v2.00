@@ -8,7 +8,8 @@
     
     
     When        Who         What
-    26/04/2014  phoski      Initial      
+    26/04/2014  phoski      Initial   
+    15/12/2016  phoski      isActive field   
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -191,13 +192,13 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain General Tables") skip.
+    {&out} htmlib-Header("Maintain General Tables") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/gentab.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/gentab.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain General Tables") skip.
+    {&out} htmlib-ProgramTitle("Maintain General Tables") SKIP.
     
 
     {&out}
@@ -207,7 +208,7 @@ PROCEDURE process-web-request :
         lc-link-otherp
         ).
 
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
 
@@ -215,8 +216,8 @@ PROCEDURE process-web-request :
 
     {&out}
     htmlib-TableHeading(
-        "Table Type|Code|Description"
-        ) skip.
+        "Table Type|Code|Description|Active"
+        ) SKIP.
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -295,16 +296,18 @@ PROCEDURE process-web-request :
 
        
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
 
             htmlib-MntTableField(html-encode(b-query.gtype),'left')
             htmlib-MntTableField(html-encode(b-query.gcode),'left')
             htmlib-MntTableField(html-encode(b-query.descr),'left')
+            htmlib-MntTableField(html-encode(IF b-query.isActive THEN 'Yes' ELSE 'No'),'left')
+             
             
             tbar-StandardRow(
-                rowid(b-query),
+                ROWID(b-query),
                 lc-user,
                 appurl + "/sys/gentabmnt.p",
                 "gentab",
@@ -312,7 +315,7 @@ PROCEDURE process-web-request :
                 )
             
            
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -324,25 +327,25 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
     {lib/navpanel.i "sys/gentab.p"}
 
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+           SKIP.
 
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

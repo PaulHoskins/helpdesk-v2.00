@@ -9,6 +9,7 @@
     
     When        Who         What
     16/10/2016  phoski      Initial
+    15/12/2016  phoski      Sort option by close date
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -42,9 +43,9 @@ DEFINE VARIABLE lc-selr-Code      AS LONGCHAR  NO-UNDO.
 DEFINE VARIABLE lc-selr-Name      AS LONGCHAR  NO-UNDO.
 
 DEFINE VARIABLE lc-sels-code      AS CHARACTER NO-UNDO
-    INITIAL 'b-query.Rating|b-query.createDate|b-query.op_no|b-query.cu_name|b-query.salesmanager|b-query.nextstep|b-query.Probability|b-query.last_act' .
+    INITIAL 'b-query.Rating|b-query.createDate|b-query.op_no|b-query.cu_name|b-query.salesmanager|b-query.nextstep|b-query.Probability|b-query.last_act|b-query.closeDate' .
 DEFINE VARIABLE lc-sels-name      AS CHARACTER NO-UNDO
-    INITIAL 'Traffic Light|Date|Opportunity Number|Customer|Sales Rep|Stage|Probability|Last Activity' .
+    INITIAL 'Traffic Light|Date|Opportunity Number|Customer|Sales Rep|Stage|Probability|Last Activity|Close Date' .
 
 
 DEFINE VARIABLE lc-crit-account   AS CHARACTER NO-UNDO.

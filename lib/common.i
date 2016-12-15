@@ -34,6 +34,7 @@
     24/07/2016  phoski      CRM Changes
     03/09/2016  phoski      Global Email var
     15/10/2016  phoski      New CRM Table Codes
+    15/12/2016  phoski      isactive on gentab
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -594,6 +595,9 @@ PROCEDURE com-GenTabSelect :
 
     DEFINE OUTPUT PARAMETER pc-code     AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-Desc     AS CHARACTER NO-UNDO.
+    
+    DEFINE VARIABLE lc-Desc AS CHARACTER NO-UNDO.
+    
 
     DEFINE VARIABLE icount AS INTEGER NO-UNDO.
 
@@ -603,16 +607,26 @@ PROCEDURE com-GenTabSelect :
     FOR EACH b-GenTab NO-LOCK 
         WHERE b-GenTab.CompanyCode = pc-CompanyCode
         AND b-GenTab.gType = pc-gType
+        BY b-gentab.IsActive DESC
+        BY b-Gentab.gCode
         :
-
+        
+        ASSIGN
+            lc-desc = b-GenTab.Descr.
+            
+       
+         
+        IF NOT b-gentab.IsActive
+        THEN lc-desc = lc-desc + "  - (** Inactive **)".
+            
         IF icount = 0 
             THEN ASSIGN pc-code = b-GenTab.gCode
-                pc-Desc = b-GenTab.Descr.
+                pc-Desc = lc-desc.
 
         ELSE ASSIGN pc-code = pc-code + '|' + 
                b-GenTab.gCode
                 pc-Desc = pc-Desc + '|' + 
-               b-GenTab.Descr.
+               lc-desc.
 
         icount = icount + 1.
 

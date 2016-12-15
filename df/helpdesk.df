@@ -50,17 +50,17 @@ ADD SEQUENCE "acs_line"
   INCREMENT 1
   CYCLE-ON-LIMIT yes
 
-ADD SEQUENCE "op_master"
-  INITIAL 1
-  INCREMENT 1
-  CYCLE-ON-LIMIT no
-  MAX-VAL 999999999
-
 ADD SEQUENCE "crm_data_load"
   INITIAL 1
   INCREMENT 1
   CYCLE-ON-LIMIT yes
   MAX-VAL 99999999
+
+ADD SEQUENCE "op_master"
+  INITIAL 1
+  INCREMENT 1
+  CYCLE-ON-LIMIT no
+  MAX-VAL 999999999
 
 ADD TABLE "acs_head"
   AREA "Schema Area"
@@ -2436,6 +2436,13 @@ ADD FIELD "descr" OF "GenTab" AS character
   MAX-WIDTH 160
   ORDER 40
 
+ADD FIELD "isActive" OF "GenTab" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 6
+  MAX-WIDTH 1
+  ORDER 50
+
 ADD INDEX "prim-key" ON "GenTab" 
   AREA "Schema Area"
   UNIQUE
@@ -4656,10 +4663,8 @@ ADD FIELD "crtDate" OF "op_master" AS date
   ORDER 290
 
 ADD FIELD "last_act" OF "op_master" AS datetime 
-  DESCRIPTION "System gen from op_activity"
-  FORMAT "99/99/9999 HH:MM:SS"
+  FORMAT "99/99/9999 HH:MM:SS.SSS"
   INITIAL ?
-  LABEL "Last Activirt"
   POSITION 31
   MAX-WIDTH 8
   ORDER 300
@@ -6971,4 +6976,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000138493
+0000138552

@@ -14,7 +14,8 @@
                             build relevant page etc
     28/11/2016  phoski      Default on add to existing to main sales
                             contact
-                            Show custoemr name on page title                        
+                            Show customer name on page title    
+    15/12/2016  phoski      Use "." in created contact name                                            
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -98,7 +99,8 @@ DEFINE BUFFER Customer FOR Customer.
 DEFINE BUFFER b-user   FOR webuser.
 
 {src/web2/wrap-cgi.i}
-    {lib/htmlib.i}
+
+{lib/htmlib.i}
 
 
 
@@ -258,15 +260,7 @@ PROCEDURE ip-ViewActionPage:
 
             ASSIGN 
                 substr(lc-info,1,li-tag-end) = "".
-            /*
-             {&out} 
-             '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-             lc-object 
-             
-             '~')' SKIP
-             ";actionExpand(this,~'" lc-this-class "~')"
-             '">':U skip.
-             */
+          
             {&out} lc-info.
     
             {&out} htmlib-ExpandBox(lc-object,op_action.Notes).
@@ -283,38 +277,7 @@ PROCEDURE ip-ViewActionPage:
             IF li-Duration > 0 
             THEN '<strong>' + html-encode(com-TimeToString(li-duration)) + '</strong>'
             ELSE "",'right').
-        /*    
-        tbar-BeginHidden(ROWID(op_action)).
-               IF lc-allowDelete = "yes" 
-            THEN {&out} tbar-Link("delete",ROWID(op_action),
-            'javascript:ConfirmDeleteAction(' +
-            "ROW" + string(ROWID(op_action)) + ','
-                           
-                          
-            + string(op_action.opActionID) + ');',
-            "").
-            
-        {&out}
-            
-        tbar-Link("update",?,
-            'javascript:PopUpWindow('
-            + '~'' + appurl 
-            + '/crm/actionupdate.p?mode=update&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action))
-            + '~'' 
-            + ');'
-            ,"")
-                                                                                            
-        tbar-Link("multiiss",?,
-            'javascript:PopUpWindow('
-            + '~'' + appurl 
-            + '/crm/activityupdmain.p?mode=display&oprowid=' + string(ROWID(op_master)) + "&rowid=" + string(ROWID(op_action)) + "&actionrowid=" + string(ROWID(op_action))
-            + '~'' 
-            + ');'
-            ,"") skip
-                         
-
-            tbar-EndHidden()
-            */
+  
         {&out}   
             '</tr>' SKIP.
 
@@ -351,9 +314,6 @@ PROCEDURE ip-ViewActionPage:
             END.
             
             {&out}
-                /*SKIP(1)
-                tbar-trID(lc-ToolBarID,ROWID(op_activity))
-                SKIP(1) */
                 REPLACE(htmlib-MntTableField("",'left'),"<td","<td colspan=4") 
                 htmlib-MntTableField(STRING(op_activity.ActDate,'99/99/9999'),'left') SKIP.
 
@@ -372,11 +332,7 @@ PROCEDURE ip-ViewActionPage:
     
                 ASSIGN 
                     substr(lc-info,1,li-tag-end) = "".
-                /*
-                {&out} 
-                '<img class="expandboxi i' lc-this-class '" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-                lc-object '~')">':U skip.
-                */
+              
                 {&out} lc-info.
         
                 {&out} REPLACE(htmlib-ExpandBox(lc-object,op_activity.Notes),
@@ -1225,7 +1181,7 @@ PROCEDURE ip-Validate:
                 'You must enter the sales contact name',
                 INPUT-OUTPUT pc-error-field,
                 INPUT-OUTPUT pc-error-msg ).
-         IF lc-AddEmail = "" 
+        IF lc-AddEmail = "" 
             THEN RUN htmlib-AddErrorMessage(
                 'addemail', 
                 'You must enter the sales contact email address',
@@ -1391,11 +1347,13 @@ PROCEDURE process-web-request:
         
     IF AVAILABLE Customer THEN
     DO:
-        ASSIGN lc-title = lc-title + " - Customer: " + Customer.Name.
+        ASSIGN 
+            lc-title = lc-title + " - Customer: " + Customer.Name.
         
         IF lc-mode = "ADD" AND  lc-submitsource = "ACCOUNT" AND request_method = "POST" THEN
         DO:
-           ASSIGN lc-op-salescontact = Customer.SalesContact.
+            ASSIGN 
+                lc-op-salescontact = Customer.SalesContact.
           
         END.
         
@@ -1543,7 +1501,9 @@ PROCEDURE process-web-request:
                         ASSIGN
                             customer.isActive = customer.accStatus = "Active".
                             
-                        lc-loginid = TRIM(REPLACE(lc-SalesContact," ","")).
+                        ASSIGN
+                            lc-SalesContact = TRIM(lc-salesContact).
+                        lc-loginid = TRIM(REPLACE(lc-SalesContact," ",".")).
                         IF CAN-FIND(FIRST b-user WHERE b-user.loginid = lc-loginid NO-LOCK) THEN
                         REPEAT:
                             li-loop = li-loop + 1.
@@ -1555,20 +1515,20 @@ PROCEDURE process-web-request:
                         END.
                         CREATE b-user.
                         ASSIGN 
-                            customer.salesContact  = lc-loginid
-                            b-user.loginid     = lc-loginid
-                            b-user.CompanyCode = lc-global-company
-                            b-user.UserClass   = "CUSTOMER"
-                            b-user.engType     = "custSal".
+                            customer.salesContact = lc-loginid
+                            b-user.loginid        = lc-loginid
+                            b-user.CompanyCode    = lc-global-company
+                            b-user.UserClass      = "CUSTOMER"
+                            b-user.engType        = "custSal".
                   
                         ASSIGN 
                             
                             b-user.surname       = lc-SalesContact
                             b-user.accountnumber = lc-accountnumber
-                            b-user.name = lc-SalesContact
-                            b-user.Mobile = lc-addmobile
-                            b-user.Telephone = lc-addMobile
-                            b-user.email = lc-addEmail
+                            b-user.name          = lc-SalesContact
+                            b-user.Mobile        = lc-addmobile
+                            b-user.Telephone     = lc-addMobile
+                            b-user.email         = lc-addEmail
                             .
                             
                                           

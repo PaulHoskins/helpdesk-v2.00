@@ -9,6 +9,7 @@
     
     When        Who         What
     26/04/2014  phoski      Initial      
+    15/12/2016  phoski      isActive field   
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -47,7 +48,7 @@ DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-gtype        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-descr        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-gcode        AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-isactive     AS CHARACTER NO-UNDO.
 
 
 
@@ -304,7 +305,8 @@ PROCEDURE process-web-request :
             ASSIGN 
                 lc-gtype     = get-value("gtype")
                 lc-descr     = get-value("descr")
-                lc-gcode     = get-value("gcode").
+                lc-gcode     = get-value("gcode")
+                lc-isactive  = get-value("isactive").
                   
             .
             
@@ -341,6 +343,7 @@ PROCEDURE process-web-request :
                 DO:
                     ASSIGN 
                         b-table.descr     = lc-descr
+                        b-table.isactive  = lc-isactive = 'on'
                         .
                    
                     
@@ -377,39 +380,41 @@ PROCEDURE process-web-request :
         ASSIGN 
             lc-gtype = b-table.gtype
             lc-gCode = b-table.gCode
+            
             .
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post"
             THEN ASSIGN lc-descr   = b-table.descr
+                        lc-isactive = IF b-table.isactive THEN 'on' ELSE ''
                 .
        
     END.
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
+    {&out} htmlib-Header(lc-title) SKIP
            htmlib-StartForm("mainform","post", appurl + '/sys/gentabmnt.p' )
-           htmlib-ProgramTitle(lc-title) skip.
+           htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-Hidden ("savesearch", lc-search) SKIP
+           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+           htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-Hidden ("nullfield", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("gtype",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Table Type")
         ELSE htmlib-SideLabel("Table Type"))
-    '</TD>' skip
+    '</TD>' SKIP
     .
 
     IF lc-mode = "ADD" THEN
@@ -426,7 +431,7 @@ PROCEDURE process-web-request :
             '<option value="' cCode '" ' 
             IF lc-gType = cCode
                 THEN "selected" 
-            ELSE "" '>' html-encode(cDesc) '</option>' skip.
+            ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
              
   
@@ -442,29 +447,29 @@ PROCEDURE process-web-request :
            */
     ELSE
         {&out} htmlib-TableField(html-encode(lc-gtype),'left')
-           skip.
+           SKIP.
 
 
-    {&out} '</TR>' skip.
+    {&out} '</TR>' SKIP.
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("gcode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Code")
         ELSE htmlib-SideLabel("Code"))
-    '</TD>' skip
+    '</TD>' SKIP
     .
 
     IF lc-mode = "ADD" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("gcode",20,lc-gcode) skip
+    htmlib-InputField("gcode",20,lc-gcode) SKIP
            '</TD>'.
-    else
+    ELSE
     {&out} htmlib-TableField(html-encode(lc-gcode),'left')
-           skip.
+           SKIP.
 
 
-    {&out} '</TR>' skip.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("descr",lc-error-field,'|') > 0 
@@ -475,32 +480,50 @@ PROCEDURE process-web-request :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("descr",40,lc-descr) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-descr),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
     
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("isactive",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Active?")
+        ELSE htmlib-SideLabel("Active?"))
+    '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left">'
+    htmlib-CheckBox("isactive", IF lc-isactive = 'on'
+        THEN TRUE ELSE FALSE) 
+    '</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(IF lc-isactive = 'on'
+                                         THEN 'yes' ELSE 'no'),'left')
+           SKIP.
+    
+    {&out} '</TR>' SKIP.
 
     
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
          
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+           htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
