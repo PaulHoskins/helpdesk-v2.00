@@ -160,25 +160,31 @@ PROCEDURE ip-BuildQueryPhrase:
     ASSIGN
         lc-QPhrase = 
         "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
+   
 
     IF lc-crit-account <> "ALL" 
+    AND lc-crit-account <> ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.accountNumber = '"  + lc-crit-account + "'".
-         
+      
     
     IF lc-crit-status <> "ALL"
+    AND lc-crit-status <> ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.opstatus = '"  + lc-crit-status + "'".
-        
+    
     IF lc-crit-type <> "ALL"
+    AND lc-crit-type <>  ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.opType = '"  + lc-crit-type + "'".
-                    
+        
+    IF DATE(lc-lodate) <> ?
+    AND date(lc-hiDate) <> ? THEN                
     ASSIGN 
         lc-QPhrase = lc-QPhrase + 
             " and b-query.CrtDate >= " + string(DATE(lc-lodate)) + " " + 
             " and b-query.CrtDate <= " + string(DATE(lc-hidate)) + " ".
-            
+          
     IF lc-search <> "" THEN
     DO:
         ASSIGN 
@@ -190,11 +196,7 @@ PROCEDURE ip-BuildQueryPhrase:
                 lc-QPhrase = lc-QPhrase +  " and b-query.op_no >= " + string(li-int).
             
     END.   
-    /*      
-                            
-    ASSIGN 
-        lc-QPhrase = lc-QPhrase  + " , first b-qcust NO-LOCK where b-qcust.companyCode = b-query.companycode and b-qcust.accountnumber = b-query.accountnumber".
-    */
+
         
     IF lc-crit-rep <> "ALL"
         THEN ASSIGN 
@@ -847,7 +849,7 @@ PROCEDURE process-web-request :
         THEN lc-crit-rep = lc-global-user.
         
       
-    IF request_method = "GET" AND get-value("navigation") = "" THEN
+    IF request_method = "GET" AND ( get-value("navigation") = ""  OR get-value("navigation") = "INITIAL") THEN
     DO:
         IF glob-webuser.engType = "SAL"
             THEN lc-crit-rep = lc-global-user.
@@ -927,6 +929,7 @@ PROCEDURE process-web-request :
             
     RUN ip-BuildQueryPhrase.
      
+    MESSAGE "PH = " lc-QPhrase.
       
     CREATE QUERY vhLQuery  
         ASSIGN 

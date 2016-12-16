@@ -10,6 +10,7 @@
     When        Who         What
     27/02/2016  phoski      Pass thru link from SLA
     10/09/2016  phoski      CRM
+    16/12/2016  phoski      Opportunity Pass Thru
 ***********************************************************************/
 
 /* Parameters Definitions ---                                           */
@@ -140,6 +141,8 @@ PROCEDURE process-web-request :
   Notes:       
 ------------------------------------------------------------------------------*/
     
+    DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO. 
+     
     
     {lib/checkloggedin.i}
 
@@ -169,7 +172,7 @@ PROCEDURE process-web-request :
         lc-passref = get-value("passref").
 
     
-    IF lc-mode = "passthru" AND NOT b-user.engType BEGINS "SAL" THEN
+    IF lc-mode = "passthru" /* AND NOT b-user.engType BEGINS "SAL" */ THEN
     DO:
         
         CASE lc-passtype:
@@ -188,10 +191,39 @@ PROCEDURE process-web-request :
                 RUN run-web-object IN web-utilities-hdl ("iss/issueframe.p").
                 RETURN.
             END.
+              
+        END.
+        WHEN "opportunity" THEN
+        DO:
+            FIND op_master WHERE op_master.CompanyCode = b-User.CompanyCode
+                         AND op_master.op_no = int(lc-passref) NO-LOCK NO-ERROR.
+            IF AVAILABLE op_master THEN
+            DO:
+                set-user-field("mode","update").
+                set-user-field("rowid",STRING(ROWID(op_master))).
+                FIND Customer WHERE Customer.CompanyCode = op_master.CompanyCode
+                        AND Customer.AccountNumber = op_master.AccountNumber NO-LOCK NO-ERROR.
+    
+                ASSIGN 
+                    lc-enc-key =
+                    DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(Customer))).
+                 
+               
+                set-user-field("crmaccount",lc-enc-key).
+                
+                set-user-field("source","passthru").
+                
+                
+                ASSIGN 
+                    request_method = 'get'.
+                RUN run-web-object IN web-utilities-hdl ("crm/crmop.p").
+                RETURN.
+            END.
             
-                         
+                        
                          
         END.
+        
         END CASE.
         
     END.

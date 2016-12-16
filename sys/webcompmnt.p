@@ -24,6 +24,7 @@
     25/06/2016  phoski      Issue Survey
     03/07/2016  phoski      2 Factor Auth Config     
     15/10/2016  phoski      Autogen Account Numbers - CRM Phase 2 
+    15/12/2016  phoski      Company.unqualOppEmail 
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -102,6 +103,8 @@ DEFINE VARIABLE lc-factorPIN      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-autogenAccount AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-nextAccount    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lengthAccount  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-unqualOppEmail AS CHARACTER NO-UNDO.
+
 
 
 
@@ -160,25 +163,25 @@ PROCEDURE ip-BuildPage :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("companycode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Company Code")
         ELSE htmlib-SideLabel("Company Code"))
-    '</TD>' skip
+    '</TD>' SKIP
     .
 
     IF lc-mode = "ADD" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("companycode",10,lc-companycode) skip
+    htmlib-InputField("companycode",10,lc-companycode) SKIP
            '</TD>'.
-    else
+    ELSE
     {&out} htmlib-TableField(html-encode(lc-companycode),'left')
-           skip.
+           SKIP.
 
-    {&out} '</TR>' skip.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("name",lc-error-field,'|') > 0 
@@ -189,11 +192,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("name",40,lc-name) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-name),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("address1",lc-error-field,'|') > 0 
@@ -204,11 +207,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("address1",40,lc-address1) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-address1),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("address2",lc-error-field,'|') > 0 
@@ -219,11 +222,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("address2",40,lc-address2) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-address2),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("city",lc-error-field,'|') > 0 
@@ -234,11 +237,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("city",40,lc-city) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-city),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("county",lc-error-field,'|') > 0 
@@ -249,11 +252,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("county",40,lc-county) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-county),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("country",lc-error-field,'|') > 0 
@@ -264,11 +267,11 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("country",40,lc-country) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-country),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("postcode",lc-error-field,'|') > 0 
@@ -279,19 +282,19 @@ PROCEDURE ip-BuildPage :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("postcode",20,lc-postcode) 
-    '</TD>' skip.
-    else 
-    do:
+    '</TD>' SKIP.
+    ELSE 
+    DO:
 
 IF lc-postcode = "" THEN 
     {&out} htmlib-TableField(html-encode(lc-postcode),'left')
-           skip.
-        else
+           SKIP.
+        ELSE
 
-         {&out}  replace(htmlib-TableField(html-encode(lc-postcode),'left'),"</td>","").
+         {&out}  REPLACE(htmlib-TableField(html-encode(lc-postcode),'left'),"</td>","").
 
 END.
-{&out} '</TR>' skip.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("webaddress",lc-error-field,'|') > 0 
@@ -302,11 +305,11 @@ END.
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("webaddress",40,lc-webaddress) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-webaddress),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("helpdesklink",lc-error-field,'|') > 0 
@@ -317,11 +320,11 @@ htmlib-InputField("webaddress",40,lc-webaddress)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("helpdesklink",80,lc-helpdesklink) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-helpdesklink),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("smtp",lc-error-field,'|') > 0 
@@ -332,11 +335,11 @@ htmlib-InputField("helpdesklink",80,lc-helpdesklink)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("smtp",40,lc-smtp) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-smtp),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 /**/
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("emuser",lc-error-field,'|') > 0 
@@ -347,11 +350,11 @@ htmlib-InputField("smtp",40,lc-smtp)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("emuser",40,lc-emuser) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-emuser),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("empass",lc-error-field,'|') > 0 
@@ -362,11 +365,11 @@ htmlib-InputField("emuser",40,lc-emuser)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("empass",40,lc-empass) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-empass),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("emssl",lc-error-field,'|') > 0 
@@ -377,11 +380,11 @@ htmlib-InputField("empass",40,lc-empass)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-checkBox("emssl",lc-emssl = "on")
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(IF lc-emssl = "on" THEN "Yes" ELSE 'No','left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 /**/
@@ -394,11 +397,11 @@ htmlib-checkBox("emssl",lc-emssl = "on")
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("helpdeskemail",40,lc-helpdeskemail) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-helpdeskemail),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("bulkemail",lc-error-field,'|') > 0 
     THEN htmlib-SideLabelError("Bulk Email Address")
@@ -408,25 +411,43 @@ htmlib-InputField("helpdeskemail",40,lc-helpdeskemail)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("bulkemail",40,lc-bulkemail) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-bulkemail),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("custaddissue",lc-error-field,'|') > 0 
     THEN htmlib-SideLabelError("Unassigned Issue Alert Email Address")
     ELSE htmlib-SideLabel("Unassigned Issue Alert Email Address"))
 '</TD>'.
-    
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("custaddissue",40,lc-custaddissue) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-custaddissue),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
+
+/**/
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("unqualoppemail",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Unqualified Lead Email Alert List")
+    ELSE htmlib-SideLabel("Unqualified Lead Email Alert List"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-InputField("unqualoppemail",80,lc-unqualoppemail) 
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(lc-unqualoppemail),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
+
+    
+
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -438,11 +459,11 @@ htmlib-InputField("custaddissue",40,lc-custaddissue)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("email2db",40,lc-email2db) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-email2db),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 
@@ -455,11 +476,11 @@ htmlib-InputField("email2db",40,lc-email2db)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("helpdeskphone",20,lc-helpdeskphone) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-helpdeskphone),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("timeout",lc-error-field,'|') > 0 
@@ -470,11 +491,11 @@ htmlib-InputField("helpdeskphone",20,lc-helpdeskphone)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("timeout",2,lc-timeout) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-timeout),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("passwordexpire",lc-error-field,'|') > 0 
     THEN htmlib-SideLabelError("Password Expiry (Days)")
@@ -484,11 +505,11 @@ htmlib-InputField("timeout",2,lc-timeout)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("passwordexpire",2,lc-passwordexpire) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-passwordexpire),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("renew",lc-error-field,'|') > 0 
@@ -499,11 +520,11 @@ htmlib-InputField("passwordexpire",2,lc-passwordexpire)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("renew",15,lc-renew) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-renew),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("emailfooter",lc-error-field,'|') > 0 
@@ -515,11 +536,11 @@ htmlib-InputField("renew",15,lc-renew)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-TextArea("emailfooter",lc-emailfooter,10,60)
-'</TD>' skip.
-    else 
-    {&out} htmlib-TableField(replace(html-encode(lc-emailfooter),"~n",'<br>'),'left')
-           skip.
-{&out} '</TR>' skip.
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(REPLACE(html-encode(lc-emailfooter),"~n",'<br>'),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("monitormessage",lc-error-field,'|') > 0 
@@ -530,11 +551,11 @@ htmlib-TextArea("emailfooter",lc-emailfooter,10,60)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-TextArea("monitormessage",lc-monitormessage,10,60)
-'</TD>' skip.
-    else 
-    {&out} htmlib-TableField(replace(html-encode(lc-monitormessage),"~n",'<br>'),'left')
-           skip.
-{&out} '</TR>' skip.
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(REPLACE(html-encode(lc-monitormessage),"~n",'<br>'),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -546,11 +567,11 @@ htmlib-TextArea("monitormessage",lc-monitormessage,10,60)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-TextArea("issueinfo",lc-issueinfo,10,60)
-'</TD>' skip.
-    else 
-    {&out} htmlib-TableField(replace(html-encode(lc-issueinfo),"~n",'<br>'),'left')
-           skip.
-{&out} '</TR>' skip.
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(REPLACE(html-encode(lc-issueinfo),"~n",'<br>'),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -566,11 +587,11 @@ htmlib-TimeSelect("slabeginhour",lc-slabeginhour,"slabeginmin",lc-slabeginmin)
 ' / ' 
 htmlib-TimeSelect("slaendhour",lc-slaendhour,"slaendmin",lc-slaendmin)
             
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField("format time",'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -582,18 +603,18 @@ htmlib-TimeSelect("slaendhour",lc-slaendhour,"slaendmin",lc-slaendmin)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-TextArea("mbanner",lc-mbanner,10,60)
-'</TD>' skip.
-    else
+'</TD>' SKIP.
+    ELSE
     
     DO:
 IF lc-mbanner <> "" THEN
     {&out} htmlib-TableField(html-encode(lc-mbanner) + '<BR><BR><BR>' + lc-mbanner,'left')
-           skip.
+           SKIP.
         ELSE
         {&out} htmlib-TableField("&nbsp;",'left') SKIP.
 
 END.
-{&out} '</TR>' skip.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("engcost",lc-error-field,'|') > 0 
@@ -604,11 +625,11 @@ END.
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("engcost",10,lc-engcost) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-engcost),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -620,11 +641,11 @@ htmlib-InputField("engcost",10,lc-engcost)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-Select("iss-survey",lc-sv-code ,lc-sv-desc,lc-iss-survey)
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-iss-survey),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("factorauth",lc-error-field,'|') > 0 
@@ -635,11 +656,11 @@ htmlib-Select("iss-survey",lc-sv-code ,lc-sv-desc,lc-iss-survey)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-checkBox("factorauth",lc-factorAuth = "on")
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(IF lc-factorAuth = "on" THEN "Yes" ELSE "No"),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("factoremail",lc-error-field,'|') > 0 
@@ -650,11 +671,11 @@ IF NOT CAN-DO("view,delete",lc-mode) THEN
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("factoremail",30,lc-factoremail) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-factoremail),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -666,11 +687,11 @@ htmlib-InputField("factoremail",30,lc-factoremail)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("factoraccount",30,lc-factoraccount) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-factoraccount),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -682,11 +703,11 @@ htmlib-InputField("factoraccount",30,lc-factoraccount)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("factorpassword",30,lc-factorpassword) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-factorpassword),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("factorpin",lc-error-field,'|') > 0 
@@ -697,11 +718,11 @@ htmlib-InputField("factorpassword",30,lc-factorpassword)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-Select("factorpin","4|5|6|7|8","4|5|6|7|8",lc-factorpin)
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-factorPin),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("autogenaccount",lc-error-field,'|') > 0 
@@ -712,11 +733,11 @@ htmlib-Select("factorpin","4|5|6|7|8","4|5|6|7|8",lc-factorpin)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-checkBox("autogenaccount",lc-autogenaccount = "on")
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(IF lc-autogenaccount = "on" THEN "Yes" ELSE "No"),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("nextaccount",lc-error-field,'|') > 0 
@@ -727,11 +748,11 @@ IF NOT CAN-DO("view,delete",lc-mode) THEN
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-InputField("nextaccount",8,lc-nextaccount) 
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-nextaccount),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     (IF LOOKUP("lengthaccount",lc-error-field,'|') > 0 
@@ -742,14 +763,14 @@ htmlib-InputField("nextaccount",8,lc-nextaccount)
 IF NOT CAN-DO("view,delete",lc-mode) THEN
     {&out} '<TD VALIGN="TOP" ALIGN="left">'
 htmlib-Select("lengthaccount","0|3|4|5|6|7|8","No Padding|3 Digits - 999|4 Digits - 9999|5 Digits - 99999|6 Digits - 999999|7 Digits - 9999999 |8 Digits - 99999999",lc-lengthaccount)
-'</TD>' skip.
-    else 
+'</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-lengthaccount),'left')
-           skip.
-{&out} '</TR>' skip.
+           SKIP.
+{&out} '</TR>' SKIP.
 
 
-{&out} htmlib-EndTable() '<br /> 'skip.
+{&out} htmlib-EndTable() '<br /> 'SKIP.
 END PROCEDURE.
 
 
@@ -1085,6 +1106,7 @@ PROCEDURE process-web-request :
                 lc-autogenAccount = get-value("autogenaccount")
                 lc-nextaccount    = get-value("nextaccount")
                 lc-lengthaccount  = get-value("lengthaccount")
+                lc-unqualoppemail = get-value("unqualoppemail")
                  .
             IF lc-mode = 'update' THEN
             DO:
@@ -1161,6 +1183,7 @@ PROCEDURE process-web-request :
                         b-table.autogenaccount = lc-autogenaccount = "on"
                         b-table.nextaccount = int(lc-nextaccount)
                         b-table.lengthaccount = int(lc-lengthaccount)
+                        b-table.unqualoppemail = lc-unqualoppemail
                         
                         .
                    
@@ -1245,9 +1268,9 @@ PROCEDURE process-web-request :
                 lc-autogenaccount = IF b-table.autogenaccount THEN "on" ELSE ""
                 lc-nextaccount    = STRING(b-table.nextaccount)
                 lc-lengthaccount   = STRING(b-table.lengthaccount)
-                
-                
+                lc-unqualoppemail = b-table.unqualoppemail
                 .
+                
             FOR EACH acs_head NO-LOCK
                 WHERE acs_head.CompanyCode = b-table.companyCode:
                 ASSIGN
@@ -1260,19 +1283,19 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
+    {&out} htmlib-Header(lc-title) SKIP
            htmlib-StartForm("mainform","post", appurl + '/sys/webcompmnt.p' )
-           htmlib-ProgramTitle(lc-title) skip.
+           htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-Hidden ("savesearch", lc-search) SKIP
+           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+           htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-Hidden ("nullfield", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
     
     RUN ip-BuildPage.
@@ -1280,17 +1303,17 @@ PROCEDURE process-web-request :
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
          
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+           htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

@@ -16,7 +16,8 @@
                             contact
                             Show customer name on page title    
     15/12/2016  phoski      Use "." in created contact name                                            
-   
+    15/12/2016  phoski      Event Processing
+    15/12/2016  phoski      Passthru link
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -81,9 +82,9 @@ DEFINE VARIABLE lc-lostd           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-loginid         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop            AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-next            AS CHARACTER NO-UNDO.
-
-
-
+DEFINE VARIABLE lc-Data            AS CHARACTER EXTENT 10 NO-UNDO.
+DEFINE VARIABLE lc-Options         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-part            AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-Action-TBar     AS CHARACTER INITIAL 'tim' NO-UNDO.
 DEFINE VARIABLE lc-doc-tbar        AS CHARACTER INITIAL 'doc' NO-UNDO.
@@ -98,9 +99,12 @@ DEFINE BUFFER b-table  FOR op_master.
 DEFINE BUFFER Customer FOR Customer.
 DEFINE BUFFER b-user   FOR webuser.
 
+DEFINE TEMP-TABLE tt-old-table NO-UNDO LIKE op_master.
+
+
 {src/web2/wrap-cgi.i}
 
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -144,6 +148,39 @@ PROCEDURE ip-ActionPage:
         '<div id="IDAction"></div>'.
     
     
+
+END PROCEDURE.
+
+PROCEDURE ip-StatusTable:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
+           htmlib-TableHeading(
+            "Date|By|From|To"
+            ) SKIP.
+       
+       
+    FOR EACH op_status NO-LOCK OF b-table
+        BY op_status.ChangeDate:
+            
+        {&out}
+            '<tr>'
+             htmlib-MntTableField(html-encode(STRING(op_status.ChangeDate,"99/99/9999 HH:MM")),'left')
+             htmlib-MntTableField(html-encode(com-userName(op_status.Loginid)),'left')
+             htmlib-MntTableField(html-encode(IF op_status.FromOpStatus = "" THEN "" ELSE com-DecodeLookup(op_status.FromOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
+             htmlib-MntTableField(html-encode(com-DecodeLookup(op_status.ToOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left')  
+             '</tr>' SKIP. 
+            
+             
+    END.   
+  
+    {&out} SKIP 
+           htmlib-EndTable()
+           SKIP.
+                       
 
 END PROCEDURE.
 
@@ -837,7 +874,7 @@ PROCEDURE ip-UpdatePage:
     
    
     {&out} 
-        '<br />' htmlib-StartTable("mnt",
+        htmlib-StartTable("mnt",
         100,
         0,
         0,
@@ -1360,28 +1397,38 @@ PROCEDURE process-web-request:
         
     END.
     
-        
-    IF lc-source = "crmview" THEN
+    IF lc-source = "passthru" THEN
     DO:
         
         ASSIGN
-            lc-link-url = appurl + '/crm/view.p?navigation=refresh&' + 
-            replace(REPLACE(lc-filterOptions,"|","&"),"^","=").
+            lc-link-url = appurl + '/crm/view.p?navigation=initial&reason=passthru'.
+            
+        ASSIGN
+            lc-title = "Account: " + Customer.Name + " - " + lc-title.
        
     END.
     ELSE
-    DO:   
-        ASSIGN 
-            lc-link-url = appurl + '/crm/customer.p' + 
+        IF lc-source = "crmview" THEN
+        DO:
+        
+            ASSIGN
+                lc-link-url = appurl + '/crm/view.p?navigation=refresh&' + 
+            replace(REPLACE(lc-filterOptions,"|","&"),"^","=").
+       
+        END.
+        ELSE
+        DO:   
+            ASSIGN 
+                lc-link-url = appurl + '/crm/customer.p' + 
             '?crmaccount=' + url-encode(lc-enc-key,"Query") +
             '&navigation=refresh&mode=CRM' +
             "&source=" + lc-source + "&parent=" + lc-parent +
             '&time=' + string(TIME).
                                   
               
-        ASSIGN
-            lc-title = "Account: " + Customer.Name + " - " + lc-title.
-    END.
+            ASSIGN
+                lc-title = "Account: " + Customer.Name + " - " + lc-title.
+        END.
         
     IF AVAILABLE Customer THEN
         ASSIGN 
@@ -1564,6 +1611,11 @@ PROCEDURE process-web-request:
                         b-table.op_no = IF AVAILABLE b-valid THEN b-valid.op_no + 1 ELSE 1.        
                 END.
                 
+                EMPTY TEMP-TABLE tt-old-table.
+                CREATE tt-old-table.
+                BUFFER-COPY b-table TO tt-old-table.
+               
+                
                 ASSIGN
                     b-table.descr           = lc-descr
                     b-table.salesContact    = lc-op-salescontact
@@ -1590,7 +1642,24 @@ PROCEDURE process-web-request:
                 IF b-table.salesContact = lc-global-selcode
                     THEN b-table.salesContact = "".
             
+                
                 RUN crm/lib/final-op.p ( ROWID(b-table)).
+                ASSIGN
+                    lc-data = "".
+                    
+                RUN crm/lib/process-event.p (
+                    ROWID(b-table),
+                    lc-global-user,
+                    lc-mode,
+                    lc-data,
+                    INPUT TABLE tt-old-table
+                    ).
+                        
+                 
+                    
+               
+          
+                
             END.
                 
         END.
@@ -1619,9 +1688,7 @@ PROCEDURE process-web-request:
         END.
         IF lc-source = "crmview" AND lc-error-Field = "" THEN
         DO:
-            DEFINE VARIABLE lc-Options AS CHARACTER NO-UNDO.
-            DEFINE VARIABLE li-loop    AS INTEGER   NO-UNDO.
-            DEFINE VARIABLE lc-part    AS CHARACTER NO-UNDO.
+           
             
             lc-Options =  REPLACE(REPLACE(lc-filterOptions,"|","&"),"^","=").
             DO li-loop = 1 TO NUM-ENTRIES(lc-options,"&"):
@@ -1636,20 +1703,31 @@ PROCEDURE process-web-request:
             
         END.
         ELSE
-            IF lc-error-field = "" THEN
+            IF lc-source = "passthru" AND lc-error-Field = "" THEN
             DO:
-                /*RUN outputHeader.*/
-                set-user-field("navigation",'refresh').
-                set-user-field("firstrow",lc-firstrow).
-                set-user-field("search",lc-search).
-                set-user-field("mode","CRM").
-                set-user-field("crmaccount" , get-value("crmaccount")).
-                set-user-field("source",lc-source).
-                set-user-field("parent",lc-parent).
+           
+                set-user-field("navigation",'initial').
                 request_method = "GET".
-                RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
+                RUN run-web-object IN web-utilities-hdl ("crm/view.p").
                 RETURN.
+            
             END.
+        
+            ELSE
+                IF lc-error-field = "" THEN
+                DO:
+                    /*RUN outputHeader.*/
+                    set-user-field("navigation",'refresh').
+                    set-user-field("firstrow",lc-firstrow).
+                    set-user-field("search",lc-search).
+                    set-user-field("mode","CRM").
+                    set-user-field("crmaccount" , get-value("crmaccount")).
+                    set-user-field("source",lc-source).
+                    set-user-field("parent",lc-parent).
+                    request_method = "GET".
+                    RUN run-web-object IN web-utilities-hdl ("crm/customer.p").
+                    RETURN.
+                END.
         
     END.
     
@@ -1726,8 +1804,28 @@ PROCEDURE process-web-request:
          
                 {&out} 
                     '<div class="tabbertab" title="Opportunity">' SKIP.
+                {&out} 
+                        '<br />' htmlib-StartTable("mnt",
+                        100,
+                        0,
+                        0,
+                        0,
+                        "center").
+        
+                {&out} '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
+                
                 RUN ip-UpdatePage.
+                
+                {&out} '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
+                RUN ip-StatusTable.
+                
+                {&out} '</tr>' SKIP.
+                   
+                {&out} htmlib-EndTable() SKIP.
+         
                 {&out} htmlib-CalendarScript("closedate") SKIP.
+                
+                
         
                 IF lc-error-msg <> "" THEN
                 DO:

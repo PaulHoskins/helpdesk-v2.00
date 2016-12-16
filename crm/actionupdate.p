@@ -89,7 +89,7 @@ DEFINE VARIABLE ll-IsOpen       AS LOG       NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 
 
@@ -131,96 +131,106 @@ PROCEDURE ip-Page :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("actiondate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Date")
         ELSE htmlib-SideLabel("Date"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("actiondate",10,lc-actiondate) 
-    htmlib-CalendarLink("actiondate")
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(lc-actiondate),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-InputField("actiondate",10,lc-actiondate) 
+            htmlib-CalendarLink("actiondate")
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-actiondate),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("actiontype",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Action Type")
         ELSE htmlib-SideLabel("Action Type"))
-    '</TD>' skip
-    .
+        '</TD>' SKIP
+        .
 
     IF lc-mode = "ADD" OR lc-mode = "UPDATE" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("actioncode",lc-list-action,lc-list-aname,
-        lc-actioncode)
-    '</TD>'.
-    else
-    {&out} htmlib-TableField(html-encode(lc-actioncode),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-Select("actioncode",lc-list-action,lc-list-aname,
+            lc-actioncode)
+            '</TD>'.
+    ELSE
+        {&out} htmlib-TableField(html-encode(lc-actioncode),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("statnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
         ELSE htmlib-SideLabel("Note"))
-    '</TD>' skip
-           '<TD VALIGN="TOP" ALIGN="left">'
-           htmlib-TextArea("notes",lc-notes,6,40)
-          '</TD></tr>' skip
-           skip.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-TextArea("notes",lc-notes,6,40)
+        '</TD></tr>' SKIP
+        SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("assign",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Assigned To")
         ELSE htmlib-SideLabel("Assigned To"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("assign",lc-list-assign,lc-list-assname,
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-Select("assign",lc-list-assign,lc-list-assname,
         lc-assign)
-    '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("status",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Action Status")
         ELSE htmlib-SideLabel("Action Status"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("status",lc-global-action-code,lc-global-action-display,lc-status)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(dynamic-function("com-DecodeLookup",lc-status,
-                                     lc-global-action-code,
-                                     lc-global-action-display
-                                     ),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-Select("status",lc-global-action-code,lc-global-action-display,lc-status)
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(DYNAMIC-FUNCTION("com-DecodeLookup",lc-status,
+            lc-global-action-code,
+            lc-global-action-display
+            ),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
 
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
     
     IF lc-submit-label <> "" THEN
     DO:
-        {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        {&out} 
+            '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+            '</center>' SKIP.
     END.
 
 
@@ -241,8 +251,8 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    DEFINE VARIABLE ld-date     AS DATE     NO-UNDO.
-    DEFINE VARIABLE li-int      AS INTEGER      NO-UNDO.
+    DEFINE VARIABLE ld-date AS DATE    NO-UNDO.
+    DEFINE VARIABLE li-int  AS INTEGER NO-UNDO.
 
     ASSIGN
         ld-date = DATE(lc-actiondate) no-error.
@@ -341,8 +351,8 @@ PROCEDURE process-web-request :
 
     ASSIGN 
         lc-op-rowid = get-value("oprowid")
-        lc-mode        = get-value("mode")
-        lc-rowid       = get-value("rowid").
+        lc-mode     = get-value("mode")
+        lc-rowid    = get-value("rowid").
 
     
     FIND op_master
@@ -365,14 +375,14 @@ PROCEDURE process-web-request :
         WHEN 'add'
         THEN 
             ASSIGN 
-                lc-title = 'Add'
-                lc-link-label = "Cancel addition"
+                lc-title        = 'Add'
+                lc-link-label   = "Cancel addition"
                 lc-submit-label = "Add Action".
         WHEN 'Update'
         THEN 
             ASSIGN 
-                lc-title = 'Update'
-                lc-link-label = 'Cancel update'
+                lc-title        = 'Update'
+                lc-link-label   = 'Cancel update'
                 lc-submit-label = 'Update Action'.
     END CASE.
 
@@ -385,12 +395,12 @@ PROCEDURE process-web-request :
         IF lc-mode <> "delete" THEN
         DO:
             ASSIGN 
-                lc-actioncode   = get-value("actioncode")
-                lc-notes        = get-value("notes")
-                lc-assign       = get-value("assign")
-                lc-status       = get-value("status")
-                lc-actiondate   = get-value("actiondate")
-               .                .
+                lc-actioncode = get-value("actioncode")
+                lc-notes      = get-value("notes")
+                lc-assign     = get-value("assign")
+                lc-status     = get-value("status")
+                lc-actiondate = get-value("actiondate")
+                .                .
             
                
             RUN ip-Validate( OUTPUT lc-error-field,
@@ -419,7 +429,7 @@ PROCEDURE process-web-request :
                     CREATE b-table.
                     ASSIGN 
                         b-table.CompanyCode = lc-global-company
-                        b-table.op_id = op_master.op_id
+                        b-table.op_id       = op_master.op_id
                         b-table.CreateDt    = NOW
                         b-table.CreatedBy   = lc-global-user
                         
@@ -442,10 +452,10 @@ PROCEDURE process-web-request :
                 IF lc-error-msg = "" THEN
                 DO:
                     ASSIGN 
-                        b-table.notes            = lc-notes
-                        b-table.ActionStatus     = lc-Status
-                        b-table.ActionCode       = lc-ActionCode
-                        b-table.ActionDate       = DATE(lc-ActionDate)
+                        b-table.notes        = lc-notes
+                        b-table.ActionStatus = lc-Status
+                        b-table.ActionCode   = lc-ActionCode
+                        b-table.ActionDate   = DATE(lc-ActionDate)
                         .
 
                     IF lc-mode = "ADD"
@@ -458,7 +468,7 @@ PROCEDURE process-web-request :
                         DO:
                             ASSIGN 
                                 b-table.AssignDt = NOW
-                                b-table.AssignBy   = lc-global-user.
+                                b-table.AssignBy = lc-global-user.
                             
                         END.
                     END.
@@ -497,12 +507,12 @@ PROCEDURE process-web-request :
             
             RUN outputHeader.
             {&out} 
-            '<html>' skip
-                '<script language="javascript">' skip
-                'var ParentWindow = opener' skip
-                'ParentWindow.actionCreated()' skip
+                '<html>' SKIP
+                '<script language="javascript">' SKIP
+                'var ParentWindow = opener' SKIP
+                'ParentWindow.actionCreated()' SKIP
                 
-                '</script>' skip
+                '</script>' SKIP
                 '<body><h1>ActionUpdated</h1></body></html>'.
             RETURN.
         END.
@@ -520,11 +530,11 @@ PROCEDURE process-web-request :
 
         IF CAN-DO("view,delete",lc-mode)
             OR request_method <> "post"
-            THEN ASSIGN lc-notes        = b-table.notes
-                lc-actionCode   = b-table.ActionCode
-                lc-assign       = b-table.assignto
-                lc-status       = b-table.ActionStatus
-                lc-actiondate   = STRING(b-table.ActionDate,'99/99/9999')
+            THEN ASSIGN lc-notes      = b-table.notes
+                lc-actionCode = b-table.ActionCode
+                lc-assign     = b-table.assignto
+                lc-status     = b-table.ActionStatus
+                lc-actiondate = STRING(b-table.ActionDate,'99/99/9999')
                 .
        
     END.
@@ -532,7 +542,7 @@ PROCEDURE process-web-request :
     IF request_method = "GET" AND lc-mode = "ADD" THEN
     DO:
         ASSIGN 
-            lc-assign = lc-global-user
+            lc-assign     = lc-global-user
             lc-actiondate = STRING(TODAY,'99/99/9999')
             .
     END.
@@ -541,31 +551,31 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-    .
+    {&out} htmlib-Header(lc-title) SKIP
+        .
 
     {&out}
-    htmlib-StartForm("mainform","post", selfurl)
-    htmlib-ProgramTitle(lc-title) skip.
+        htmlib-StartForm("mainform","post", selfurl)
+        htmlib-ProgramTitle(lc-title) SKIP.
 
 
     RUN ip-Page.
 
-    {&out} htmlib-Hidden("oprowid",lc-op-rowid) skip
-           htmlib-Hidden("mode",lc-mode) skip
-           htmlib-Hidden("rowid",lc-rowid) skip
-    .
+    {&out} htmlib-Hidden("oprowid",lc-op-rowid) SKIP
+        htmlib-Hidden("mode",lc-mode) SKIP
+        htmlib-Hidden("rowid",lc-rowid) SKIP
+        .
 
-    {&out} htmlib-EndForm() skip.
+    {&out} htmlib-EndForm() SKIP.
 
 
     IF NOT CAN-DO("view,delete",lc-mode)  THEN
     DO:
         {&out}
-        htmlib-CalendarScript("actiondate") skip.
+            htmlib-CalendarScript("actiondate") SKIP.
     END.
     {&out}
-    htmlib-Footer() skip.
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
