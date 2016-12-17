@@ -10,6 +10,7 @@
     When        Who         What
     16/10/2016  phoski      Initial
     15/12/2016  phoski      Sort option by close date
+    17/12/2016  phoski      Projected Revenue/GP on summary
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -89,6 +90,8 @@ DEFINE TEMP-TABLE tt-sum NO-UNDO
     FIELD cnt   AS INTEGER
     FIELD rev   AS DECIMAL
     FIELD cost  AS DECIMAL
+    FIELD prev  AS DECIMAL 
+    FIELD prof  AS DECIMAL
     INDEX dtype dtype KEY
     INDEX ddisp dtype dkey.
     
@@ -235,7 +238,7 @@ PROCEDURE ip-BuildSummaryTable:
                      
     {&out} '<td valign="top">'                
     REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Sales Rep|Opportunities^right|Revenue^right|Cost^right|GP Profit^right") SKIP.
+               htmlib-TableHeading("Sales Rep|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("REP").
@@ -247,7 +250,7 @@ PROCEDURE ip-BuildSummaryTable:
            
     {&out} '<td valign="top">'                
     REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Status|Opportunities^right|Revenue^right|Cost^right|GP Profit^right") SKIP.
+               htmlib-TableHeading("Status|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("STATUS").
@@ -262,7 +265,7 @@ PROCEDURE ip-BuildSummaryTable:
                      
     {&out} '<td valign="top">'                
     REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Type|Opportunities^right|Revenue^right|Cost^right|GP Profit^right") SKIP.
+               htmlib-TableHeading("Type|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Type").
@@ -274,7 +277,7 @@ PROCEDURE ip-BuildSummaryTable:
            
     {&out} '<td valign="top">'                
     REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Stage|Opportunities^right|Revenue^right|Cost^right|GP Profit^right") SKIP.
+               htmlib-TableHeading("Stage|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("NEXT").
@@ -288,7 +291,7 @@ PROCEDURE ip-BuildSummaryTable:
     
     {&out} '<tr><td valign="top" colspan=2>'                
     REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Customer|Opportunities^right|Revenue^right|Cost^right|GP Profit^right") SKIP.
+               htmlib-TableHeading("Customer|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Customer").
@@ -319,26 +322,29 @@ PROCEDURE ip-BuildSpecificSummaryTable:
     DEFINE VARIABLE lf-cost     AS DECIMAL NO-UNDO.
     DEFINE VARIABLE lf-rev      AS DECIMAL NO-UNDO.
     DEFINE VARIABLE li-cnt      AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lf-prev     AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-prof     AS DECIMAL NO-UNDO.
     
-               
-    ASSIGN
-        li-cnt = 0
-        lf-rev = 0
-        lf-cost = 0.
-                
-    FOR EACH tt-sum NO-LOCK WHERE tt-sum.dtype = pc-dtype BY tt-sum.dkey:
+    DEFINE BUFFER tt-sum FOR tt-sum.
+                   
+    FOR EACH tt-sum NO-LOCK WHERE tt-sum.dtype = pc-dtype 
+        BY tt-sum.dkey:
         {&out} '<tr>' SKIP
         replib-RepField(html-encode(IF pc-dType = "REP" THEN com-userName(tt-sum.dkey) ELSE tt-sum.dKey),'left','') 
         replib-RepField(STRING(tt-sum.cnt),"right",'')
         replib-RepField("&pound" + com-money(tt-sum.Rev) ,"right",'')
         replib-RepField("&pound" + com-money(tt-sum.cost) ,"right",'')
         replib-RepField("&pound" + com-money(tt-sum.rev - tt-sum.Cost) ,"right",'')
+        replib-RepField("&pound" + com-money(tt-sum.prev) ,"right",'')
+        replib-RepField("&pound" + com-money(tt-sum.prof) ,"right",'')
             '</tr>' SKIP.
         
         ASSIGN 
             li-cnt = li-cnt + tt-sum.cnt
             lf-cost  = lf-cost + tt-sum.cost
-            lf-rev = lf-rev + tt-sum.rev.
+            lf-rev = lf-rev + tt-sum.rev
+            lf-prof = lf-prof + tt-sum.prof
+            lf-prev  = lf-prev + tt-sum.prev.
                
 
                
@@ -350,6 +356,9 @@ PROCEDURE ip-BuildSpecificSummaryTable:
     replib-RepField("&pound" + com-money(lf-Rev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
     replib-RepField("&pound" + com-money(lf-cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
     replib-RepField("&pound" + com-money(lf-rev - lf-Cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+    replib-RepField("&pound" + com-money(lf-prev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+    replib-RepField("&pound" + com-money(lf-prof) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+    
     '</tr>' SKIP.
             
 
@@ -428,10 +437,7 @@ PROCEDURE ip-BuildTable:
                 
                   
         END.
-        /* testing
-        IF b-query.last_act <> ? 
-        THEN ASSIGN lc-LastAct = lc-LastAct + " Calc=" + string(b-query.last_act). 
-        */
+      
                        
         {&out}   
         
@@ -556,9 +562,9 @@ PROCEDURE ip-GenerateSummary:
         IF tt-sum.dKey = ""
             THEN tt-sum.dKey = com-GenTabDesc(b-query.companyCode,"CRM.Stage",b-query.NextStep).
            
-        CreateSummaryRecord("CUSTOMER",customer.AccountNumber).
+        CreateSummaryRecord("CUSTOMER",customer.name + Customer.accountnumber).
         IF tt-sum.dKey = ""
-            THEN tt-sum.dKey = customer.name.
+            THEN tt-sum.dKey = /* Customer.AccountNumber + " - " + */ customer.name.
                 
             
      
@@ -987,6 +993,8 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
             Notes:  																	  
     ------------------------------------------------------------------------------*/	
 
+    DEFINE VARIABLE lf-amt  AS DECIMAL NO-UNDO.
+    
     FIND tt-sum WHERE  tt-sum.dtype = pc-dType AND tt-sum.key = pc-key EXCLUSIVE-LOCK NO-ERROR.
     IF NOT AVAILABLE tt-sum THEN CREATE tt-sum.
             
@@ -996,7 +1004,15 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
         tt-sum.cnt = tt-sum.cnt + 1
         tt-sum.cost = tt-sum.cost + b-query.CostOfSale
         tt-sum.rev = tt-sum.rev + b-query.Revenue. 
+    
+    lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2). 
+    
+    ASSIGN tt-sum.prev = tt-sum.prev + lf-amt.
+    
+    ASSIGN 
+          lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2). 
             
+     ASSIGN tt-sum.prof = tt-sum.prof + lf-amt.       
             
     RETURN TRUE.
                 
