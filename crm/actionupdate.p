@@ -9,6 +9,7 @@
     
     When        Who         What
     22/08/2016  phoski      Initial
+    17/12/2016  phoski      call process-event for add.Action
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -56,6 +57,9 @@ DEFINE VARIABLE lc-temp         AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lr-temp         AS ROWID     NO-UNDO.
 DEFINE VARIABLE ll-IsOpen       AS LOG       NO-UNDO.
+
+DEFINE VARIABLE lc-Data            AS CHARACTER EXTENT 10 NO-UNDO.
+DEFINE TEMP-TABLE tt-old-table NO-UNDO LIKE op_master.
 
 
 {iss/issue.i}
@@ -357,6 +361,10 @@ PROCEDURE process-web-request :
     
     FIND op_master
         WHERE ROWID(op_master) = to-rowid(lc-op-rowid) NO-LOCK.
+    EMPTY TEMP-TABLE tt-old-table.
+    CREATE tt-old-table.
+    BUFFER-COPY op_master TO tt-old-table.
+                    
     
     FIND customer WHERE Customer.CompanyCode = op_master.CompanyCode
         AND Customer.AccountNumber = op_master.AccountNumber
@@ -481,6 +489,19 @@ PROCEDURE process-web-request :
                             lr-temp = ROWID(b-table).
                         RELEASE b-table.
                         FIND b-table WHERE ROWID(b-table) = lr-temp EXCLUSIVE-LOCK.
+                        ASSIGN
+                            lc-data = "".
+                        ASSIGN lc-data[1] = STRING(lr-temp).    
+                    
+                        RUN crm/lib/process-event.p (
+                            ROWID(op_master),
+                            lc-global-user,
+                            "ADD.ACTION",
+                            lc-data,
+                            INPUT TABLE tt-old-table
+                            ).
+                                
+                        
 
                         
                     END.

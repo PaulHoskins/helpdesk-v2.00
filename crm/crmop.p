@@ -1403,8 +1403,7 @@ PROCEDURE process-web-request:
         ASSIGN
             lc-link-url = appurl + '/crm/view.p?navigation=initial&reason=passthru'.
             
-        ASSIGN
-            lc-title = "Account: " + Customer.Name + " - " + lc-title.
+ 
        
     END.
     ELSE

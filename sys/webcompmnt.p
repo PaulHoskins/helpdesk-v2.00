@@ -25,6 +25,7 @@
     03/07/2016  phoski      2 Factor Auth Config     
     15/10/2016  phoski      Autogen Account Numbers - CRM Phase 2 
     15/12/2016  phoski      Company.unqualOppEmail 
+    17/12/2016  phoski      Company.opactwarnDays & Company.opactwarnEmail
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -104,6 +105,9 @@ DEFINE VARIABLE lc-autogenAccount AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-nextAccount    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lengthAccount  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-unqualOppEmail AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opactwarnDays  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-opactwarnEmail AS CHARACTER NO-UNDO.
+
 
 
 
@@ -769,6 +773,35 @@ htmlib-Select("lengthaccount","0|3|4|5|6|7|8","No Padding|3 Digits - 999|4 Digit
            SKIP.
 {&out} '</TR>' SKIP.
 
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("opactwarnDays",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Opportunity Last Activity Warning - Number of Days")
+    ELSE htmlib-SideLabel("Opportunity Last Activity Warning - Number of Days"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-InputField("opactwarndays",4,lc-opactwarnDays) 
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(lc-opactwarnDays),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
+
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("opactwarnemail",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Opportunity Last Activity Warning - Email List")
+    ELSE htmlib-SideLabel("Opportunity Last Activity Warning - Email List"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-InputField("opactwarnemail",80,lc-opactwarnEmail) 
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(lc-opactwarnEmail),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
 
 {&out} htmlib-EndTable() '<br /> 'SKIP.
 END PROCEDURE.
@@ -907,6 +940,17 @@ PROCEDURE ip-Validate :
             'The next account must be in the range 1 to  99999999',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+        li-int = int(lc-opactwarnDays) no-error.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 
+        THEN RUN htmlib-AddErrorMessage(
+            'opactwarndays', 
+            'The warning days must be 0 or greater',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
             
 END PROCEDURE.
 
@@ -1107,6 +1151,8 @@ PROCEDURE process-web-request :
                 lc-nextaccount    = get-value("nextaccount")
                 lc-lengthaccount  = get-value("lengthaccount")
                 lc-unqualoppemail = get-value("unqualoppemail")
+                lc-opactwarnDays  = get-value("opactwarndays")
+                lc-opactwarnEmail = get-value("opactwarnemail")
                  .
             IF lc-mode = 'update' THEN
             DO:
@@ -1184,6 +1230,11 @@ PROCEDURE process-web-request :
                         b-table.nextaccount = int(lc-nextaccount)
                         b-table.lengthaccount = int(lc-lengthaccount)
                         b-table.unqualoppemail = lc-unqualoppemail
+                        b-table.opactwarnDays = int(lc-opactwarnDays)
+                        b-table.opactwarnEmail = lc-opactwarnEmail
+                        
+                        
+                        
                         
                         .
                    
@@ -1267,8 +1318,10 @@ PROCEDURE process-web-request :
                 lc-FactorPin      = STRING(b-table.twoFactor_PinLength)
                 lc-autogenaccount = IF b-table.autogenaccount THEN "on" ELSE ""
                 lc-nextaccount    = STRING(b-table.nextaccount)
-                lc-lengthaccount   = STRING(b-table.lengthaccount)
+                lc-lengthaccount  = STRING(b-table.lengthaccount)
                 lc-unqualoppemail = b-table.unqualoppemail
+                lc-opactwarnDays  = STRING(b-table.opactwarnDays)
+                lc-opactwarnEmail = b-table.opactwarnEmail
                 .
                 
             FOR EACH acs_head NO-LOCK
