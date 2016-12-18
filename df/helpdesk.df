@@ -809,6 +809,27 @@ ADD FIELD "lengthAccount" OF "Company" AS integer
   MAX-WIDTH 4
   ORDER 400
 
+ADD FIELD "unqualOppEmail" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 42
+  MAX-WIDTH 16
+  ORDER 410
+
+ADD FIELD "opactwarnDays" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "365"
+  POSITION 43
+  MAX-WIDTH 4
+  ORDER 420
+
+ADD FIELD "opactwarnEmail" OF "Company" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 44
+  MAX-WIDTH 16
+  ORDER 430
+
 ADD INDEX "CompanyCode" ON "Company" 
   AREA "Schema Area"
   UNIQUE
@@ -1704,7 +1725,7 @@ ADD FIELD "AccountRef" OF "Customer" AS character
 
 ADD FIELD "iss_survey" OF "Customer" AS logical 
   FORMAT "yes/no"
-  INITIAL "yes"
+  INITIAL "no"
   LABEL "Send Issue Surveys"
   POSITION 31
   MAX-WIDTH 1
@@ -4796,6 +4817,63 @@ ADD INDEX "prim_key" ON "op_note"
   INDEX-FIELD "CreateDate" DESCENDING 
   INDEX-FIELD "CreateTime" DESCENDING 
 
+ADD TABLE "op_status"
+  AREA "Schema Area"
+  LABEL "OP Status Changes"
+  DUMP-NAME "op_status"
+
+ADD FIELD "CompanyCode" OF "op_status" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "op_id" OF "op_status" AS integer 
+  FORMAT "99999999"
+  INITIAL "0"
+  LABEL "Issue No"
+  POSITION 3
+  MAX-WIDTH 4
+  ORDER 20
+
+ADD FIELD "LoginID" OF "op_status" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 4
+  MAX-WIDTH 30
+  ORDER 30
+
+ADD FIELD "ChangeDate" OF "op_status" AS datetime 
+  FORMAT "99/99/9999 HH:MM:SS"
+  INITIAL ?
+  POSITION 5
+  MAX-WIDTH 8
+  ORDER 40
+
+ADD FIELD "FromOpStatus" OF "op_status" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 6
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD FIELD "ToOpStatus" OF "op_status" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 7
+  MAX-WIDTH 16
+  ORDER 60
+
+ADD INDEX "PrimKey" ON "op_status" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "op_id" ASCENDING 
+  INDEX-FIELD "ChangeDate" ASCENDING 
+
 ADD TABLE "ptp_phase"
   AREA "Schema Area"
   LABEL "Project Template - Phase"
@@ -5565,6 +5643,48 @@ ADD INDEX "IssueNumber" ON "Ticket"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "IssueNumber" ASCENDING 
   INDEX-FIELD "TxnDate" ASCENDING 
+
+ADD TABLE "uFilter"
+  AREA "Schema Area"
+  LABEL "User Saved Filters"
+  DUMP-NAME "ufilter"
+
+ADD FIELD "LoginID" OF "uFilter" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "User ID"
+  POSITION 2
+  MAX-WIDTH 30
+  ORDER 20
+
+ADD FIELD "ProgName" OF "uFilter" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 30
+
+ADD FIELD "FilterCode" OF "uFilter" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 4
+  MAX-WIDTH 16
+  ORDER 40
+
+ADD FIELD "FilterValue" OF "uFilter" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 5
+  MAX-WIDTH 16
+  ORDER 50
+
+ADD INDEX "prim" ON "uFilter" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "LoginID" ASCENDING 
+  INDEX-FIELD "ProgName" ASCENDING 
+  INDEX-FIELD "FilterCode" ASCENDING 
 
 ADD TABLE "UserParam"
   AREA "Schema Area"
@@ -6976,4 +7096,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000138552
+0000140886

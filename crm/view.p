@@ -11,6 +11,7 @@
     16/10/2016  phoski      Initial
     15/12/2016  phoski      Sort option by close date
     17/12/2016  phoski      Projected Revenue/GP on summary
+    18/12/2016  phoski      Columns changed
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -95,7 +96,7 @@ DEFINE TEMP-TABLE tt-sum NO-UNDO
     INDEX dtype dtype KEY
     INDEX ddisp dtype dkey.
     
-DEFINE BUFFER b-query   FOR op_master.
+DEFINE BUFFER b-query FOR op_master.
 
 
 
@@ -129,7 +130,7 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/replib.i}
 
 
@@ -157,34 +158,33 @@ PROCEDURE ip-BuildQueryPhrase:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE li-int          AS INTEGER NO-UNDO.
+    DEFINE VARIABLE li-int AS INTEGER NO-UNDO.
     
 
     ASSIGN
-        lc-QPhrase = 
-        "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
+        lc-QPhrase = "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
    
 
     IF lc-crit-account <> "ALL" 
-    AND lc-crit-account <> ""
+        AND lc-crit-account <> ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.accountNumber = '"  + lc-crit-account + "'".
       
     
     IF lc-crit-status <> "ALL"
-    AND lc-crit-status <> ""
+        AND lc-crit-status <> ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.opstatus = '"  + lc-crit-status + "'".
     
     IF lc-crit-type <> "ALL"
-    AND lc-crit-type <>  ""
+        AND lc-crit-type <>  ""
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.opType = '"  + lc-crit-type + "'".
         
     IF DATE(lc-lodate) <> ?
-    AND date(lc-hiDate) <> ? THEN                
-    ASSIGN 
-        lc-QPhrase = lc-QPhrase + 
+        AND date(lc-hiDate) <> ? THEN                
+        ASSIGN 
+            lc-QPhrase = lc-QPhrase + 
             " and b-query.CrtDate >= " + string(DATE(lc-lodate)) + " " + 
             " and b-query.CrtDate <= " + string(DATE(lc-hidate)) + " ".
           
@@ -230,83 +230,93 @@ PROCEDURE ip-BuildSummaryTable:
     DEFINE VARIABLE lc-width AS CHARACTER INITIAL 'width="100%"' NO-UNDO.
     
     {&out} SKIP
-            '<br/><div class="infobox">Summary</div>' SKIP.
+        '<br/><div class="infobox">Summary</div>' SKIP.
    
     {&out} REPLACE(htmlib-StartMntTable(),'width="100%"','') SKIP.
            
-    {&out} '<tr>' SKIP.
+    {&out} 
+        '<tr>' SKIP.
                      
-    {&out} '<td valign="top">'                
-    REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Sales Rep|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+    {&out} 
+        '<td valign="top">'                
+        REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
+        htmlib-TableHeading("Sales Rep|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("REP").
     
     {&out} SKIP 
-            htmlib-EndTable()
-            '</td>'
-           SKIP.
+        htmlib-EndTable()
+        '</td>'
+        SKIP.
            
-    {&out} '<td valign="top">'                
-    REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Status|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+    {&out} 
+        '<td valign="top">'                
+        REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
+        htmlib-TableHeading("Status|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("STATUS").
     
     {&out} SKIP 
-            htmlib-EndTable()
-            '</td>'
-           SKIP.
+        htmlib-EndTable()
+        '</td>'
+        SKIP.
            
-    {&out} '</tr>'.   
-    {&out} '<tr>' SKIP.
+    {&out} 
+        '</tr>'.   
+    {&out} 
+        '<tr>' SKIP.
                      
-    {&out} '<td valign="top">'                
-    REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Type|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+    {&out} 
+        '<td valign="top">'                
+        REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
+        htmlib-TableHeading("Type|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Type").
     
     {&out} SKIP 
-            htmlib-EndTable()
-            '</td>'
-           SKIP.
+        htmlib-EndTable()
+        '</td>'
+        SKIP.
            
-    {&out} '<td valign="top">'                
-    REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Stage|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+    {&out} 
+        '<td valign="top">'                
+        REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
+        htmlib-TableHeading("Stage|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("NEXT").
     
     {&out} SKIP 
-            htmlib-EndTable()
-            '</td>'
-           SKIP.
+        htmlib-EndTable()
+        '</td>'
+        SKIP.
            
-    {&out} '</tr>'.       
+    {&out} 
+        '</tr>'.       
     
-    {&out} '<tr><td valign="top" colspan=2>'                
-    REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-               htmlib-TableHeading("Customer|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+    {&out} 
+        '<tr><td valign="top" colspan=2>'                
+        REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
+        htmlib-TableHeading("Customer|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Customer").
     
     {&out} SKIP 
-            htmlib-EndTable()
-            '</td>'
-           SKIP.
+        htmlib-EndTable()
+        '</td>'
+        SKIP.
            
-    {&out} '</tr>'. 
+    {&out} 
+        '</tr>'. 
                 
 
     {&out} SKIP 
-            htmlib-EndTable()
-    .
+        htmlib-EndTable()
+        .
 
 END PROCEDURE.
 
@@ -319,47 +329,49 @@ PROCEDURE ip-BuildSpecificSummaryTable:
     DEFINE INPUT PARAMETER pc-dtype     AS CHARACTER NO-UNDO.
     
 
-    DEFINE VARIABLE lf-cost     AS DECIMAL NO-UNDO.
-    DEFINE VARIABLE lf-rev      AS DECIMAL NO-UNDO.
-    DEFINE VARIABLE li-cnt      AS INTEGER NO-UNDO.
-    DEFINE VARIABLE lf-prev     AS DECIMAL NO-UNDO.
-    DEFINE VARIABLE lf-prof     AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-cost AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-rev  AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE li-cnt  AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lf-prev AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-prof AS DECIMAL NO-UNDO.
     
     DEFINE BUFFER tt-sum FOR tt-sum.
                    
     FOR EACH tt-sum NO-LOCK WHERE tt-sum.dtype = pc-dtype 
         BY tt-sum.dkey:
-        {&out} '<tr>' SKIP
-        replib-RepField(html-encode(IF pc-dType = "REP" THEN com-userName(tt-sum.dkey) ELSE tt-sum.dKey),'left','') 
-        replib-RepField(STRING(tt-sum.cnt),"right",'')
-        replib-RepField("&pound" + com-money(tt-sum.Rev) ,"right",'')
-        replib-RepField("&pound" + com-money(tt-sum.cost) ,"right",'')
-        replib-RepField("&pound" + com-money(tt-sum.rev - tt-sum.Cost) ,"right",'')
-        replib-RepField("&pound" + com-money(tt-sum.prev) ,"right",'')
-        replib-RepField("&pound" + com-money(tt-sum.prof) ,"right",'')
+        {&out} 
+            '<tr>' SKIP
+            replib-RepField(html-encode(IF pc-dType = "REP" THEN com-userName(tt-sum.dkey) ELSE tt-sum.dKey),'left','') 
+            replib-RepField(STRING(tt-sum.cnt),"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.Rev) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.cost) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.rev - tt-sum.Cost) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.prev) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.prof) ,"right",'')
             '</tr>' SKIP.
         
         ASSIGN 
-            li-cnt = li-cnt + tt-sum.cnt
-            lf-cost  = lf-cost + tt-sum.cost
-            lf-rev = lf-rev + tt-sum.rev
+            li-cnt  = li-cnt + tt-sum.cnt
+            lf-cost = lf-cost + tt-sum.cost
+            lf-rev  = lf-rev + tt-sum.rev
             lf-prof = lf-prof + tt-sum.prof
-            lf-prev  = lf-prev + tt-sum.prev.
+            lf-prev = lf-prev + tt-sum.prev.
                
 
                
     END.  
      
-    {&out} '<tr>'
-    replib-RepField(html-encode("Total"),'left','') 
-    replib-RepField(STRING(li-cnt),"right","border-top: 1px solid black;border-bottom: 1px solid black;")
-    replib-RepField("&pound" + com-money(lf-Rev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
-    replib-RepField("&pound" + com-money(lf-cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
-    replib-RepField("&pound" + com-money(lf-rev - lf-Cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
-    replib-RepField("&pound" + com-money(lf-prev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
-    replib-RepField("&pound" + com-money(lf-prof) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+    {&out} 
+        '<tr>'
+        replib-RepField(html-encode("Total"),'left','') 
+        replib-RepField(STRING(li-cnt),"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-Rev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-rev - lf-Cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-prev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-prof) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
     
-    '</tr>' SKIP.
+        '</tr>' SKIP.
             
 
 END PROCEDURE.
@@ -371,14 +383,14 @@ PROCEDURE ip-BuildTable:
     ------------------------------------------------------------------------------*/
 
     
-    DEFINE VARIABLE lc-Enc-Key       AS CHARACTER NO-UNDO. 
-    DEFINE VARIABLE lf-Amt           AS DECIMAL   NO-UNDO.
-    DEFINE VARIABLE lc-LastAct       AS CHARACTER NO-UNDO.
-    DEFINE BUFFER customer           FOR Customer.
+    DEFINE VARIABLE lc-Enc-Key AS CHARACTER NO-UNDO. 
+    DEFINE VARIABLE lf-Amt     AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lc-LastAct AS CHARACTER NO-UNDO.
+    DEFINE BUFFER customer FOR Customer.
     
 
     ASSIGN 
-        li-count = 0
+        li-count     = 0
         lr-first-row = ?
         lr-last-row  = ?.
 
@@ -387,15 +399,14 @@ PROCEDURE ip-BuildTable:
         FIND Customer OF b-query NO-LOCK NO-ERROR.
         
         ASSIGN 
-            lc-enc-key =
-                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(Customer))).
+            lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(Customer))).
         ASSIGN 
             lc-rowid = STRING(ROWID(b-query)).
            
         ASSIGN 
             li-count = li-count + 1.
         IF lr-first-row = ?
-        THEN ASSIGN lr-first-row = ROWID(b-query).
+            THEN ASSIGN lr-first-row = ROWID(b-query).
         ASSIGN 
             lr-last-row = ROWID(b-query).
         
@@ -404,19 +415,21 @@ PROCEDURE ip-BuildTable:
             tbar-tr(ROWID(b-query))
             SKIP.
             
-        {&out} '<td valign="top" align="right">' SKIP.
+        {&out} 
+            '<td valign="top" align="right">' SKIP.
         
         IF b-query.Rating = "COLD"
             THEN {&out} '&nbsp;' SKIP.
         ELSE
-         IF b-query.Rating = "WARM"
-        THEN {&out} '<img src="/images/sla/warn.jpg" height="20" width="20" alt="WARM">' SKIP.
-        ELSE
-        IF b-query.Rating = "HOT"
-        THEN {&out} '<img src="/images/sla/ok.jpg" height="20" width="20" alt="HOT">' SKIP.
-        ELSE {&out} '&nbsp;' SKIP.
+            IF b-query.Rating = "WARM"
+                THEN {&out} '<img src="/images/sla/warn.jpg" height="20" width="20" alt="WARM">' SKIP.
+            ELSE
+                IF b-query.Rating = "HOT"
+                    THEN {&out} '<img src="/images/sla/ok.jpg" height="20" width="20" alt="HOT">' SKIP.
+                ELSE {&out} '&nbsp;' SKIP.
         
-        {&out} '</td>' SKIP.
+        {&out} 
+            '</td>' SKIP.
             
         ASSIGN
             lc-lastAct = "".
@@ -440,22 +453,17 @@ PROCEDURE ip-BuildTable:
       
                        
         {&out}   
-        
-        htmlib-MntTableField(html-encode(lc-lastAct),'left') 
-        htmlib-MntTableField(html-encode(STRING(b-query.crtDate,"99/99/9999")),'left')  
-            
-        htmlib-MntTableField(html-encode(com-userName(b-query.SalesManager)),'left') 
-        htmlib-MntTableField(html-encode(b-query.cu_name),'left')   
-        htmlib-MntTableField(html-encode(b-query.descr),'left')  
-            
-        htmlib-MntTableField(html-encode(com-DecodeLookup(b-query.opStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
-        htmlib-MntTableField(html-encode(com-DecodeLookup(b-query.opType,lc-global-opType-Code,lc-global-opType-Desc )),'left') 
-        htmlib-MntTableField(IF b-query.CloseDate = ? THEN "&nbsp;" ELSE STRING(b-query.closeDate,"99/99/9999"),'left')  
-        htmlib-MntTableField(STRING(b-query.Probability) + "%","right")
-        htmlib-MntTableField("&pound" + com-money(b-query.Revenue) ,"right")
-        htmlib-MntTableField("&pound" + com-money(b-query.CostOfSale) ,"right")
-        htmlib-MntTableField("&pound" + com-money(b-query.Revenue - b-query.CostOfSale) ,"right")
-                                  
+            htmlib-MntTableField(html-encode(b-query.cu_name),'left')   
+            htmlib-MntTableField(html-encode(b-query.descr),'left')  
+            htmlib-MntTableField(IF b-query.CloseDate = ? THEN "&nbsp;" ELSE STRING(b-query.closeDate,"99/99/9999"),'left')  
+            htmlib-MntTableField(html-encode(lc-lastAct),'left') 
+            htmlib-MntTableField(html-encode(com-DecodeLookup(b-query.opType,lc-global-opType-Code,lc-global-opType-Desc )),'left')   
+            htmlib-MntTableField(html-encode(com-DecodeLookup(b-query.opStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
+            htmlib-MntTableField(html-encode(com-userName(b-query.SalesManager)),'left') 
+            htmlib-MntTableField(STRING(b-query.Probability) + "%","right")
+            htmlib-MntTableField("&pound" + com-money(b-query.Revenue) ,"right")
+            htmlib-MntTableField("&pound" + com-money(b-query.CostOfSale) ,"right")
+            htmlib-MntTableField("&pound" + com-money(b-query.Revenue - b-query.CostOfSale) ,"right")
             . 
         ASSIGN 
             lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2).       
@@ -465,15 +473,16 @@ PROCEDURE ip-BuildTable:
         ASSIGN 
             lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2).       
          
-        {&out} htmlib-MntTableField("&pound" + com-money(lf-amt) ,"right")
-        htmlib-MntTableField(html-encode(com-GenTabDesc(b-query.companyCode,"CRM.Stage",b-query.NextStep)),'left')  
-        
-        htmlib-MntTableField(html-encode(STRING(b-query.op_no)),'right')  
+        {&out} 
+            htmlib-MntTableField("&pound" + com-money(lf-amt) ,"right")
+            htmlib-MntTableField(html-encode(com-GenTabDesc(b-query.companyCode,"CRM.Stage",b-query.NextStep)),'left')  
+            htmlib-MntTableField(html-encode(STRING(b-query.crtDate,"99/99/9999")),'left')  
+            htmlib-MntTableField(html-encode(STRING(b-query.op_no)),'right')  
             .
             
             
         {&out} SKIP
-                    tbar-BeginHidden(ROWID(b-query)).
+            tbar-BeginHidden(ROWID(b-query)).
                     
         {&out} tbar-Link("view",ROWID(b-query),appurl + "/crm/crmop.p","crmaccount=" + url-encode(lc-enc-key,"Query") + "&" + lc-link-otherp + "|firstrow^" + string(lr-first-row)).
         
@@ -484,9 +493,9 @@ PROCEDURE ip-BuildTable:
            
                   
         {&out}
-        tbar-EndHidden()
-                SKIP
-               '</tr>' SKIP.
+            tbar-EndHidden()
+            SKIP
+            '</tr>' SKIP.
                    
         IF li-count = li-max-lines THEN LEAVE.
      
@@ -505,9 +514,9 @@ PROCEDURE ip-ExportJS:
     ------------------------------------------------------------------------------*/
     
     {&out} lc-global-jquery  SKIP
-           '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  SKIP
-           '<script language="javascript">' SKIP
-           'var appurl = "' appurl '";' SKIP.
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>'  SKIP
+        '<script language="javascript">' SKIP
+        'var appurl = "' appurl '";' SKIP.
 
     {&out} SKIP
         'function ChangeCriteria() ~{' SKIP
@@ -517,11 +526,11 @@ PROCEDURE ip-ExportJS:
         '   SubmitThePage("DatesChange")' SKIP
         '~}' SKIP
           
-           '</script>' SKIP
+        '</script>' SKIP
                    
-           '<script language="JavaScript" src="/asset/page/crm/view.js?v=1.0.1"></script>' SKIP
+        '<script language="JavaScript" src="/asset/page/crm/view.js?v=1.0.1"></script>' SKIP
            
-    .
+        .
            
     
            
@@ -652,10 +661,10 @@ PROCEDURE ip-Selection:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE iloop       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE cPart       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cCode       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cDesc       AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE iloop AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE cPart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cCode AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDesc AS CHARACTER NO-UNDO.
     
     {&out} htmlib-BeginCriteria("Search Opportunities").
     
@@ -665,14 +674,16 @@ PROCEDURE ip-Selection:
    
     
     
-    {&out} '<table align=center>' SKIP.
+    {&out} 
+        '<table align=center>' SKIP.
     
-    {&out} '<tr><td align=right valign=top>' htmlib-SideLabel("Customer") 
-    '</td><td align=left valign=top colspan=5>'.
+    {&out} 
+        '<tr><td align=right valign=top>' htmlib-SideLabel("Customer") 
+        '</td><td align=left valign=top colspan=5>'.
   
     
     {&out-long}
-    htmlib-SelectJSLong(
+        htmlib-SelectJSLong(
         "account",
         'ChangeCriteria()',
         "All|" + lc-sela-code,
@@ -685,11 +696,12 @@ PROCEDURE ip-Selection:
             lc-selr-name = "All|" + lc-selr-name.
                 
                 
-    {&out} '<tr><td align=right valign=top>' htmlib-SideLabel("Sales Rep") 
-    '</td><td align=left valign=top>'.
+    {&out} 
+        '<tr><td align=right valign=top>' htmlib-SideLabel("Sales Rep") 
+        '</td><td align=left valign=top>'.
     
     {&out-long}
-    htmlib-SelectJSLong(
+        htmlib-SelectJSLong(
         "rep",
         'ChangeCriteria()',
         lc-selr-code,
@@ -698,69 +710,77 @@ PROCEDURE ip-Selection:
         ) '</td>'.
         
         
-    {&out} '<td align=right valign=top>' htmlib-SideLabel("Status") 
-    '</td><td align=left valign=top>'
-      
-    htmlib-SelectJS("status",'ChangeCriteria()',"ALL|" + lc-global-opstatus-Code ,"All|" + lc-global-opStatus-desc,lc-crit-status).
-             
-    {&out} '</td><td align=right valign=top>' htmlib-SideLabel("Type") 
-    '</td><td align=left valign=top>'
-    
-    
-    htmlib-SelectJS("type",'ChangeCriteria()',"ALL|" + lc-global-opType-Code ,"All|" + lc-global-opType-desc,lc-crit-Type).
-    
-    {&out} '</td></tr><tr>' SKIP.
     {&out} 
-    '<td valign="top" align="right">' 
+        '<td align=right valign=top>' htmlib-SideLabel("Status") 
+        '</td><td align=left valign=top>'
+      
+        htmlib-SelectJS("status",'ChangeCriteria()',"ALL|" + lc-global-opstatus-Code ,"All|" + lc-global-opStatus-desc,lc-crit-status).
+             
+    {&out} 
+        '</td><td align=right valign=top>' htmlib-SideLabel("Type") 
+        '</td><td align=left valign=top>'
+    
+    
+        htmlib-SelectJS("type",'ChangeCriteria()',"ALL|" + lc-global-opType-Code ,"All|" + lc-global-opType-desc,lc-crit-Type).
+    
+    {&out} 
+        '</td></tr><tr>' SKIP.
+    {&out} 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td>' SKIP.
-    {&out} '<td valign="top" align="right">' 
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP.
+    {&out} 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("hidate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("To Date")
         ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' SKIP.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("hidate",10,lc-hidate) 
+        htmlib-CalendarLink("hidate")
+        '</td>' SKIP.
     
-    {&out} '</td><td align=right valign=top>' htmlib-SideLabel("Sort") 
-    '</td><td align=left valign=top>'
+    {&out} 
+        '</td><td align=right valign=top>' htmlib-SideLabel("Sort") 
+        '</td><td align=left valign=top>'
     
     
-    htmlib-SelectJS("sort",'ChangeCriteria()',lc-sels-code, lc-sels-name,lc-crit-sort)
+        htmlib-SelectJS("sort",'ChangeCriteria()',lc-sels-code, lc-sels-name,lc-crit-sort)
         .
     
-    {&out} '<br/>' 
-    '<select name="sortorder" class="inputfield" onChange="ChangeCriteria()">' 
-         SKIP.
+    {&out} 
+        '<br/>' 
+        '<select name="sortorder" class="inputfield" onChange="ChangeCriteria()">' 
+        SKIP.
     DO iloop = 1 TO NUM-ENTRIES(lc-orderOptions):
         cPart = ENTRY(iloop,lc-OrderOptions).
         cCode = ENTRY(1,cPart,"|").
         cDesc = ENTRY(2,cPart,"|").
 
         {&out}
-        '<option value="' cCode '" ' 
-        IF lc-Crit-SortOrder = cCode
+            '<option value="' cCode '" ' 
+            IF lc-Crit-SortOrder = cCode
             THEN "selected" 
-        ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
+            ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
               
   
     END.
-    {&out} '</select></td></tr>'.
+    {&out} 
+        '</select></td></tr>'.
     
 
    
 
        
-    {&out} '</table>' htmlib-EndCriteria() '<br />'.
+    {&out} 
+        '</table>' htmlib-EndCriteria() '<br />'.
       
 END PROCEDURE.
 
@@ -831,19 +851,19 @@ PROCEDURE process-web-request :
     {lib/checkloggedin.i}
     
     ASSIGN
-        lc-firstrow    = get-value("firstrow")
-        lc-lastrow     = get-value("lastrow")
-        lc-navigation  = get-value("navigation")
-        lc-submitSource = get-value("submitsource")
-        lc-crit-account = get-value("account")
-        lc-search       = get-value("search")
-        lc-crit-rep     = get-value("rep")
-        lc-crit-status = get-value("status")
-        lc-crit-type = get-value("type")
-        lc-lodate      = get-value("lodate")         
-        lc-hidate      = get-value("hidate")
-        lc-crit-sort   = get-value("sort")
-        lc-crit-SortOrder   = get-value("sortorder")
+        lc-firstrow       = get-value("firstrow")
+        lc-lastrow        = get-value("lastrow")
+        lc-navigation     = get-value("navigation")
+        lc-submitSource   = get-value("submitsource")
+        lc-crit-account   = get-value("account")
+        lc-search         = get-value("search")
+        lc-crit-rep       = get-value("rep")
+        lc-crit-status    = get-value("status")
+        lc-crit-type      = get-value("type")
+        lc-lodate         = get-value("lodate")         
+        lc-hidate         = get-value("hidate")
+        lc-crit-sort      = get-value("sort")
+        lc-crit-SortOrder = get-value("sortorder")
         .
 
                                     
@@ -905,33 +925,40 @@ PROCEDURE process-web-request :
     RUN ip-ExportJS.
     
     {&out} htmlib-StartForm("mainform","post", appurl + '/crm/view.p' ) SKIP
-           htmlib-ProgramTitle("CRM Opportunities") SKIP
-           htmlib-hidden("submitsource","") SKIP.
+        htmlib-ProgramTitle("CRM Opportunities") SKIP
+        htmlib-hidden("submitsource","") SKIP.
     RUN ip-Selection.
     {&out} htmlib-CalendarScript("lodate") SKIP
-            htmlib-CalendarScript("hidate") SKIP.
+        htmlib-CalendarScript("hidate") SKIP.
      
        
     
     {&out}
-    tbar-Begin(
+        tbar-Begin(
         REPLACE(tbar-FindLabelIssue(appurl + "/crm/view.p","Search Description"),"IssueButtonPress","crmButton")
         )
-    tbar-Link("add",?,appurl +  "/crm/crmop.p",lc-link-otherp)
+        tbar-Link("add",?,appurl +  "/crm/crmop.p",lc-link-otherp)
         
-    tbar-BeginOption()
-    tbar-Link("view",?,"off",lc-link-otherp)
-    tbar-Link("update",?,"off",lc-link-otherp)
-    tbar-Link("delete",?,"off",lc-link-otherp)
+        tbar-BeginOption()
+        tbar-Link("view",?,"off",lc-link-otherp)
+        tbar-Link("update",?,"off",lc-link-otherp)
+        tbar-Link("delete",?,"off",lc-link-otherp)
         
-    tbar-EndOption() 
-    tbar-End().
+        tbar-EndOption() 
+        tbar-End().
     
     {&out} SKIP
-           REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
-           htmlib-TableHeading(
-            "Rating^right|Last Activity|Date|Sales Rep|Customer|Description|Status|Type|Close Date|Probabilty^right|Revenue^right|Cost^right|GP Profit^right|Projected Revenue^right|Projected GP^right|Stage|Opportunity Number^right"
-            ) SKIP.
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
+        /*
+        htmlib-TableHeading(
+         "Rating^right|Last Activity|Date|Sales Rep|Customer|Description|Status|Type|Close Date|Probabilty^right|Revenue^right|Cost^right|GP Profit^right|Projected Revenue^right|Projected GP^right|Stage|Opportunity Number^right"
+         ) 
+         */
+        htmlib-TableHeading(
+        "Rating^right|Customer|Description|Close Date|Last Activity|Type|Status|Sales Rep|Probabilty^right|Revenue^right|Cost^right|GP Profit^right|Projected Revenue^right|Projected GP^right|Stage|Date|Opportunity Number^right"
+        )
+            
+        SKIP.
             
     RUN ip-BuildQueryPhrase.
      
@@ -962,20 +989,20 @@ PROCEDURE process-web-request :
     RUN ip-BuildTable.
     
     {&out} SKIP 
-           htmlib-EndTable()
-           SKIP.
+        htmlib-EndTable()
+        SKIP.
            
            
     {lib/crmviewpanel.i "crm/view.p"}
     {&out} SKIP
-           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
-           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
-           SKIP.
+        htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+        htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+        SKIP.
      
     RUN ip-BuildSummaryTable.
            
     {&OUT}  htmlib-EndForm() SKIP
-            htmlib-Footer() SKIP.
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
@@ -993,26 +1020,28 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
             Notes:  																	  
     ------------------------------------------------------------------------------*/	
 
-    DEFINE VARIABLE lf-amt  AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-amt AS DECIMAL NO-UNDO.
     
     FIND tt-sum WHERE  tt-sum.dtype = pc-dType AND tt-sum.key = pc-key EXCLUSIVE-LOCK NO-ERROR.
     IF NOT AVAILABLE tt-sum THEN CREATE tt-sum.
             
     ASSIGN
         tt-sum.dType = pc-dType
-        tt-sum.key = pc-key
-        tt-sum.cnt = tt-sum.cnt + 1
-        tt-sum.cost = tt-sum.cost + b-query.CostOfSale
-        tt-sum.rev = tt-sum.rev + b-query.Revenue. 
+        tt-sum.key   = pc-key
+        tt-sum.cnt   = tt-sum.cnt + 1
+        tt-sum.cost  = tt-sum.cost + b-query.CostOfSale
+        tt-sum.rev   = tt-sum.rev + b-query.Revenue. 
     
     lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2). 
     
-    ASSIGN tt-sum.prev = tt-sum.prev + lf-amt.
+    ASSIGN 
+        tt-sum.prev = tt-sum.prev + lf-amt.
     
     ASSIGN 
-          lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2). 
+        lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2). 
             
-     ASSIGN tt-sum.prof = tt-sum.prof + lf-amt.       
+    ASSIGN 
+        tt-sum.prof = tt-sum.prof + lf-amt.       
             
     RETURN TRUE.
                 

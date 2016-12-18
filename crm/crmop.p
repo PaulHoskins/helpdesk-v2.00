@@ -557,6 +557,20 @@ PROCEDURE ip-ViewPage:
         THEN {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' SKIP.
        
        
+       {&out} 
+                        '<br />' htmlib-StartTable("mnt",
+                        100,
+                        0,
+                        0,
+                        0,
+                        "center").
+        
+    {&out} '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
+                
+                  
+                
+                
+       
     {&out} htmlib-StartTable("mnt",
         100,
         0,
@@ -677,10 +691,18 @@ PROCEDURE ip-ViewPage:
         '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
         htmlib-SideLabel("Campaign")        '</TD>' SKIP
         '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
+      {&out} htmlib-EndTable() SKIP. 
           
+    {&out} '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
+     RUN ip-StatusTable.
+               
+    {&out} '</tr>' SKIP.
+                   
+    {&out} htmlib-EndTable() SKIP.                
+                
 
               
-    {&out} htmlib-EndTable() SKIP.
+   
     
    
     IF lc-mode = "DELETE" THEN RETURN.
