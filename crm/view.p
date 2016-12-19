@@ -962,8 +962,7 @@ PROCEDURE process-web-request :
             
     RUN ip-BuildQueryPhrase.
      
-    MESSAGE "PH = " lc-QPhrase.
-      
+        
     CREATE QUERY vhLQuery  
         ASSIGN 
         CACHE = 100.

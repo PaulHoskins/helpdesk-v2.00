@@ -28,6 +28,7 @@
     29/03/2015  phoski      Complex Project Class 
     24/08/2015  phoski      Default to Open issues and sort by issue 
     01/08/2016  phoski      CRM
+    19/12/2016  phoski      Filter Save/Load
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -127,6 +128,13 @@ DEFINE VARIABLE vhLBuffer2        AS HANDLE    NO-UNDO.
 DEFINE VARIABLE vhLQuery          AS HANDLE    NO-UNDO.
 
 
+DEFINE VARIABLE lc-FilterFields   AS CHARACTER
+    INITIAL "account,status,assign,area,category,lodate,hidate,sortfield,sortorder,iclass,accountmanager" NO-UNDO.
+DEFINE VARIABLE lc-FilterValue    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-FField         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-FValue         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-loop           AS INTEGER   NO-UNDO.
+    
 
 DEFINE BUFFER b-query   FOR issue.
 DEFINE BUFFER b-qcust   FOR Customer.
@@ -178,7 +186,7 @@ FUNCTION Format-Select-Account RETURNS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -203,14 +211,14 @@ PROCEDURE ip-BuildIssueTable:
     ------------------------------------------------------------------------------*/
 
     ASSIGN 
-        li-count = 0
+        li-count     = 0
         lr-first-row = ?
         lr-last-row  = ?.
 
     REPEAT WHILE vhLBuffer1:AVAILABLE: 
  
         ASSIGN 
-            lc-rowid = STRING(ROWID(b-query))
+            lc-rowid   = STRING(ROWID(b-query))
             lc-issdate = IF b-query.issuedate = ? THEN "" ELSE STRING(b-query.issuedate,'99/99/9999').
         ASSIGN 
             li-count = li-count + 1.
@@ -264,53 +272,56 @@ PROCEDURE ip-BuildIssueTable:
         ASSIGN 
             lc-area = IF AVAILABLE b-area THEN b-area.description ELSE "".
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip.
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP.
 
         /* SLA Traffic Light */
         IF NOT ll-Customer THEN
         DO:
-            {&out} '<td valign="top" align="right">' SKIP.
+            {&out} 
+                '<td valign="top" align="right">' SKIP.
 
             IF b-query.tlight = li-global-sla-fail
                 THEN {&out} '<img src="/images/sla/fail.jpg" height="20" width="20" alt="SLA Fail">' SKIP.
             ELSE
-            IF b-query.tlight = li-global-sla-amber
-            THEN {&out} '<img src="/images/sla/warn.jpg" height="20" width="20" alt="SLA Amber">' SKIP.
+                IF b-query.tlight = li-global-sla-amber
+                    THEN {&out} '<img src="/images/sla/warn.jpg" height="20" width="20" alt="SLA Amber">' SKIP.
             
-            ELSE
-            IF b-query.tlight = li-global-sla-ok
-            THEN {&out} '<img src="/images/sla/ok.jpg" height="20" width="20" alt="SLA OK">' SKIP.
+                ELSE
+                    IF b-query.tlight = li-global-sla-ok
+                        THEN {&out} '<img src="/images/sla/ok.jpg" height="20" width="20" alt="SLA OK">' SKIP.
             
-            ELSE {&out} '&nbsp;' SKIP.
+                    ELSE {&out} '&nbsp;' SKIP.
             
-            {&out} '</td>' skip.
+            {&out} 
+                '</td>' SKIP.
 
             IF b-query.slatrip <> ? THEN
             DO:
-                {&out} '<td valign="top" align="left" nowrap>' SKIP
-                       STRING(b-query.slatrip,"99/99/9999 HH:MM") SKIP.
+                {&out} 
+                    '<td valign="top" align="left" nowrap>' SKIP
+                    STRING(b-query.slatrip,"99/99/9999 HH:MM") SKIP.
 
 
                 IF b-query.slaAmber <> ? THEN
                     {&out} '<br/>' SKIP
-                       STRING(b-query.slaAmber,"99/99/9999 HH:MM") SKIP.
-                {&out} '</td>' SKIP.
+                        STRING(b-query.slaAmber,"99/99/9999 HH:MM") SKIP.
+                {&out} 
+                    '</td>' SKIP.
 
             END.
             ELSE 
                 {&out} '<td>&nbsp;</td>' SKIP.
         END.
         {&out}
-        htmlib-MntTableField(html-encode(STRING(b-query.issuenumber)),'right')
-        htmlib-MntTableField(html-encode(lc-issdate),'right').
+            htmlib-MntTableField(html-encode(STRING(b-query.issuenumber)),'right')
+            htmlib-MntTableField(html-encode(lc-issdate),'right').
         IF b-query.LongDescription <> ""
             AND b-query.LongDescription <> b-query.briefdescription THEN
         DO:
             ASSIGN 
-                lc-info = 
-                REPLACE(htmlib-MntTableField(html-encode(b-query.briefdescription),'left'),'</td>','')
+                lc-info   = REPLACE(htmlib-MntTableField(html-encode(b-query.briefdescription),'left'),'</td>','')
                 lc-object = "hdobj" + string(b-query.issuenumber).
             ASSIGN 
                 li-tag-end = INDEX(lc-info,">").
@@ -318,19 +329,20 @@ PROCEDURE ip-BuildIssueTable:
             ASSIGN 
                 substr(lc-info,1,li-tag-end) = "".
             {&out} 
-            '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-            lc-object '~')">':U skip.
+                '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+                lc-object '~')">':U SKIP.
             {&out} lc-info.
             {&out} htmlib-ExpandBox(lc-object,b-query.LongDescription).
-            {&out} '</td>' skip.
+            {&out} 
+                '</td>' SKIP.
         END.
         ELSE {&out} htmlib-MntTableField(html-encode(b-query.briefdescription),"left").
         {&out}
-        htmlib-MntTableField(html-encode(lc-status),'left')
-        htmlib-MntTableField(html-encode(lc-area),'left')
-        htmlib-MntTableField(/*html-encode(b-query.iclass)*/
-        com-DecodeLookup(b-query.iClass,lc-global-iclass-code,lc-global-iclass-desc)
-        ,'left').
+            htmlib-MntTableField(html-encode(lc-status),'left')
+            htmlib-MntTableField(html-encode(lc-area),'left')
+            htmlib-MntTableField(/*html-encode(b-query.iclass)*/
+            com-DecodeLookup(b-query.iClass,lc-global-iclass-code,lc-global-iclass-desc)
+            ,'left').
         IF NOT ll-customer THEN
         DO:
             IF b-query.lastActivity = ?
@@ -338,8 +350,8 @@ PROCEDURE ip-BuildIssueTable:
             ELSE lc-lastAct = STRING(b-query.lastActivity,"99/99/9999 HH:MM").
             
             {&out}
-            htmlib-MntTableField(REPLACE(html-encode(lc-assigned),"~n","<br>"),'left')
-            htmlib-MntTableField(REPLACE(html-encode(lc-LastAct),"~n","<br>"),'left').
+                htmlib-MntTableField(REPLACE(html-encode(lc-assigned),"~n","<br>"),'left')
+                htmlib-MntTableField(REPLACE(html-encode(lc-LastAct),"~n","<br>"),'left').
 
             
             IF lc-raised = "" THEN 
@@ -349,8 +361,7 @@ PROCEDURE ip-BuildIssueTable:
             ELSE
             DO:
                 ASSIGN 
-                    lc-info = 
-                            REPLACE(htmlib-MntTableField(html-encode(lc-customer),'left'),'</td>','')
+                    lc-info   = REPLACE(htmlib-MntTableField(html-encode(lc-customer),'left'),'</td>','')
                     lc-object = "hdobjcust" + string(b-query.issuenumber).
                 ASSIGN 
                     li-tag-end = INDEX(lc-info,">").
@@ -358,32 +369,33 @@ PROCEDURE ip-BuildIssueTable:
                 ASSIGN 
                     substr(lc-info,1,li-tag-end) = "".
                 {&out} 
-                '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-                lc-object '~')">':U skip.
+                    '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+                    lc-object '~')">':U SKIP.
                 {&out} lc-info.
                 {&out} htmlib-SimpleExpandBox(lc-object,lc-raised).
-                {&out} '</td>' skip.
+                {&out} 
+                    '</td>' SKIP.
             END.
         END. 
     
-        {&out} skip
-                    tbar-BeginHidden(rowid(b-query)).
+        {&out} SKIP
+            tbar-BeginHidden(ROWID(b-query)).
         IF NOT ll-Customer 
             THEN {&out} tbar-Link("pdf",?,
-            'javascript:RepWindow('
-            + '~'' + lc-link-print 
-            + '~'' 
-            + ');'
-            ,"")
-        tbar-Link("MailIssue",ROWID(this-user),appurl + '/' + "iss/issueemail.p",lc-link-otherp).
+                'javascript:RepWindow('
+                + '~'' + lc-link-print 
+                + '~'' 
+                + ');'
+                ,"")
+                tbar-Link("MailIssue",ROWID(this-user),appurl + '/' + "iss/issueemail.p",lc-link-otherp).
 
 
     
         IF ll-Customer
             THEN {&out} tbar-Link("statement",?,appurl + '/'
-            + "cust/indivstatement.p","source=customer&accountnumber=" + this-user.AccountNumber).
+                + "cust/indivstatement.p","source=customer&accountnumber=" + this-user.AccountNumber).
         {&out}
-        tbar-Link("view",ROWID(b-query),
+            tbar-Link("view",ROWID(b-query),
             'javascript:HelpWindow('
             + '~'' + appurl 
             + '/iss/issueview.p?rowid=' + string(ROWID(b-query))
@@ -392,13 +404,13 @@ PROCEDURE ip-BuildIssueTable:
             ,lc-link-otherp).
         IF NOT ll-customer  
             THEN {&out} tbar-Link("update",ROWID(b-query),appurl + '/' + "iss/issueframe.p",lc-link-otherp).
-            else {&out} tbar-Link("doclist",rowid(b-query),appurl + '/' + "iss/custissdoc.p",lc-link-otherp).
+        ELSE {&out} tbar-Link("doclist",ROWID(b-query),appurl + '/' + "iss/custissdoc.p",lc-link-otherp).
         IF DYNAMIC-FUNCTION("com-IsSuperUser",lc-global-user)
             THEN {&out} tbar-Link("moveiss",ROWID(b-query),appurl + '/' + "iss/moveissue.p",lc-link-otherp).
         {&out}
-        tbar-EndHidden()
-                skip
-               '</tr>' skip.
+            tbar-EndHidden()
+            SKIP
+            '</tr>' SKIP.
         IF li-count = li-max-lines THEN LEAVE.
      
         vhLQuery:GET-NEXT(NO-LOCK). 
@@ -414,13 +426,12 @@ PROCEDURE ip-BuildQueryPhrase:
     ------------------------------------------------------------------------------*/
 
     ASSIGN
-        lc-QPhrase = 
-        "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
+        lc-QPhrase = "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
 
     IF lc-sel-account <> htmlib-Null() THEN 
     DO:
         ASSIGN 
-            lc-QPhrase =  lc-QPhrase + " and b-query.AccountNumber = '" + lc-acc-lo + "'".
+            lc-QPhrase = lc-QPhrase + " and b-query.AccountNumber = '" + lc-acc-lo + "'".
     END.  
     ELSE
         IF DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?) THEN
@@ -439,16 +450,16 @@ PROCEDURE ip-BuildQueryPhrase:
         END.
         ELSE
             IF lc-sel-assign <> htmlib-null() 
-                THEN ASSIGN lc-QPhrase =  lc-QPhrase + " and b-query.AssignTo = '" + lc-ass-lo + "'".
+                THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.AssignTo = '" + lc-ass-lo + "'".
     END.
 
     
 
     IF lc-sel-area <> htmlib-null() 
-        THEN ASSIGN lc-QPhrase =  lc-QPhrase + " and b-query.AreaCode = '" + lc-area-lo + "'".
+        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.AreaCode = '" + lc-area-lo + "'".
     
     IF lc-sel-cat <> htmlib-null() 
-        THEN ASSIGN lc-QPhrase =  lc-QPhrase + " and b-query.CatCode = '" + lc-cat-lo + "'".
+        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.CatCode = '" + lc-cat-lo + "'".
 
     ASSIGN 
         lc-QPhrase = lc-QPhrase + 
@@ -472,7 +483,7 @@ PROCEDURE ip-BuildQueryPhrase:
     IF lc-accountManager = 'on' THEN
     DO:
         ASSIGN 
-            lc-QPhrase =  lc-QPhrase + " and b-qcust.AccountManager = '" + lc-ass-lo + "'".
+            lc-QPhrase = lc-QPhrase + " and b-qcust.AccountManager = '" + lc-ass-lo + "'".
     END.    
                 
 
@@ -506,27 +517,35 @@ PROCEDURE ip-ExportJScript :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} skip
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} SKIP
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+        '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function ChangeAccount() ~{' skip
-        '   SubmitThePage("AccountChange")' skip
-        '~}' skip
+    {&out} SKIP
+        'function ChangeAccount() ~{' SKIP
+        '   SubmitThePage("AccountChange")' SKIP
+        '~}' SKIP
 
-        'function ChangeStatus() ~{' skip
-        '   SubmitThePage("StatusChange")' skip
-        '~}' skip
+        'function FilterSave() ~{' SKIP
+        '   SubmitThePage("FilterSave")' SKIP
+        '~}' SKIP
+        
+        'function FilterLoad() ~{' SKIP
+        '   SubmitThePage("FilterLoad")' SKIP
+        '~}' SKIP
+        
+        'function ChangeStatus() ~{' SKIP
+        '   SubmitThePage("StatusChange")' SKIP
+        '~}' SKIP
 
-            'function ChangeDates() ~{' skip
-        '   SubmitThePage("DatesChange")' skip
-        '~}' skip.
+        'function ChangeDates() ~{' SKIP
+        '   SubmitThePage("DatesChange")' SKIP
+        '~}' SKIP.
 
-    {&out} skip
-           '</script>' skip.
+    {&out} SKIP
+        '</script>' SKIP.
 END PROCEDURE.
 
 
@@ -541,6 +560,7 @@ PROCEDURE ip-InitialProcess :
       Notes:       
     ------------------------------------------------------------------------------*/
 
+       
     IF ll-customer THEN
     DO:
         ASSIGN 
@@ -555,8 +575,7 @@ PROCEDURE ip-InitialProcess :
     ELSE
     DO:
         ASSIGN 
-            lc-SortOptions = 
-               "b-query.tlight|Traffic Light,"  +
+            lc-SortOptions = "b-query.tlight|Traffic Light,"  +
                "b-query.SLATrip|SLA Date,"  +
                "b-query.SLAAmber|SLA Warning,"  +
                "b-query.IssueNumber|Issue Number,b-query.IssueDate|Date,b-query.briefDescription|Brief Description,b-query.StatusCode|Status,"
@@ -569,24 +588,67 @@ PROCEDURE ip-InitialProcess :
     ASSIGN
         lc-OrderOptions = "DESC|Descending,ASC|Ascending".
 
+ 
 
     
+    IF get-value("submitsource") = "FilterLoad" THEN
+    DO:
+
+        
+        lc-FilterValue =  DYNAMIC-FUNCTION("com-FilterLoad", lc-global-user,"issue","Default").
+        IF lc-filterValue <> ? THEN
+        DO li-loop = 1 TO NUM-ENTRIES(lc-filterValue,"|"):
+            
+            ASSIGN
+                lc-FField = ENTRY(li-loop,lc-filterValue,"|").
+            IF lc-FField = "" THEN NEXT.
+            lc-fValue = ENTRY(2,lc-FField,"=").
+            lc-fField = ENTRY(1,lc-FField,"=").
+            
+            set-user-field(lc-FField,lc-FValue).
+                
+                
+        END.    
+        
+    END.
+    
     ASSIGN 
-        lc-search      = get-value("search")
-        lc-firstrow    = get-value("firstrow")
-        lc-lastrow     = get-value("lastrow")
-        lc-navigation  = get-value("navigation")
-        lc-sel-account = get-value("account")
-        lc-sel-status  = get-value("status")
-        lc-sel-assign  = get-value("assign")
-        lc-sel-area    = get-value("area")
-        lc-sel-cat     = get-value("category")
-        lc-lodate      = get-value("lodate")         
-        lc-hidate      = get-value("hidate")
-        lc-SortField   = get-value("sortfield")
-        lc-SortOrder   = get-value("sortorder")
-        lc-iclass      = get-value("iclass")
+        lc-search         = get-value("search")
+        lc-firstrow       = get-value("firstrow")
+        lc-lastrow        = get-value("lastrow")
+        lc-navigation     = get-value("navigation")
+        lc-sel-account    = get-value("account")
+        lc-sel-status     = get-value("status")
+        lc-sel-assign     = get-value("assign")
+        lc-sel-area       = get-value("area")
+        lc-sel-cat        = get-value("category")
+        lc-lodate         = get-value("lodate")         
+        lc-hidate         = get-value("hidate")
+        lc-SortField      = get-value("sortfield")
+        lc-SortOrder      = get-value("sortorder")
+        lc-iclass         = get-value("iclass")
         lc-AccountManager = get-value("accountmanager").
+        
+    IF get-value("submitsource") = "FilterSave" THEN
+    DO:
+        
+        DO li-loop = 1 TO NUM-ENTRIES(lc-FilterFields):
+            
+            ASSIGN 
+                lc-FField = ENTRY(li-loop,lc-FilterFields)
+                lc-FValue = get-value(lc-FField).
+                
+            ASSIGN
+                lc-FilterValue = TRIM(lc-filterValue + "|" + lc-FField + "=" + lc-FValue).
+        END.  
+       
+        DYNAMIC-FUNCTION("com-FilterSave", lc-global-user,"issue","Default",lc-FilterValue).
+        
+                     
+       
+       
+    END.
+         
             
     
  
@@ -650,7 +712,7 @@ PROCEDURE ip-InitialProcess :
             li-search = int(lc-search) no-error.
         IF ERROR-STATUS:ERROR
             OR li-search < 1 THEN ASSIGN ll-search-err = TRUE
-                li-search = 0.
+                li-search     = 0.
     END.
 
     ASSIGN 
@@ -668,7 +730,7 @@ PROCEDURE ip-InitialProcess :
     FIND webuser WHERE webuser.companycode = lc-global-company
         AND webuser.loginid = lc-global-user NO-LOCK.
     IF webuser.UserClass = "CONTRACT" 
-        THEN ASSIGN lc-list-assign = webuser.loginid
+        THEN ASSIGN lc-list-assign  = webuser.loginid
             lc-list-assname = webuser.name
             lc-sel-assign   = webuser.loginid.
 
@@ -763,80 +825,81 @@ PROCEDURE ip-Selection :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE iloop       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE cPart       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cCode       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cDesc       AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE iloop AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE cPart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cCode AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDesc AS CHARACTER NO-UNDO.
     
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
     IF NOT ll-customer
         THEN {&out}
-    '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
+            '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
 
     {&out}
-    '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("status",lc-list-status,lc-list-sname,lc-sel-status)) '</td>' skip.
+        '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
+        '<td align=left valign=top>' 
+        format-Select-Account(htmlib-Select("status",lc-list-status,lc-list-sname,lc-sel-status)) '</td>' SKIP.
     {&out} 
-    '<td valign="top" align="right">' 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td>' skip
-    .
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP
+        .
     IF ll-Customer THEN
         {&out} '<td valign="top" align="right">' 
-        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("To Date")
-        ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' skip.
+            (IF LOOKUP("hidate",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Date")
+            ELSE htmlib-SideLabel("To Date"))
+            '</td>'
+            '<td valign="top" align="left">'
+            htmlib-CalendarInputField("hidate",10,lc-hidate) 
+            htmlib-CalendarLink("hidate")
+            '</td>' SKIP.
 
     
     
     {&out} 
-    '</tr><tr>'.
+        '</tr><tr>'.
     IF lc-accountmanager = 'on' THEN
         {&out} 
-    '<td align=right valign=top>' htmlib-SideLabel("TAM/CAM") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("assign",lc-list-acm,lc-list-acmname,lc-sel-assign)).
-    else
-    {&out} 
-    '<td align=right valign=top>' htmlib-SideLabel("Assigned") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("assign",lc-list-assign,lc-list-assname,lc-sel-assign)).
+            '<td align=right valign=top>' htmlib-SideLabel("TAM/CAM") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("assign",lc-list-acm,lc-list-acmname,lc-sel-assign)).
+    ELSE
+        {&out} 
+            '<td align=right valign=top>' htmlib-SideLabel("Assigned") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("assign",lc-list-assign,lc-list-assname,lc-sel-assign)).
     
     IF this-user.accountManager
         THEN {&out} REPLACE(htmlib-CheckBox("accountmanager", lc-accountManager = "on"),
-        '>',' onclick="ChangeAccount()">')
-    REPLACE(htmlib-SideLabel("TAM/CAM"),":","") SKIP.
+            '>',' onclick="ChangeAccount()">')
+            REPLACE(htmlib-SideLabel("TAM/CAM"),":","") SKIP.
     
     {&out}   
-    '</td>' skip.
+        '</td>' SKIP.
    
     
-    {&out} '<td align=right valign=top>' htmlib-SideLabel("Area") '</td>'
-    '<td align=left valign=top>'
-    '<select name="area" class="inputfield" onChange="ChangeAccount()">' 
-    '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
-    IF lc-sel-area = dynamic-function("htmlib-Null") 
+    {&out} 
+        '<td align=right valign=top>' htmlib-SideLabel("Area") '</td>'
+        '<td align=left valign=top>'
+        '<select name="area" class="inputfield" onChange="ChangeAccount()">' 
+        '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
+        IF lc-sel-area = dynamic-function("htmlib-Null") 
         THEN "selected" 
-    ELSE "" '>All Areas</option>' skip
-            '<option value="NOTASSIGNED" ' if lc-sel-area = "NOTASSIGNED"
-                then "selected" else "" '>Not Assigned</option>' skip   
-    .
+        ELSE "" '>All Areas</option>' SKIP
+        '<option value="NOTASSIGNED" ' IF lc-sel-area = "NOTASSIGNED"
+        THEN "selected" ELSE "" '>Not Assigned</option>' SKIP   
+        .
     FOR EACH webIssArea NO-LOCK
         WHERE webIssArea.CompanyCode = lc-Global-Company 
         BREAK BY webIssArea.GroupID
@@ -847,39 +910,41 @@ PROCEDURE ip-Selection :
                 WHERE webissagrp.companycode = webissArea.CompanyCode
                 AND webissagrp.Groupid     = webissArea.GroupID NO-LOCK NO-ERROR.
             {&out}
-            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' skip.
+                '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' SKIP.
         END.
         {&out}
-        '<option value="' webIssArea.AreaCode '" ' 
-        IF lc-sel-area = webIssArea.AreaCode  
+            '<option value="' webIssArea.AreaCode '" ' 
+            IF lc-sel-area = webIssArea.AreaCode  
             THEN "selected" 
-        ELSE "" '>' html-encode(webIssArea.Description) '</option>' skip.
-        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' skip.
+            ELSE "" '>' html-encode(webIssArea.Description) '</option>' SKIP.
+        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' SKIP.
     END.
-    {&out} '</select></td>'.
+    {&out} 
+        '</select></td>'.
 
     IF NOT ll-customer THEN
         {&out} '<td valign="top" align="right">' 
-        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("To Date")
-        ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' skip.
+            (IF LOOKUP("hidate",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Date")
+            ELSE htmlib-SideLabel("To Date"))
+            '</td>'
+            '<td valign="top" align="left">'
+            htmlib-CalendarInputField("hidate",10,lc-hidate) 
+            htmlib-CalendarLink("hidate")
+            '</td>' SKIP.
     IF NOT ll-customer THEN
     DO:
-        {&out} '</tr><tr>'
-        '<td align=right valign=top>' htmlib-SideLabel("Category") '</td>'
-        '<td align=left valign=top>' 
-        format-Select-Account(htmlib-Select("category",lc-list-cat,lc-list-cname,lc-sel-cat)) '</td>' skip.
+        {&out} 
+            '</tr><tr>'
+            '<td align=right valign=top>' htmlib-SideLabel("Category") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("category",lc-list-cat,lc-list-cname,lc-sel-cat)) '</td>' SKIP.
     END.
 
     {&out} /*'</tr><tr>' */
-    '<td align=right valign=top>' htmlib-SideLabel("Class") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("iclass","All|" + lc-global-iclass-code,"All|" + lc-global-iclass-desc,lc-iclass)) '</td>' skip.
+        '<td align=right valign=top>' htmlib-SideLabel("Class") '</td>'
+        '<td align=left valign=top>' 
+        format-Select-Account(htmlib-Select("iclass","All|" + lc-global-iclass-code,"All|" + lc-global-iclass-desc,lc-iclass)) '</td>' SKIP.
 
     /*
     ** SortField
@@ -888,49 +953,68 @@ PROCEDURE ip-Selection :
     IF lc-SortOptions <> "" THEN
     DO:
         {&out}
-        '<td align=right valign=top>' htmlib-SideLabel("Sort By") '</td>'
-        '<td align=left valign=top>'
-        '<select name="sortfield" class="inputfield" onChange="ChangeAccount()">' 
-             SKIP.
+            '<td align=right valign=top>' htmlib-SideLabel("Sort By") '</td>'
+            '<td align=left valign=top>'
+            '<select name="sortfield" class="inputfield" onChange="ChangeAccount()">' 
+            SKIP.
         DO iloop = 1 TO NUM-ENTRIES(lc-SortOptions):
             cPart = ENTRY(iloop,lc-SortOptions).
             cCode = ENTRY(1,cPart,"|").
             cDesc = ENTRY(2,cPart,"|").
 
             {&out}
-            '<option value="' cCode '" ' 
-            IF lc-SortField = cCode
+                '<option value="' cCode '" ' 
+                IF lc-SortField = cCode
                 THEN "selected" 
-            ELSE "" '>' html-encode(cDesc) '</option>' skip.
+                ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
              
   
         END.
-        {&out} '</select>'.
+        {&out} 
+            '</select>'.
 
-        {&out} '<br/>' 
-        '<select name="sortorder" class="inputfield" onChange="ChangeAccount()">' 
-             SKIP.
+        {&out} 
+            '<br/>' 
+            '<select name="sortorder" class="inputfield" onChange="ChangeAccount()">' 
+            SKIP.
         DO iloop = 1 TO NUM-ENTRIES(lc-orderOptions):
             cPart = ENTRY(iloop,lc-OrderOptions).
             cCode = ENTRY(1,cPart,"|").
             cDesc = ENTRY(2,cPart,"|").
 
             {&out}
-            '<option value="' cCode '" ' 
-            IF lc-SortOrder = cCode
+                '<option value="' cCode '" ' 
+                IF lc-SortOrder = cCode
                 THEN "selected" 
-            ELSE "" '>' html-encode(cDesc) '</option>' skip.
+                ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
               
   
         END.
-        {&out} '</select></td>'.
+        {&out} 
+            '</select></td>'.
 
 
 
     END.
-    {&out} '</tr></table>' skip.
+    IF NOT ll-customer THEN
+    DO:
+        {&out} 
+            '<td align="left" valign="top">'
+            '&nbsp;<button onclick="FilterSave();">Save Filter</button>'.
+                
+        IF DYNAMIC-FUNCTION("com-FilterLoad", lc-global-user,"issue","Default") <> ?      
+            THEN {&out}     
+                '&nbsp;<button onclick="FilterLoad();">Load Filter</button>'.
+                 
+                
+        {&out} 
+            '</td>' SKIP.
+            
+    END.
+    {&out} 
+        '</tr></table>' SKIP.
 END PROCEDURE.
 
 
@@ -943,65 +1027,66 @@ PROCEDURE ip-SelectionCustomer:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE iloop       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE cPart       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cCode       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cDesc       AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE iloop AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE cPart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cCode AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDesc AS CHARACTER NO-UNDO.
     
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
     IF NOT ll-customer
         THEN {&out}
-    '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
+            '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
 
     {&out}
-    '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("status",lc-list-status,lc-list-sname,lc-sel-status)) '</td>' skip.
+        '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
+        '<td align=left valign=top>' 
+        format-Select-Account(htmlib-Select("status",lc-list-status,lc-list-sname,lc-sel-status)) '</td>' SKIP.
     {&out} 
-    '<td valign="top" align="right">' 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td>' skip
-    .
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP
+        .
     IF ll-Customer THEN
         {&out} '<td valign="top" align="right">' 
-        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("To Date")
-        ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' skip.
+            (IF LOOKUP("hidate",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Date")
+            ELSE htmlib-SideLabel("To Date"))
+            '</td>'
+            '<td valign="top" align="left">'
+            htmlib-CalendarInputField("hidate",10,lc-hidate) 
+            htmlib-CalendarLink("hidate")
+            '</td>' SKIP.
 
     
     IF NOT ll-customer 
         THEN 
         {&out} 
-    '</tr><tr>' 
-    '<td align=right valign=top>' htmlib-SideLabel("Assigned") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("assign",lc-list-assign,lc-list-assname,lc-sel-assign)) '</td>' skip.
+            '</tr><tr>' 
+            '<td align=right valign=top>' htmlib-SideLabel("Assigned") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("assign",lc-list-assign,lc-list-assname,lc-sel-assign)) '</td>' SKIP.
 
-    {&out} '<td align=right valign=top>' htmlib-SideLabel("Area") '</td>'
-    '<td align=left valign=top>'
-    '<select name="area" class="inputfield" onChange="ChangeAccount()">' 
-    '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
-    IF lc-sel-area = dynamic-function("htmlib-Null") 
+    {&out} 
+        '<td align=right valign=top>' htmlib-SideLabel("Area") '</td>'
+        '<td align=left valign=top>'
+        '<select name="area" class="inputfield" onChange="ChangeAccount()">' 
+        '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
+        IF lc-sel-area = dynamic-function("htmlib-Null") 
         THEN "selected" 
-    ELSE "" '>All Areas</option>' skip
-            '<option value="NOTASSIGNED" ' if lc-sel-area = "NOTASSIGNED"
-                then "selected" else "" '>Not Assigned</option>' skip   
-    .
+        ELSE "" '>All Areas</option>' SKIP
+        '<option value="NOTASSIGNED" ' IF lc-sel-area = "NOTASSIGNED"
+        THEN "selected" ELSE "" '>Not Assigned</option>' SKIP   
+        .
     FOR EACH webIssArea NO-LOCK
         WHERE webIssArea.CompanyCode = lc-Global-Company 
         BREAK BY webIssArea.GroupID
@@ -1012,39 +1097,41 @@ PROCEDURE ip-SelectionCustomer:
                 WHERE webissagrp.companycode = webissArea.CompanyCode
                 AND webissagrp.Groupid     = webissArea.GroupID NO-LOCK NO-ERROR.
             {&out}
-            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' skip.
+                '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' SKIP.
         END.
         {&out}
-        '<option value="' webIssArea.AreaCode '" ' 
-        IF lc-sel-area = webIssArea.AreaCode  
+            '<option value="' webIssArea.AreaCode '" ' 
+            IF lc-sel-area = webIssArea.AreaCode  
             THEN "selected" 
-        ELSE "" '>' html-encode(webIssArea.Description) '</option>' skip.
-        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' skip.
+            ELSE "" '>' html-encode(webIssArea.Description) '</option>' SKIP.
+        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' SKIP.
     END.
-    {&out} '</select></td>'.
+    {&out} 
+        '</select></td>'.
 
     IF NOT ll-customer THEN
         {&out} '<td valign="top" align="right">' 
-        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("To Date")
-        ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' skip.
+            (IF LOOKUP("hidate",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Date")
+            ELSE htmlib-SideLabel("To Date"))
+            '</td>'
+            '<td valign="top" align="left">'
+            htmlib-CalendarInputField("hidate",10,lc-hidate) 
+            htmlib-CalendarLink("hidate")
+            '</td>' SKIP.
     IF NOT ll-customer THEN
     DO:
-        {&out} '</tr><tr>'
-        '<td align=right valign=top>' htmlib-SideLabel("Category") '</td>'
-        '<td align=left valign=top>' 
-        format-Select-Account(htmlib-Select("category",lc-list-cat,lc-list-cname,lc-sel-cat)) '</td>' skip.
+        {&out} 
+            '</tr><tr>'
+            '<td align=right valign=top>' htmlib-SideLabel("Category") '</td>'
+            '<td align=left valign=top>' 
+            format-Select-Account(htmlib-Select("category",lc-list-cat,lc-list-cname,lc-sel-cat)) '</td>' SKIP.
     END.
 
     {&out} /*'</tr><tr>' */
-    '<td align=right valign=top>' htmlib-SideLabel("Class") '</td>'
-    '<td align=left valign=top>' 
-    format-Select-Account(htmlib-Select("iclass","All|" + lc-global-iclass-code,"All|" + lc-global-iclass-code,lc-iclass)) '</td>' skip.
+        '<td align=right valign=top>' htmlib-SideLabel("Class") '</td>'
+        '<td align=left valign=top>' 
+        format-Select-Account(htmlib-Select("iclass","All|" + lc-global-iclass-code,"All|" + lc-global-iclass-code,lc-iclass)) '</td>' SKIP.
 
     /*
     ** SortField
@@ -1053,49 +1140,53 @@ PROCEDURE ip-SelectionCustomer:
     IF lc-SortOptions <> "" THEN
     DO:
         {&out}
-        '<td align=right valign=top>' htmlib-SideLabel("Sort By") '</td>'
-        '<td align=left valign=top>'
-        '<select name="sortfield" class="inputfield" onChange="ChangeAccount()">' 
-             SKIP.
+            '<td align=right valign=top>' htmlib-SideLabel("Sort By") '</td>'
+            '<td align=left valign=top>'
+            '<select name="sortfield" class="inputfield" onChange="ChangeAccount()">' 
+            SKIP.
         DO iloop = 1 TO NUM-ENTRIES(lc-SortOptions):
             cPart = ENTRY(iloop,lc-SortOptions).
             cCode = ENTRY(1,cPart,"|").
             cDesc = ENTRY(2,cPart,"|").
 
             {&out}
-            '<option value="' cCode '" ' 
-            IF lc-SortField = cCode
+                '<option value="' cCode '" ' 
+                IF lc-SortField = cCode
                 THEN "selected" 
-            ELSE "" '>' html-encode(cDesc) '</option>' skip.
+                ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
              
   
         END.
-        {&out} '</select>'.
+        {&out} 
+            '</select>'.
 
-        {&out} '<br/>' 
-        '<select name="sortorder" class="inputfield" onChange="ChangeAccount()">' 
-             SKIP.
+        {&out} 
+            '<br/>' 
+            '<select name="sortorder" class="inputfield" onChange="ChangeAccount()">' 
+            SKIP.
         DO iloop = 1 TO NUM-ENTRIES(lc-orderOptions):
             cPart = ENTRY(iloop,lc-OrderOptions).
             cCode = ENTRY(1,cPart,"|").
             cDesc = ENTRY(2,cPart,"|").
 
             {&out}
-            '<option value="' cCode '" ' 
-            IF lc-SortOrder = cCode
+                '<option value="' cCode '" ' 
+                IF lc-SortOrder = cCode
                 THEN "selected" 
-            ELSE "" '>' html-encode(cDesc) '</option>' skip.
+                ELSE "" '>' html-encode(cDesc) '</option>' SKIP.
 
               
   
         END.
-        {&out} '</select></td>'.
+        {&out} 
+            '</select></td>'.
 
 
 
     END.
-    {&out} '</tr></table>' skip.
+    {&out} 
+        '</tr></table>' SKIP.
     
 
 END PROCEDURE.
@@ -1172,10 +1263,10 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    DEFINE VARIABLE ld-lodate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE ld-hidate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE li-loop     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-rowid    AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE ld-lodate AS DATE      NO-UNDO.
+    DEFINE VARIABLE ld-hidate AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
     ASSIGN
         ld-lodate = DATE(lc-lodate) no-error.
@@ -1290,20 +1381,22 @@ PROCEDURE process-web-request :
     RUN ip-InitialProcess.
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Issue") skip.
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
+    {&out} htmlib-Header("Maintain Issue") SKIP.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
     RUN ip-ExportJScript.
-    {&out} htmlib-JScript-Maintenance() skip.
-    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/issue.p' ) skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/issue.p' ) SKIP.
     {&out} htmlib-ProgramTitle(IF ll-Customer THEN "Your Issues" ELSE "Maintain Issue") 
-    htmlib-hidden("submitsource","") skip.
+        htmlib-hidden("submitsource","") SKIP.
     {&out} htmlib-BeginCriteria("Search Issues").
     
     IF ll-customer AND get-value("statementsent") = "yes" THEN
     DO:
-        {&out} '<div class="infobox">A statement for your account has been sent to your email address.</div>' skip.
+        {&out} 
+            '<div class="infobox">A statement for your account has been sent to your email address.</div>' SKIP.
     END.
-    {&out} '<table align=center><tr>' skip.
+    {&out} 
+        '<table align=center><tr>' SKIP.
     
     IF ll-customer 
         THEN RUN ip-SelectionCustomer.
@@ -1326,25 +1419,25 @@ PROCEDURE process-web-request :
                          
         .
     {&out}
-    tbar-Begin(
+        tbar-Begin(
         tbar-FindLabelIssue(appurl + "/iss/issue.p","Search Issue Number/Description")
         )
-    tbar-BeginOption().
+        tbar-BeginOption().
     IF NOT ll-Customer 
         THEN {&out}
-    tbar-Link("pdf",?,
-        'javascript:RepWindow('
-        + '~'' + lc-link-print 
-        + '~'' 
-        + ');'
-        ,"")
-    tbar-Link("MailIssue",ROWID(this-user),appurl + '/' + "iss/issueemail.p",lc-link-otherp).
+            tbar-Link("pdf",?,
+            'javascript:RepWindow('
+            + '~'' + lc-link-print 
+            + '~'' 
+            + ');'
+            ,"")
+            tbar-Link("MailIssue",ROWID(this-user),appurl + '/' + "iss/issueemail.p",lc-link-otherp).
 
     IF ll-Customer
         THEN {&out} tbar-Link("statement",?,appurl + '/'
-        + "cust/indivstatement.p","source=customer&accountnumber=" + this-user.AccountNumber).
+            + "cust/indivstatement.p","source=customer&accountnumber=" + this-user.AccountNumber).
     {&out}
-    tbar-Link("view",?,"off",lc-link-otherp).
+        tbar-Link("view",?,"off",lc-link-otherp).
     IF NOT ll-Customer THEN
     DO:
         {&out} tbar-Link("update",?,"off",lc-link-otherp).
@@ -1358,16 +1451,16 @@ PROCEDURE process-web-request :
     
     {&out} tbar-EndOption() tbar-End().
     IF NOT ll-customer
-        THEN {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="100%"') skip
-           htmlib-TableHeading(
+        THEN {&out} SKIP
+            REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
+            htmlib-TableHeading(
             "|SLA Date<br/>SLA Warning|Issue Number^right|Date^right|Brief Description^left|Status^left|Area|Class|Assigned To|Last Contact|Customer^left"
-            ) skip.
-    else {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="97%"') skip
-           htmlib-TableHeading(
+            ) SKIP.
+    ELSE {&out} SKIP
+            REPLACE(htmlib-StartMntTable(),'width="100%"','width="97%"') SKIP
+            htmlib-TableHeading(
             "Issue Number^right|Date^right|Brief Description^left|Status^left|Area|Class"
-            ) skip.
+            ) SKIP.
 
     RUN ip-SetQueryRanges.
             
@@ -1399,17 +1492,17 @@ PROCEDURE process-web-request :
     
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
     
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
     {lib/issnavpanel3.i "iss/issue.p"}
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+        htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+        htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+        SKIP.
     /*
     ***
     *** Dummy fields that are in selection for internal users but not customers
@@ -1419,23 +1512,23 @@ PROCEDURE process-web-request :
     IF ll-customer THEN
     DO:
         {&out} 
-            skip
+            SKIP
             '<div style="display: none;">'
-                format-Select-Account(htmlib-Select("account",lc-sel-account,lc-sel-account,lc-sel-account)) 
-                format-Select-Account(htmlib-Select("assign",htmlib-Null(),htmlib-Null(),htmlib-Null())) 
+            format-Select-Account(htmlib-Select("account",lc-sel-account,lc-sel-account,lc-sel-account)) 
+            format-Select-Account(htmlib-Select("assign",htmlib-Null(),htmlib-Null(),htmlib-Null())) 
                                
             '</div>'
-            skip.
+            SKIP.
     END.
     /*
     *** Dummy field as chk box is required in JS 
     */
     IF  ll-customer
-    OR this-user.accountManager = FALSE
-    THEN {&out} skip
+        OR this-user.accountManager = FALSE
+        THEN {&out} SKIP
             '<div style="display: none;">'
-                REPLACE(htmlib-CheckBox("accountmanager",false),
-        '>',' onclick="ChangeAccount()">') '</div>' SKIP.
+            REPLACE(htmlib-CheckBox("accountmanager",FALSE),
+            '>',' onclick="ChangeAccount()">') '</div>' SKIP.
         
         
 
@@ -1444,20 +1537,21 @@ PROCEDURE process-web-request :
         {&out} htmlib-mBanner(lc-global-Company).
     END.
 
-    {&out} htmlib-EndForm() skip.
-    {&out} htmlib-CalendarScript("lodate") skip
-           htmlib-CalendarScript("hidate") skip.
+    {&out} htmlib-EndForm() SKIP.
+    {&out} htmlib-CalendarScript("lodate") SKIP
+        htmlib-CalendarScript("hidate") SKIP.
     IF ll-customer AND get-value("showpdf") <> "" THEN
     DO:
-        {&out} '<script>' skip
+        {&out} 
+            '<script>' SKIP
             "OpenNewWindow('"
-                    appurl "/rep/viewpdf3.pdf?PDF=" 
-                    url-encode(get-value("showpdf"),"query") "')" skip
-            '</script>' skip.
+            appurl "/rep/viewpdf3.pdf?PDF=" 
+            url-encode(get-value("showpdf"),"query") "')" SKIP
+            '</script>' SKIP.
     END.
     
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 
 
 END PROCEDURE.

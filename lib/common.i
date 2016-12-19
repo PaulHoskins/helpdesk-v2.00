@@ -35,6 +35,7 @@
     03/09/2016  phoski      Global Email var
     15/10/2016  phoski      New CRM Table Codes
     15/12/2016  phoski      isactive on gentab
+    19/12/2016  phoski      com-FilterSave com-FilterLoad
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -44,8 +45,8 @@
 &global-define CUSTOMER CUSTOMER
 &global-define CONTRACT CONTRACT
 
-DEFINE BUFFER glob-company  FOR Company.
-DEFINE BUFFER glob-webuser  FOR webuser.
+DEFINE BUFFER glob-company FOR Company.
+DEFINE BUFFER glob-webuser FOR webuser.
 
 
 DEFINE VARIABLE lc-global-selcode                     AS CHARACTER 
@@ -187,32 +188,32 @@ DEFINE VARIABLE lc-global-accStatus-HelpDesk-InActive AS CHARACTER
     INITIAL 'Ex-Customer' NO-UNDO.      
 
 DEFINE VARIABLE lc-global-opType-Code                 AS CHARACTER 
-    INITIAL 'ULEAD|LEAD|OPP'        NO-UNDO.
+    INITIAL 'ULEAD|LEAD|OPP' NO-UNDO.
 DEFINE VARIABLE lc-global-opType-Desc                 AS CHARACTER 
-    INITIAL "Unqualified Lead|Lead|Opportunity"   NO-UNDO.
+    INITIAL "Unqualified Lead|Lead|Opportunity" NO-UNDO.
      
 DEFINE VARIABLE lc-global-Rating-Code                 AS CHARACTER 
-    INITIAL 'HOT|WARM|COLD'        NO-UNDO.
+    INITIAL 'HOT|WARM|COLD' NO-UNDO.
 DEFINE VARIABLE lc-global-Rating-Desc                 AS CHARACTER 
-    INITIAL "Hot|Warm|Cold"   NO-UNDO.
+    INITIAL "Hot|Warm|Cold" NO-UNDO.
 
-DEFINE VARIABLE lc-global-opStatus-Code                 AS CHARACTER 
-    INITIAL 'OP|CL|W|L'        NO-UNDO.
-DEFINE VARIABLE lc-global-opStatus-Desc                 AS CHARACTER 
-    INITIAL "Open|Closed|Won|Lost"   NO-UNDO.
+DEFINE VARIABLE lc-global-opStatus-Code               AS CHARACTER 
+    INITIAL 'OP|CL|W|L' NO-UNDO.
+DEFINE VARIABLE lc-global-opStatus-Desc               AS CHARACTER 
+    INITIAL "Open|Closed|Won|Lost" NO-UNDO.
  
 DEFINE VARIABLE lc-global-opProb-Code                 AS CHARACTER 
-    INITIAL '0|25|50|75|100'        NO-UNDO.
+    INITIAL '0|25|50|75|100' NO-UNDO.
 DEFINE VARIABLE lc-global-opProb-Desc                 AS CHARACTER 
-    INITIAL "0%|25%|50%|75%|100%"   NO-UNDO.
+    INITIAL "0%|25%|50%|75%|100%" NO-UNDO.
 
-DEFINE VARIABLE lc-global-CRMRS-Code                 AS CHARACTER 
-    INITIAL 'NEW|INV-DATA|CONT-CH|CONT-NI|CONT-IN|ACC-CRT'        NO-UNDO.
-DEFINE VARIABLE lc-global-CRMRS-Desc                 AS CHARACTER 
-    INITIAL "New Record|Invalid Data|Contacted - Chasing|Contacted - Not Interested|Contacted - Interested|Account Created"   NO-UNDO.
+DEFINE VARIABLE lc-global-CRMRS-Code                  AS CHARACTER 
+    INITIAL 'NEW|INV-DATA|CONT-CH|CONT-NI|CONT-IN|ACC-CRT' NO-UNDO.
+DEFINE VARIABLE lc-global-CRMRS-Desc                  AS CHARACTER 
+    INITIAL "New Record|Invalid Data|Contacted - Chasing|Contacted - Not Interested|Contacted - Interested|Account Created" NO-UNDO.
 
-DEFINE VARIABLE lc-global-CRMRS-ACC-CRT              AS CHARACTER 
-    INITIAL 'ACC-CRT'        NO-UNDO.
+DEFINE VARIABLE lc-global-CRMRS-ACC-CRT               AS CHARACTER 
+    INITIAL 'ACC-CRT' NO-UNDO.
                  
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
@@ -328,6 +329,17 @@ FUNCTION com-DescribeTicket RETURNS CHARACTER
 
 FUNCTION com-EngineerSelection RETURNS CHARACTER 
     (  ) FORWARD.
+
+FUNCTION com-FilterLoad RETURNS CHARACTER 
+	(pc-loginid AS CHARACTER,
+	 pc-ProgName AS CHARACTER,
+	 pc-Code AS CHARACTER) FORWARD.
+
+FUNCTION com-FilterSave RETURNS ROWID 
+    (pc-loginid AS CHARACTER,
+    pc-ProgName AS CHARACTER,
+    pc-Code AS CHARACTER,
+    pc-Value AS CHARACTER) FORWARD.
 
 FUNCTION com-GenTabDesc RETURNS CHARACTER
     ( pc-CompanyCode AS CHARACTER,
@@ -599,7 +611,7 @@ PROCEDURE com-GenTabSelect :
     DEFINE VARIABLE lc-Desc AS CHARACTER NO-UNDO.
     
 
-    DEFINE VARIABLE icount AS INTEGER NO-UNDO.
+    DEFINE VARIABLE icount  AS INTEGER   NO-UNDO.
 
 
     DEFINE BUFFER b-GenTab FOR GenTab.
@@ -617,7 +629,7 @@ PROCEDURE com-GenTabSelect :
        
          
         IF NOT b-gentab.IsActive
-        THEN lc-desc = lc-desc + "  - (** Inactive **)".
+            THEN lc-desc = lc-desc + "  - (** Inactive **)".
             
         IF icount = 0 
             THEN ASSIGN pc-code = b-GenTab.gCode
@@ -2004,8 +2016,8 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                     
                 IF CAN-FIND(FIRST op_master 
                     WHERE op_master.CompanyCode = Customer.companyCode
-                      AND op_master.AccountNumber = Customer.AccountNumber NO-LOCK)
-                      THEN RETURN FALSE.
+                    AND op_master.AccountNumber = Customer.AccountNumber NO-LOCK)
+                    THEN RETURN FALSE.
                 /*      
                 IF CAN-FIND(FIRST WebUser
                     WHERE WebUser.CompanyCode     = customer.CompanyCode
@@ -2579,6 +2591,59 @@ END FUNCTION.
 
 
 
+FUNCTION com-FilterLoad RETURNS CHARACTER 
+	(  pc-loginid AS CHARACTER ,
+    pc-ProgName AS CHARACTER ,
+    pc-Code AS CHARACTER  ):
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/    
+    DEFINE BUFFER uFilter FOR uFilter.
+    
+    FIND uFilter
+        WHERE uFilter.LoginID = pc-loginid
+        AND uFilter.ProgName = pc-ProgName
+        AND uFilter.FilterCode = pc-code 
+        NO-LOCK NO-ERROR.
+    RETURN IF AVAIL uFilter THEN uFilter.FilterValue ELSE ?.
+    
+		
+END FUNCTION.
+
+FUNCTION com-FilterSave RETURNS ROWID 
+    ( pc-loginid AS CHARACTER ,
+    pc-ProgName AS CHARACTER ,
+    pc-Code AS CHARACTER ,
+    pc-Value AS CHARACTER  ):
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/	
+    DEFINE BUFFER uFilter FOR uFilter.
+    
+    FIND uFilter
+        WHERE uFilter.LoginID = pc-loginid
+        AND uFilter.ProgName = pc-ProgName
+        AND uFilter.FilterCode = pc-code 
+        EXCLUSIVE-LOCK NO-ERROR.
+    IF NOT AVAILABLE uFilter THEN
+    DO:
+        CREATE uFilter.
+        ASSIGN
+            uFilter.LoginID    = pc-loginid
+            uFilter.ProgName   = pc-ProgName
+            uFilter.FilterCode = pc-code 
+            .
+    END.
+    ASSIGN
+        uFilter.FilterValue = pc-value.
+        
+    RETURN ROWID(uFilter).
+       
+		
+END FUNCTION.
+
 FUNCTION com-GenTabDesc RETURNS CHARACTER
     ( pc-CompanyCode AS CHARACTER,
     pc-GType AS CHARACTER,
@@ -2782,10 +2847,10 @@ FUNCTION com-Initialise RETURNS LOGICAL
     DO li-loop = 0 TO 100 BY 10:
         
         IF li-loop = 0
-        THEN ASSIGN lc-global-opProb-Code = "0"
-                    lc-global-opProb-Desc = "0%".
+            THEN ASSIGN lc-global-opProb-Code = "0"
+                lc-global-opProb-Desc = "0%".
         ELSE ASSIGN lc-global-opProb-Code = lc-global-opProb-code + "|" + string(li-loop)
-                    lc-global-opProb-Desc = lc-global-opProb-Desc + "|" + string(li-loop) + "%".
+                lc-global-opProb-Desc = lc-global-opProb-Desc + "|" + string(li-loop) + "%".
     END.    
     DO li-loop = 0 TO 23:
 
@@ -2862,8 +2927,8 @@ FUNCTION com-InitialSetup RETURNS LOGICAL
          lc-global-secure = DYNAMIC-FUNCTION("sysec-EncodeValue","GlobalSecure",TODAY,"GlobalSecure",lc-temp).
         */
         ASSIGN
-            lc-global-secure = STRING(ROWID(webuser))
-            lc-global-email  = WebUser.Email
+            lc-global-secure  = STRING(ROWID(webuser))
+            lc-global-email   = WebUser.Email
             lc-global-company = WebUser.CompanyCode
             lc-global-EngType = WebUser.engType.
         DYNAMIC-FUNCTION('com-CheckSystemSetup':U,lc-global-company).

@@ -16,7 +16,10 @@
     23/02/2015  phoski      Acive/Inactive Customers & toggle 
     21/05/2016  phoski      use Longchars for customer selection
     01/08/2016  phoski      CRM
-    
+    19/12/2016  phoski      First Activity Date & time
+    19/12/2016  phoski      sla desc
+    19/12/2016  phoskl      Show only >1 day completions
+           
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -53,7 +56,7 @@ DEFINE VARIABLE li-loop       AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-ClassList  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-output     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submit     AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-1Day       AS CHARACTER NO-UNDO.
 
 
 DEFINE TEMP-TABLE ttc NO-UNDO
@@ -144,28 +147,28 @@ PROCEDURE ip-ExportJScript :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} skip
+    {&out} SKIP
             '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP
             '<script language="JavaScript" src="/asset/chart/Chart.js"></script>'.
 
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+          '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function ChangeAccount() ~{' skip
-        '   SubmitThePage("AccountChange")' skip
-        '~}' skip
+    {&out} SKIP
+        'function ChangeAccount() ~{' SKIP
+        '   SubmitThePage("AccountChange")' SKIP
+        '~}' SKIP
 
-        'function ChangeStatus() ~{' skip
-        '   SubmitThePage("StatusChange")' skip
-        '~}' skip
+        'function ChangeStatus() ~{' SKIP
+        '   SubmitThePage("StatusChange")' SKIP
+        '~}' SKIP
 
-            'function ChangeDates() ~{' skip
+            'function ChangeDates() ~{' SKIP
        /* '   SubmitThePage("DatesChange")' skip */
-        '~}' skip.
+        '~}' SKIP.
 
-    {&out} skip
-           '</script>' skip.
+    {&out} SKIP
+           '</script>' SKIP.
 END PROCEDURE.
 
 
@@ -200,8 +203,8 @@ PROCEDURE ip-ExportReport :
 
     PUT UNFORMATTED
                 
-        '"Customer","Issue Number","Description","Issue Type","Raised By","System","SLA Level","' +
-        'Date Raised","Time Raised","Date Completed","Time Completed","Activity Duration","SLA Achieved","SLA Comment","' +
+        '"Customer","Issue Number","Description","Issue Type","Raised By","System","SLA","' +
+        'Date Raised","Time Raised","Date Completed","Time Completed","Date First Activity","Time First Activity","Activity Duration","SLA Achieved","SLA Comment","' +
         '"Closed By' SKIP.
 
 
@@ -222,13 +225,17 @@ PROCEDURE ip-ExportReport :
             tt-ilog.iType
             tt-ilog.RaisedLoginID
             tt-ilog.AreaCode
-            tt-ilog.SLALevel
+            tt-ilog.SLADesc
             tt-ilog.CreateDate
             STRING(tt-ilog.CreateTime,"hh:mm")
       
             IF tt-ilog.CompDate = ? THEN "" ELSE STRING(tt-ilog.CompDate,"99/99/9999")
 
             IF tt-ilog.CompTime = 0 THEN "" ELSE STRING(tt-ilog.CompTime,"hh:mm")
+            
+            IF tt-ilog.fActDate = ? THEN "" ELSE STRING(tt-ilog.fActDate,"99/99/9999")
+             
+            IF tt-ilog.fActTime = 0 THEN "" ELSE STRING(tt-ilog.factTime,"hh:mm")
        
             tt-ilog.ActDuration
             tt-ilog.SLAAchieved
@@ -380,33 +387,33 @@ PROCEDURE ip-PDF:
             '<thead>'
             '<tr>'
             htmlib-TableHeading(
-                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA Level^left|" +
-                "Date Raised^right|Time Raised^left|Date Completed^right|Time Completed^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
+                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
+                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^left|Time First Activity^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left")
                 
             '</tr>'
             '</thead>'
-        skip.
+        SKIP.
 
 
         END.
 
 
         {&prince}
-            skip
+            SKIP
             '<tr>'
-            skip
-            htmlib-MntTableField(html-encode(string(tt-ilog.issuenumber)),'right')
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.briefDescription)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.iType)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.RaisedLoginID)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.AreaCode)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.SLALevel)),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateDate,"99/99/9999")),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateTime,"hh:mm")),'right').
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
         
         IF tt-ilog.CompDate <> ? THEN
             {&prince}
@@ -417,6 +424,15 @@ PROCEDURE ip-PDF:
             htmlib-MntTableField(html-encode(""),'right')
             htmlib-MntTableField(html-encode(""),'right').    
 
+        IF tt-ilog.factDate <> ? THEN
+            {&prince}
+        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
+        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
+        ELSE
+        {&prince}
+            htmlib-MntTableField(html-encode(""),'right')
+            htmlib-MntTableField(html-encode(""),'right').  
+            
         {&prince}
         htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
         htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
@@ -437,9 +453,9 @@ PROCEDURE ip-PDF:
 
         IF LAST-OF(tt-ilog.AccountNumber) THEN
         DO:
-            {&prince} skip 
+            {&prince} SKIP 
                 htmlib-EndTable()
-                skip.
+                SKIP.
 
             {&prince} htmlib-EndCriteria().
 
@@ -497,13 +513,13 @@ PROCEDURE ip-PrintReport :
                 RUN ip-SummaryPage (tt-ilog.AccountNumber).
                     
             END.  
-            {&out} skip
-                htmlib-StartMntTable() skip
+            {&out} SKIP
+                htmlib-StartMntTable() SKIP
                 htmlib-TableHeading(
-                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA Level^left|" +
-                "Date Raised^right|Time Raised^left|Date Completed^right|Time Completed^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
+                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
+                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left"
-            ) skip.
+            ) SKIP.
 
             li-count = 0.
 
@@ -516,20 +532,20 @@ PROCEDURE ip-PrintReport :
             
 
         {&out}
-            skip
+            SKIP
             lc-tr
-            skip
-            htmlib-MntTableField(html-encode(string(tt-ilog.issuenumber)),'right')
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.briefDescription)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.iType)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.RaisedLoginID)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.AreaCode)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.SLALevel)),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateDate,"99/99/9999")),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateTime,"hh:mm")),'right').
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
         
         IF tt-ilog.CompDate <> ? THEN
             {&out} 
@@ -540,6 +556,14 @@ PROCEDURE ip-PrintReport :
             htmlib-MntTableField(html-encode(""),'right')
             htmlib-MntTableField(html-encode(""),'right').    
 
+        IF tt-ilog.fActDate <> ? THEN
+            {&out} 
+        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
+        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
+        ELSE
+        {&out} 
+            htmlib-MntTableField(html-encode(""),'right')
+            htmlib-MntTableField(html-encode(""),'right').   
         {&out}
         htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
         htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
@@ -560,9 +584,9 @@ PROCEDURE ip-PrintReport :
 
         IF LAST-OF(tt-ilog.AccountNumber) THEN
         DO:
-            {&out} skip 
+            {&out} SKIP 
                 htmlib-EndTable()
-                skip.
+                SKIP.
 
             {&out} htmlib-EndCriteria().
 
@@ -629,6 +653,7 @@ PROCEDURE ip-ProcessReport :
         lc-lo-Account,
         lc-hi-Account,
         get-value("allcust") = "on",
+        get-value("oneday") = "on",
         DATE(lc-lodate),
         DATE(lc-hidate),
         SUBSTR(TRIM(lc-classlist),2),
@@ -682,16 +707,16 @@ PROCEDURE ip-Selection :
     '<td valign="top" align="left">'
     htmlib-CalendarInputField("lodate",10,lc-lodate) 
     htmlib-CalendarLink("lodate")
-    '</td>' skip.
+    '</td>' SKIP.
 
     IF NOT ll-customer THEN 
     DO:
         {&out}
         '</tr><tr>' SKIP
            '<td align=right valign=top>' 
-           (if lookup("loaccount",lc-error-field,'|') > 0 
-            then htmlib-SideLabelError("To Customer")
-            else htmlib-SideLabel("To Customer"))
+           (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Customer")
+            ELSE htmlib-SideLabel("To Customer"))
         
             '</td>'
            '<td align=left valign=top>'.
@@ -709,7 +734,7 @@ PROCEDURE ip-Selection :
     '<td valign="top" align="left">'
     htmlib-CalendarInputField("hidate",10,lc-hidate) 
     htmlib-CalendarLink("hidate")
-    '</td>' skip.
+    '</td>' SKIP.
 
     {&out} '</tr>' SKIP.
 
@@ -721,10 +746,18 @@ PROCEDURE ip-Selection :
         '<td valign="top" align="left">'
         REPLACE(htmlib-checkBox("allcust",get-value("allcust") = "on"),
         ">",' onChange="ChangeAccount()">')
-        '</td></tr>' skip.
+        '</td></tr>' SKIP.
         
 
     END.
+     {&out} '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Show Over 1 Day Completions")
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-checkBox("oneday",get-value("oneday") = "on")
+        
+        '</td></tr>' SKIP.
+        
     
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
         lc-codeName = "chk" + ENTRY(li-loop,lc-global-iclass-code,"|").
@@ -738,7 +771,7 @@ PROCEDURE ip-Selection :
         '</td>'
         '<td valign="top" align="left">'
         htmlib-checkBox(lc-CodeName,get-value(lc-CodeName) = "on")
-        '</td></tr>' skip.
+        '</td></tr>' SKIP.
     
     END.
     {&out} '<tr><td valign="top" align="right">' 
@@ -746,7 +779,7 @@ PROCEDURE ip-Selection :
     '</td>'
     '<td valign="top" align="left">'
     htmlib-checkBox("summary",get-value("summary") = "on")
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
         
         
     
@@ -758,7 +791,7 @@ PROCEDURE ip-Selection :
     htmlib-Select("output","WEB|CSV|PDF","Web Page|Email CSV|Email PDF",get-value("output")) '</td></tr>'.
     
   
-    {&out} '</table>' skip.
+    {&out} '</table>' SKIP.
 END PROCEDURE.
 
 
@@ -831,8 +864,8 @@ PROCEDURE ip-SummaryPage:
     END.
     
     {&out} SKIP
-           '<div style="padding: 15px;">' skip
-                replace(htmlib-StartMntTable(),"100%","35%") SKIP.
+           '<div style="padding: 15px;">' SKIP
+                REPLACE(htmlib-StartMntTable(),"100%","35%") SKIP.
                 
     {&out} SKIP
         '<tr>'
@@ -849,7 +882,7 @@ PROCEDURE ip-SummaryPage:
        htmlib-SideLabel("Technical Account Manager")
        
        '</td><td valign="top" align="left" colspan=2>'
-        dynamic-function('com-UserName',Customer.AccountManager)
+        DYNAMIC-FUNCTION('com-UserName',Customer.AccountManager)
        '</td></tr>' SKIP.
        
     {&out} SKIP
@@ -885,7 +918,7 @@ PROCEDURE ip-SummaryPage:
        '</td><td valign="top" align="right">'
          li-sla[1] 
           '</td><td valign="top" align="right">'
-           string(ld-sla[1],"zzzz9.99-") '%'
+           STRING(ld-sla[1],"zzzz9.99-") '%'
        '</td></tr>' SKIP.
     {&out} SKIP
         '<tr>'
@@ -895,7 +928,7 @@ PROCEDURE ip-SummaryPage:
        '</td><td valign="top" align="right">'
          li-sla[2]
           '</td><td valign="top" align="right">'
-           string(ld-sla[2],"zzzz9.99-") '%'
+           STRING(ld-sla[2],"zzzz9.99-") '%'
        '</td></tr>' SKIP.
          
     {&out} SKIP
@@ -926,7 +959,7 @@ PROCEDURE ip-SummaryPage:
        '</td><td valign="top" align="right">'
          li-temp 
         '</td><td valign="top" align="right">'
-          string(ld-temp,">>>>9.99-") '%'
+          STRING(ld-temp,">>>>9.99-") '%'
        '</td></tr>' SKIP.
        
         
@@ -963,7 +996,7 @@ PROCEDURE ip-SummaryPage:
        '</td><td valign="top" align="right">'
          li-temp 
         '</td><td valign="top" align="right">'
-          string(ld-temp,">>>>9.99-") '%'
+          STRING(ld-temp,">>>>9.99-") '%'
        '</td></tr>' SKIP.
        
         
@@ -1046,16 +1079,16 @@ PROCEDURE ip-SummaryPage:
           
     END.      
                
-    {&out} skip 
+    {&out} SKIP 
                 htmlib-EndTable() SKIP.
                 
     {&out} '<table width="100%" border="0">' SKIP
             '<TR>'
             '<td valign="top" align="CENTER">'
-       replace(htmlib-SideLabel("Number of Issues By System Area"),":","")
+       REPLACE(htmlib-SideLabel("Number of Issues By System Area"),":","")
        '</td>'
        '<td valign="top" align="CENTER">'
-       replace(htmlib-SideLabel("Time By System Area In Hours"),":","")
+       REPLACE(htmlib-SideLabel("Time By System Area In Hours"),":","")
        '</td></tr>'
        
             '<tr><td align="CENTER" style="border: 1px solid #E4ECF0;">' SKIP.            
@@ -1069,14 +1102,14 @@ PROCEDURE ip-SummaryPage:
     {&out} '</td><td align="CENTER" style="border: 1px solid #E4ECF0;">'.
      
     {&out} 
-    '<div id="canvas-holder2">' skip
+    '<div id="canvas-holder2">' SKIP
         '<canvas id="' lc-id[2] '" width="300" height="300"/>' SKIP
          '</div>' SKIP.
      
     {&out} '</td></tr><tr><td colspan="2" align="CENTER" style="border: 1px solid #E4ECF0;">'.
      
     {&out} 
-    '<div id="canvas-holder3">' skip
+    '<div id="canvas-holder3">' SKIP
         '<canvas id="' lc-id[3] '" width="500" height="300"/>' SKIP
          '</div>' SKIP.
          
@@ -1106,8 +1139,8 @@ PROCEDURE ip-SummaryPage:
               
             {&out} '~{' SKIP
                     ' value: ' ttd.val ',' SKIP
-                    ' color: ~"' entry(li-tCol,lc-co) '",' SKIP
-                    ' highlight: ~"' entry(li-tCol,lc-hi) '",' SKIP
+                    ' color: ~"' ENTRY(li-tCol,lc-co) '",' SKIP
+                    ' highlight: ~"' ENTRY(li-tCol,lc-hi) '",' SKIP
                     ' label: ~"' ttd.lbl '"' SKIP
                     '~}'.
                     
@@ -1144,19 +1177,19 @@ PROCEDURE ip-SummaryPage:
     DO li-set = 1 TO 2:
         IF li-set = 1
         THEN {&out} 
-                ' ~{' skip
-                '   fillColor : "rgba(220,220,220,0.5)",' skip
-                '   strokeColor : "rgba(220,220,220,0.8)",' skip
-                '   highlightFill: "rgba(220,220,220,0.75)",' skip
-                '   highlightStroke: "rgba(220,220,220,1)",' skip
+                ' ~{' SKIP
+                '   fillColor : "rgba(220,220,220,0.5)",' SKIP
+                '   strokeColor : "rgba(220,220,220,0.8)",' SKIP
+                '   highlightFill: "rgba(220,220,220,0.75)",' SKIP
+                '   highlightStroke: "rgba(220,220,220,1)",' SKIP
                 '   data :' SKIP
                 '   ['. 
         ELSE {&out}
-                ' ~{' skip
-                '   fillColor : "rgba(151,187,205,0.5)",' skip
-                '   strokeColor : "rgba(151,187,205,0.8)",' skip
-                '   highlightFill : "rgba(151,187,205,0.75)",' skip
-                '   highlightStroke : "rgba(151,187,205,1)",' skip            
+                ' ~{' SKIP
+                '   fillColor : "rgba(151,187,205,0.5)",' SKIP
+                '   strokeColor : "rgba(151,187,205,0.8)",' SKIP
+                '   highlightFill : "rgba(151,187,205,0.75)",' SKIP
+                '   highlightStroke : "rgba(151,187,205,1)",' SKIP            
                 '   data :' SKIP
                 '   ['.
         DO li-loop = 1 TO NUM-ENTRIES(lc-lb):
@@ -1165,7 +1198,7 @@ PROCEDURE ip-SummaryPage:
              {&out} ttd.setVal[li-set].
              IF li-loop <  NUM-ENTRIES(lc-lb)
              THEN {&out} ','.
-             else {&out} ']' SKIP.
+             ELSE {&out} ']' SKIP.
         END. 
         IF li-set = 1
         THEN {&out} '~},' SKIP.
@@ -1183,7 +1216,7 @@ PROCEDURE ip-SummaryPage:
                
                 
     {&out} '</div>'
-                skip.
+                SKIP.
                 
         
         
@@ -1382,16 +1415,16 @@ PROCEDURE process-web-request :
        
     RUN outputHeader.
 
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
-    {&out} htmlib-Header("Issue Log") skip.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
+    {&out} htmlib-Header("Issue Log") SKIP.
     RUN ip-ExportJScript.
-    {&out} htmlib-JScript-Maintenance() skip.
-    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/issuelog.p' ) skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/issuelog.p' ) SKIP.
     {&out} htmlib-ProgramTitle("Issue Log") 
-    htmlib-hidden("submitsource","") skip.
+    htmlib-hidden("submitsource","") SKIP.
     {&out} htmlib-BeginCriteria("Report Criteria").
     
-    {&out} '<table align=center><tr>' skip.
+    {&out} '<table align=center><tr>' SKIP.
 
     RUN ip-Selection.
 
@@ -1402,11 +1435,11 @@ PROCEDURE process-web-request :
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     {&out} '<center>' htmlib-SubmitButton("submitform","Report") 
-    '</center>' skip.
+    '</center>' SKIP.
 
     
     
@@ -1427,12 +1460,12 @@ PROCEDURE process-web-request :
 
 
     
-    {&out} htmlib-EndForm() skip.
-    {&out} htmlib-CalendarScript("lodate") skip
-           htmlib-CalendarScript("hidate") skip.
+    {&out} htmlib-EndForm() SKIP.
+    {&out} htmlib-CalendarScript("lodate") SKIP
+           htmlib-CalendarScript("hidate") SKIP.
    
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 
 
 END PROCEDURE.

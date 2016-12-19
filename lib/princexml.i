@@ -13,6 +13,7 @@
     03/08/2010  DJS         3665 - Changed to putput only the html file
                             for the email
     20/06/2011  DJS         Changed to output as complete HTML email
+    19/12/2016  phoski      Prince.exe location from WebAttr
     
 ***********************************************************************/
 
@@ -35,7 +36,20 @@ DEFINE TEMP-TABLE tt-pxml NO-UNDO
 
 FUNCTION pxml-Convert       RETURNS LOG ( pc-html AS CHARACTER , pc-pdf AS CHARACTER):
 
-    OS-COMMAND SILENT VALUE(lc-prince-exec + " " + pc-html + " " + pc-pdf ).
+    DEFINE BUFFER webAttr FOR WebAttr.
+    
+    FIND webattr
+        WHERE WebAttr.SystemID = "SYSTEM"
+        AND WebAttr.AttrID = "PRINCE" NO-LOCK NO-ERROR.
+    IF AVAILABLE webAttr
+        THEN lc-prince-exec = WebAttr.AttrValue.
+    
+    IF SEARCH(lc-prince-exec)  = ? THEN
+    DO:
+        MESSAGE "Prince not found at " lc-prince-exec.
+    END.
+    ELSE 
+        OS-COMMAND SILENT VALUE(lc-prince-exec + " " + pc-html + " " + pc-pdf ).
 
     RETURN SEARCH(pc-pdf) <> ?.
 
@@ -66,10 +80,10 @@ END FUNCTION.
 FUNCTION pxml-StandardHTMLBegin RETURNS LOG ():
 
     {&prince}
-    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' skip
-        '<html>' skip
-        '<head>' skip
-    .
+        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' SKIP
+        '<html>' SKIP
+        '<head>' SKIP
+        .
     RETURN TRUE.
 
 END FUNCTION.
@@ -77,8 +91,8 @@ END FUNCTION.
 FUNCTION pxml-StandardBody RETURNS LOG ():
 
     {&prince}
-    '</head>' skip
-        '<body>' skip.
+        '</head>' SKIP
+        '<body>' SKIP.
 
     RETURN TRUE.
 
@@ -104,19 +118,19 @@ FUNCTION pxml-Header        RETURNS LOG (pc-companyCode AS CHARACTER):
     
     IF NOT AVAILABLE Company THEN
         {&prince}
-    '<div class="heading">' skip
-        '   Micar Computer Systems Limited - HelpDesk' skip.
-    else
-    {&prince}
-        '<div class="heading">' skip
-        '   ' dynamic-function("pxml-Safe",Company.Name) ' - HelpDesk' skip.
+            '<div class="heading">' SKIP
+            '   Micar Computer Systems Limited - HelpDesk' SKIP.
+    ELSE
+        {&prince}
+            '<div class="heading">' SKIP
+            '   ' DYNAMIC-FUNCTION("pxml-Safe",Company.Name) ' - HelpDesk' SKIP.
     
     DYNAMIC-FUNCTION("pxml-Logo",pc-companyCode).
         
     {&prince}
-    '   <span style="float: right">' STRING(TODAY,"99/99/9999") '</span>' skip
-        '</div>' skip
-        '<div id="content">' skip.
+        '   <span style="float: right">' STRING(TODAY,"99/99/9999") '</span>' SKIP
+        '</div>' SKIP
+        '<div id="content">' SKIP.
 
 
     RETURN TRUE.
@@ -213,15 +227,15 @@ FUNCTION pxml-PrePrintFooter RETURNS LOG ( pc-companyCode AS CHARACTER ):
     IF NOT AVAILABLE Company THEN RETURN TRUE.
 
     {&prince}
-    '<style>' skip
-        '@page ~{' skip
-        '@bottom ~{' skip
-        'font-size: 8px;' skip
-        'content: "' Company.name '";' skip
-        'border-top: 1px solid black;' skip
-        '~}' skip
-        '~}' skip
-        '</style>' skip.
+        '<style>' SKIP
+        '@page ~{' SKIP
+        '@bottom ~{' SKIP
+        'font-size: 8px;' SKIP
+        'content: "' Company.name '";' SKIP
+        'border-top: 1px solid black;' SKIP
+        '~}' SKIP
+        '~}' SKIP
+        '</style>' SKIP.
 
     RETURN TRUE.
 END FUNCTION.
@@ -230,9 +244,9 @@ END FUNCTION.
 FUNCTION pxml-Footer RETURNS LOG ( pc-companycode AS CHARACTER ):
 
     {&prince}
-    '</div>' skip
-        '</body>' skip
-        '</html>' skip.
+        '</div>' SKIP
+        '</body>' SKIP
+        '</html>' SKIP.
 
     RETURN TRUE.
 
@@ -280,7 +294,7 @@ FUNCTION pxml-Logo    RETURNS LOG ( pc-companyCode AS CHARACTER ):
         lc-use = "http://micar.com/resources/template/header_logo.gif".
 
         {&prince} 
-        '<img src="' lc-use '" height=113px width=160px style="float: left; padding-right: 10px;">' skip. 
+            '<img src="' lc-use '" height=113px width=160px style="float: left; padding-right: 10px;">' SKIP. 
     END.
     ELSE
     DO:
@@ -288,7 +302,7 @@ FUNCTION pxml-Logo    RETURNS LOG ( pc-companyCode AS CHARACTER ):
         lc-use = "http://www.ouritdept.co.uk/files/main_logo.jpg".
 
         {&prince} 
-        '<img src="' lc-use '" height=70px width=160px style="float: left; padding-right: 10px;">' skip. 
+            '<img src="' lc-use '" height=70px width=160px style="float: left; padding-right: 10px;">' SKIP. 
     END.
 
     RETURN TRUE.
@@ -329,14 +343,14 @@ FUNCTION pxml-StyleSheet    RETURNS LOG ( pc-companyCode AS CHARACTER ):
         ASSIGN 
             lc-use = FILE-INFO:FULL-PATHNAME.
         {&prince} 
-        '<style type="text/css"> ' skip.
+            '<style type="text/css"> ' SKIP.
         INPUT from value( lc-use ) no-echo. /* read in the stylesheet */
         REPEAT:
             IMPORT UNFORMATTED cTextLine.      /* read the whole text line... */
-            {&prince} cTextLine skip.
+            {&prince} cTextLine SKIP.
         END.
         {&prince} 
-        '</style> ' skip.
+            '</style> ' SKIP.
     END.
 
     RETURN TRUE.
@@ -380,7 +394,7 @@ FUNCTION pxml-DocumentStyleSheet    RETURNS LOG ( pc-Document AS CHARACTER ,
         ASSIGN 
             lc-use = FILE-INFO:FULL-PATHNAME.
         {&prince} 
-        '<link rel="stylesheet" href="' lc-use '" type="text/css">' skip.
+            '<link rel="stylesheet" href="' lc-use '" type="text/css">' SKIP.
 
     END.
 

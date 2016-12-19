@@ -13,6 +13,7 @@
                             active customers
     07/03/2015  phoski      Put activity seconds on tt
     29/03/2015  phoski      Class Code/Desc
+    19/12/2016  phoski      First Activity Date & time
     
 ***********************************************************************/
 
@@ -26,6 +27,7 @@ DEFINE INPUT PARAMETER pc-loginid              AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-FromAccountNumber    AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-ToAccountNumber      AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pl-allcust              AS LOG               NO-UNDO.
+DEFINE INPUT PARAMETER pl-oneday               AS LOG               NO-UNDO.
 DEFINE INPUT PARAMETER pd-FromDate             AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pd-ToDate               AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pc-ClassList            AS CHARACTER         NO-UNDO.
@@ -77,7 +79,13 @@ PROCEDURE ip-BuildData :
     DEFINE VARIABLE li-min      AS INTEGER      NO-UNDO.
     DEFINE VARIABLE li-hr       AS INTEGER      NO-UNDO.
     DEFINE VARIABLE li-work     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE ldt-Comp    AS DATETIME NO-UNDO.
+    DEFINE VARIABLE ldt-Comp    AS DATETIME     NO-UNDO.
+    
+    DEFINE VARIABLE ldt-st      AS DATETIME     NO-UNDO.
+    DEFINE VARIABLE ldt-en      AS DATETIME     NO-UNDO.
+    DEFINE VARIABLE ldt-day     AS DATETIME     NO-UNDO.
+    
+    
 
     
 
@@ -112,6 +120,12 @@ PROCEDURE ip-BuildData :
         ASSIGN
             tt-ilog.isClosed =  NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
 
+        IF tt-ilog.isClosed = FALSE AND pl-oneday THEN
+        DO:
+            DELETE tt-ilog.
+            NEXT.
+        END.
+        
         IF tt-ilog.SLALevel = ?
             THEN tt-ilog.SLALevel = 0.
 
@@ -155,6 +169,15 @@ PROCEDURE ip-BuildData :
                 
             END.
         END.
+        
+        FIND slahead WHERE slahead.SLAID = Issue.link-SLAID NO-LOCK NO-ERROR.
+        IF AVAILABLE slahead THEN
+        DO: 
+            
+            tt-ilog.SLADesc = slahead.SLACode + "/" + string(tt-ilog.SLALevel).
+        END.
+        ELSE tt-ilog.SLADesc = "".
+        
 
         ASSIGN 
             tt-ilog.AreaCode = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
@@ -171,8 +194,13 @@ PROCEDURE ip-BuildData :
         ASSIGN 
             li-seconds = 0.
 
-        FOR EACH IssActivity OF Issue NO-LOCK:
-   
+        FOR EACH IssActivity OF Issue NO-LOCK
+            BY issActivity.StartDate
+            BY issActivity.StartTime:
+
+            IF tt-ilog.fActDate = ?
+            THEN ASSIGN tt-ilog.fActDate =  issActivity.StartDate
+                        tt-ilog.fActTime = issActivity.StartTime.  
 
             ASSIGN 
                 li-seconds = li-seconds + IssActivity.Duration.
@@ -198,7 +226,28 @@ PROCEDURE ip-BuildData :
                 .
 
         END.
-
+        
+        IF pl-oneday THEN
+        DO:
+            ASSIGN
+                ldt-st = DATETIME(STRING(tt-ilog.CreateDate,"99/99/9999") + " " + string(tt-ilog.CreateTime,"HH:MM:SS")).
+                
+           ASSIGN
+                ldt-en = DATETIME(STRING(tt-ilog.CompDate,"99/99/9999") + " " + string(tt-ilog.CompTime,"HH:MM:SS")).
+                
+            ASSIGN
+                ldt-day = ADD-INTERVAL(ldt-st,1,"days").
+                
+            IF ldt-Day > ldt-en THEN
+            DO:
+                DELETE tt-ilog.
+                NEXT.
+            END.
+                 
+                    
+           
+        END.
+        
     END.
 
   
