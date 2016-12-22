@@ -4705,6 +4705,69 @@ ADD FIELD "cu_name" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 320
 
+ADD FIELD "mk_contactTime" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 34
+  MAX-WIDTH 4
+  ORDER 350
+
+ADD FIELD "mk_amPM" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 35
+  MAX-WIDTH 16
+  ORDER 360
+
+ADD FIELD "mk_timeOnSite" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 36
+  MAX-WIDTH 4
+  ORDER 370
+
+ADD FIELD "mk_pageViews" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 37
+  MAX-WIDTH 4
+  ORDER 380
+
+ADD FIELD "mk_landingPage" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 38
+  MAX-WIDTH 16
+  ORDER 390
+
+ADD FIELD "mk_exitPage" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 39
+  MAX-WIDTH 16
+  ORDER 400
+
+ADD FIELD "mk_LongestPage" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 40
+  MAX-WIDTH 16
+  ORDER 410
+
+ADD FIELD "mk_formType" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 41
+  MAX-WIDTH 16
+  ORDER 330
+
+ADD FIELD "mk_keyword" OF "op_master" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 42
+  MAX-WIDTH 16
+  ORDER 340
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -7096,4 +7159,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000140886
+0000142084

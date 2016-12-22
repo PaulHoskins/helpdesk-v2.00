@@ -36,6 +36,7 @@
     15/10/2016  phoski      New CRM Table Codes
     15/12/2016  phoski      isactive on gentab
     19/12/2016  phoski      com-FilterSave com-FilterLoad
+    22/12/2016  phoski      Marketing constants
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -212,6 +213,11 @@ DEFINE VARIABLE lc-global-CRMRS-Code                  AS CHARACTER
 DEFINE VARIABLE lc-global-CRMRS-Desc                  AS CHARACTER 
     INITIAL "New Record|Invalid Data|Contacted - Chasing|Contacted - Not Interested|Contacted - Interested|Account Created" NO-UNDO.
 
+
+DEFINE VARIABLE lc-global-FormType-Code                  AS CHARACTER 
+    INITIAL 'CS|NI|QR|CR|BR' NO-UNDO.
+DEFINE VARIABLE lc-global-FormType-Desc                  AS CHARACTER 
+    INITIAL "Contact Us|Need IT Support?|Quotation Request|Call Back Request|Brochure Request" NO-UNDO.
 DEFINE VARIABLE lc-global-CRMRS-ACC-CRT               AS CHARACTER 
     INITIAL 'ACC-CRT' NO-UNDO.
                  

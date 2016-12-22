@@ -18,6 +18,7 @@
     15/12/2016  phoski      Use "." in created contact name                                            
     15/12/2016  phoski      Event Processing
     15/12/2016  phoski      Passthru link
+    22/12/206   phoski      Marketing fields
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -92,6 +93,17 @@ DEFINE VARIABLE lc-doc-tbar        AS CHARACTER INITIAL 'doc' NO-UNDO.
 /* Stuff for call from crmview.p */
 DEFINE VARIABLE lc-FilterOptions   AS CHARACTER NO-UNDO.
 
+DEFINE VARIABLE lc-mkformType      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkkeyword       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkcontactTime   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkamPM          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mktimeOnSite    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkpageViews     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mklandingPage   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkexitPage      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mkLongestPage   AS CHARACTER NO-UNDO.
+  
+
 {crm/customer-form-vars.i}
 
 DEFINE BUFFER b-valid  FOR op_master.
@@ -151,16 +163,132 @@ PROCEDURE ip-ActionPage:
 
 END PROCEDURE.
 
+PROCEDURE ip-MarketingPage:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+
+    IF lc-mode = "ADD" THEN {&out} '<br />'.
+    
+    
+    {&out} 
+        '<div class="infobox" style="font-size:10px;">Marketing</div>' SKIP.
+    
+    
+    {&out} 
+        htmlib-StartTable("mnt",
+        100,
+        0,
+        0,
+        0,
+        "center").
+                        
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Form Type")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("mkformtype",lc-global-FormType-Code ,lc-global-FormType-desc,lc-mkFormType)
+        '</TD></TR>' SKIP.
+                            
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mkkeyword",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Keyword")
+        ELSE htmlib-SideLabel("Keyword"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mkkeyword",40,lc-mkkeyword) SKIP
+        '</TD></tr>' SKIP.
+        
+      
+      {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mkcontacttime",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Contact Time (HHMM)")
+        ELSE htmlib-SideLabel("Contact Time (HHMM)"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mkcontacttime",4,lc-mkcontacttime) SKIP
+        '</TD></tr>' SKIP.
+          
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("AM/PM")
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="1">'
+        htmlib-Select("mkampm","AM|PM" ,"AM|PM",lc-mkamPm)
+        '</TD></TR>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mktimeonsite",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Time On Site (Mins)")
+        ELSE htmlib-SideLabel("Time On Site (Mins)"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mktimeonsite",6,lc-mktimeonsite) SKIP
+        '</TD></tr>' SKIP.
+             
+   {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mkpageviews",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Page Views")
+        ELSE htmlib-SideLabel("Page Views"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mkpageviews",6,lc-mkpageviews) SKIP
+        '</TD></tr>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mklandingpage",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Landing Page")
+        ELSE htmlib-SideLabel("Landing Page"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mklandingpage",40,lc-mklandingpage) SKIP
+        '</TD></tr>' SKIP.
+            
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mkexitpage",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Exit Page")
+        ELSE htmlib-SideLabel("Exit Page"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mkexitpage",40,lc-mkexitpage) SKIP
+        '</TD></tr>' SKIP.
+      
+    {&out} 
+        '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
+        ( IF LOOKUP("mklongestpage",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Longest Page")
+        ELSE htmlib-SideLabel("Longest Page"))
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("mklongestpage",40,lc-mklongestpage) SKIP
+        '</TD></tr>' SKIP.
+        
+        
+        
+                           
+                           
+    {&out} htmlib-EndTable() SKIP.
+    
+    
+
+END PROCEDURE.
+
 PROCEDURE ip-StatusTable:
 /*------------------------------------------------------------------------------
  Purpose:
  Notes:
 ------------------------------------------------------------------------------*/
     {&out} SKIP
-           REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
-           htmlib-TableHeading(
-            "Date|By|From|To"
-            ) SKIP.
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
+        htmlib-TableHeading(
+        "Date|By|From|To"
+        ) SKIP.
        
        
     FOR EACH op_status NO-LOCK OF b-table
@@ -168,18 +296,18 @@ PROCEDURE ip-StatusTable:
             
         {&out}
             '<tr>'
-             htmlib-MntTableField(html-encode(STRING(op_status.ChangeDate,"99/99/9999 HH:MM")),'left')
-             htmlib-MntTableField(html-encode(com-userName(op_status.Loginid)),'left')
-             htmlib-MntTableField(html-encode(IF op_status.FromOpStatus = "" THEN "" ELSE com-DecodeLookup(op_status.FromOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
-             htmlib-MntTableField(html-encode(com-DecodeLookup(op_status.ToOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left')  
-             '</tr>' SKIP. 
+            htmlib-MntTableField(html-encode(STRING(op_status.ChangeDate,"99/99/9999 HH:MM")),'left')
+            htmlib-MntTableField(html-encode(com-userName(op_status.Loginid)),'left')
+            htmlib-MntTableField(html-encode(IF op_status.FromOpStatus = "" THEN "" ELSE com-DecodeLookup(op_status.FromOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
+            htmlib-MntTableField(html-encode(com-DecodeLookup(op_status.ToOpStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left')  
+            '</tr>' SKIP. 
             
              
     END.   
   
     {&out} SKIP 
-           htmlib-EndTable()
-           SKIP.
+        htmlib-EndTable()
+        SKIP.
                        
 
 END PROCEDURE.
@@ -557,15 +685,16 @@ PROCEDURE ip-ViewPage:
         THEN {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' SKIP.
        
        
-       {&out} 
-                        '<br />' htmlib-StartTable("mnt",
-                        100,
-                        0,
-                        0,
-                        0,
-                        "center").
+    {&out} 
+        '<br />' htmlib-StartTable("mnt",
+        100,
+        0,
+        0,
+        0,
+        "center").
         
-    {&out} '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
+    {&out} 
+        '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
                 
                   
                 
@@ -691,12 +820,14 @@ PROCEDURE ip-ViewPage:
         '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
         htmlib-SideLabel("Campaign")        '</TD>' SKIP
         '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
-      {&out} htmlib-EndTable() SKIP. 
+    {&out} htmlib-EndTable() SKIP. 
           
-    {&out} '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
-     RUN ip-StatusTable.
+    {&out} 
+        '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
+    RUN ip-StatusTable.
                
-    {&out} '</tr>' SKIP.
+    {&out} 
+        '</tr>' SKIP.
                    
     {&out} htmlib-EndTable() SKIP.                
                 
@@ -926,7 +1057,7 @@ PROCEDURE ip-UpdatePage:
         DO:
         
             {&out} 
-                '<tr><td colspan="2" id="box1"><div class="infobox">New CRM Customer Details</div>' SKIP.
+                '<tr><td colspan="2" id="box1"><div class="infobox" style="font-size:10px;">New CRM Customer Details</div>' SKIP.
         
         
             RUN ip-NewAccountPage.
@@ -936,7 +1067,7 @@ PROCEDURE ip-UpdatePage:
                 '</td></tr>' SKIP. 
         
             {&out} 
-                '<tr><td colspan="2" id="box2"><div class="infobox">Opportunity Details</div></td></tr>' SKIP.
+                '<tr><td colspan="2" id="box2"><div class="infobox" style="font-size:10px;">Opportunity Details</div></td></tr>' SKIP.
         END.
         
     END.
@@ -1200,6 +1331,37 @@ PROCEDURE ip-Validate:
             'The revenue is invalid',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
+            
+         
+    ASSIGN 
+        li-int = int(lc-mkcontacttime) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'mkcontacttime', 
+            'The contact time is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+        li-int = int(lc-mktimeonSite) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'mktimeonSite', 
+            'The time on site is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+    li-int = int(lc-mkpageviews) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'mkpageviews', 
+            'The page views is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+                 
+            
                      
     IF lc-source = "crmview" AND lc-mode = "Add" AND lc-accountNumber = "ADD" THEN
     DO:
@@ -1491,6 +1653,17 @@ PROCEDURE process-web-request:
                 lc-camp            = get-value("camp")
                 lc-ops             = get-value("ops")
                 lc-lostd           = get-value("lostd")
+                
+                lc-mkformType      = get-value("mkformType")
+                lc-mkkeyword       = get-value("mkkeyword")
+                lc-mkcontacttime   = get-value("mkcontacttime")
+                lc-mkampm          = get-value("mkampm")
+                lc-mktimeonsite    = get-value("mktimeonsite")
+                lc-mkpageviews     = get-value("mkpageviews")
+                lc-mklandingpage   = get-value("mklandingpage")
+                lc-mkexitpage      = get-value("mkexitpage")
+                lc-mklongestpage   = get-value("mklongestpage")
+                
                 .
             IF lc-source = "crmview" AND lc-mode = "Add" THEN
             DO:
@@ -1658,6 +1831,18 @@ PROCEDURE process-web-request:
                     b-table.Campaign        = lc-camp
                     b-table.opSource        = lc-ops
                     b-table.lostdescription = lc-lostd
+                    
+                    b-table.mk_formtype     = lc-mkformtype
+                    b-table.mk_keyword      = lc-mkkeyword
+                    b-table.mk_contactTime  = INTEGER(lc-mkcontactTime)
+                    b-table.mk_ampm         = lc-mkampm
+                    b-table.mk_TimeOnSite   = INTEGER(lc-mkTimeOnSite)
+                    b-table.mk_PageViews    = INTEGER(lc-mkPageViews)
+                    b-table.mk_landingPage  = lc-mkLandingPage  
+                    b-table.mk_exitPage     = lc-mkexitPage  
+                    b-table.mk_longestPage  = lc-mkLongestPage  
+
+                    
                     .
                     
                 IF b-table.salesContact = lc-global-selcode
@@ -1778,6 +1963,18 @@ PROCEDURE process-web-request:
             lc-camp            = b-table.Campaign
             lc-ops             = b-table.opSource
             lc-lostd           = b-table.lostdescription
+            
+            lc-mkformType      = b-table.mk_formType
+            lc-mkkeyword       = b-table.mk_keyword
+            lc-mkcontactTime   = STRING(b-table.mk_contactTime,"9999")
+            lc-mkampm          = b-table.mk_ampm
+            lc-mkTimeonSite    = STRING(b-table.mk_TimeOnSite)
+            lc-mkPageViews     = STRING(b-table.mk_PageViews)
+            lc-mkLandingPage   = b-table.mk_LandingPage
+            lc-mkExitPage      = b-table.mk_exitPage
+            lc-mkLongestPage   = b-table.mk_LongestPage
+
+                        
             .
             
        
@@ -1814,7 +2011,28 @@ PROCEDURE process-web-request:
     ELSE
         IF lc-mode = "ADD" THEN
         DO:
+            {&out} 
+                '<br />' htmlib-StartTable("mnt",
+                100,
+                0,
+                0,
+                0,
+                "center").
+                        
+            {&out} 
+                '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
+                            
             RUN ip-UpdatePage.
+            {&out} 
+                '</td><TD VALIGN="TOP" ALIGN="left">' SKIP.
+            RUN ip-MarketingPage.
+                
+            {&out} 
+                '</tr>' SKIP.
+                   
+            {&out} htmlib-EndTable() SKIP.
+                
+            
             {&out} htmlib-CalendarScript("closedate") SKIP.
         END.
         ELSE 
@@ -1826,21 +2044,25 @@ PROCEDURE process-web-request:
                 {&out} 
                     '<div class="tabbertab" title="Opportunity">' SKIP.
                 {&out} 
-                        '<br />' htmlib-StartTable("mnt",
-                        100,
-                        0,
-                        0,
-                        0,
-                        "center").
+                    '<br />' htmlib-StartTable("mnt",
+                    100,
+                    0,
+                    0,
+                    0,
+                    "center").
         
-                {&out} '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
+                {&out} 
+                    '<tr><TD VALIGN="TOP" ALIGN="left">' SKIP.
                 
                 RUN ip-UpdatePage.
                 
-                {&out} '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
+                {&out} 
+                    '</td><TD VALIGN="TOP" ALIGN="left"><div class="infobox" style="font-size:10px;">Status Changes</div>' SKIP.
                 RUN ip-StatusTable.
+                RUN ip-MarketingPage.
                 
-                {&out} '</tr>' SKIP.
+                {&out} 
+                    '</tr>' SKIP.
                    
                 {&out} htmlib-EndTable() SKIP.
          
