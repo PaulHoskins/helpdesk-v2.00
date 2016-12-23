@@ -220,6 +220,8 @@ DEFINE VARIABLE lc-global-FormType-Desc                  AS CHARACTER
     INITIAL "Contact Us|Need IT Support?|Quotation Request|Call Back Request|Brochure Request" NO-UNDO.
 DEFINE VARIABLE lc-global-CRMRS-ACC-CRT               AS CHARACTER 
     INITIAL 'ACC-CRT' NO-UNDO.
+DEFINE VARIABLE lc-Global-Months-Name                 AS CHARACTER INITIAL
+"January|February|March|April|May|June|July|August|September|October|November|December"     NO-UNDO.
                  
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
