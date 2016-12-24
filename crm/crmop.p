@@ -18,7 +18,10 @@
     15/12/2016  phoski      Use "." in created contact name                                            
     15/12/2016  phoski      Event Processing
     15/12/2016  phoski      Passthru link
-    22/12/206   phoski      Marketing fields
+    22/12/2016  phoski      Marketing fields
+    24/12/2016  phoski      Disabled display of opno on change page
+                            and marketing fields on view page
+    
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -164,10 +167,10 @@ PROCEDURE ip-ActionPage:
 END PROCEDURE.
 
 PROCEDURE ip-MarketingPage:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
 
     IF lc-mode = "ADD" THEN {&out} '<br />'.
     
@@ -202,7 +205,7 @@ PROCEDURE ip-MarketingPage:
         '</TD></tr>' SKIP.
         
       
-      {&out} 
+    {&out} 
         '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("mkcontacttime",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Contact Time (HHMM)")
@@ -229,7 +232,7 @@ PROCEDURE ip-MarketingPage:
         htmlib-InputField("mktimeonsite",6,lc-mktimeonsite) SKIP
         '</TD></tr>' SKIP.
              
-   {&out} 
+    {&out} 
         '<TR align="left"><TD VALIGN="TOP" ALIGN="right" width="25%">' 
         ( IF LOOKUP("mkpageviews",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Page Views")
@@ -820,6 +823,61 @@ PROCEDURE ip-ViewPage:
         '<TR align="left" style="font-size: 12px;padding-left: 15px;"><TD ALIGN="right" width="25%">' 
         htmlib-SideLabel("Campaign")        '</TD>' SKIP
         '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">' com-GenTabDesc(b-table.companyCode,"CRM.Campaign",b-table.Campaign) '</td></tr>' SKIP.
+        
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="left" colspan=2><div class="infobox" style="font-size:10px;">Marketing</div></td></tr>' SKIP
+        .
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Form Type")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  com-DecodeLookup(b-table.mk_formType,lc-global-FormType-Code,lc-global-FormType-Desc ) '</td></tr>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Keyword")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_keyword '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Contact Time")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_contactTime '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("AM/PM")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_amPM '</td></tr>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Time On Site")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_timeOnSite '</td></tr>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Page Views")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_pageViews '</td></tr>' SKIP.
+        
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Landing Page")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_landingPage '</td></tr>' SKIP.
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Exit Page")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_exitPage '</td></tr>' SKIP.
+
+    {&out} 
+        '<TR align="left"><TD ALIGN="right" width="25%">' 
+        htmlib-SideLabel("Longest Page")        '</TD>' SKIP
+        '<TD ALIGN="left" style="font-size: 12px;padding-left: 15px;">'  b-table.mk_longestPage '</td></tr>' SKIP.
+                
+          
+        
+        
+        
+        
+        
+        
     {&out} htmlib-EndTable() SKIP. 
           
     {&out} 
@@ -1080,7 +1138,7 @@ PROCEDURE ip-UpdatePage:
             THEN htmlib-SideLabelError("Opportunity No")
             ELSE htmlib-SideLabel("Opportunity No"))
             '</TD>' SKIP
-            '<TD VALIGN="TOP" ALIGN="left" class="sidelabel">'  lc-opno
+            '<TD VALIGN="TOP" ALIGN="left" class="sidelabel">' REPLACE(htmlib-InputField("lcopno",8,lc-opno),">"," disabled>") SKIP
             '</TD></tr>'.
     END.
               
@@ -1352,7 +1410,7 @@ PROCEDURE ip-Validate:
             INPUT-OUTPUT pc-error-msg ).
             
     ASSIGN 
-    li-int = int(lc-mkpageviews) NO-ERROR.
+        li-int = int(lc-mkpageviews) NO-ERROR.
     IF ERROR-STATUS:ERROR
         OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
             'mkpageviews', 

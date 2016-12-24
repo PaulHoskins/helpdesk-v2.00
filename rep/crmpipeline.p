@@ -25,27 +25,25 @@ DEFINE VARIABLE lc-error-msg   AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-char        AS CHARACTER NO-UNDO.
-
-
- 
-DEFINE VARIABLE ll-Customer    AS LOG       NO-UNDO.
+DEFINE VARIABLE ll-Customer    AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lc-filename    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-CodeName    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-output      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submit      AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE cPart          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE cCode          AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE cDesc          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-StatusList  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-crit-rep    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-selr-Code   AS LONGCHAR  NO-UNDO.
+DEFINE VARIABLE lc-selr-Name   AS LONGCHAR  NO-UNDO.
+DEFINE VARIABLE lc-Label       AS CHARACTER EXTENT 12 NO-UNDO.
+DEFINE VARIABLE lc-Banner      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-tr          AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-StatusList     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-crit-rep       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-selr-Code      AS LONGCHAR  NO-UNDO.
-DEFINE VARIABLE lc-selr-Name      AS LONGCHAR  NO-UNDO.
 
-
+{rep/crmpipelinett.i}
 
 
     
@@ -107,40 +105,6 @@ RUN process-web-request.
 
 /* **********************  Internal Procedures  *********************** */
 
-PROCEDURE ip-ExportJScript :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-/**
-{&out} SKIP
-        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP
-        '<script language="JavaScript" src="/asset/chart/Chart.js"></script>'.
-
-{&out} SKIP 
-      '<script language="JavaScript">' SKIP.
-
-{&out} SKIP
-    'function ChangeAccount() ~{' SKIP
-    '   SubmitThePage("AccountChange")' SKIP
-    '~}' SKIP
-
-    'function ChangeStatus() ~{' SKIP
-    '   SubmitThePage("StatusChange")' SKIP
-    '~}' SKIP
-
-        'function ChangeDates() ~{' SKIP
-   /* '   SubmitThePage("DatesChange")' skip */
-    '~}' SKIP.
-
-{&out} SKIP
-       '</script>' SKIP.
-           
- **/
-           
-END PROCEDURE.
-
 
 PROCEDURE ip-ExportReport :
     /*------------------------------------------------------------------------------
@@ -149,11 +113,7 @@ PROCEDURE ip-ExportReport :
       Notes:       
     ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER pc-filename AS CHARACTER NO-UNDO.
-    
-
-    DEFINE BUFFER customer FOR customer.
-    DEFINE BUFFER issue    FOR issue.
-    
+  
 
     DEFINE VARIABLE lc-GenKey AS CHARACTER NO-UNDO.
 
@@ -164,62 +124,70 @@ PROCEDURE ip-ExportReport :
         
     pc-filename = SESSION:TEMP-DIR + "/CRMPipeLine-" + lc-GenKey
         + ".csv".
-/**
+
     OUTPUT TO VALUE(pc-filename).
 
     PUT UNFORMATTED
                 
-        '"Customer","Issue Number","Description","Issue Type","Raised By","System","SLA","' +
-        'Date Raised","Time Raised","Date Completed","Time Completed","Date First Activity","Time First Activity","Activity Duration","SLA Achieved","SLA Comment","' +
-        '"Closed By' SKIP.
+        '"Sales Rep","Status","Type"' + lc-banner
+        SKIP.
 
 
-    FOR EACH tt-ilog NO-LOCK
-        BREAK BY tt-ilog.AccountNumber
-        BY tt-ilog.IssueNumber
-        :
+    FOR EACH tt-pipe NO-LOCK
+        BREAK BY IF tt-pipe.loginid = "TOTAL" THEN 2 ELSE 1
+        BY tt-pipe.loginid 
+        BY tt-pipe.opStatus:
             
-        FIND customer WHERE customer.CompanyCode = lc-global-company
-            AND customer.AccountNumber = tt-ilog.AccountNumber
-            NO-LOCK NO-ERROR.
-
-
-        EXPORT DELIMITER ','
-            ( customer.AccountNumber + " " + customer.NAME )
-            tt-ilog.issuenumber
-            tt-ilog.briefDescription
-            tt-ilog.iType
-            tt-ilog.RaisedLoginID
-            tt-ilog.AreaCode
-            tt-ilog.SLADesc
-            tt-ilog.CreateDate
-            STRING(tt-ilog.CreateTime,"hh:mm")
-      
-            IF tt-ilog.CompDate = ? THEN "" ELSE STRING(tt-ilog.CompDate,"99/99/9999")
-
-            IF tt-ilog.CompTime = 0 THEN "" ELSE STRING(tt-ilog.CompTime,"hh:mm")
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "Count"
+            tt-pipe.ocount.
             
-            IF tt-ilog.fActDate = ? THEN "" ELSE STRING(tt-ilog.fActDate,"99/99/9999")
-             
-            IF tt-ilog.fActTime = 0 THEN "" ELSE STRING(tt-ilog.factTime,"hh:mm")
-       
-            tt-ilog.ActDuration
-            tt-ilog.SLAAchieved
-            tt-ilog.SLAComment
-            tt-ilog.ClosedBy
+                 
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "Revenue" tt-pipe.Rev.
+            
+        
 
-            . 
-           
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "Cost"
+            tt-pipe.Cost.
+        
+
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "GP Profit" 
+            tt-pipe.gpProf.
+            
+
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "Projected Revenue" 
+            tt-pipe.ProjRev.
+
+                
+        EXPORT DELIMITER ','   
+            tt-pipe.loginid
+            tt-pipe.opDesc
+            "Projected"
+            tt-pipe.ProjGP.
+        
+        
+        
+               
     END.
-
+   
     OUTPUT CLOSE.
 
-**/
 
 END PROCEDURE.
-
-
-
 
 PROCEDURE ip-InitialProcess :
     /*------------------------------------------------------------------------------
@@ -229,13 +197,14 @@ PROCEDURE ip-InitialProcess :
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE lc-temp AS CHARACTER NO-UNDO.
     
-     RUN crm/lib/getRepList.p ( lc-global-company, lc-global-user, OUTPUT lc-selr-Code, OUTPUT lc-selr-Name).
+    RUN crm/lib/getRepList.p ( lc-global-company, lc-global-user, OUTPUT lc-selr-Code, OUTPUT lc-selr-Name).
      
     lc-crit-rep  = get-value("rep").
         
    
-    ASSIGN lc-selr-code = "ALL|" + lc-selr-code
-            lc-selr-name = "All|" + lc-selr-name.
+    ASSIGN 
+        lc-selr-code = "ALL|" + lc-selr-code
+        lc-selr-name = "All|" + lc-selr-name.
             
         
     ASSIGN
@@ -243,9 +212,6 @@ PROCEDURE ip-InitialProcess :
         lc-output = get-value("output")
         lc-submit = get-value("submitsource")
         .
-    
-   
-
 
     IF request_method = "GET" THEN
     DO:
@@ -262,350 +228,201 @@ PROCEDURE ip-InitialProcess :
         
     END.
 
-    
-    
-
 END PROCEDURE.
 
 
-
-PROCEDURE ip-PDF:
+PROCEDURE ip-Line:
     /*------------------------------------------------------------------------------
-            Purpose:  																	  
-            Notes:  																	  
+     Purpose:
+     Notes:
     ------------------------------------------------------------------------------*/
-    DEFINE OUTPUT PARAMETER pc-pdf AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-status    AS CHARACTER    NO-UNDO.
+    DEFINE INPUT PARAMETER pc-type      AS CHARACTER    NO-UNDO.
+    DEFINE INPUT PARAMETER pf-value     AS DECIMAL EXTENT 13    NO-UNDO.
     
-    DEFINE BUFFER customer FOR customer.
-    DEFINE BUFFER issue    FOR issue.
+    DEFINE VARIABLE li-loop AS INTEGER NO-UNDO.
     
-    DEFINE VARIABLE lc-html         AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-pdf          AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ll-ok           AS LOG       NO-UNDO.
-    DEFINE VARIABLE li-ReportNumber AS INTEGER   NO-UNDO.
+    {&out}
+        SKIP
+        lc-tr
+        SKIP
+        htmlib-MntTableField(html-encode(pc-status),'left')
+        htmlib-MntTableField(html-encode(pc-type),'left')
+        .
 
-    ASSIGN    
-        li-ReportNumber = NEXT-VALUE(ReportNumber).
-    ASSIGN 
-        lc-html = SESSION:TEMP-DIR + caps(lc-global-company) + "-PipeLine-" + string(li-ReportNumber).
-
-
-    ASSIGN 
-        lc-pdf  = lc-html + ".pdf"
-        lc-html = lc-html + ".html".
-
-    OS-DELETE value(lc-pdf) no-error.
-    OS-DELETE value(lc-html) no-error.
-
-    /*                                                                                                                                                                                                               */
-    /*    DYNAMIC-FUNCTION("pxml-Initialise").                                                                                                                                                                       */
-    /*                                                                                                                                                                                                               */
-    /*    CREATE tt-pxml.                                                                                                                                                                                            */
-    /*    ASSIGN                                                                                                                                                                                                     */
-    /*        tt-pxml.PageOrientation = "LANDSCAPE".                                                                                                                                                                 */
-    /*                                                                                                                                                                                                               */
-    /*    DYNAMIC-FUNCTION("pxml-OpenStream",lc-html).                                                                                                                                                               */
-    /*    DYNAMIC-FUNCTION("pxml-Header", lc-global-company).                                                                                                                                                        */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*    {&prince}                                                                                                                                                                                                  */
-    /*    '<p style="text-align: center; font-size: 14px; font-weight: 900;">Issue Log - '                                                                                                                           */
-    /*    'From ' STRING(DATE(lc-lodate),"99/99/9999")                                                                                                                                                               */
-    /*    ' To ' STRING(DATE(lc-hidate),"99/99/9999")                                                                                                                                                                */
-    /*                                                                                                                                                                                                               */
-    /*    '</div>'.                                                                                                                                                                                                  */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*    FOR EACH tt-ilog NO-LOCK                                                                                                                                                                                   */
-    /*        BREAK BY tt-ilog.AccountNumber                                                                                                                                                                         */
-    /*        BY tt-ilog.IssueNumber                                                                                                                                                                                 */
-    /*        :                                                                                                                                                                                                      */
-    /*                                                                                                                                                                                                               */
-    /*        IF FIRST-OF(tt-ilog.AccountNumber) THEN                                                                                                                                                                */
-    /*        DO:                                                                                                                                                                                                    */
-    /*            FIND customer WHERE customer.CompanyCode = lc-global-company                                                                                                                                       */
-    /*                AND customer.AccountNumber = tt-ilog.AccountNumber                                                                                                                                             */
-    /*                NO-LOCK NO-ERROR.                                                                                                                                                                              */
-    /*            {&prince} htmlib-BeginCriteria("Customer - " + tt-ilog.AccountNumber + " " +                                                                                                                       */
-    /*                customer.NAME) SKIP.                                                                                                                                                                           */
-    /*                                                                                                                                                                                                               */
-    /*            {&prince}                                                                                                                                                                                          */
-    /*            '<table class="landrep">'                                                                                                                                                                          */
-    /*            '<thead>'                                                                                                                                                                                          */
-    /*            '<tr>'                                                                                                                                                                                             */
-    /*            htmlib-TableHeading(                                                                                                                                                                               */
-    /*                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +                                                                                                  */
-    /*                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^left|Time First Activity^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +*/
-    /*                "Closed By^left")                                                                                                                                                                              */
-    /*                                                                                                                                                                                                               */
-    /*            '</tr>'                                                                                                                                                                                            */
-    /*            '</thead>'                                                                                                                                                                                         */
-    /*        SKIP.                                                                                                                                                                                                  */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*        END.                                                                                                                                                                                                   */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*        {&prince}                                                                                                                                                                                              */
-    /*            SKIP                                                                                                                                                                                               */
-    /*            '<tr>'                                                                                                                                                                                             */
-    /*            SKIP                                                                                                                                                                                               */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')                                                                                                                             */
-    /*                                                                                                                                                                                                               */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')                                                                                                                         */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')                                                                                                                                    */
-    /*                                                                                                                                                                                                               */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')                                                                                                                            */
-    /*                                                                                                                                                                                                               */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')                                                                                                                                 */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')                                                                                                                                  */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')                                                                                                                 */
-    /*            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').                                                                                                                     */
-    /*                                                                                                                                                                                                               */
-    /*        IF tt-ilog.CompDate <> ? THEN                                                                                                                                                                          */
-    /*            {&prince}                                                                                                                                                                                          */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')                                                                                                                       */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').                                                                                                                           */
-    /*        ELSE                                                                                                                                                                                                   */
-    /*        {&prince}                                                                                                                                                                                              */
-    /*            htmlib-MntTableField(html-encode(""),'right')                                                                                                                                                      */
-    /*            htmlib-MntTableField(html-encode(""),'right').                                                                                                                                                     */
-    /*                                                                                                                                                                                                               */
-    /*        IF tt-ilog.factDate <> ? THEN                                                                                                                                                                          */
-    /*            {&prince}                                                                                                                                                                                          */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')                                                                                                                       */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').                                                                                                                           */
-    /*        ELSE                                                                                                                                                                                                   */
-    /*        {&prince}                                                                                                                                                                                              */
-    /*            htmlib-MntTableField(html-encode(""),'right')                                                                                                                                                      */
-    /*            htmlib-MntTableField(html-encode(""),'right').                                                                                                                                                     */
-    /*                                                                                                                                                                                                               */
-    /*        {&prince}                                                                                                                                                                                              */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')                                                                                                                                 */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')                                                                                                                                  */
-    /*        htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')                                                                                                                                  */
-    /*                                                                                                                                                                                                               */
-    /*        htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')                                                                                                                                     */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*            SKIP .                                                                                                                                                                                             */
-    /*                                                                                                                                                                                                               */
-    /*        {&prince} '</tr>' SKIP.                                                                                                                                                                                */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*        IF LAST-OF(tt-ilog.AccountNumber) THEN                                                                                                                                                                 */
-    /*        DO:                                                                                                                                                                                                    */
-    /*            {&prince} SKIP                                                                                                                                                                                     */
-    /*                htmlib-EndTable()                                                                                                                                                                              */
-    /*                SKIP.                                                                                                                                                                                          */
-    /*                                                                                                                                                                                                               */
-    /*            {&prince} htmlib-EndCriteria().                                                                                                                                                                    */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*        END.                                                                                                                                                                                                   */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*    END.                                                                                                                                                                                                       */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*    DYNAMIC-FUNCTION("pxml-Footer",lc-global-company).                                                                                                                                                         */
-    /*    DYNAMIC-FUNCTION("pxml-CloseStream").                                                                                                                                                                      */
-    /*                                                                                                                                                                                                               */
-    /*                                                                                                                                                                                                               */
-    /*    ll-ok = DYNAMIC-FUNCTION("pxml-Convert",lc-html,lc-pdf).                                                                                                                                                   */
-
-    OS-DELETE value(lc-html) no-error.
-    
-    IF ll-ok
-        THEN ASSIGN pc-pdf = lc-pdf.
-    
+    DO li-loop = 1 TO 13:
+        IF pc-type = "Count"
+            THEN  {&out}
+                htmlib-MntTableField(STRING(pf-value[li-loop],"zzzzzzzz9"),'right').
+        ELSE
+            {&out}
+                htmlib-MntTableField("&pound" + com-money(pf-value[li-loop]),'right').
+           
+        
+    END.
+                       
+    {&out} 
+        '</tr>' SKIP.
+         
 
 END PROCEDURE.
 
 PROCEDURE ip-PrintReport :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+      Purpose:     
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
 
-/*    DEFINE BUFFER customer     FOR customer.                                                                                                                                                                     */
-/*    DEFINE BUFFER issue        FOR issue.                                                                                                                                                                        */
-/*    DEFINE VARIABLE li-count        AS INTEGER          NO-UNDO.                                                                                                                                                 */
-/*    DEFINE VARIABLE lc-tr           AS CHARACTER        NO-UNDO.                                                                                                                                                 */
-/*    DEFINE VARIABLE li-eng          AS INTEGER          NO-UNDO.                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*    DEFINE BUFFER tt-ilog   FOR tt-ilog.                                                                                                                                                                         */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*    FOR EACH tt-ilog NO-LOCK                                                                                                                                                                                     */
-/*        BREAK BY tt-ilog.AccountNumber                                                                                                                                                                           */
-/*        BY tt-ilog.IssueNumber                                                                                                                                                                                   */
-/*        :                                                                                                                                                                                                        */
-/*                                                                                                                                                                                                                 */
-/*        IF FIRST-OF(tt-ilog.AccountNumber) THEN                                                                                                                                                                  */
-/*        DO:                                                                                                                                                                                                      */
-/*            FIND customer WHERE customer.CompanyCode = lc-global-company                                                                                                                                         */
-/*                AND customer.AccountNumber = tt-ilog.AccountNumber                                                                                                                                               */
-/*                NO-LOCK NO-ERROR.                                                                                                                                                                                */
-/*            {&out} htmlib-BeginCriteria("Customer - " + tt-ilog.AccountNumber + " " +                                                                                                                            */
-/*                customer.NAME) SKIP.                                                                                                                                                                             */
-/*            IF get-value("summary") = "on" THEN                                                                                                                                                                  */
-/*            DO:                                                                                                                                                                                                  */
-/*                RUN ip-SummaryPage (tt-ilog.AccountNumber).                                                                                                                                                      */
-/*                                                                                                                                                                                                                 */
-/*            END.                                                                                                                                                                                                 */
-/*            {&out} SKIP                                                                                                                                                                                          */
-/*                htmlib-StartMntTable() SKIP                                                                                                                                                                      */
-/*                htmlib-TableHeading(                                                                                                                                                                             */
-/*                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +                                                                                                    */
-/*                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +*/
-/*                "Closed By^left"                                                                                                                                                                                 */
-/*            ) SKIP.                                                                                                                                                                                              */
-/*                                                                                                                                                                                                                 */
-/*            li-count = 0.                                                                                                                                                                                        */
-/*                                                                                                                                                                                                                 */
-/*        END.                                                                                                                                                                                                     */
-/*                                                                                                                                                                                                                 */
-/*        li-count = li-count + 1.                                                                                                                                                                                 */
-/*        IF li-count MOD 2 = 0                                                                                                                                                                                    */
-/*            THEN lc-tr = '<tr style="background: #EBEBE6;">'.                                                                                                                                                    */
-/*        ELSE lc-tr = '<tr style="background: white;">'.                                                                                                                                                          */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*        {&out}                                                                                                                                                                                                   */
-/*            SKIP                                                                                                                                                                                                 */
-/*            lc-tr                                                                                                                                                                                                */
-/*            SKIP                                                                                                                                                                                                 */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')                                                                                                                               */
-/*                                                                                                                                                                                                                 */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')                                                                                                                           */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')                                                                                                                                      */
-/*                                                                                                                                                                                                                 */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')                                                                                                                              */
-/*                                                                                                                                                                                                                 */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')                                                                                                                                   */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')                                                                                                                                    */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')                                                                                                                   */
-/*            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').                                                                                                                       */
-/*                                                                                                                                                                                                                 */
-/*        IF tt-ilog.CompDate <> ? THEN                                                                                                                                                                            */
-/*            {&out}                                                                                                                                                                                               */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')                                                                                                                         */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').                                                                                                                             */
-/*        ELSE                                                                                                                                                                                                     */
-/*        {&out}                                                                                                                                                                                                   */
-/*            htmlib-MntTableField(html-encode(""),'right')                                                                                                                                                        */
-/*            htmlib-MntTableField(html-encode(""),'right').                                                                                                                                                       */
-/*                                                                                                                                                                                                                 */
-/*        IF tt-ilog.fActDate <> ? THEN                                                                                                                                                                            */
-/*            {&out}                                                                                                                                                                                               */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')                                                                                                                         */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').                                                                                                                             */
-/*        ELSE                                                                                                                                                                                                     */
-/*        {&out}                                                                                                                                                                                                   */
-/*            htmlib-MntTableField(html-encode(""),'right')                                                                                                                                                        */
-/*            htmlib-MntTableField(html-encode(""),'right').                                                                                                                                                       */
-/*        {&out}                                                                                                                                                                                                   */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')                                                                                                                                   */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')                                                                                                                                    */
-/*        htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')                                                                                                                                    */
-/*                                                                                                                                                                                                                 */
-/*        htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')                                                                                                                                       */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*            SKIP .                                                                                                                                                                                               */
-/*                                                                                                                                                                                                                 */
-/*        {&out} '</tr>' SKIP.                                                                                                                                                                                     */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*        IF LAST-OF(tt-ilog.AccountNumber) THEN                                                                                                                                                                   */
-/*        DO:                                                                                                                                                                                                      */
-/*            {&out} SKIP                                                                                                                                                                                          */
-/*                htmlib-EndTable()                                                                                                                                                                                */
-/*                SKIP.                                                                                                                                                                                            */
-/*                                                                                                                                                                                                                 */
-/*            {&out} htmlib-EndCriteria().                                                                                                                                                                         */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*        END.                                                                                                                                                                                                     */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*    END.                                                                                                                                                                                                         */
-/*                                                                                                                                                                                                                 */
-/*    FIND FIRST ttc NO-LOCK NO-ERROR.                                                                                                                                                                             */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*    IF AVAILABLE ttc THEN                                                                                                                                                                                        */
-/*    DO:                                                                                                                                                                                                          */
-/*        {&out} SKIP                                                                                                                                                                                              */
-/*            '<script>' SKIP                                                                                                                                                                                      */
-/*                                                                                                                                                                                                                 */
-/*          'window.onload = function()~{' SKIP                                                                                                                                                                    */
-/*        .                                                                                                                                                                                                        */
-/*        FOR EACH ttc NO-LOCK:                                                                                                                                                                                    */
-/*                                                                                                                                                                                                                 */
-/*            {&out}                                                                                                                                                                                               */
-/*            'var ctx = document.getElementById("' ttc.id '").getContext("2d");' SKIP.                                                                                                                            */
-/*                                                                                                                                                                                                                 */
-/*            IF  ttc.id BEGINS "B" THEN                                                                                                                                                                           */
-/*            DO:                                                                                                                                                                                                  */
-/*              {&out}                                                                                                                                                                                             */
-/*            'window.myPie = new Chart(ctx).Bar(pd' ttc.id ', ~{' SKIP                                                                                                                                            */
-/*            '  responsive : true ' SKIP                                                                                                                                                                          */
-/*            '~});' SKIP.                                                                                                                                                                                         */
-/*                                                                                                                                                                                                                 */
-/*            END.                                                                                                                                                                                                 */
-/*            ELSE {&out}                                                                                                                                                                                          */
-/*            'window.myPie = new Chart(ctx).Pie(pd' ttc.id ');' SKIP.                                                                                                                                             */
-/*                                                                                                                                                                                                                 */
-/*        END.                                                                                                                                                                                                     */
-/*                                                                                                                                                                                                                 */
-/*        {&out}                                                                                                                                                                                                   */
-/*        '~};' SKIP                                                                                                                                                                                               */
-/*         '</script>' SKIP.                                                                                                                                                                                       */
-/*                                                                                                                                                                                                                 */
-/*                                                                                                                                                                                                                 */
-/*    END.                                                                                                                                                                                                         */
+ 
+    DEFINE VARIABLE li-count AS INTEGER NO-UNDO.
+
+
+    {&out} SKIP                                                                                                                                                                                          
+        htmlib-StartMntTable() SKIP                                                                                                                                                                      
+        htmlib-TableHeading(                                                                                                                                                                             
+        "Status|Type" + lc-banner                                                                                                                                           
+        ) SKIP.  
+        
+        
+    FOR EACH tt-pipe NO-LOCK
+        BREAK BY IF tt-pipe.loginid = "TOTAL" THEN 2 ELSE 1
+        BY tt-pipe.loginid 
+        BY tt-pipe.opStatus:
+            
+          
+        IF FIRST-OF(tt-pipe.loginid) THEN
+        DO:
+            li-count = 0.
+           
+            ASSIGN
+                li-count = li-count + 1.
+            IF li-count MOD 2 = 0
+                THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+            ELSE lc-tr = '<tr style="background: white;">'.
+            
+            lc-tr = '<tr style="background: #d1d0c2;">'.
+            
+            {&out}
+                SKIP
+                lc-tr
+                SKIP
+                REPLACE(htmlib-MntTableField(html-encode((IF tt-pipe.loginid = "TOTAL" THEN "" ELSE "Sales Rep: " ) + tt-pipe.loginid),'left'),"<td","<td colspan=15 style='font-weight: bold;padding: 10px;'")
+                '</tr>' SKIP.
+            
+        END.   
+            
+            
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+        
+        RUN ip-Line (tt-pipe.opdesc,"Count", tt-pipe.oCount).
+        
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+                
+        RUN ip-Line ("","Revenue", tt-pipe.Rev).
+        
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+                
+        RUN ip-Line ("","Cost", tt-pipe.Cost).
+        
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+                
+        RUN ip-Line ("","GP Profit", tt-pipe.gpProf).
+            
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+                
+        RUN ip-Line ("","Projected Revenue", tt-pipe.ProjRev).
+        
+            
+        ASSIGN
+            li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.
+                
+        RUN ip-Line ("","Projected", tt-pipe.ProjGP).
+        
+        
+        
+
+     
+                  
+    END.    
+    {&out} SKIP                                                                                                                                                                                          
+        htmlib-EndTable()                                                                                                                                                                                
+        SKIP. 
+                                                                                                                                                                                             
 
 END PROCEDURE.
 
 
 PROCEDURE ip-ProcessReport :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+      Purpose:     
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
 
+    DEFINE VARIABLE ld-start AS DATE    EXTENT 12 NO-UNDO.
+    DEFINE VARIABLE li-loop  AS INTEGER NO-UNDO.
+    
+    
+    ASSIGN
+        ld-start[1] = DATE(int(get-value("month")),1,int(get-value("year"))).
+    
+    DO li-loop = 2 TO 12:
+        ld-start[li-loop] = ADD-INTERVAL(ld-start[li-loop - 1 ],1,"month").    
+    END.
 
-/*                                     */
-/*    RUN rep/issuelogbuild.p (        */
-/*        lc-global-company,           */
-/*        lc-global-user,              */
-/*        lc-lo-Account,               */
-/*        lc-hi-Account,               */
-/*        get-value("allcust") = "on", */
-/*        get-value("oneday") = "on",  */
-/*        DATE(lc-lodate),             */
-/*        DATE(lc-hidate),             */
-/*        SUBSTR(TRIM(lc-classlist),2),*/
-/*        OUTPUT TABLE tt-ilog         */
-/*                                     */
-/*        ).                           */
+    DO li-loop = 1 TO 12:
+        ASSIGN 
+            lc-label[li-loop] = ENTRY(MONTH(ld-start[li-loop]),lc-Global-Months-Name,"|") + " " + string(YEAR(ld-start[li-loop]),"9999").
+            
+        IF lc-output = "CSV"
+            THEN lc-Banner = TRIM(lc-banner + ',"' + lc-label[li-loop] + '"' ).
+        ELSE  
+            ASSIGN 
+                lc-banner = TRIM(lc-banner + "|" + lc-label[li-loop] + "^right").     
+       
+    END.
+    
+    IF lc-output = "CSV"
+        THEN lc-Banner = TRIM(lc-banner + ',"Total"' ).
+    ELSE  
+        ASSIGN 
+            lc-banner = TRIM(lc-banner + "|Total^right"). 
+                
+    
+    
+    RUN rep/crmpipeline-build.p (
+        lc-global-company,
+        lc-global-user,
+        int(get-value("month")),
+        int(get-value("year")),
+        get-value("rep"),
+        SUBSTR(TRIM(lc-statusList),2),
+        OUTPUT TABLE tt-pipe
+        ).
 
 END PROCEDURE.
 
@@ -633,18 +450,21 @@ PROCEDURE ip-Selection :
         htmlib-Select("month","1|2|3|4|5|6|7|8|9|10|11|12",lc-Global-Months-Name,get-value("month")).
         
     DEFINE VARIABLE li-year AS INTEGER NO-UNDO.
-    ASSIGN li-year = YEAR(TODAY)
-           cCode = ""
-           .
+    ASSIGN 
+        li-year = YEAR(TODAY)
+        cCode   = ""
+        .
     DO li-loop = 10 TO 1 BY -1:
         
         IF cCode = ""
-        THEN cCode = STRING(li-year,"9999").
+            THEN cCode = STRING(li-year,"9999").
         ELSE cCode = cCode + "|" + string(li-year,"9999").
-        ASSIGN li-year = li-year - 1.
+        ASSIGN 
+            li-year = li-year - 1.
         
     END.
-    {&out} ' - '
+    {&out} 
+        ' - '
         htmlib-Select("year",cCode,cCode,get-value("year")).
         
         
@@ -653,7 +473,7 @@ PROCEDURE ip-Selection :
     {&out} 
         '</td></tr>'.
         
-   {&out} 
+    {&out} 
         '<tr><td align=right valign=top>' htmlib-SideLabel("Sales Rep") 
         '</td><td align=left valign=top>'.
     
@@ -692,7 +512,7 @@ PROCEDURE ip-Selection :
         htmlib-SideLabel("Report Output")
         '</td>'
         '<td align=left valign=top>' 
-        htmlib-Select("output","WEB|CSV|PDF","Web Page|Email CSV|Email PDF",get-value("output")) '</td></tr>'.
+        htmlib-Select("output","WEB|CSV","Web Page|Email CSV",get-value("output")) '</td></tr>'.
     
   
     {&out} 
@@ -824,26 +644,30 @@ PROCEDURE process-web-request :
         DO:
             RUN ip-ProcessReport.
             
-            IF lc-output = "CSV" THEN RUN ip-ExportReport (OUTPUT lc-filename).
-            ELSE
-                IF lc-output = "PDF" THEN RUN ip-PDF (OUTPUT lc-filename).
+            FIND FIRST tt-pipe NO-LOCK NO-ERROR.
             
-            IF lc-output <> "WEB" THEN 
+            IF NOT AVAILABLE tt-pipe
+                THEN ASSIGN lc-error-msg = "There is no data to report".
+            ELSE
             DO:
-            /*
-            mlib-SendAttEmail 
-                ( lc-global-company,
-                "",
-                "HelpDesk Issue Log Report ",
-                "Please find attached your report covering the period "
-                + string(DATE(lc-lodate),"99/99/9999") + " to " +
-                string(DATE(lc-hidate),'99/99/9999'),
-                this-user.email,
-                "",
-                "",
-                lc-filename).
-            OS-DELETE value(lc-filename).
-            */
+                
+            
+                IF lc-output = "CSV" THEN RUN ip-ExportReport (OUTPUT lc-filename).
+        
+                IF lc-output <> "WEB" THEN 
+                DO:
+            
+                    mlib-SendAttEmail 
+                        ( lc-global-company,
+                        "",
+                        "CRM Pipe Line Report ",
+                        "Please find attached your report",
+                        this-user.email,
+                        "",
+                        "",
+                        lc-filename).
+                    OS-DELETE value(lc-filename).
+                END.
             END.
             
         END.
@@ -852,12 +676,12 @@ PROCEDURE process-web-request :
     RUN outputHeader.
 
     {&out} htmlib-Header("CRM Pipeline Report") SKIP.
-    RUN ip-ExportJScript.
     {&out} htmlib-JScript-Maintenance() SKIP.
     {&out} htmlib-StartForm("mainform","post", appurl + '/rep/crmpipeline.p' ) SKIP.
-    {&out} htmlib-ProgramTitle("Issue Log") 
-        htmlib-hidden("submitsource","") SKIP.
-    {&out} htmlib-BeginCriteria("Report Criteria").
+    {&out} 
+        htmlib-ProgramTitle("Issue Log") 
+        htmlib-hidden("submitsource","") SKIP
+        htmlib-BeginCriteria("Report Criteria").
     
     {&out} 
         '<table align=center><tr>' SKIP.
