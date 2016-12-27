@@ -949,12 +949,7 @@ PROCEDURE process-web-request :
     
     {&out} SKIP
         REPLACE(htmlib-StartMntTable(),'width="100%"','width="100%"') SKIP
-        /*
-        htmlib-TableHeading(
-         "Rating^right|Last Activity|Date|Sales Rep|Customer|Description|Status|Type|Close Date|Probabilty^right|Revenue^right|Cost^right|GP Profit^right|Projected Revenue^right|Projected GP^right|Stage|Opportunity Number^right"
-         ) 
-         */
-        htmlib-TableHeading(
+           htmlib-TableHeading(
         "Rating^right|Customer|Description|Close Date|Last Activity|Type|Status|Sales Rep|Probabilty^right|Revenue^right|Cost^right|GP Profit^right|Projected Revenue^right|Projected GP^right|Stage|Date|Opportunity Number^right"
         )
             
