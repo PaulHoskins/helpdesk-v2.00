@@ -9,7 +9,7 @@
     
     
     When        Who         What
-    18/12/12/2016  phoski      Initial
+    31/12/2016  phoski      Initial
    
 ***********************************************************************/
 
@@ -19,7 +19,7 @@ FOR EACH op_master:
     FIND FIRST op_status OF op_master NO-LOCK NO-ERROR.
     IF AVAILABLE op_status THEN NEXT.
     
-     CREATE op_Status.
+    CREATE op_Status.
     ASSIGN
         op_status.companyCode  = op_master.CompanyCode
         op_status.op_id        = op_master.op_id
@@ -38,7 +38,7 @@ FOR EACH op_master:
             op_status.ChangeDate   = ADD-INTERVAL(op_master.createDate,1,"hour")
             op_status.FromOPStatus = ""
             op_status.ToOpStatus   = op_master.OpStatus.
-     END.
+    END.
      
                 
         

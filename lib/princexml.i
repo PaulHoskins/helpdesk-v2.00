@@ -14,6 +14,7 @@
                             for the email
     20/06/2011  DJS         Changed to output as complete HTML email
     19/12/2016  phoski      Prince.exe location from WebAttr
+    08/01/2016  phoski      fixed again - reinvestigate
     
 ***********************************************************************/
 
@@ -25,7 +26,7 @@
 
 DEFINE STREAM s-prince.
 DEFINE VARIABLE lc-prince-exec AS CHARACTER INITIAL
-    '"C:\Program Files (x86)\Prince\engine\bin\prince.exe"' NO-UNDO.
+    '"C:\Program Files\Prince\engine\bin\prince.exe"' NO-UNDO.
 
 DEFINE TEMP-TABLE tt-pxml NO-UNDO
     FIELD PageOrientation AS CHARACTER
@@ -40,16 +41,11 @@ FUNCTION pxml-Convert       RETURNS LOG ( pc-html AS CHARACTER , pc-pdf AS CHARA
     
     FIND webattr
         WHERE WebAttr.SystemID = "SYSTEM"
-        AND WebAttr.AttrID = "PRINCE" NO-LOCK NO-ERROR.
+        AND WebAttr.AttrID = "PRINCExxxx" NO-LOCK NO-ERROR.
     IF AVAILABLE webAttr
         THEN lc-prince-exec = WebAttr.AttrValue.
-    
-    IF SEARCH(lc-prince-exec)  = ? THEN
-    DO:
-        MESSAGE "Prince not found at " lc-prince-exec.
-    END.
-    ELSE 
-        OS-COMMAND SILENT VALUE(lc-prince-exec + " " + pc-html + " " + pc-pdf ).
+
+    OS-COMMAND SILENT VALUE(lc-prince-exec + " " + pc-html + " " + pc-pdf ).
 
     RETURN SEARCH(pc-pdf) <> ?.
 

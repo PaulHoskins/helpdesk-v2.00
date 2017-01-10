@@ -29,6 +29,7 @@
     24/08/2015  phoski      Default to Open issues and sort by issue 
     01/08/2016  phoski      CRM
     19/12/2016  phoski      Filter Save/Load
+    09/01/2016  phoski      Filter dates - adjustment to reflect today
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -134,6 +135,9 @@ DEFINE VARIABLE lc-FilterValue    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-FField         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-FValue         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop           AS INTEGER   NO-UNDO.
+DEFINE VARIABLE ld-FilterDate     AS DATE      NO-UNDO.
+DEFINE VARIABLE li-FilterDays     AS INTEGER   NO-UNDO.
+
     
 
 DEFINE BUFFER b-query   FOR issue.
@@ -593,22 +597,49 @@ PROCEDURE ip-InitialProcess :
     
     IF get-value("submitsource") = "FilterLoad" THEN
     DO:
-
+       
         
-        lc-FilterValue =  DYNAMIC-FUNCTION("com-FilterLoad", lc-global-user,"issue","Default").
+        /*lc-FilterValue =  DYNAMIC-FUNCTION("com-FilterLoad", lc-global-user,"issue","Default"). */
+        
+        RUN com-GetFilterLoad (lc-global-user,"issue","Default", OUTPUT lc-filterValue, OUTPUT ld-FilterDate).
+        
         IF lc-filterValue <> ? THEN
-        DO li-loop = 1 TO NUM-ENTRIES(lc-filterValue,"|"):
+        DO:
+            DO li-loop = 1 TO NUM-ENTRIES(lc-filterValue,"|"):
             
-            ASSIGN
-                lc-FField = ENTRY(li-loop,lc-filterValue,"|").
-            IF lc-FField = "" THEN NEXT.
-            lc-fValue = ENTRY(2,lc-FField,"=").
-            lc-fField = ENTRY(1,lc-FField,"=").
+                ASSIGN
+                    lc-FField = ENTRY(li-loop,lc-filterValue,"|").
+                IF lc-FField = "" THEN NEXT.
+                lc-fValue = ENTRY(2,lc-FField,"=").
+                lc-fField = ENTRY(1,lc-FField,"=").
             
-            set-user-field(lc-FField,lc-FValue).
+                set-user-field(lc-FField,lc-FValue).
                 
                 
-        END.    
+            END. 
+           
+            IF ld-FilterDate <> ?
+            AND ld-filterDate <> TODAY THEN
+            DO:
+                ASSIGN
+                    li-FilterDays = TODAY - ld-filterDate.
+                ASSIGN 
+                    lc-lodate         = get-value("lodate")         
+                    lc-hidate         = get-value("hidate")
+                    .
+                 ld-FilterDate = DATE(lc-loDate) + li-filterDays.
+                 
+                 set-user-field("lodate",STRING(ld-FilterDate,"99/99/9999")).
+                  
+                 ld-FilterDate = DATE(lc-hiDate) + li-filterDays.
+                 set-user-field("hidate",STRING(ld-FilterDate,"99/99/9999")).
+                   
+        
+                    
+            END.
+            
+        END.
+           
         
     END.
     

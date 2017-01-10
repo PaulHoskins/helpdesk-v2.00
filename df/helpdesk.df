@@ -5741,6 +5741,13 @@ ADD FIELD "FilterValue" OF "uFilter" AS character
   MAX-WIDTH 16
   ORDER 50
 
+ADD FIELD "fDate" OF "uFilter" AS date 
+  FORMAT "99/99/99"
+  INITIAL "today"
+  POSITION 6
+  MAX-WIDTH 4
+  ORDER 60
+
 ADD INDEX "prim" ON "uFilter" 
   AREA "Schema Area"
   UNIQUE
@@ -7159,4 +7166,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142084
+0000142208

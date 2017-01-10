@@ -37,6 +37,7 @@
     15/12/2016  phoski      isactive on gentab
     19/12/2016  phoski      com-FilterSave com-FilterLoad
     22/12/2016  phoski      Marketing constants
+    09/01/2016  phoski      com-GetFilterLoad
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -214,14 +215,14 @@ DEFINE VARIABLE lc-global-CRMRS-Desc                  AS CHARACTER
     INITIAL "New Record|Invalid Data|Contacted - Chasing|Contacted - Not Interested|Contacted - Interested|Account Created" NO-UNDO.
 
 
-DEFINE VARIABLE lc-global-FormType-Code                  AS CHARACTER 
+DEFINE VARIABLE lc-global-FormType-Code               AS CHARACTER 
     INITIAL 'CS|NI|QR|CR|BR' NO-UNDO.
-DEFINE VARIABLE lc-global-FormType-Desc                  AS CHARACTER 
+DEFINE VARIABLE lc-global-FormType-Desc               AS CHARACTER 
     INITIAL "Contact Us|Need IT Support?|Quotation Request|Call Back Request|Brochure Request" NO-UNDO.
 DEFINE VARIABLE lc-global-CRMRS-ACC-CRT               AS CHARACTER 
     INITIAL 'ACC-CRT' NO-UNDO.
 DEFINE VARIABLE lc-Global-Months-Name                 AS CHARACTER INITIAL
-"January|February|March|April|May|June|July|August|September|October|November|December"     NO-UNDO.
+    "January|February|March|April|May|June|July|August|September|October|November|December" NO-UNDO.
                  
 DEFINE VARIABLE li-global-sched-days-back             AS INTEGER   INITIAL 100 NO-UNDO.
 
@@ -339,9 +340,9 @@ FUNCTION com-EngineerSelection RETURNS CHARACTER
     (  ) FORWARD.
 
 FUNCTION com-FilterLoad RETURNS CHARACTER 
-	(pc-loginid AS CHARACTER,
-	 pc-ProgName AS CHARACTER,
-	 pc-Code AS CHARACTER) FORWARD.
+    (pc-loginid AS CHARACTER,
+    pc-ProgName AS CHARACTER,
+    pc-Code AS CHARACTER) FORWARD.
 
 FUNCTION com-FilterSave RETURNS ROWID 
     (pc-loginid AS CHARACTER,
@@ -1229,6 +1230,40 @@ PROCEDURE com-GetEngineerList:
                         b-user.Name.
     END.
     
+
+END PROCEDURE.
+
+PROCEDURE com-GetFilterLoad:
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+    DEFINE INPUT PARAMETER pc-loginid AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-ProgName AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-Code AS CHARACTER NO-UNDO.
+    
+    DEFINE OUTPUT PARAMETER pc-filter AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pd-date AS DATE NO-UNDO.
+    DEFINE BUFFER uFilter FOR uFilter.
+    
+    ASSIGN
+        pc-filter = ?
+        pd-date   = ?.
+            
+    FOR FIRST uFilter
+        WHERE uFilter.LoginID = pc-loginid
+        AND uFilter.ProgName = pc-ProgName
+        AND uFilter.FilterCode = pc-code 
+        NO-LOCK:
+        ASSIGN 
+            pc-filter = uFilter.FilterValue
+            pd-date   = uFilter.fdate.
+             
+    END.
+   
+    
+    RETURN.
+        
 
 END PROCEDURE.
 
@@ -2600,7 +2635,7 @@ END FUNCTION.
 
 
 FUNCTION com-FilterLoad RETURNS CHARACTER 
-	(  pc-loginid AS CHARACTER ,
+    (  pc-loginid AS CHARACTER ,
     pc-ProgName AS CHARACTER ,
     pc-Code AS CHARACTER  ):
     /*------------------------------------------------------------------------------
@@ -2645,8 +2680,10 @@ FUNCTION com-FilterSave RETURNS ROWID
             .
     END.
     ASSIGN
+        uFilter.fDate       = TODAY
         uFilter.FilterValue = pc-value.
         
+      
     RETURN ROWID(uFilter).
        
 		
