@@ -1,0 +1,10 @@
+<license id="1000060">
+    <name>Single User License</name>
+    <vendor>YesLogic</vendor>
+    <product>Prince</product>
+    <version>5.1</version>
+    <end-user>Our IT Department Ltd</end-user>
+    <date>2006-05-13</date>
+    <signature>9D8B9D5F54A0EE176F2A40EA30BA0332</signature>
+    <option id="upgrades">20061113</option>
+</license>

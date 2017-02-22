@@ -30,6 +30,7 @@
     01/08/2016  phoski      CRM
     19/12/2016  phoski      Filter Save/Load
     09/01/2016  phoski      Filter dates - adjustment to reflect today
+    04/02/2017  phoski      Long for account selection
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -170,6 +171,8 @@ DEFINE BUFFER this-user FOR WebUser.
 FUNCTION Format-Select-Account RETURNS CHARACTER
     ( pc-htm AS CHARACTER )  FORWARD.
 
+FUNCTION Format-Select-AccountLong RETURNS LONGCHAR 
+	(pc-htm AS LONGCHAR) FORWARD.
 
 &ENDIF
 
@@ -865,10 +868,14 @@ PROCEDURE ip-Selection :
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
     IF NOT ll-customer
-        THEN {&out}
+        THEN 
+        DO:
+            {&out}
             '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
-            '<td align=left valign=top>' 
-            format-Select-Account(htmlib-Select("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
+            '<td align=left valign=top>'.
+            {&out-long} 
+            format-Select-AccountLong(htmlib-SelectLong("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
+        END.
 
     {&out}
         '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
@@ -1613,6 +1620,25 @@ FUNCTION Format-Select-Account RETURNS CHARACTER
 
 END FUNCTION.
 
+FUNCTION Format-Select-AccountLong RETURNS LONGCHAR 
+	 ( pc-htm AS LONGCHAR ) :
+    /*------------------------------------------------------------------------------
+      Purpose:  
+        Notes:  
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE lc-htm AS LONGCHAR NO-UNDO.
+
+    lc-htm = REPLACE(pc-htm,'<select',
+        '<select onChange="ChangeAccount()"')
+        . 
+
+
+    RETURN lc-htm.
+
+
+		
+END FUNCTION.
 
 &ENDIF
 
