@@ -21,6 +21,7 @@
     22/12/2016  phoski      Marketing fields
     24/12/2016  phoski      Disabled display of opno on change page
                             and marketing fields on view page
+    22/02/2017  phoski      Recurring Cost & Revenue
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -74,6 +75,8 @@ DEFINE VARIABLE lc-rating          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-opStatus        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-prob            AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-cos             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-recrev          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-reccos          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-rev             AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-lost            AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-sType           AS CHARACTER NO-UNDO.
@@ -1270,6 +1273,25 @@ PROCEDURE ip-UpdatePage:
         htmlib-InputField("rev",8,lc-rev) 
         '</TD>' SKIP.
     
+     
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("rcos",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Recurring Cost Of Sale")
+        ELSE htmlib-SideLabel("Recurring Cost Of Sale"))
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-InputField("rcos",8,lc-reccos) 
+        '</TD>' SKIP.
+    
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("rrev",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Recurring Revenue")
+        ELSE htmlib-SideLabel("Recurring Revenue"))
+        '</TD><TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+        htmlib-InputField("rrev",8,lc-recrev) 
+        '</TD>' SKIP.
+        
     RUN com-GenTabSelect ( lc-global-company, "CRM.DealLostReason", 
         OUTPUT lc-code,
         OUTPUT lc-desc ).
@@ -1390,7 +1412,24 @@ PROCEDURE ip-Validate:
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
             
-         
+    ASSIGN 
+        li-int = int(lc-reccos) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'rcos', 
+            'The recurring cost of sale is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+        li-int = int(lc-recrev) NO-ERROR.
+    IF ERROR-STATUS:ERROR
+    OR li-int < 0 THEN RUN htmlib-AddErrorMessage(
+            'rrev', 
+            'The recurring revenue is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+                
     ASSIGN 
         li-int = int(lc-mkcontacttime) NO-ERROR.
     IF ERROR-STATUS:ERROR
@@ -1705,6 +1744,8 @@ PROCEDURE process-web-request:
                 lc-prob            = get-value("prob")
                 lc-cos             = get-value("cos")
                 lc-rev             = get-value("rev")
+                lc-reccos          = get-value("rcos")
+                lc-recrev          = get-value("rrev")
                 lc-lost            = get-value("lost")
                 lc-stype           = get-value("stype")
                 lc-dbase           = get-value("dbase")
@@ -1883,6 +1924,8 @@ PROCEDURE process-web-request:
                     b-table.Probability     = INTEGER(lc-prob)
                     b-table.CostOfSale      = INTEGER(lc-cos)
                     b-table.Revenue         = INTEGER(lc-rev)
+                    b-table.RecCostOfSale    = INTEGER(lc-reccos)
+                    b-table.RecRevenue       = INTEGER(lc-recrev)
                     b-table.DealLostReason  = lc-lost
                     b-table.SourceType      = lc-stype
                     b-table.dbase           = lc-dbase
@@ -2015,6 +2058,8 @@ PROCEDURE process-web-request:
             lc-prob            = STRING(b-table.Probability)
             lc-cos             = STRING(b-table.CostOfSale)
             lc-rev             = STRING(b-table.Revenue)
+            lc-reccos          = STRING(b-table.RecCostOfSale)
+            lc-recrev          = STRING(b-table.RecRevenue)
             lc-lost            = b-table.DealLostReason
             lc-stype           = b-table.SourceType
             lc-dbase           = b-table.dBase

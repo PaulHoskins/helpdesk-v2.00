@@ -12,6 +12,7 @@
     15/12/2016  phoski      Sort option by close date
     17/12/2016  phoski      Projected Revenue/GP on summary
     18/12/2016  phoski      Columns changed
+    22/02/2017  phoski      Recurring Cost & Revenue
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -64,7 +65,7 @@ DEFINE VARIABLE lc-lodate         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-hidate         AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE li-max-lines      AS INTEGER   INITIAL 12000 NO-UNDO.
+DEFINE VARIABLE li-max-lines      AS INTEGER   INITIAL 12 NO-UNDO.
 DEFINE VARIABLE lr-first-row      AS ROWID     NO-UNDO.
 DEFINE VARIABLE lr-last-row       AS ROWID     NO-UNDO.
 DEFINE VARIABLE li-count          AS INTEGER   NO-UNDO.
@@ -93,6 +94,12 @@ DEFINE TEMP-TABLE tt-sum NO-UNDO
     FIELD cost  AS DECIMAL
     FIELD prev  AS DECIMAL 
     FIELD prof  AS DECIMAL
+    
+    FIELD r-rev   AS DECIMAL
+    FIELD r-cost  AS DECIMAL
+    FIELD r-prev  AS DECIMAL 
+    FIELD r-prof  AS DECIMAL
+    
     INDEX dtype dtype KEY
     INDEX ddisp dtype dkey.
     
@@ -229,6 +236,12 @@ PROCEDURE ip-BuildSummaryTable:
 
     DEFINE VARIABLE lc-width AS CHARACTER INITIAL 'width="100%"' NO-UNDO.
     
+    DEFINE VARIABLE lc-label AS CHARACTER NO-UNDO.
+    
+    lc-label = "|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right"
+    + "|" + fill("&nbsp;",20)
+    + "|Recurring<br />Revenue^right|Recurring<br />Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right".
+    
     {&out} SKIP
         '<br/><div class="infobox">Summary</div>' SKIP.
    
@@ -240,20 +253,20 @@ PROCEDURE ip-BuildSummaryTable:
     {&out} 
         '<td valign="top">'                
         REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-        htmlib-TableHeading("Sales Rep|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+        htmlib-TableHeading("Sales Rep" + lc-label) SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("REP").
     
     {&out} SKIP 
         htmlib-EndTable()
-        '</td>'
+        '</td></tr>'
         SKIP.
            
     {&out} 
-        '<td valign="top">'                
+        '<tr><td valign="top">'                
         REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-        htmlib-TableHeading("Status|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+        htmlib-TableHeading("Status" + lc-label) SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("STATUS").
@@ -271,20 +284,20 @@ PROCEDURE ip-BuildSummaryTable:
     {&out} 
         '<td valign="top">'                
         REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-        htmlib-TableHeading("Type|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+        htmlib-TableHeading("Type" + lc-label) SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Type").
     
     {&out} SKIP 
         htmlib-EndTable()
-        '</td>'
+        '</td></tr>'
         SKIP.
            
     {&out} 
-        '<td valign="top">'                
+        '<tr><td valign="top">'                
         REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-        htmlib-TableHeading("Stage|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+        htmlib-TableHeading("Stage" + lc-label) SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("NEXT").
@@ -298,9 +311,9 @@ PROCEDURE ip-BuildSummaryTable:
         '</tr>'.       
     
     {&out} 
-        '<tr><td valign="top" colspan=2>'                
+        '<tr><td valign="top">'                
         REPLACE(htmlib-StartMntTable(),'width="100%"',lc-width) SKIP
-        htmlib-TableHeading("Customer|Opportunities^right|Revenue^right|Cost^right|GP Profit^right|Projected<br />Revenue^right|Projected<br />GP^right") SKIP.
+        htmlib-TableHeading("Customer" + lc-label) SKIP.
             
     
     RUN ip-BuildSpecificSummaryTable("Customer").
@@ -334,6 +347,10 @@ PROCEDURE ip-BuildSpecificSummaryTable:
     DEFINE VARIABLE li-cnt  AS INTEGER NO-UNDO.
     DEFINE VARIABLE lf-prev AS DECIMAL NO-UNDO.
     DEFINE VARIABLE lf-prof AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-r-cost AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-r-rev  AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-r-prev AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE lf-r-prof AS DECIMAL NO-UNDO.
     
     DEFINE BUFFER tt-sum FOR tt-sum.
                    
@@ -348,6 +365,14 @@ PROCEDURE ip-BuildSpecificSummaryTable:
             replib-RepField("&pound" + com-money(tt-sum.rev - tt-sum.Cost) ,"right",'')
             replib-RepField("&pound" + com-money(tt-sum.prev) ,"right",'')
             replib-RepField("&pound" + com-money(tt-sum.prof) ,"right",'')
+            replib-RepField("&nbsp;" ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.r-Rev) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.r-cost) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.r-rev - tt-sum.r-Cost) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.r-prev) ,"right",'')
+            replib-RepField("&pound" + com-money(tt-sum.r-prof) ,"right",'')
+            
+            
             '</tr>' SKIP.
         
         ASSIGN 
@@ -355,7 +380,11 @@ PROCEDURE ip-BuildSpecificSummaryTable:
             lf-cost = lf-cost + tt-sum.cost
             lf-rev  = lf-rev + tt-sum.rev
             lf-prof = lf-prof + tt-sum.prof
-            lf-prev = lf-prev + tt-sum.prev.
+            lf-prev = lf-prev + tt-sum.prev
+            lf-r-cost = lf-r-cost + tt-sum.r-cost
+            lf-r-rev  = lf-r-rev + tt-sum.r-rev
+            lf-r-prof = lf-r-prof + tt-sum.r-prof
+            lf-r-prev = lf-r-prev + tt-sum.r-prev.
                
 
                
@@ -370,6 +399,13 @@ PROCEDURE ip-BuildSpecificSummaryTable:
         replib-RepField("&pound" + com-money(lf-rev - lf-Cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
         replib-RepField("&pound" + com-money(lf-prev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
         replib-RepField("&pound" + com-money(lf-prof) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&nbsp;" ,"right",'')
+        replib-RepField("&pound" + com-money(lf-r-Rev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-r-cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-r-rev - lf-r-Cost) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-r-prev) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+        replib-RepField("&pound" + com-money(lf-r-prof) ,"right","border-top: 1px solid black;border-bottom: 1px solid black;")
+         
     
         '</tr>' SKIP.
             
@@ -385,6 +421,7 @@ PROCEDURE ip-BuildTable:
     
     DEFINE VARIABLE lc-Enc-Key AS CHARACTER NO-UNDO. 
     DEFINE VARIABLE lf-Amt     AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lf-Amt2    AS DECIMAL   NO-UNDO.
     DEFINE VARIABLE lc-LastAct AS CHARACTER NO-UNDO.
     DEFINE BUFFER customer FOR Customer.
     
@@ -461,20 +498,24 @@ PROCEDURE ip-BuildTable:
             htmlib-MntTableField(html-encode(com-DecodeLookup(b-query.opStatus,lc-global-opStatus-Code,lc-global-opStatus-Desc )),'left') 
             htmlib-MntTableField(html-encode(com-userName(b-query.SalesManager)),'left') 
             htmlib-MntTableField(STRING(b-query.Probability) + "%","right")
-            htmlib-MntTableField("&pound" + com-money(b-query.Revenue) ,"right")
-            htmlib-MntTableField("&pound" + com-money(b-query.CostOfSale) ,"right")
-            htmlib-MntTableField("&pound" + com-money(b-query.Revenue - b-query.CostOfSale) ,"right")
+            htmlib-MntTableField("<b>&pound" + com-money(b-query.Revenue) + "</b></br><i>&pound" +  com-money(b-query.RecRevenue) ,"right")
+            htmlib-MntTableField("<b>&pound" + com-money(b-query.CostOfSale)  + "</b></br><i>&pound" +  com-money(b-query.RecCostOfSale) ,"right")
+            htmlib-MntTableField("<b>&pound" + com-money(b-query.Revenue - b-query.CostOfSale) +
+            "</b></br><i>&pound" +  com-money(b-query.RecRevenue - b-query.RecCostOfSale) ,"right")
             . 
         ASSIGN 
-            lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2).       
+            lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2)
+            lf-amt2 = ROUND(b-query.RecRevenue * (b-query.Probability / 100),2).          
          
-        {&out} htmlib-MntTableField("&pound" + com-money(lf-amt) ,"right").  
+        {&out} htmlib-MntTableField("<b>&pound" + com-money(lf-amt) 
+           + "</b><i></br>&pound" +  com-money(lf-amt2) ,"right").  
          
         ASSIGN 
-            lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2).       
+            lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2)
+            lf-amt2 = ROUND(b-query.RecCostofsale * (b-query.Probability / 100),2).           
          
         {&out} 
-            htmlib-MntTableField("&pound" + com-money(lf-amt) ,"right")
+            htmlib-MntTableField("<b>&pound" + com-money(lf-amt)  + "</b></br><i>&pound" +  com-money(lf-amt2),"right")
             htmlib-MntTableField(html-encode(com-GenTabDesc(b-query.companyCode,"CRM.Stage",b-query.NextStep)),'left')  
             htmlib-MntTableField(html-encode(STRING(b-query.crtDate,"99/99/9999")),'left')  
             htmlib-MntTableField(html-encode(STRING(b-query.op_no)),'right')  
@@ -608,8 +649,9 @@ PROCEDURE ip-navigate:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-
-
+/**
+    MESSAGE "lc-navigation = " lc-navigation " lc-firstrow = " lc-firstRow " lc-lastrow = " lc-lastRow.
+ **/   
     IF lc-navigation = "nextpage" THEN
     DO:
         vhLQuery:REPOSITION-TO-ROWID(TO-ROWID(lc-lastrow)) .
@@ -1024,19 +1066,32 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
         tt-sum.key   = pc-key
         tt-sum.cnt   = tt-sum.cnt + 1
         tt-sum.cost  = tt-sum.cost + b-query.CostOfSale
-        tt-sum.rev   = tt-sum.rev + b-query.Revenue. 
+        tt-sum.rev   = tt-sum.rev + b-query.Revenue
+        tt-sum.r-cost  = tt-sum.r-cost + b-query.RecCostOfSale
+        tt-sum.r-rev   = tt-sum.r-rev + b-query.RecRevenue.  
     
     lf-amt = ROUND(b-query.Revenue * (b-query.Probability / 100),2). 
     
     ASSIGN 
         tt-sum.prev = tt-sum.prev + lf-amt.
     
+    lf-amt = ROUND(b-query.RecRevenue * (b-query.Probability / 100),2). 
+    
+    ASSIGN 
+        tt-sum.r-prev = tt-sum.r-prev + lf-amt.
+        
     ASSIGN 
         lf-amt = ROUND(b-query.costofsale * (b-query.Probability / 100),2). 
             
     ASSIGN 
         tt-sum.prof = tt-sum.prof + lf-amt.       
             
+      ASSIGN 
+        lf-amt = ROUND(b-query.Reccostofsale * (b-query.Probability / 100),2). 
+            
+    ASSIGN 
+        tt-sum.r-prof = tt-sum.r-prof + lf-amt.     
+                
     RETURN TRUE.
                 
 

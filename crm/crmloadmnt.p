@@ -150,18 +150,18 @@ PROCEDURE ipViewAcc:
     
     {&out} '</div>'.
     
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
     {&out}
     htmlib-TableHeading(
         "|ID|Name|Address 1|Address 2|City|County|Post Code|Telephone|Business Type|Contact Details|Position"
-        ) skip.
+        ) SKIP.
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-CRMRS-Code,"|"):
             
         {&out} '<tr><td colspan=12><div class="infobox">'
         '<a name="'  ENTRY(li-loop,lc-global-CRMRS-Code,"|") '"></a>' SKIP
-        '<a href="#top"><img src="/asset/img/up_16.gif"></a>' skip
+        '<a href="#top"><img src="/asset/img/up_16.gif"></a>' SKIP
         com-DecodeLookup(ENTRY(li-loop,lc-global-CRMRS-Code,"|"),lc-global-CRMRS-Code,lc-global-CRMRS-Desc)
         '</div</td></tr>' SKIP.
         
@@ -204,9 +204,9 @@ PROCEDURE ipViewAcc:
     
     END.
     
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
     
     
 
@@ -446,21 +446,21 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
+    {&out} htmlib-Header(lc-title) SKIP
            htmlib-StartForm("mainform","post", appurl + '/crm/crmloadmnt.p' )
-           htmlib-ProgramTitle(lc-title) skip.
+           htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-Hidden ("savesearch", lc-search) SKIP
+           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+           htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-Hidden ("nullfield", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
    
@@ -474,14 +474,14 @@ PROCEDURE process-web-request :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("description",40,lc-description) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-description),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
     
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
     IF lc-mode = "VIEW"
@@ -491,17 +491,17 @@ PROCEDURE process-web-request :
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<br/><center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
          
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+           htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

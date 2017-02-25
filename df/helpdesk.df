@@ -4768,6 +4768,20 @@ ADD FIELD "mk_keyword" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 340
 
+ADD FIELD "recCostOfSale" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 43
+  MAX-WIDTH 4
+  ORDER 420
+
+ADD FIELD "RecRevenue" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 44
+  MAX-WIDTH 4
+  ORDER 430
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -7166,4 +7180,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142208
+0000142479
