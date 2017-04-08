@@ -21,7 +21,8 @@
     31/07/2016  phoski      Filter On Disabled flag 
     06/09/2016  phoski      Customer selection 32k problem    
     19/09/2016  phoski      Limit customer name to 30 chars as toolbar
-                            splits over lines               
+                            splits over lines    
+    08/04/2016  phoski      Company wide Working Hours                                
     
 
 ***********************************************************************/
@@ -141,24 +142,24 @@ PROCEDURE ip-ExportJScript :
     ------------------------------------------------------------------------------*/
 
     {&out}
-    '<script language="JavaScript" src="/scripts/js/menu.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' skip
+    '<script language="JavaScript" src="/scripts/js/menu.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' SKIP
     .
 
-    {&out} skip
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} SKIP
+            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+          '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function OptionChange(obj) ~{' skip
+    {&out} SKIP
+        'function OptionChange(obj) ~{' SKIP
         '   SubmitThePage("selection");' SKIP
-        '~}' skip.
+        '~}' SKIP.
 
-    {&out} skip
-           '</script>' skip.
+    {&out} SKIP
+           '</script>' SKIP.
 
 
 END PROCEDURE.
@@ -329,15 +330,15 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Users") skip.
+    {&out} htmlib-Header("Maintain Users") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
     RUN ip-ExportJScript.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webuser.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webuser.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Users") skip
-           htmlib-hidden("submitsource","") skip.
+    {&out} htmlib-ProgramTitle("Maintain Users") SKIP
+           htmlib-hidden("submitsource","") SKIP.
     
   
     {&out-long}
@@ -361,18 +362,19 @@ PROCEDURE process-web-request :
     tbar-Link("delete",?,"off",'')
     tbar-Link("genpassword",?,"off",'')
     tbar-Link("contaccess",?,"off",'')
+    tbar-Link("wrk-hrall",?,  appurl + "/sys/webwrkhourall.p" ,lc-link-otherp)
     tbar-Link("wrk-hr",?,"off",'')
     tbar-Link("conttime",?,"off",'')
     tbar-EndOption()
     tbar-End().
 
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
     {&out}
     htmlib-TableHeading(
         "User Name^left|Name^left|Customer|Email<br/>Mobile^left|Last Password Change^left|Last Login^left|Disabled?"
-        ) skip.
+        ) SKIP.
 
     lc-QPhrase = 
         "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
@@ -412,7 +414,7 @@ PROCEDURE process-web-request :
     
     CREATE QUERY vhLQuery.
 
-    vhLBuffer = BUFFER b-query:handle.
+    vhLBuffer = BUFFER b-query:HANDLE.
 
     vhLQuery:SET-BUFFERS(vhLBuffer).
     vhLQuery:QUERY-PREPARE(lc-QPhrase).
@@ -488,40 +490,41 @@ PROCEDURE process-web-request :
          
                       
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
             htmlib-MntTableField(html-encode(b-query.loginid),'left')
             htmlib-MntTableField(html-encode(b-query.name),'left')
             htmlib-MntTableField(html-encode(lc-CustomerInfo),'left')
             htmlib-MntTableField(lc-contactInfo,'left')
             htmlib-MntTableField(html-encode(lc-lastPass),'left')
             htmlib-MntTableField(html-encode(lc-lastLogin),'left')
-            htmlib-MntTableField(html-encode((if b-query.disabled = true
-                                          then 'Yes' else 'No') + lc-nopass),'left') skip
+            htmlib-MntTableField(html-encode((IF b-query.disabled = TRUE
+                                          THEN 'Yes' ELSE 'No') + lc-nopass),'left') SKIP
 
-            tbar-BeginHidden(rowid(b-query))
-                tbar-Link("view",rowid(b-query),appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
-                tbar-Link("update",rowid(b-query),appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
-                tbar-Link("delete",rowid(b-query),
-                          if DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"webuser",rowid(b-query))
-                          then ( appurl + '/' + "sys/webusermnt.p") else "off",
+            tbar-BeginHidden(ROWID(b-query))
+                tbar-Link("view",ROWID(b-query),appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
+                tbar-Link("update",ROWID(b-query),appurl + '/' + "sys/webusermnt.p",lc-link-otherp)
+                tbar-Link("delete",ROWID(b-query),
+                          IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"webuser",ROWID(b-query))
+                          THEN ( appurl + '/' + "sys/webusermnt.p") ELSE "off",
                           lc-link-otherp)
-                tbar-Link("genpassword",rowid(b-query),appurl + '/' + "sys/webusergen.p","customer=" + 
-                                                string(rowid(b-query)) 
+                tbar-Link("genpassword",ROWID(b-query),appurl + '/' + "sys/webusergen.p","customer=" + 
+                                                string(ROWID(b-query)) 
                                                 )
-                tbar-Link("contaccess",rowid(b-query),
-                              if b-query.UserClass = "CONTRACT"
-                              then ( appurl + '/' + "sys/webcontaccess.p") else "off",lc-link-otherp)
-                tbar-Link("wrk-hr",rowid(b-query),
-                              if b-query.UserClass = "INTERNAL"
-                              then ( appurl + '/' + "sys/webwrkhour.p") else "off",lc-link-otherp)
+                tbar-Link("contaccess",ROWID(b-query),
+                              IF b-query.UserClass = "CONTRACT"
+                              THEN ( appurl + '/' + "sys/webcontaccess.p") ELSE "off",lc-link-otherp)
+                tbar-Link("wrk-hrall",?,  appurl + "/sys/webwrkhourall.p" ,lc-link-otherp)
+                tbar-Link("wrk-hr",ROWID(b-query),
+                              IF b-query.UserClass = "INTERNAL"
+                              THEN ( appurl + '/' + "sys/webwrkhour.p") ELSE "off",lc-link-otherp)
 
-                tbar-Link("conttime",rowid(b-query),
-                              if b-query.UserClass = "INTERNAL"
-                              then ( appurl + '/' + "sys/webconttime.p") else "off",lc-link-otherp)
+                tbar-Link("conttime",ROWID(b-query),
+                              IF b-query.UserClass = "INTERNAL"
+                              THEN ( appurl + '/' + "sys/webconttime.p") ELSE "off",lc-link-otherp)
             tbar-EndHidden()
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -536,16 +539,16 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
    
     {&out} htmlib-StartPanel() 
-            skip.
+            SKIP.
 
 
     {&out}  '<tr><td align="left">'.
@@ -587,19 +590,19 @@ PROCEDURE process-web-request :
     {&out} htmlib-EndPanel().
 
      
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+           SKIP.
     {&out} 
     '<div id="urlinfo">|selacc=' lc-selacc '|fstatus=' get-value("fstatus") 
-        '</div>' skip.
+        '</div>' SKIP.
     
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

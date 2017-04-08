@@ -20,6 +20,7 @@
     03/09/2016  phoski      CRM 
     06/09/2116  phoski      tbar-BeginLong use longchar
     15/10/2016  phoski      CRM Phase 2
+    08/04/2017  phoski      wrk-hrall tool
     
     
 ***********************************************************************/
@@ -857,6 +858,11 @@ FUNCTION tbar-Link RETURNS CHARACTER
                 ASSIGN 
                 lc-image    = '/images/toolbar3/dataset.gif'
                 lc-alt-text = 'Maintain/View Data Set'.
+            WHEN "wrk-hrall" THEN 
+            ASSIGN 
+                lc-image    = '/images/toolbar3/wrk-all.gif'
+                lc-alt-text = 'All Working Hours'.
+                
             
                  
             
