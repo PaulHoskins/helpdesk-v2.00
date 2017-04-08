@@ -85,6 +85,7 @@ DEFINE VARIABLE lc-QPhrase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE vhLBuffer1        AS HANDLE    NO-UNDO.
 DEFINE VARIABLE vhLBuffer2        AS HANDLE    NO-UNDO.
 DEFINE VARIABLE vhLQuery          AS HANDLE    NO-UNDO.
+DEFINE VARIABLE ll-Dates          AS LOGICAL   NO-UNDO.
 
 
 DEFINE TEMP-TABLE tt-sum NO-UNDO
@@ -139,7 +140,7 @@ FUNCTION CreateSummaryRecord RETURNS LOGICAL
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-    {lib/htmlib.i}
+{lib/htmlib.i}
 {lib/replib.i}
 
 
@@ -794,20 +795,30 @@ PROCEDURE ip-Selection:
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
         '</td>'
-        '<td valign="top" align="left">'
+        '<td valign="top" align="left">'.
+    IF ll-dates THEN
+    {&out}       
         htmlib-CalendarInputField("lodate",10,lc-lodate) 
         htmlib-CalendarLink("lodate")
         '</td>' SKIP.
+    ELSE
+    {&out} REPLACE(htmlib-CalendarInputField("xlodate",10,lc-lodate),">"," disabled>" ) 
+            htmlib-Hidden("lodate",lc-lodate) "</td>" SKIP. 
+        
     {&out} 
         '<td valign="top" align="right">' 
         (IF LOOKUP("hidate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("To Date")
         ELSE htmlib-SideLabel("To Date"))
         '</td>'
-        '<td valign="top" align="left">'
+        '<td valign="top" align="left">'.
+    IF ll-dates THEN
+    {&out}
         htmlib-CalendarInputField("hidate",10,lc-hidate) 
         htmlib-CalendarLink("hidate")
         '</td>' SKIP.
+     ELSE {&out} REPLACE(htmlib-CalendarInputField("xhidate",10,lc-hidate),">"," disabled>" )
+         htmlib-Hidden("hidate",lc-hidate) "</td>" SKIP. 
      
         
     
@@ -950,7 +961,9 @@ PROCEDURE process-web-request :
         
     IF glob-webuser.engType = "SAL"
         THEN lc-crit-rep = lc-global-user.
-        
+     
+    ASSIGN ll-dates = TRUE.
+      
     IF lc-crit-dType <> "Date"
     AND lc-crit-dType <> "Close" THEN
     DO:
@@ -960,8 +973,11 @@ PROCEDURE process-web-request :
         OR lc-Crit-dType = "CloseLast"
         THEN ASSIGN ld-work2 = ld-work1 - 1
                     ld-work1 = com-monthBegin(ld-work2).
-        ASSIGN lc-lodate = STRING(ld-work1, "99/99/9999").
-        ASSIGN lc-hidate = STRING(ld-work2, "99/99/9999").
+        ASSIGN
+            ll-Dates = FALSE
+            lc-lodate = STRING(ld-work1, "99/99/9999")
+            lc-hidate = STRING(ld-work2, "99/99/9999").
+        
     END.
       
     IF request_method = "GET" AND ( get-value("navigation") = ""  OR get-value("navigation") = "INITIAL") THEN
@@ -1020,6 +1036,8 @@ PROCEDURE process-web-request :
         htmlib-ProgramTitle("CRM Opportunities") SKIP
         htmlib-hidden("submitsource","") SKIP.
     RUN ip-Selection.
+    
+    IF ll-Dates THEN
     {&out} htmlib-CalendarScript("lodate") SKIP
         htmlib-CalendarScript("hidate") SKIP.
      
