@@ -13,6 +13,7 @@
     17/12/2016  phoski      Projected Revenue/GP on summary
     18/12/2016  phoski      Columns changed
     22/02/2017  phoski      Recurring Cost & Revenue
+    07/04/2017  phoski      Probability/Date Selections
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -59,13 +60,14 @@ DEFINE VARIABLE lc-crit-sort      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-crit-SortOrder AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-SortOptions    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-OrderOptions   AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-crit-prob      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-crit-dType     AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-lodate         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-hidate         AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE li-max-lines      AS INTEGER   INITIAL 12 NO-UNDO.
+DEFINE VARIABLE li-max-lines      AS INTEGER   INITIAL 12000000 NO-UNDO.
 DEFINE VARIABLE lr-first-row      AS ROWID     NO-UNDO.
 DEFINE VARIABLE lr-last-row       AS ROWID     NO-UNDO.
 DEFINE VARIABLE li-count          AS INTEGER   NO-UNDO.
@@ -189,12 +191,20 @@ PROCEDURE ip-BuildQueryPhrase:
             lc-QPhrase = lc-QPhrase + " and b-query.opType = '"  + lc-crit-type + "'".
         
     IF DATE(lc-lodate) <> ?
-        AND date(lc-hiDate) <> ? THEN                
+        AND date(lc-hiDate) <> ? THEN   
+    DO: 
+        IF lc-crit-dtype BEGINS "date"  THEN          
         ASSIGN 
             lc-QPhrase = lc-QPhrase + 
             " and b-query.CrtDate >= " + string(DATE(lc-lodate)) + " " + 
             " and b-query.CrtDate <= " + string(DATE(lc-hidate)) + " ".
-          
+        ELSE 
+        ASSIGN 
+            lc-QPhrase = lc-QPhrase + 
+            " and b-query.CloseDate >= " + string(DATE(lc-lodate)) + " " + 
+            " and b-query.CloseDate <= " + string(DATE(lc-hidate)) + " " +
+            " and b-query.CloseDate <> ? ".
+    END.      
     IF lc-search <> "" THEN
     DO:
         ASSIGN 
@@ -211,7 +221,9 @@ PROCEDURE ip-BuildQueryPhrase:
     IF lc-crit-rep <> "ALL"
         THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.SalesManager = '"  + lc-crit-rep + "'".   
-       
+   IF INTEGER(lc-crit-prob) > 0    
+   THEN ASSIGN 
+            lc-QPhrase = lc-QPhrase + " and b-query.Probability >= "  + lc-crit-prob.       
     IF lc-crit-Sort <> "" THEN
     DO:
         ASSIGN 
@@ -721,7 +733,7 @@ PROCEDURE ip-Selection:
     
     {&out} 
         '<tr><td align=right valign=top>' htmlib-SideLabel("Customer") 
-        '</td><td align=left valign=top colspan=5>'.
+        '</td><td align=left valign=top colspan=8>'.
   
     
     {&out-long}
@@ -767,6 +779,15 @@ PROCEDURE ip-Selection:
     
     {&out} 
         '</td></tr><tr>' SKIP.
+      
+     {&out} 
+        '<td align=right valign=top>' htmlib-SideLabel("Date Type") 
+        '</td><td align=left valign=top>'
+        
+        htmlib-SelectJS("dtype",'ChangeCriteria()', "Date|DateThis|DateLast|Close|CloseThis|CloseLast"
+        , "Opportunity Date|Opportunity Date (This Month)|Opportunity Date (Last Month)|Close Date|Close Date (This Month)|Close Date (Last Month)",lc-crit-dtype)
+        '</td>'. 
+        
     {&out} 
         '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
@@ -787,7 +808,16 @@ PROCEDURE ip-Selection:
         htmlib-CalendarInputField("hidate",10,lc-hidate) 
         htmlib-CalendarLink("hidate")
         '</td>' SKIP.
+     
+        
     
+    {&out} 
+        '</tr><tr>'
+        '<td align=right valign=top>' htmlib-SideLabel("Probability% >=") 
+        '</td><td align=left valign=top>'
+        
+        htmlib-SelectJS("prob",'ChangeCriteria()', lc-global-opProb-Code , lc-global-opProb-desc,lc-crit-prob) '</td>'.   
+        
     {&out} 
         '</td><td align=right valign=top>' htmlib-SideLabel("Sort") 
         '</td><td align=left valign=top>'
@@ -816,10 +846,7 @@ PROCEDURE ip-Selection:
     END.
     {&out} 
         '</select></td></tr>'.
-    
-
-   
-
+        
        
     {&out} 
         '</table>' htmlib-EndCriteria() '<br />'.
@@ -889,6 +916,8 @@ PROCEDURE process-web-request :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
+    DEFINE VARIABLE ld-Work1     AS DATE     NO-UNDO.
+    DEFINE VARIABLE ld-Work2     AS DATE     NO-UNDO.
   
     {lib/checkloggedin.i}
     
@@ -906,9 +935,15 @@ PROCEDURE process-web-request :
         lc-hidate         = get-value("hidate")
         lc-crit-sort      = get-value("sort")
         lc-crit-SortOrder = get-value("sortorder")
+        lc-crit-prob      = get-value("prob")
+        lc-crit-dtype     = get-value("dtype").
+        
+        
         .
 
-                                    
+    IF lc-crit-dtype = ""
+    THEN lc-crit-dtype = "Date".
+                                
          
     RUN crm/lib/getCustomerList.p ( lc-global-company, lc-global-user, OUTPUT lc-sela-Code, OUTPUT lc-sela-Name).
     RUN crm/lib/getRepList.p ( lc-global-company, lc-global-user, OUTPUT lc-selr-Code, OUTPUT lc-selr-Name).
@@ -916,6 +951,18 @@ PROCEDURE process-web-request :
     IF glob-webuser.engType = "SAL"
         THEN lc-crit-rep = lc-global-user.
         
+    IF lc-crit-dType <> "Date"
+    AND lc-crit-dType <> "Close" THEN
+    DO:
+        ld-work1 = com-monthBegin(TODAY).
+        ld-work2 = Com-MonthEnd(TODAY).
+        IF lc-crit-dType = "DateLast"
+        OR lc-Crit-dType = "CloseLast"
+        THEN ASSIGN ld-work2 = ld-work1 - 1
+                    ld-work1 = com-monthBegin(ld-work2).
+        ASSIGN lc-lodate = STRING(ld-work1, "99/99/9999").
+        ASSIGN lc-hidate = STRING(ld-work2, "99/99/9999").
+    END.
       
     IF request_method = "GET" AND ( get-value("navigation") = ""  OR get-value("navigation") = "INITIAL") THEN
     DO:
@@ -942,7 +989,8 @@ PROCEDURE process-web-request :
     
         IF  lc-crit-sortOrder = "" THEN lc-crit-SortOrder = "DESC".
               
-        
+        IF lc-crit-prob = ""
+        THEN lc-crit-prob = "0" .
     END.
             
     ASSIGN 
@@ -956,7 +1004,9 @@ PROCEDURE process-web-request :
                              '|lodate^' + lc-lodate +     
                              '|hidate^' + lc-hidate +
                              '|sort^' + lc-crit-Sort + 
-                             '|sortorder^' + lc-crit-SortOrder 
+                             '|sortorder^' + lc-crit-SortOrder  +
+                             '|prob^' + lc-crit-prob +
+                             '|dtype^' + lc-crit-dtype.
         .
                                 
     RUN outputHeader.

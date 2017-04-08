@@ -22,7 +22,10 @@ function crmButton(ButtonEvent, NewURL) {
 
 	var psort = document.mainform.sort.value
 	var psortorder = document.mainform.sortorder.value
-
+	
+	var pprob = document.mainform.prob.value
+	
+	var pdtype = document.mainform.dtype.value
 
 
 	NewURL += "?search=" + pSearch
@@ -38,6 +41,8 @@ function crmButton(ButtonEvent, NewURL) {
 	NewURL += "&lodate=" + plodate
 	NewURL += "&sort=" + psort
 	NewURL += "&sortorder=" + psortorder
+	NewURL += "&prob=" + pprob
+	NewURL += "&dtype=" + pdtype
 
 
 	if (ButtonEvent == "add") {
