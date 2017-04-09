@@ -11,6 +11,7 @@
     09/04/2006  phoski      Initial
     10/04/2006  phoski      CompanyCode
     05/09/2015  phoski      DJS Year start problems
+    09/04/2017  phoski      Various
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -113,8 +114,9 @@ FUNCTION dayOfWeek RETURNS INTEGER
 &IF DEFINED(EXCLUDE-Wk2Date) = 0 &THEN
 
 FUNCTION htmlib-SelectDecimalTime RETURNS CHARACTER 
-	(pc-name AS CHARACTER,
-	 pc-value AS CHARACTER) FORWARD.
+    (pc-name AS CHARACTER,
+    pc-selected AS CHARACTER,
+    pf-contract AS DECIMAL) FORWARD.
 
 FUNCTION Wk2Date RETURNS CHARACTER
     (cWkYrNo AS CHARACTER) FORWARD.
@@ -139,7 +141,7 @@ FUNCTION Wk2Date RETURNS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 
 
@@ -166,15 +168,15 @@ PROCEDURE ip-build-year :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE vx        AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE vz        AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE lc-date   AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE hi-date   AS DATE NO-UNDO.
-    DEFINE VARIABLE lo-date   AS DATE NO-UNDO.
-    DEFINE VARIABLE std-hours AS DECIMAL FORMAT "99.99" NO-UNDO.
-    DEFINE VARIABLE tmp-hours AS DECIMAL FORMAT "99.99" NO-UNDO.
-    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10"  NO-UNDO.
-    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|BANK|LEAVE|SICK|DOC|DENT|OT"  NO-UNDO.
+    DEFINE VARIABLE vx                AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE vz                AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-date           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE hi-date           AS DATE      NO-UNDO.
+    DEFINE VARIABLE lo-date           AS DATE      NO-UNDO.
+    DEFINE VARIABLE std-hours         AS DECIMAL   FORMAT "99.99" NO-UNDO.
+    DEFINE VARIABLE tmp-hours         AS DECIMAL   FORMAT "99.99" NO-UNDO.
+    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10" NO-UNDO.
+    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|BANK|LEAVE|SICK|DOC|DENT|OT" NO-UNDO.
   
 
     FOR EACH WebStdTime WHERE WebStdTime.CompanyCode = lc-global-company                      
@@ -183,7 +185,7 @@ PROCEDURE ip-build-year :
         NO-LOCK:
         DO vx = 1 TO 7:
             ASSIGN 
-                tmp-hours         =   ((TRUNCATE(WebStdTime.StdAMEndTime[vx] / 100,0) + dec(WebStdTime.StdAMEndTime[vx] MODULO 100 / 60))          /* convert time to decimal  */ 
+                tmp-hours         = ((TRUNCATE(WebStdTime.StdAMEndTime[vx] / 100,0) + dec(WebStdTime.StdAMEndTime[vx] MODULO 100 / 60))          /* convert time to decimal  */ 
                                        - (TRUNCATE(WebStdTime.StdAMStTime[vx] / 100,0) + dec(WebStdTime.StdAMStTime[vx] MODULO 100 / 60)))            /* convert time to decimal  */ 
                                        + ((TRUNCATE(WebStdTime.StdPMEndTime[vx] / 100,0) + dec(WebStdTime.StdPMEndTime[vx] MODULO 100 / 60))          /* convert time to decimal  */                               
                 - (TRUNCATE(WebStdTime.StdPMStTime[vx] / 100,0) + dec(WebStdTime.StdPMStTime[vx] MODULO 100 / 60)))            /* convert time to decimal  */ 
@@ -253,308 +255,308 @@ PROCEDURE ip-ExportAccordion :
     ------------------------------------------------------------------------------*/
 
     {&out}
-    '<style type="text/css">' skip
+        '<style type="text/css">' SKIP
       
-      '.clear ~{ /* generic container (i.e. div) for floating buttons */' skip
-      'overflow: hidden;'    skip
-      'width: 100%;' skip
-      '~}' skip
+        '.clear ~{ /* generic container (i.e. div) for floating buttons */' SKIP
+        'overflow: hidden;'    SKIP
+        'width: 100%;' SKIP
+        '~}' SKIP
 
-      'a.button ~{' skip
-      'background: transparent url(~'/images/toolbar/bg_button_a.gif~') no-repeat scroll top right;' skip
-      'color: #444;' skip
-      'display: block;' skip
-      'float: left;' skip
-      'font: normal 12px arial, sans-serif;' skip
-      'height: 24px;' skip
-      'margin-right: 6px;' skip
-      'padding-right: 18px; /* sliding doors padding */' skip
-      'text-decoration: none;' skip
-      '~}' skip
+        'a.button ~{' SKIP
+        'background: transparent url(~'/images/toolbar/bg_button_a.gif~') no-repeat scroll top right;' SKIP
+        'color: #444;' SKIP
+        'display: block;' SKIP
+        'float: left;' SKIP
+        'font: normal 12px arial, sans-serif;' SKIP
+        'height: 24px;' SKIP
+        'margin-right: 6px;' SKIP
+        'padding-right: 18px; /* sliding doors padding */' SKIP
+        'text-decoration: none;' SKIP
+        '~}' SKIP
 
-      'a.button span ~{' skip
-      'background: transparent url(~'/images/toolbar/bg_button_span1.gif~') no-repeat;' skip
-      'display: block;' skip
-      'line-height: 14px;' skip
-      'padding: 5px 0 5px 18px;' skip
-       'cursor: pointer;' skip
-      '~} ' skip
+        'a.button span ~{' SKIP
+        'background: transparent url(~'/images/toolbar/bg_button_span1.gif~') no-repeat;' SKIP
+        'display: block;' SKIP
+        'line-height: 14px;' SKIP
+        'padding: 5px 0 5px 18px;' SKIP
+        'cursor: pointer;' SKIP
+        '~} ' SKIP
 
-      'a.button:active ~{' skip
-      'background-position: bottom right;' skip
-      'color: #000;' skip
-      'outline: none; /* hide dotted outline in Firefox */' skip
-       'cursor: pointer;' skip
-      '~}' skip
+        'a.button:active ~{' SKIP
+        'background-position: bottom right;' SKIP
+        'color: #000;' SKIP
+        'outline: none; /* hide dotted outline in Firefox */' SKIP
+        'cursor: pointer;' SKIP
+        '~}' SKIP
 
-      'a.button:active span ~{' skip
-      'background-position: bottom left;' skip
-      'padding: 6px 0 4px 18px; /* push text down 1px */' skip
-       'cursor: pointer;' skip
-      '~} ' skip
+        'a.button:active span ~{' SKIP
+        'background-position: bottom left;' SKIP
+        'padding: 6px 0 4px 18px; /* push text down 1px */' SKIP
+        'cursor: pointer;' SKIP
+        '~} ' SKIP
 
-      '.buttonbox ~{' skip
-      'border: 0px dotted blue;'  skip
-      'padding: 1px; ' skip
-      'margin-bottom: 1px;'  skip
-      'margin-top: 1px; ' skip
-      'font-weight: bold; ' skip
-      'background-color: #FFFFFF;' skip
-      'position: relative;' skip
-      'width: 100%;' skip
-      'height: 20px;     ' skip
-      '~}' skip
-
-
-      '.AccordionTitle, .AccordionTitle1, .AccordionTitle2, .AccordionContent, .AccordionContainer' skip
-      '~{' skip
-      'position: relative;' skip
-      'margin-left:auto;' skip
-      'margin-right:auto;' skip
-      'width: 750px; /*changeble*/' skip
-      'border-bottom: 1px dotted white;' skip
-      '~}' skip
+        '.buttonbox ~{' SKIP
+        'border: 0px dotted blue;'  SKIP
+        'padding: 1px; ' SKIP
+        'margin-bottom: 1px;'  SKIP
+        'margin-top: 1px; ' SKIP
+        'font-weight: bold; ' SKIP
+        'background-color: #FFFFFF;' SKIP
+        'position: relative;' SKIP
+        'width: 100%;' SKIP
+        'height: 20px;     ' SKIP
+        '~}' SKIP
 
 
-      '.AccordionTitle' skip
-      '~{' skip
-      'height: 20px; /*changeble*/' skip
-      'overflow: hidden;' skip
-      'cursor: pointer;' skip
-      'font-family: Verdana; /*changeble*/' skip
-      'font-size: 12px; /*changeble*/' skip
-      'font-weight: normal; /*changeble*/' skip
-      'vertical-align: middle; /*changeble*/' skip
-      'text-align: center; /*changeble*/' skip
-      'display: table-cell;' skip
-      '-moz-user-select: none;' skip
-      'border-top: none; /*changeble*/' skip
-      'border-bottom: none; /*changeble*/' skip
-      'border-left: none; /*changeble*/' skip
-      'border-right: none; /*changeble*/' skip
-      'background-color: #0099cc;' skip
-      'color: White;' skip
-      '~}' skip
-
-      '.AccordionTitle1' skip
-      '~{' skip
-      'height: 20px; /*changeble*/' skip
-      'overflow: hidden;' skip
-      'cursor: pointer;' skip
-      'font-family: Verdana; /*changeble*/' skip
-      'font-size: 12px; /*changeble*/' skip
-      'font-weight: normal; /*changeble*/' skip
-      'vertical-align: middle; /*changeble*/' skip
-      'text-align: center; /*changeble*/' skip
-      'display: table-cell;' skip
-      '-moz-user-select: none;' skip
-      'border-top: none; /*changeble*/' skip
-      'border-bottom: none; /*changeble*/' skip
-      'border-left: none; /*changeble*/' skip
-      'border-right: none; /*changeble*/' skip
-      'background-color: #E4ECF0;' skip
-/*       'background-color: #F5F5F5;' skip */
-      'color: Black;' skip
-      '~}' skip
-
-      '.AccordionTitle2' skip
-      '~{' skip
-      'height: 20px; /*changeble*/' skip
-      'overflow: hidden;' skip
-      'cursor: pointer;' skip
-      'font-family: Verdana; /*changeble*/' skip
-      'font-size: 12px; /*changeble*/' skip
-      'font-weight: normal; /*changeble*/' skip
-      'vertical-align: middle; /*changeble*/' skip
-      'text-align: center; /*changeble*/' skip
-      'display: table-cell;' skip
-      '-moz-user-select: none;' skip
-      'border-top: none; /*changeble*/' skip
-      'border-bottom: none; /*changeble*/' skip
-      'border-left: none; /*changeble*/' skip
-      'border-right: none; /*changeble*/' skip
-      'background-color: #A4C1F4;' skip
-      'color: Black;' skip
-      '~}' skip
-
-      '.AccordionContent' skip
-      '~{' skip
-      'height: 0px;' skip
-      'overflow: hidden; /*display: none;  */' skip
-      '~}' skip
+        '.AccordionTitle, .AccordionTitle1, .AccordionTitle2, .AccordionContent, .AccordionContainer' SKIP
+        '~{' SKIP
+        'position: relative;' SKIP
+        'margin-left:auto;' SKIP
+        'margin-right:auto;' SKIP
+        'width: 750px; /*changeble*/' SKIP
+        'border-bottom: 1px dotted white;' SKIP
+        '~}' SKIP
 
 
-      '.AccordionContent_' skip
-      '~{' skip
-      'height: auto;' skip
-      '~}' skip
+        '.AccordionTitle' SKIP
+        '~{' SKIP
+        'height: 20px; /*changeble*/' SKIP
+        'overflow: hidden;' SKIP
+        'cursor: pointer;' SKIP
+        'font-family: Verdana; /*changeble*/' SKIP
+        'font-size: 12px; /*changeble*/' SKIP
+        'font-weight: normal; /*changeble*/' SKIP
+        'vertical-align: middle; /*changeble*/' SKIP
+        'text-align: center; /*changeble*/' SKIP
+        'display: table-cell;' SKIP
+        '-moz-user-select: none;' SKIP
+        'border-top: none; /*changeble*/' SKIP
+        'border-bottom: none; /*changeble*/' SKIP
+        'border-left: none; /*changeble*/' SKIP
+        'border-right: none; /*changeble*/' SKIP
+        'background-color: #0099cc;' SKIP
+        'color: White;' SKIP
+        '~}' SKIP
+
+        '.AccordionTitle1' SKIP
+        '~{' SKIP
+        'height: 20px; /*changeble*/' SKIP
+        'overflow: hidden;' SKIP
+        'cursor: pointer;' SKIP
+        'font-family: Verdana; /*changeble*/' SKIP
+        'font-size: 12px; /*changeble*/' SKIP
+        'font-weight: normal; /*changeble*/' SKIP
+        'vertical-align: middle; /*changeble*/' SKIP
+        'text-align: center; /*changeble*/' SKIP
+        'display: table-cell;' SKIP
+        '-moz-user-select: none;' SKIP
+        'border-top: none; /*changeble*/' SKIP
+        'border-bottom: none; /*changeble*/' SKIP
+        'border-left: none; /*changeble*/' SKIP
+        'border-right: none; /*changeble*/' SKIP
+        'background-color: #E4ECF0;' SKIP
+        /*       'background-color: #F5F5F5;' skip */
+        'color: Black;' SKIP
+        '~}' SKIP
+
+        '.AccordionTitle2' SKIP
+        '~{' SKIP
+        'height: 20px; /*changeble*/' SKIP
+        'overflow: hidden;' SKIP
+        'cursor: pointer;' SKIP
+        'font-family: Verdana; /*changeble*/' SKIP
+        'font-size: 12px; /*changeble*/' SKIP
+        'font-weight: normal; /*changeble*/' SKIP
+        'vertical-align: middle; /*changeble*/' SKIP
+        'text-align: center; /*changeble*/' SKIP
+        'display: table-cell;' SKIP
+        '-moz-user-select: none;' SKIP
+        'border-top: none; /*changeble*/' SKIP
+        'border-bottom: none; /*changeble*/' SKIP
+        'border-left: none; /*changeble*/' SKIP
+        'border-right: none; /*changeble*/' SKIP
+        'background-color: #A4C1F4;' SKIP
+        'color: Black;' SKIP
+        '~}' SKIP
+
+        '.AccordionContent' SKIP
+        '~{' SKIP
+        'height: 0px;' SKIP
+        'overflow: hidden; /*display: none;  */' SKIP
+        '~}' SKIP
 
 
-      '.AccordionContainer' skip
-      '~{' skip
-      'border-top: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-bottom: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-left: solid 1px #C1C1C1; /*changeble*/' skip
-      'border-right: solid 1px #C1C1C1; /*changeble*/' skip
-      '~}' skip
+        '.AccordionContent_' SKIP
+        '~{' SKIP
+        'height: auto;' SKIP
+        '~}' SKIP
 
 
-      '.ContentTable' skip
-      '~{' skip
-      'width: 100%;' skip
-      'text-align: center;' skip
-      'color: White;' skip
-      '~}' skip
+        '.AccordionContainer' SKIP
+        '~{' SKIP
+        'border-top: solid 1px #C1C1C1; /*changeble*/' SKIP
+        'border-bottom: solid 1px #C1C1C1; /*changeble*/' SKIP
+        'border-left: solid 1px #C1C1C1; /*changeble*/' SKIP
+        'border-right: solid 1px #C1C1C1; /*changeble*/' SKIP
+        '~}' SKIP
 
-      '.ContentCell' skip
-      '~{' skip
-      'background-color: #666666;' skip
-      '~}' skip
 
-      '.ContentTable a:link, a:visited' skip
-      '~{' skip
-      'color: White;' skip
-      'text-decoration: none;' skip
-      '~}' skip
+        '.ContentTable' SKIP
+        '~{' SKIP
+        'width: 100%;' SKIP
+        'text-align: center;' SKIP
+        'color: White;' SKIP
+        '~}' SKIP
 
-      '.ContentTable a:hover' skip
-      '~{' skip
-      'color: Yellow;' skip
-      'text-decoration: none;' skip
-      '~}' skip
+        '.ContentCell' SKIP
+        '~{' SKIP
+        'background-color: #666666;' SKIP
+        '~}' SKIP
 
-      '</style>' skip
+        '.ContentTable a:link, a:visited' SKIP
+        '~{' SKIP
+        'color: White;' SKIP
+        'text-decoration: none;' SKIP
+        '~}' SKIP
 
-      '<script type="text/javascript" language="JavaScript">' skip
-      'var ContentHeight = 0;' skip
-      'var TimeToSlide = 200;' skip
-      'var openAccordion = "";' SKIP
-      'var inEdit = false;' skip
-      'var totalAcc = 0 ;' skip
-      'var firstTime = ' if lc-mode = 'display' or lc-mode = 'insert' then 'true' else 'false' skip
+        '.ContentTable a:hover' SKIP
+        '~{' SKIP
+        'color: Yellow;' SKIP
+        'text-decoration: none;' SKIP
+        '~}' SKIP
+
+        '</style>' SKIP
+
+        '<script type="text/javascript" language="JavaScript">' SKIP
+        'var ContentHeight = 0;' SKIP
+        'var TimeToSlide = 200;' SKIP
+        'var openAccordion = "";' SKIP
+        'var inEdit = false;' SKIP
+        'var totalAcc = 0 ;' SKIP
+        'var firstTime = ' IF lc-mode = 'display' OR lc-mode = 'insert' THEN 'true' ELSE 'false' SKIP
       
-      'function runAccordion(index)' skip
-      '~{' SKIP
-      /*
-      'if (inEdit) ' skip
-      '~{' skip
-      ' alert("You have made changes to this week~'s times\n Please update or cancel before continuing" ); ' skip
-      ' return; ' skip
-      '~}' skip
-      */
-      'var nID = "Accordion" + index + "Content";' skip
-      'if(openAccordion == nID)' skip
-      'nID = "";' skip
-      'ContentHeight = document.getElementById("Accordion" + index + "Content"+"_").offsetHeight;' skip
-      'setTimeout("animate(" + new Date().getTime() + "," + TimeToSlide + ",~'"' skip
-      '+ openAccordion + "~',~'" + nID + "~')", 33);' skip
-      'openAccordion = nID;' skip
-      '~}' skip
+        'function runAccordion(index)' SKIP
+        '~{' SKIP
+        /*
+        'if (inEdit) ' skip
+        '~{' skip
+        ' alert("You have made changes to this week~'s times\n Please update or cancel before continuing" ); ' skip
+        ' return; ' skip
+        '~}' skip
+        */
+        'var nID = "Accordion" + index + "Content";' SKIP
+        'if(openAccordion == nID)' SKIP
+        'nID = "";' SKIP
+        'ContentHeight = document.getElementById("Accordion" + index + "Content"+"_").offsetHeight;' SKIP
+        'setTimeout("animate(" + new Date().getTime() + "," + TimeToSlide + ",~'"' SKIP
+        '+ openAccordion + "~',~'" + nID + "~')", 33);' SKIP
+        'openAccordion = nID;' SKIP
+        '~}' SKIP
 
-      'function animate(lastTick, timeLeft, closingId, openingId)' skip
-      '~{' skip
-      'var curTick = new Date().getTime();' skip
-      'var elapsedTicks = curTick - lastTick;' skip
-      'var opening = (openingId == "") ? null : document.getElementById(openingId);' skip
-      'var closing = (closingId == "") ? null : document.getElementById(closingId);' skip
-      'if(timeLeft <= elapsedTicks)' skip
-      '~{' skip
-      'if(opening != null)' skip
-      'opening.style.height = ~'auto~';' skip
-      'if(closing != null)' skip
-      '~{' skip
-      '//closing.style.display = ~'none~';' skip
-      'closing.style.height = ~'0px~';' skip
-      '~}' skip
-      'return;' skip
-      '~}' skip
-      'timeLeft -= elapsedTicks;' skip
-      'var newClosedHeight = Math.round((timeLeft/TimeToSlide) * ContentHeight);' skip
-      'if(opening != null)' skip
-      '~{' skip
-      'if(opening.style.display != ~'block~')' skip
-      'opening.style.display = ~'block~';' skip
-      'opening.style.height = (ContentHeight - newClosedHeight) + ~'px~';' skip
-      '~}' skip
-      'if(closing != null)' skip
-      'closing.style.height = newClosedHeight + ~'px~';' skip
-      'setTimeout("animate(" + curTick + "," + timeLeft + ",~'"' skip
-      '+ closingId + "~',~'" + openingId + "~')", 33);' skip
-      '~}' skip
+        'function animate(lastTick, timeLeft, closingId, openingId)' SKIP
+        '~{' SKIP
+        'var curTick = new Date().getTime();' SKIP
+        'var elapsedTicks = curTick - lastTick;' SKIP
+        'var opening = (openingId == "") ? null : document.getElementById(openingId);' SKIP
+        'var closing = (closingId == "") ? null : document.getElementById(closingId);' SKIP
+        'if(timeLeft <= elapsedTicks)' SKIP
+        '~{' SKIP
+        'if(opening != null)' SKIP
+        'opening.style.height = ~'auto~';' SKIP
+        'if(closing != null)' SKIP
+        '~{' SKIP
+        '//closing.style.display = ~'none~';' SKIP
+        'closing.style.height = ~'0px~';' SKIP
+        '~}' SKIP
+        'return;' SKIP
+        '~}' SKIP
+        'timeLeft -= elapsedTicks;' SKIP
+        'var newClosedHeight = Math.round((timeLeft/TimeToSlide) * ContentHeight);' SKIP
+        'if(opening != null)' SKIP
+        '~{' SKIP
+        'if(opening.style.display != ~'block~')' SKIP
+        'opening.style.display = ~'block~';' SKIP
+        'opening.style.height = (ContentHeight - newClosedHeight) + ~'px~';' SKIP
+        '~}' SKIP
+        'if(closing != null)' SKIP
+        'closing.style.height = newClosedHeight + ~'px~';' SKIP
+        'setTimeout("animate(" + curTick + "," + timeLeft + ",~'"' SKIP
+        '+ closingId + "~',~'" + openingId + "~')", 33);' SKIP
+        '~}' SKIP
 
-      'function checkLoad()' skip
-      '~{' skip
-      'if (window.onLoad)' skip
-      '~{' skip
-      'window.resizeBy(0, totalAcc * 20);' skip
-      '~}' skip
-      'else ~{' skip
-      'setTimeout("checkLoad();", 1000);' skip
-      '~}' skip
-/*         'alert(firstTime);' skip */
-      'if ( firstTime )' skip
-      '~{' skip
-      'firstTime = false;' skip
-      'fitWindow();' skip
-      '~}' skip
-      '~}' skip
+        'function checkLoad()' SKIP
+        '~{' SKIP
+        'if (window.onLoad)' SKIP
+        '~{' SKIP
+        'window.resizeBy(0, totalAcc * 20);' SKIP
+        '~}' SKIP
+        'else ~{' SKIP
+        'setTimeout("checkLoad();", 1000);' SKIP
+        '~}' SKIP
+        /*         'alert(firstTime);' skip */
+        'if ( firstTime )' SKIP
+        '~{' SKIP
+        'firstTime = false;' SKIP
+        'fitWindow();' SKIP
+        '~}' SKIP
+        '~}' SKIP
 
 
-      'function FitBody() ~{' skip
-      'var iSize = getSizeXY();' skip
-      'var iScroll = getScrollXY();' skip
-/*       'window.alert( 'Width = ' + iSize[0]  +  '   Height = ' + iSize[1] );' skip     */
-/*       'window.alert( 'Width = ' + iScroll[0]  +  '   Height = ' + iScroll[1] );' skip */
-      'iWidth = iSize[0] + iScroll[0] + 28 ;' skip
-      'iHeight = iSize[1] + iScroll[1] + iScroll[1] + 20 ;' skip
-/*       'window.alert( 'Width = ' + iWidth  +  '   Height = ' + iHeight );' skip */
-      'if (iScroll[1] != 0 ) window.resizeTo(iWidth, iHeight);' skip
-      'self.focus();' skip
-      '~};' skip
+        'function FitBody() ~{' SKIP
+        'var iSize = getSizeXY();' SKIP
+        'var iScroll = getScrollXY();' SKIP
+        /*       'window.alert( 'Width = ' + iSize[0]  +  '   Height = ' + iSize[1] );' skip     */
+        /*       'window.alert( 'Width = ' + iScroll[0]  +  '   Height = ' + iScroll[1] );' skip */
+        'iWidth = iSize[0] + iScroll[0] + 28 ;' SKIP
+        'iHeight = iSize[1] + iScroll[1] + iScroll[1] + 20 ;' SKIP
+        /*       'window.alert( 'Width = ' + iWidth  +  '   Height = ' + iHeight );' skip */
+        'if (iScroll[1] != 0 ) window.resizeTo(iWidth, iHeight);' SKIP
+        'self.focus();' SKIP
+        '~};' SKIP
 
-      'function getSizeXY() ~{' skip
-      'var myWidth = 0, myHeight = 0;' skip
-      'if( typeof( window.innerWidth ) == "number" ) ~{' skip
-      '//Non-IE' skip
-      'myWidth = window.innerWidth;' skip
-      'myHeight = window.innerHeight;' skip
-      '//window.alert("NON IE");' skip
-      '~} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) ~{' skip
-      '//IE 6+ in standards compliant mode' skip
-      'myWidth = document.documentElement.clientWidth;' skip
-      'myHeight = document.documentElement.clientHeight;' skip
-      '//window.alert("IE 6");' skip
-      '~} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) ~{' skip
-      '//IE 4 compatible' skip
-      'myWidth = document.body.clientWidth;' skip
-      'myHeight = document.body.clientHeight;' skip
-      '//window.alert("IE 4");' skip
-      '~}' skip
-/*       '//window.alert( 'Width = ' + myWidth  +  '   Height = ' + myHeight );' skip */
-      'return [ myWidth, myHeight ];' skip
-      '~}' skip
+        'function getSizeXY() ~{' SKIP
+        'var myWidth = 0, myHeight = 0;' SKIP
+        'if( typeof( window.innerWidth ) == "number" ) ~{' SKIP
+        '//Non-IE' SKIP
+        'myWidth = window.innerWidth;' SKIP
+        'myHeight = window.innerHeight;' SKIP
+        '//window.alert("NON IE");' SKIP
+        '~} else if( document.documentElement && ( document.documentElement.clientWidth || document.documentElement.clientHeight ) ) ~{' SKIP
+        '//IE 6+ in standards compliant mode' SKIP
+        'myWidth = document.documentElement.clientWidth;' SKIP
+        'myHeight = document.documentElement.clientHeight;' SKIP
+        '//window.alert("IE 6");' SKIP
+        '~} else if( document.body && ( document.body.clientWidth || document.body.clientHeight ) ) ~{' SKIP
+        '//IE 4 compatible' SKIP
+        'myWidth = document.body.clientWidth;' SKIP
+        'myHeight = document.body.clientHeight;' SKIP
+        '//window.alert("IE 4");' SKIP
+        '~}' SKIP
+        /*       '//window.alert( 'Width = ' + myWidth  +  '   Height = ' + myHeight );' skip */
+        'return [ myWidth, myHeight ];' SKIP
+        '~}' SKIP
 
-      'function getScrollXY() ~{' skip
-      'var scrOfX = 0, scrOfY = 0;' skip
-      'if( typeof( window.pageYOffset ) == "number" ) ~{' skip
-      '//Netscape compliant' skip
-      'scrOfY = window.pageYOffset;' skip
-      'scrOfX = window.pageXOffset;' skip
-      '~} else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) ~{' skip
-      '//DOM compliant' skip
-      'scrOfY = document.body.scrollTop;' skip
-      'scrOfX = document.body.scrollLeft;' skip
-      '~} else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) ~{' skip
-      '//IE6 standards compliant mode' skip
-      'scrOfY = document.documentElement.scrollTop;' skip
-      'scrOfX = document.documentElement.scrollLeft;' skip
-      '~}' skip
-/*       '//window.alert( 'Width = ' + scrOfX  +  '   Height = ' + scrOfY );' skip */
-      'return [ scrOfX, scrOfY ];' skip
-      '~}' skip
+        'function getScrollXY() ~{' SKIP
+        'var scrOfX = 0, scrOfY = 0;' SKIP
+        'if( typeof( window.pageYOffset ) == "number" ) ~{' SKIP
+        '//Netscape compliant' SKIP
+        'scrOfY = window.pageYOffset;' SKIP
+        'scrOfX = window.pageXOffset;' SKIP
+        '~} else if( document.body && ( document.body.scrollLeft || document.body.scrollTop ) ) ~{' SKIP
+        '//DOM compliant' SKIP
+        'scrOfY = document.body.scrollTop;' SKIP
+        'scrOfX = document.body.scrollLeft;' SKIP
+        '~} else if( document.documentElement && ( document.documentElement.scrollLeft || document.documentElement.scrollTop ) ) ~{' SKIP
+        '//IE6 standards compliant mode' SKIP
+        'scrOfY = document.documentElement.scrollTop;' SKIP
+        'scrOfX = document.documentElement.scrollLeft;' SKIP
+        '~}' SKIP
+        /*       '//window.alert( 'Width = ' + scrOfX  +  '   Height = ' + scrOfY );' skip */
+        'return [ scrOfX, scrOfY ];' SKIP
+        '~}' SKIP
       
-      '</script>' skip
-    .
+        '</script>' SKIP
+        .
 
 
 
@@ -571,83 +573,95 @@ PROCEDURE ip-time-display :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE vx      AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE vz      AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE lc-h    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE vx                AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE vz                AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-h              AS CHARACTER NO-UNDO.
     
-    DEFINE VARIABLE lc-date AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE hi-date AS DATE NO-UNDO.
-    DEFINE VARIABLE lo-date AS DATE NO-UNDO.
-    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10"  NO-UNDO.
-    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|B.Hol|A/Leave|Sick|Doctor|Dentist|Overtime"  NO-UNDO.
+    DEFINE VARIABLE lc-date           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE hi-date           AS DATE      NO-UNDO.
+    DEFINE VARIABLE lo-date           AS DATE      NO-UNDO.
+    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10" NO-UNDO.
+    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|B.Hol|A/Leave|Sick|Doctor|Dentist|Overtime" NO-UNDO.
     DEFINE VARIABLE lc-saved-reason   AS CHARACTER INITIAL "00" NO-UNDO.
+    DEFINE VARIABLE lc-src-hr         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-src-opt        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-dst-hr         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-dst-opt        AS CHARACTER NO-UNDO.
+        
     
     FOR EACH this-year :
 
    
         ASSIGN 
             lc-date = Wk2Date(STRING(STRING(this-year.ty-week-no,"99") + "-" + string(li-curr-year,"9999")))
-            hi-date  = DATE(ENTRY(1,lc-date,"|")).
+            hi-date = DATE(ENTRY(1,lc-date,"|")).
            
 
         {&out}
-        '<div onclick="runAccordion(' STRING(this-year.ty-week-no) ');">' skip
-          '  <div class="AccordionTitle' string(if this-year.ty-week-no modulo 2 = 0 then 1 else 2)  '"  onselectstart="return false;">' skip
-          '    <span style="float:left;margin-left:20px;text-align:bottom;"><strong>Week ' string(this-year.ty-week-no,"99") '</strong> (' replace(lc-date,"|"," - ") ')'
-          '    </span><span style="float:right;margin-right:20px;text-align:bottom;">Total Hours: ' string(ty-hours,">9.99-") '</span>' skip
-          '  </div>' skip
-          '</div>' skip
-          '<div id="Accordion' string(this-year.ty-week-no) 'Content" class="AccordionContent">' skip
-          '   <div id="Accordion' string(this-year.ty-week-no) 'Content_" class="AccordionContent_">' skip  .
+            '<div onclick="runAccordion(' STRING(this-year.ty-week-no) ');">' SKIP
+            '  <div class="AccordionTitle' STRING(IF this-year.ty-week-no MODULO 2 = 0 THEN 1 ELSE 2)  '"  onselectstart="return false;">' SKIP
+            '    <span style="float:left;margin-left:20px;text-align:bottom;"><strong>Week ' STRING(this-year.ty-week-no,"99") '</strong> (' REPLACE(lc-date,"|"," - ") ')'
+            '    </span><span style="float:right;margin-right:20px;text-align:bottom;">Total Hours: ' STRING(ty-hours,">9.99-") '</span>' SKIP
+            '  </div>' SKIP
+            '</div>' SKIP
+            '<div id="Accordion' STRING(this-year.ty-week-no) 'Content" class="AccordionContent">' SKIP
+            '   <div id="Accordion' STRING(this-year.ty-week-no) 'Content_" class="AccordionContent_">' SKIP  .
 
  
  
         {&out} 
  
          
-        '   <div id="weekdiv' STRING(this-year.ty-week-no) '" name="weekdiv' STRING(this-year.ty-week-no) '"  >' skip
-               '      <table   style="border:5px solid ' if this-year.ty-week-no modulo 2 = 0 then "#E4ECF0" else "#A4C1F4" ';"  ><tr><td>&nbsp;' skip
-               '</td>'
-               ''
-               '      <td>' string(entry(1,lc-day)) ' - ' string(day(hi-date + 0))     '</td>'
-               '      <td>' string(entry(2,lc-day)) ' - ' string(day(hi-date + 1)) '</td>' 
-               '      <td>' string(entry(3,lc-day)) ' - ' string(day(hi-date + 2)) '</td>' 
-               '      <td>' string(entry(4,lc-day)) ' - ' string(day(hi-date + 3)) '</td>' 
-               '      <td>' string(entry(5,lc-day)) ' - ' string(day(hi-date + 4)) '</td>' 
-               '      <td>' string(entry(6,lc-day)) ' - ' string(day(hi-date + 5)) '</td>' 
-               '      <td>' string(entry(7,lc-day)) ' - ' string(day(hi-date + 6)) '</td>'  
-               '      </tr>' skip
-               '      <tr><td width="50px" align="right">Contracted Hours:</td> ' skip.
+            '   <div id="weekdiv' STRING(this-year.ty-week-no) '" name="weekdiv' STRING(this-year.ty-week-no) '"  >' SKIP
+            '      <table   style="border:5px solid ' IF this-year.ty-week-no MODULO 2 = 0 THEN "#E4ECF0" ELSE "#A4C1F4" ';"  ><tr><td>&nbsp;' SKIP
+            '</td>'
+            ''
+            '      <td>' STRING(ENTRY(1,lc-day)) ' - ' STRING(DAY(hi-date + 0))     '</td>'
+            '      <td>' STRING(ENTRY(2,lc-day)) ' - ' STRING(DAY(hi-date + 1)) '</td>' 
+            '      <td>' STRING(ENTRY(3,lc-day)) ' - ' STRING(DAY(hi-date + 2)) '</td>' 
+            '      <td>' STRING(ENTRY(4,lc-day)) ' - ' STRING(DAY(hi-date + 3)) '</td>' 
+            '      <td>' STRING(ENTRY(5,lc-day)) ' - ' STRING(DAY(hi-date + 4)) '</td>' 
+            '      <td>' STRING(ENTRY(6,lc-day)) ' - ' STRING(DAY(hi-date + 5)) '</td>' 
+            '      <td>' STRING(ENTRY(7,lc-day)) ' - ' STRING(DAY(hi-date + 6)) '</td>'  
+            '      </tr>' SKIP
+            '      <tr><td width="50px" align="right">Contracted Hours:</td> ' SKIP.
           
         DO vx = 1 TO 7:
 
 
-            {&out} '     <td>'       STRING(ld-curr-hours[vx],"99.99-") '</td>'  skip.
+            {&out} 
+                '     <td>'       STRING(ld-curr-hours[vx],"99.99-") '</td>'  SKIP.
         END.
 
 
-        {&out}  '      <tr><td width="50px" align="right">Change Hours:</td> ' skip.
+        {&out}  
+            '      <tr><td width="50px" align="right">Change Hours:</td> ' SKIP.
 
         DO vx = 1 TO 7:
 
-            FIND FIRST this-day WHERE this-day.td-week-no = this-year.ty-week-no
-                AND   this-day.td-day-no  = vx
+            FIND FIRST this-day 
+                WHERE this-day.td-week-no = this-year.ty-week-no
+                AND this-day.td-day-no  = vx
                 NO-LOCK NO-ERROR.
 
             lc-h  =   htmlib-SelectDecimalTime(
-            "weekno" + string(this-year.ty-week-no) + "-" + string(vx,"99"),
-             IF AVAILABLE this-day THEN STRING(this-day.td-hours) ELSE "0.00"
-                        ) .
+                "weekno" + string(this-year.ty-week-no) + "-" + string(vx,"99"),
+                IF AVAILABLE this-day THEN STRING(this-day.td-hours) ELSE "0.00",
+                ld-curr-hours[vx]
+                
+                ) .
             IF AVAILABLE this-day THEN
             DO:
                 IF INTEGER(this-day.td-reason) < 10 
-                THEN ASSIGN lc-h = REPLACE(lc-h,'<select','<select style="color:red;"').
+                    THEN ASSIGN lc-h = REPLACE(lc-h,'<select','<select style="color:red;"').
                 ELSE ASSIGN lc-h = REPLACE(lc-h,'<select','<select style="color:green;"').
             END.
-            {&out} '<td>' lc-h '</td>' SKIP.
+            {&out} 
+                '<td>' lc-h '</td>' SKIP.
         END.
 
-        {&out} '     </tr><tr><td align="right"> Reason:</td> ' skip.
+        {&out} 
+            '     </tr><tr><td align="right"> Reason:</td> ' SKIP.
 
         DO vx = 1 TO 7:
          
@@ -655,25 +669,61 @@ PROCEDURE ip-time-display :
                 AND   this-day.td-day-no  = vx
                 NO-LOCK NO-ERROR.
 
-            {&out} '       <td width="40px" >' htmlib-Select("reasonno" + string(this-year.ty-week-no) + "-" + string(vx,"99"),lc-list-reason-id,lc-list-reason,
-                IF AVAILABLE this-day THEN this-day.td-reason ELSE "")  '</td>'  skip.
+            {&out} 
+                '       <td width="40px" >' htmlib-Select("reasonno" + string(this-year.ty-week-no) + "-" + string(vx,"99"),lc-list-reason-id,lc-list-reason,
+                IF AVAILABLE this-day THEN this-day.td-reason ELSE "")  '</td>'  SKIP.
               
         END.
+        
+       
+        
+        ASSIGN
+            lc-src-hr = "weekno" + STRING(this-year.ty-week-no) + "-01".
+        lc-src-opt = "reasonno" + STRING(this-year.ty-week-no) + "-01".
+        
+        
+        {&out} SKIP 
+            '<script>' SKIP
+            'function copyDays' this-year.ty-week-no '() ~{' SKIP
+            ' var shr = document.getElementById("' lc-src-hr '").value;' SKIP
+            ' var sopt = document.getElementById("' lc-src-opt '").value;' SKIP.
+               
+        DO vx = 2 TO 7:
+            IF ld-curr-hours[vx] = 0.00 THEN NEXT.
+            ASSIGN
+                lc-dst-hr = "weekno" + STRING(this-year.ty-week-no) + "-" + string(vx,"99").
+            lc-dst-opt = "reasonno" + STRING(this-year.ty-week-no)  + "-" + string(vx,"99").
+            {&out}
+                'document.getElementById("' lc-dst-hr '").value = shr;' SKIP
+                'document.getElementById("' lc-dst-opt '").value = sopt;' SKIP
+                .
+            
+           
+        END.
+             
+        {&out} SKIP 
+            '~}' SKIP 
+            '</script>' SKIP  .
+        
+        {&out} 
+            '</tr><tr><td>&nbsp;</td><td>' SKIP
+            '<input class="submitbutton" type="button" onclick="javascript:copyDays' this-year.ty-week-no '();"  value="Copy >>" />' SKIP
+            '</td>' SKIP.
 
-
-        {&out}  '</tr>' skip
-         '<tr><td cellpadding="2px" height="20px" colspan=8 >'
-         '<div style="width:100%; height:20px; margin-right:auto; margin-left:auto; ">'
-         '<input class="submitbutton" type="button" onclick="javascript:inEdit=false;runAccordion(' string(this-year.ty-week-no) ');"  value="Cancel" />' skip
+        {&out}  
+            '</tr>' SKIP
+            '<tr><td cellpadding="2px" height="20px" colspan=8 >'
+            '<div style="width:100%; height:20px; margin-right:auto; margin-left:auto; ">'
+            '<input class="submitbutton" type="button" onclick="javascript:inEdit=false;runAccordion(' STRING(this-year.ty-week-no) ');"  value="Cancel" />' SKIP
      
-         '<input class="submitbutton" type="button" onclick="javascript:updateHours(' string(this-year.ty-week-no) ');"  value="Update" />' skip
-         '</div></td>'          
-         '     </tr></table></div>' skip.
+            '<input class="submitbutton" type="button" onclick="javascript:updateHours(' STRING(this-year.ty-week-no) ');"  value="Update" />' SKIP
+            '</div></td>'          
+            '     </tr></table></div>' SKIP.
      
         {&out}
           
-        ' </div>' skip
-          '</div>' skip.
+            ' </div>' SKIP
+            '</div>' SKIP.
 
     END.
  
@@ -750,13 +800,13 @@ PROCEDURE process-web-request :
       emails:       
     ------------------------------------------------------------------------------*/
     
-    DEFINE VARIABLE lc-object           AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE vx                  AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-date             AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10"  NO-UNDO.
-    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|BANK|LEAVE|SICK|DOC|DENT|OT"  NO-UNDO.
+    DEFINE VARIABLE lc-object         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE vx                AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-date           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-list-reason-id AS CHARACTER INITIAL "|01|02|03|04|05|10" NO-UNDO.
+    DEFINE VARIABLE lc-list-reason    AS CHARACTER INITIAL "Select|BANK|LEAVE|SICK|DOC|DENT|OT" NO-UNDO.
 
-    DEFINE VARIABLE lc-selacc       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-selacc         AS CHARACTER NO-UNDO.
     
 
     {lib/checkloggedin.i} 
@@ -792,7 +842,7 @@ PROCEDURE process-web-request :
     IF li-curr-year = ? OR li-curr-year = 0 THEN li-curr-year = YEAR(TODAY).
   
     ASSIGN  
-        li-end-week  = INTEGER(ENTRY(2,Date2Wk(DATE("01/01/" + string(li-curr-year + 1 )) - 1) ,"|")). /* work out the number of weeks for this year */
+        li-end-week = INTEGER(ENTRY(2,Date2Wk(DATE("01/01/" + string(li-curr-year + 1 )) - 1) ,"|")). /* work out the number of weeks for this year */
     /*
     **
     ** PH Always 52 
@@ -803,11 +853,11 @@ PROCEDURE process-web-request :
     
 
     IF lc-mode = "" 
-        THEN ASSIGN lc-mode = get-field("savemode")
-            lc-rowid = get-field("saverowid")
-            lc-search = get-value("savesearch")
-            lc-firstrow = get-value("savefirstrow")
-            lc-lastrow  = get-value("savelastrow")
+        THEN ASSIGN lc-mode       = get-field("savemode")
+            lc-rowid      = get-field("saverowid")
+            lc-search     = get-value("savesearch")
+            lc-firstrow   = get-value("savefirstrow")
+            lc-lastrow    = get-value("savelastrow")
             lc-navigation = get-value("savenavigation").
 
     ASSIGN 
@@ -829,10 +879,10 @@ PROCEDURE process-web-request :
     ASSIGN 
         lc-loginid = b-table.loginid.
     ASSIGN 
-        lc-title = 'Contracted Times For ' + 
+        lc-title        = 'Contracted Times For ' + 
            html-encode(b-table.forename + " " + b-table.surname)
            + " - " + string(li-curr-year) + '</b>'
-        lc-link-label = "Back"
+        lc-link-label   = "Back"
         lc-submit-label = "Update Times".
       
     ASSIGN 
@@ -853,9 +903,9 @@ PROCEDURE process-web-request :
         DO vx = 1 TO 7:
  
             ASSIGN 
-                lc-object  = STRING(INTEGER(lc-submitweek),"99") + "-" + string(li-curr-year)
-                lc-date    = ENTRY(1,Wk2Date(lc-object),"|")
-                lc-date    = STRING(DATE(lc-date) - 1 + vx).
+                lc-object = STRING(INTEGER(lc-submitweek),"99") + "-" + string(li-curr-year)
+                lc-date   = ENTRY(1,Wk2Date(lc-object),"|")
+                lc-date   = STRING(DATE(lc-date) - 1 + vx).
 
             IF lc-submitreason[vx] <> "" THEN
             DO:
@@ -869,8 +919,8 @@ PROCEDURE process-web-request :
                 IF AVAILABLE WebuserTime THEN
                 DO:
                     ASSIGN 
-                        WebUserTime.EventHours  = dec(lc-submitday[vx])
-                        WebUserTime.EventType   = ENTRY(LOOKUP(lc-submitreason[vx],lc-list-reason-id,"|"),lc-list-reason,"|").
+                        WebUserTime.EventHours = dec(lc-submitday[vx])
+                        WebUserTime.EventType  = ENTRY(LOOKUP(lc-submitreason[vx],lc-list-reason-id,"|"),lc-list-reason,"|").
                 END.
                 ELSE
                 DO:
@@ -890,7 +940,7 @@ PROCEDURE process-web-request :
                     AND   WebUserTime.EventDate   = date(lc-date)
                     EXCLUSIVE-LOCK NO-ERROR.
                 IF AVAILABLE WebUserTime
-                THEN DELETE WebUserTime.
+                    THEN DELETE WebUserTime.
                 
             END.
         END.          
@@ -900,9 +950,9 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-OpenHeader(lc-title) skip
-           htmlib-StartForm("mainform","post", selfurl )
-           htmlib-ProgramTitle(lc-title) skip.
+    {&out} htmlib-OpenHeader(lc-title) SKIP
+        htmlib-StartForm("mainform","post", selfurl )
+        htmlib-ProgramTitle(lc-title) SKIP.
 
     RUN ip-ExportAccordion.
 /*
@@ -910,58 +960,59 @@ PROCEDURE process-web-request :
            '<script language="JavaScript" src="/scripts/js/validate.js"></script>' skip.
 */           
 
-    {&out} htmlib-CloseHeader("") skip.
+    {&out} htmlib-CloseHeader("") SKIP.
 
     {&out} htmlib-Hidden ("mode", lc-mode) SKIP
-           htmlib-Hidden ("selacc", lc-selacc) skip
-           htmlib-Hidden ("rowid", lc-rowid) skip
-           htmlib-Hidden ("search", lc-search) skip
-           htmlib-Hidden ("firstrow", lc-firstrow) skip
-           htmlib-Hidden ("lastrow", lc-lastrow) skip
-           htmlib-Hidden ("navigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip
-           htmlib-Hidden ("submityear", string(li-curr-year)) skip
-           htmlib-Hidden ("submitweek", "") skip
-           htmlib-Hidden ("submitday1", "") skip
-           htmlib-Hidden ("submitday2", "") skip
-           htmlib-Hidden ("submitday3", "") skip
-           htmlib-Hidden ("submitday4", "") skip
-           htmlib-Hidden ("submitday5", "") skip
-           htmlib-Hidden ("submitday6", "") skip
-           htmlib-Hidden ("submitday7", "") skip
-           htmlib-Hidden ("submitreason1", "") skip
-           htmlib-Hidden ("submitreason2", "") skip
-           htmlib-Hidden ("submitreason3", "") skip
-           htmlib-Hidden ("submitreason4", "") skip
-           htmlib-Hidden ("submitreason5", "") skip
-           htmlib-Hidden ("submitreason6", "") skip
-           htmlib-Hidden ("submitreason7", "") skip 
-    .
+        htmlib-Hidden ("selacc", lc-selacc) SKIP
+        htmlib-Hidden ("rowid", lc-rowid) SKIP
+        htmlib-Hidden ("search", lc-search) SKIP
+        htmlib-Hidden ("firstrow", lc-firstrow) SKIP
+        htmlib-Hidden ("lastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("navigation", lc-navigation) SKIP
+        htmlib-Hidden ("nullfield", lc-navigation) SKIP
+        htmlib-Hidden ("submityear", STRING(li-curr-year)) SKIP
+        htmlib-Hidden ("submitweek", "") SKIP
+        htmlib-Hidden ("submitday1", "") SKIP
+        htmlib-Hidden ("submitday2", "") SKIP
+        htmlib-Hidden ("submitday3", "") SKIP
+        htmlib-Hidden ("submitday4", "") SKIP
+        htmlib-Hidden ("submitday5", "") SKIP
+        htmlib-Hidden ("submitday6", "") SKIP
+        htmlib-Hidden ("submitday7", "") SKIP
+        htmlib-Hidden ("submitreason1", "") SKIP
+        htmlib-Hidden ("submitreason2", "") SKIP
+        htmlib-Hidden ("submitreason3", "") SKIP
+        htmlib-Hidden ("submitreason4", "") SKIP
+        htmlib-Hidden ("submitreason5", "") SKIP
+        htmlib-Hidden ("submitreason6", "") SKIP
+        htmlib-Hidden ("submitreason7", "") SKIP 
+        .
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
     
-    {&out} skip
-          htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartMntTable().
    
 
     {&out}
-    '<tr><td><br><div id="AccordionContainer" class="AccordionContainer">' skip.
+        '<tr><td><br><div id="AccordionContainer" class="AccordionContainer">' SKIP.
 
     RUN ip-build-year.
     RUN ip-time-display.
 
-    {&out} skip '</div></td></tr>' skip.
+    {&out} SKIP 
+        '</div></td></tr>' SKIP.
 
 
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
     
     
              
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
 
 
 
@@ -983,14 +1034,14 @@ FUNCTION Date2Wk RETURNS CHARACTER
       Purpose:  
         Notes:  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE cYear     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE iWkNo     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE iDayNo    AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE dYrBegin  AS DATE NO-UNDO.
-    DEFINE VARIABLE WkOne     AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE cYear    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iWkNo    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iDayNo   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE dYrBegin AS DATE      NO-UNDO.
+    DEFINE VARIABLE WkOne    AS INTEGER   NO-UNDO.
     ASSIGN 
-        cYear  = ENTRY(3,STRING(dMyDate),"/")
-        WkOne  = WEEKDAY(DATE("01/01/" + cYear)).
+        cYear = ENTRY(3,STRING(dMyDate),"/")
+        WkOne = WEEKDAY(DATE("01/01/" + cYear)).
     IF WkOne <= 5 THEN dYrBegin = DATE("01/01/" + cYear).
     ELSE dYrBegin = DATE("01/01/" + cYear) + WkOne.
     ASSIGN 
@@ -1012,9 +1063,9 @@ FUNCTION dayOfWeek RETURNS INTEGER
         Notes:  
     ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE rDate     AS INTEGER NO-UNDO.
-    DEFINE VARIABLE WkSt      AS INTEGER  INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
-    DEFINE VARIABLE DayList   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE rDate   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE WkSt    AS INTEGER   INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
+    DEFINE VARIABLE DayList AS CHARACTER NO-UNDO.
     IF WkSt = 1 THEN DayList = "1,2,3,4,5,6,7".
     ELSE DayList = "7,1,2,3,4,5,6".
 
@@ -1031,12 +1082,13 @@ END FUNCTION.
 &IF DEFINED(EXCLUDE-Wk2Date) = 0 &THEN
 
 FUNCTION htmlib-SelectDecimalTime RETURNS CHARACTER 
-	           ( pc-name AS CHARACTER ,
-                 pc-selected AS CHARACTER ) :
-/*------------------------------------------------------------------------------
-        Purpose:                                                                      
-        Notes:                                                                        
-------------------------------------------------------------------------------*/    
+    ( pc-name AS CHARACTER ,
+    pc-selected AS CHARACTER,
+    pf-contract AS DECIMAL ) :
+    /*------------------------------------------------------------------------------
+            Purpose:                                                                      
+            Notes:                                                                        
+    ------------------------------------------------------------------------------*/    
     DEFINE VARIABLE lc-data     AS CHARACTER NO-UNDO.
     DEFINE VARIABLE li-loop     AS INTEGER   NO-UNDO.
     DEFINE VARIABLE li-hour     AS INTEGER   NO-UNDO.
@@ -1052,16 +1104,25 @@ FUNCTION htmlib-SelectDecimalTime RETURNS CHARACTER
         DO li-min = 0 TO 59 BY 25:
             lc-value = STRING(li-hour,"99")  + "." + string(li-min,"99").
             IF pc-display = ""
-            THEN ASSIGN pc-display = lc-value.
+                THEN ASSIGN pc-display = lc-value.
             ELSE ASSIGN pc-display = pc-display + "|" + lc-value.
         END.
        
     END.
     
-    ASSIGN pc-value = pc-display.
+    ASSIGN 
+        pc-value = pc-display.
     
 
-
+    IF pf-contract > 0 AND DEC(pc-selected) = 0.00 THEN
+    DO:
+                              
+        ASSIGN
+            pc-value   = STRING(pf-contract,"99.99") + "|" + pc-value
+            pc-display = "All Day|" + pc-display.    
+    
+    END.
+    
     ASSIGN 
         lc-data = '<select class="inputfield" id="' + pc-name + '" name="' + pc-name + '">'.
 
@@ -1098,18 +1159,18 @@ FUNCTION Wk2Date RETURNS CHARACTER
         Notes:  
     ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE cYear     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE iWkNo     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE iDayNo    AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE iSDayNo   AS DATE NO-UNDO.
-    DEFINE VARIABLE iEDayNo   AS DATE NO-UNDO.
-    DEFINE VARIABLE dYrBegin  AS DATE NO-UNDO.
-    DEFINE VARIABLE WkOne     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE WkSt      AS INTEGER  INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
+    DEFINE VARIABLE cYear    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iWkNo    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iDayNo   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iSDayNo  AS DATE      NO-UNDO.
+    DEFINE VARIABLE iEDayNo  AS DATE      NO-UNDO.
+    DEFINE VARIABLE dYrBegin AS DATE      NO-UNDO.
+    DEFINE VARIABLE WkOne    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE WkSt     AS INTEGER   INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
     IF INDEX(cWkYrNo,"-") <> 3 THEN RETURN "Format should be xx-xxxx".
     ASSIGN 
-        cYear  = ENTRY(2,cWkYrNo,"-")
-        WkOne  = WEEKDAY(DATE("01/01/" + cYear)).
+        cYear = ENTRY(2,cWkYrNo,"-")
+        WkOne = WEEKDAY(DATE("01/01/" + cYear)).
     /*    
     IF WkOne <= 5 THEN dYrBegin = DATE("01/01/" + cYear).
     ELSE dYrBegin = DATE("01/01/" + cYear) + WkOne.
@@ -1120,14 +1181,15 @@ FUNCTION Wk2Date RETURNS CHARACTER
         iSDayNo = dYrBegin + iDayNo - WkOne + WkSt 
         iEDayNo = iSDayNo + 6 .
     */
-    ASSIGN dYrBegin = DATE("01/01/" + cYear).
+    ASSIGN 
+        dYrBegin = DATE("01/01/" + cYear).
     
     DO WHILE WEEKDAY(dYrBegin) <> 2:
         dYrBegin = dYrBegin + 1.
     END. 
     ASSIGN 
-        iWkNo  = INTEGER(ENTRY(1,cWkYrNo,"-"))
-        iDayNo = (iWkNo * 7) - 7
+        iWkNo   = INTEGER(ENTRY(1,cWkYrNo,"-"))
+        iDayNo  = (iWkNo * 7) - 7
         iSDayNo = dYrBegin + iDayNo 
         iEDayNo = iSDayNo + 6.
         
