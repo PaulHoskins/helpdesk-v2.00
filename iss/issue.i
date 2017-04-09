@@ -15,6 +15,7 @@
                             rather than attached PDF
     15/08/2015  phoski      Default alert to def-stat-loginid
     20/10/2015  phoski      com-GetHelpDeskEmail for email sender
+    09/04/2017  phoski      Email text changed
 ***********************************************************************/
 
 {lib/maillib.i}
@@ -239,7 +240,7 @@ PROCEDURE islib-StatusHistory :
                 'Dear ' 
                 + trim(WebUser.ForeName)   
                 + ',~n~n' 
-                + 'Please find attached details of the issue that has been logged with '
+                + 'Please find below the details of the issue that has been logged with '
                 + company.name
                 + '.~n' 
                 + lc-text
@@ -249,7 +250,7 @@ PROCEDURE islib-StatusHistory :
                 + 'Dear ' 
                 + trim(WebUser.ForeName)   
                 + '</p><p>' 
-                + 'Please find attached details of the issue that has been logged with '
+                + 'Please find below the details of the issue that has been logged with '
                 + company.name 
                 + '<p/><br />' 
                 + lc-html
@@ -318,7 +319,7 @@ PROCEDURE islib-StatusHistory :
                 'Dear ' 
                 + trim(WebUser.ForeName)   
                 + ',~n~n' 
-                + 'Please find attached details of the issue you have logged with '
+                + 'Please find below the details of the issue you have logged with '
                 + company.name
                 + '.~n' 
                 + lc-text
@@ -328,7 +329,7 @@ PROCEDURE islib-StatusHistory :
                 + 'Dear ' 
                 + trim(WebUser.ForeName)   
                 + '</p><p>' 
-                + 'Please find attached details of the issue you have logged with '
+                + 'Please find below the details of the issue you have logged with '
                 + company.name 
                 + '<p/><br />' 
                 + lc-html
