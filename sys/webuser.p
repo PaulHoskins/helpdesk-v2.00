@@ -304,7 +304,8 @@ PROCEDURE process-web-request :
         lc-status    = get-value("fstatus").
         
     IF get-value("submityear") = ""
-        THEN set-user-field("submityear",STRING(YEAR(TODAY),"9999")).
+    OR get-value("submityear") = "0"
+    THEN set-user-field("submityear",STRING(YEAR(TODAY),"9999")).
     
     
     ASSIGN 
@@ -362,7 +363,7 @@ PROCEDURE process-web-request :
     tbar-Link("delete",?,"off",'')
     tbar-Link("genpassword",?,"off",'')
     tbar-Link("contaccess",?,"off",'')
-    tbar-Link("wrk-hrall",?,  appurl + "/sys/webwrkhourall.p" ,lc-link-otherp)
+    tbar-Link("wrk-hrall",?,  appurl + "/sys/webwrkhourall.p",lc-link-otherp + "&submityear=" + get-value("submityear"))
     tbar-Link("wrk-hr",?,"off",'')
     tbar-Link("conttime",?,"off",'')
     tbar-EndOption()

@@ -1,15 +1,14 @@
 /***********************************************************************
 
-    Program:        sys/webwrkhour.p
+    Program:        sys/webwrkhourall.p
     
-    Purpose:        User Maintenance - Working Hours
+    Purpose:        User Maintenance - All Working Hours
     
     Notes:
     
     
     When        Who         What
-    29/11/2014  phoski      Initial
-    09/04/2017  phoski      autogen flag reset
+    09/04/2017  phoski      Initial
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -28,10 +27,7 @@ DEFINE VARIABLE li-curr-year   AS INTEGER   FORMAT "9999" NO-UNDO.
 DEFINE VARIABLE lc-day         AS CHARACTER INITIAL "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday" NO-UNDO.
 
 DEFINE VARIABLE lc-mode        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-title       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE ll-warn        AS LOGICAL   NO-UNDO.
-
                           
 DEFINE BUFFER b-valid FOR webuser.
 DEFINE BUFFER b-table FOR webuser.
@@ -46,7 +42,6 @@ DEFINE VARIABLE lc-parameters   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-label   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submit-label AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-loginid      AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE li-loop         AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-name         AS CHARACTER NO-UNDO.
@@ -251,8 +246,8 @@ PROCEDURE process-web-request :
 
     ASSIGN 
         lc-selacc     = get-value("selacc")
-        lc-mode       = get-value("mode")
-        lc-rowid      = get-value("rowid")
+        lc-mode       = "Update"
+        
         lc-search     = get-value("search")
         lc-firstrow   = get-value("firstrow")
         lc-lastrow    = get-value("lastrow")
@@ -269,22 +264,8 @@ PROCEDURE process-web-request :
                         "&lastrow=" + lc-lastrow.
   
 
-    FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid)
-        NO-LOCK NO-ERROR.
-    IF NOT AVAILABLE b-table THEN
-    DO:
-        set-user-field("mode",lc-mode).
-        set-user-field("title",lc-title).
-        set-user-field("nexturl",appurl + "/sys/webuser.p").
-        RUN run-web-object IN web-utilities-hdl ("mn/deleted.p").
-        RETURN.
-    END.
     ASSIGN 
-        lc-loginid = b-table.loginid.
-    ASSIGN 
-        lc-title        = 'Working Hours - <b>' + 
-           html-encode(b-table.forename + " " + b-table.surname)
-           + " - " + string(li-curr-year) + '</b>'
+        lc-title        = 'Working Hours - <b>All Internal Users - ' + string(li-curr-year) + '</b>'
         lc-link-label   = "Back"
         lc-submit-label = "Update Times".
       
@@ -308,36 +289,40 @@ PROCEDURE process-web-request :
         
         IF lc-error-msg = "" THEN
         DO:
-            FIND WebStdTime
-                WHERE WebStdTime.CompanyCode = lc-global-company
-                AND WebStdTime.LoginID = lc-loginid
-                AND WebStdTime.StdWkYear = li-curr-year EXCLUSIVE-LOCK NO-ERROR.
-            IF NOT AVAILABLE WebStdTime THEN
-            DO:
+            FOR EACH b-table NO-LOCK
+                WHERE b-table.CompanyCode = lc-global-company
+                  AND b-table.UserClass = "INTERNAL":
+                FIND WebStdTime
+                    WHERE WebStdTime.CompanyCode = lc-global-company
+                    AND WebStdTime.LoginID =  b-table.LoginID
+                    AND WebStdTime.StdWkYear = li-curr-year EXCLUSIVE-LOCK NO-ERROR.
+                IF AVAILABLE WebStdTime THEN NEXT.
+               
                 CREATE WebStdTime.
                 ASSIGN 
-                    WebStdTime.CompanyCode = lc-global-company
-                    WebStdTime.LoginID = lc-loginid
-                    WebStdTime.StdWkYear = li-curr-year.
-            END.
-            ASSIGN
-                WebStdTime.AutoGen = FALSE.
-            DO li-loop = 1 TO 7:
-                ASSIGN
-                    li-int = 0
-                    lc-dname = ENTRY(li-loop,lc-day) + ":-".
-                ASSIGN 
-                    lc-name = "ams" + string(li-loop).
-                WebStdTime.StdAMStTime[li-loop] = int(get-value(lc-name)).
-                ASSIGN 
-                    lc-name = "ame" + string(li-loop).
-                WebStdTime.StdAMEndTime[li-loop] = int(get-value(lc-name)).
-                ASSIGN 
-                    lc-name = "pms" + string(li-loop).
-                WebStdTime.StdPMStTime[li-loop] = int(get-value(lc-name)).
-                ASSIGN 
-                    lc-name = "pme" + string(li-loop).
-                WebStdTime.StdPMEndTime[li-loop] = int(get-value(lc-name)).
+                     WebStdTime.AutoGen = TRUE
+                     WebStdTime.CompanyCode = lc-global-company
+                     WebStdTime.LoginID =  b-table.LoginID
+                     WebStdTime.StdWkYear = li-curr-year.
+                
+                
+                DO li-loop = 1 TO 7:
+                    ASSIGN
+                        li-int = 0
+                        lc-dname = ENTRY(li-loop,lc-day) + ":-".
+                    ASSIGN 
+                        lc-name = "ams" + string(li-loop).
+                    WebStdTime.StdAMStTime[li-loop] = int(get-value(lc-name)).
+                    ASSIGN 
+                        lc-name = "ame" + string(li-loop).
+                    WebStdTime.StdAMEndTime[li-loop] = int(get-value(lc-name)).
+                    ASSIGN 
+                        lc-name = "pms" + string(li-loop).
+                    WebStdTime.StdPMStTime[li-loop] = int(get-value(lc-name)).
+                    ASSIGN 
+                        lc-name = "pme" + string(li-loop).
+                    WebStdTime.StdPMEndTime[li-loop] = int(get-value(lc-name)).
+                END.
             END.
             RUN outputHeader.
             set-user-field("navigation",'refresh').
@@ -354,20 +339,16 @@ PROCEDURE process-web-request :
     END.
     ELSE
     DO:
-        FIND WebStdTime
+        FIND FIRST WebStdTime
             WHERE WebStdTime.CompanyCode = lc-global-company
-            AND WebStdTime.LoginID = lc-loginid
             AND WebStdTime.StdWkYear = li-curr-year NO-LOCK NO-ERROR.
               
         IF NOT AVAILABLE WebStdTime THEN
         DO:
-            FIND WebStdTime
+            FIND FIRST WebStdTime
                 WHERE WebStdTime.CompanyCode = lc-global-company
-                AND WebStdTime.LoginID = lc-loginid
                 AND WebStdTime.StdWkYear = li-curr-year - 1 NO-LOCK NO-ERROR.
-                  
-            ASSIGN 
-                ll-warn = AVAILABLE WebStdTime.
+          
                 
         END.
              
@@ -403,7 +384,6 @@ PROCEDURE process-web-request :
 
     {&out} htmlib-Hidden ("mode", lc-mode) SKIP
            htmlib-Hidden ("selacc", lc-selacc) SKIP
-           htmlib-Hidden ("rowid", lc-rowid) SKIP
            htmlib-Hidden ("search", lc-search) SKIP
            htmlib-Hidden ("firstrow", lc-firstrow) SKIP
            htmlib-Hidden ("lastrow", lc-lastrow) SKIP
@@ -415,15 +395,12 @@ PROCEDURE process-web-request :
     {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
 
-    IF ll-warn THEN
-    DO:
-        {&out} '<div class="infobox" style="font-size: 10px;">' 
-        '<center>There are no details available for ' STRING(li-curr-year)
-        '. Defaulting details from ' STRING(li-curr-year - 1) '.'
-        '</center></div>'SKIP.
+    {&out} '<div class="infobox" style="font-size: 10px;">' 
+        '<center>Internal Users Without Working Hours Will Have Hours Created</center></div>'SKIP.
                     
                        
-    END.
+   
+  
     
     {&out} SKIP
           htmlib-StartMntTable().
@@ -483,7 +460,7 @@ PROCEDURE process-web-request :
         htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
     
-    {&out} '<center>' htmlib-SubmitButton("submitform","Update") 
+    {&out} '<center>' htmlib-SubmitButton("submitform","Create") 
     '</center>' SKIP.
     
     

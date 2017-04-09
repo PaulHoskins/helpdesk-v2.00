@@ -6726,6 +6726,13 @@ ADD FIELD "StdColour" OF "WebStdTime" AS character
   COLUMN-LABEL "Colour"
   ORDER 110
 
+ADD FIELD "AutoGen" OF "WebStdTime" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 10
+  MAX-WIDTH 1
+  ORDER 120
+
 ADD INDEX "prim" ON "WebStdTime" 
   AREA "Schema Area"
   UNIQUE
@@ -7180,4 +7187,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142479
+0000142608
