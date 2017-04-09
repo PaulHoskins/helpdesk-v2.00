@@ -18,7 +18,9 @@
     01/08/2016  phoski      CRM
     19/12/2016  phoski      First Activity Date & time
     19/12/2016  phoski      sla desc
-    19/12/2016  phoskl      Show only >1 day completions
+    19/12/2016  phoski      Show only >1 day completions
+    09/04/2017  phoski      Support Team selection  
+    09/04/2017  phoski      Date Types
            
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -43,20 +45,30 @@ DEFINE VARIABLE lc-hidate      AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
 
 DEFINE BUFFER this-user FOR WebUser.
   
-DEFINE VARIABLE ll-Customer   AS LOG       NO-UNDO.
+DEFINE VARIABLE ll-Customer    AS LOG       NO-UNDO.
 
-DEFINE VARIABLE lc-list-acc   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-list-aname AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-acc    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-aname  AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-filename   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-stcode AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-stname AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-CodeName   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE li-loop       AS INTEGER   NO-UNDO.
+DEFINE VARIABLE lc-filename    AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-ClassList  AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-output     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-submit     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-1Day       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-CodeName    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
+
+DEFINE VARIABLE lc-ClassList   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-output      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-submit      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-1Day        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-st-num      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-dtype       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-dtcode AS CHARACTER INITIAL 'ISS|ACT|ISSACT' NO-UNDO.
+DEFINE VARIABLE lc-list-dtdesc AS CHARACTER INITIAL 'Issue|Activity|Issue And Activity' NO-UNDO.
+
+
+
 
 
 DEFINE TEMP-TABLE ttc NO-UNDO
@@ -118,7 +130,7 @@ FUNCTION Format-Select-Account RETURNS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -148,11 +160,11 @@ PROCEDURE ip-ExportJScript :
     ------------------------------------------------------------------------------*/
 
     {&out} SKIP
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP
-            '<script language="JavaScript" src="/asset/chart/Chart.js"></script>'.
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP
+        '<script language="JavaScript" src="/asset/chart/Chart.js"></script>'.
 
     {&out} SKIP 
-          '<script language="JavaScript">' SKIP.
+        '<script language="JavaScript">' SKIP.
 
     {&out} SKIP
         'function ChangeAccount() ~{' SKIP
@@ -163,12 +175,12 @@ PROCEDURE ip-ExportJScript :
         '   SubmitThePage("StatusChange")' SKIP
         '~}' SKIP
 
-            'function ChangeDates() ~{' SKIP
-       /* '   SubmitThePage("DatesChange")' skip */
+        'function ChangeDates() ~{' SKIP
+        /* '   SubmitThePage("DatesChange")' skip */
         '~}' SKIP.
 
     {&out} SKIP
-           '</script>' SKIP.
+        '</script>' SKIP.
 END PROCEDURE.
 
 
@@ -185,11 +197,11 @@ PROCEDURE ip-ExportReport :
     DEFINE OUTPUT PARAMETER pc-filename AS CHARACTER NO-UNDO.
     
 
-    DEFINE BUFFER customer     FOR customer.
-    DEFINE BUFFER issue        FOR issue.
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER issue    FOR issue.
     
 
-    DEFINE VARIABLE lc-GenKey     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-GenKey AS CHARACTER NO-UNDO.
 
    
     ASSIGN
@@ -279,18 +291,35 @@ PROCEDURE ip-InitialProcess :
         lc-hidate     = get-value("hidate")
         lc-output     = get-value("output")
         lc-submit     = get-value("submitsource")
-        lc-temp       = get-value("allcust").
+        lc-temp       = get-value("allcust")
+        lc-st-num     = get-value("st-num")
+        lc-dtype      = get-value("dtype").
     
     
     IF lc-temp = "on"
-    THEN RUN com-GetCustomerAccount( lc-global-accStatus-HelpDesk-All , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
+        THEN RUN com-GetCustomerAccount( lc-global-accStatus-HelpDesk-All , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
     ELSE RUN com-GetCustomerAccount( lc-global-accStatus-HelpDesk-Active , lc-global-company , lc-global-user, OUTPUT lc-list-acc, OUTPUT lc-list-aname ).
 
 
+    ASSIGN
+        lc-list-stcode = "ALL"
+        lc-list-stname = "All Support Teams".
+        
+    FOR EACH steam WHERE steam.CompanyCode = lc-global-company:
+        ASSIGN
+            lc-list-stcode = lc-list-stcode + "|" + string(steam.st-num)
+            lc-list-stname = lc-list-stname + "|" + steam.descr.
+        
+    END.
+    
+    
 
     IF request_method = "GET" THEN
     DO:
+        IF lc-st-num = "" THEN lc-st-num = "ALL".
+        IF lc-dtype = "" THEN lc-Dtype = "ISS".
         
+                
         IF lc-lodate = ""
             THEN ASSIGN lc-lodate = STRING(TODAY - 365, "99/99/9999").
         
@@ -327,13 +356,13 @@ PROCEDURE ip-PDF:
     ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER pc-pdf AS CHARACTER NO-UNDO.
     
-    DEFINE BUFFER customer     FOR customer.
-    DEFINE BUFFER issue        FOR issue.
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER issue    FOR issue.
     
-    DEFINE VARIABLE lc-html         AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-pdf          AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE ll-ok           AS LOG      NO-UNDO.
-    DEFINE VARIABLE li-ReportNumber AS INTEGER      NO-UNDO.
+    DEFINE VARIABLE lc-html         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-pdf          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-ok           AS LOG       NO-UNDO.
+    DEFINE VARIABLE li-ReportNumber AS INTEGER   NO-UNDO.
 
     ASSIGN    
         li-ReportNumber = NEXT-VALUE(ReportNumber).
@@ -341,7 +370,7 @@ PROCEDURE ip-PDF:
         lc-html = SESSION:TEMP-DIR + caps(lc-global-company) + "-issueLog-" + string(li-ReportNumber).
 
     ASSIGN 
-        lc-pdf = lc-html + ".pdf"
+        lc-pdf  = lc-html + ".pdf"
         lc-html = lc-html + ".html".
 
     OS-DELETE value(lc-pdf) no-error.
@@ -359,11 +388,11 @@ PROCEDURE ip-PDF:
    
         
     {&prince}
-    '<p style="text-align: center; font-size: 14px; font-weight: 900;">Issue Log - '
-    'From ' STRING(DATE(lc-lodate),"99/99/9999")
-    ' To ' STRING(DATE(lc-hidate),"99/99/9999") 
+        '<p style="text-align: center; font-size: 14px; font-weight: 900;">Issue Log - '
+        'From ' STRING(DATE(lc-lodate),"99/99/9999")
+        ' To ' STRING(DATE(lc-hidate),"99/99/9999") 
       
-    '</div>'.
+        '</div>'.
 
 
    
@@ -383,17 +412,17 @@ PROCEDURE ip-PDF:
                 customer.NAME) SKIP.
                 
             {&prince}
-            '<table class="landrep">'
-            '<thead>'
-            '<tr>'
-            htmlib-TableHeading(
+                '<table class="landrep">'
+                '<thead>'
+                '<tr>'
+                htmlib-TableHeading(
                 "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
                 "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^left|Time First Activity^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left")
                 
-            '</tr>'
-            '</thead>'
-        SKIP.
+                '</tr>'
+                '</thead>'
+                SKIP.
 
 
         END.
@@ -417,34 +446,35 @@ PROCEDURE ip-PDF:
         
         IF tt-ilog.CompDate <> ? THEN
             {&prince}
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').
         ELSE
-        {&prince}
-            htmlib-MntTableField(html-encode(""),'right')
-            htmlib-MntTableField(html-encode(""),'right').    
+            {&prince}
+                htmlib-MntTableField(html-encode(""),'right')
+                htmlib-MntTableField(html-encode(""),'right').    
 
         IF tt-ilog.factDate <> ? THEN
             {&prince}
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
         ELSE
-        {&prince}
-            htmlib-MntTableField(html-encode(""),'right')
-            htmlib-MntTableField(html-encode(""),'right').  
+            {&prince}
+                htmlib-MntTableField(html-encode(""),'right')
+                htmlib-MntTableField(html-encode(""),'right').  
             
         {&prince}
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
-        htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
+            htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
 
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')
 
 
 
             SKIP .
 
-        {&prince} '</tr>' SKIP.
+        {&prince} 
+            '</tr>' SKIP.
 
 
 
@@ -487,13 +517,13 @@ PROCEDURE ip-PrintReport :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    DEFINE BUFFER customer     FOR customer.
-    DEFINE BUFFER issue        FOR issue.
-    DEFINE VARIABLE li-count        AS INTEGER          NO-UNDO.
-    DEFINE VARIABLE lc-tr           AS CHARACTER        NO-UNDO.
-    DEFINE VARIABLE li-eng          AS INTEGER          NO-UNDO.
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER issue    FOR issue.
+    DEFINE VARIABLE li-count AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-tr    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng   AS INTEGER   NO-UNDO.
     
-    DEFINE BUFFER tt-ilog   FOR tt-ilog.
+    DEFINE BUFFER tt-ilog FOR tt-ilog.
     
     
     FOR EACH tt-ilog NO-LOCK
@@ -519,7 +549,7 @@ PROCEDURE ip-PrintReport :
                 "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
                 "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left"
-            ) SKIP.
+                ) SKIP.
 
             li-count = 0.
 
@@ -549,33 +579,34 @@ PROCEDURE ip-PrintReport :
         
         IF tt-ilog.CompDate <> ? THEN
             {&out} 
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.CompDate,"99/99/9999")),'right')
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.CompTime,"hh:mm")),'right').
         ELSE
-        {&out} 
-            htmlib-MntTableField(html-encode(""),'right')
-            htmlib-MntTableField(html-encode(""),'right').    
+            {&out} 
+                htmlib-MntTableField(html-encode(""),'right')
+                htmlib-MntTableField(html-encode(""),'right').    
 
         IF tt-ilog.fActDate <> ? THEN
             {&out} 
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.fActDate,"99/99/9999")),'right')
+                htmlib-MntTableField(html-encode(STRING(tt-ilog.fActTime,"hh:mm")),'right').
         ELSE
-        {&out} 
-            htmlib-MntTableField(html-encode(""),'right')
-            htmlib-MntTableField(html-encode(""),'right').   
+            {&out} 
+                htmlib-MntTableField(html-encode(""),'right')
+                htmlib-MntTableField(html-encode(""),'right').   
         {&out}
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
-        htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
+            htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
 
-        htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')
 
 
 
             SKIP .
 
-        {&out} '</tr>' SKIP.
+        {&out} 
+            '</tr>' SKIP.
 
 
 
@@ -604,29 +635,29 @@ PROCEDURE ip-PrintReport :
         {&out} SKIP
             '<script>' SKIP
             
-          'window.onload = function()~{' SKIP
-        .
+            'window.onload = function()~{' SKIP
+            .
         FOR EACH ttc NO-LOCK:
                 
             {&out}      
-            'var ctx = document.getElementById("' ttc.id '").getContext("2d");' SKIP.
+                'var ctx = document.getElementById("' ttc.id '").getContext("2d");' SKIP.
             
             IF  ttc.id BEGINS "B" THEN 
             DO:
-              {&out}
-            'window.myPie = new Chart(ctx).Bar(pd' ttc.id ', ~{' SKIP
-            '  responsive : true ' SKIP
-            '~});' SKIP.
+                {&out}
+                    'window.myPie = new Chart(ctx).Bar(pd' ttc.id ', ~{' SKIP
+                    '  responsive : true ' SKIP
+                    '~});' SKIP.
                
             END.
             ELSE {&out}
-            'window.myPie = new Chart(ctx).Pie(pd' ttc.id ');' SKIP.
+                    'window.myPie = new Chart(ctx).Pie(pd' ttc.id ');' SKIP.
             
         END.
          
         {&out}    
-        '~};' SKIP
-         '</script>' SKIP.
+            '~};' SKIP
+            '</script>' SKIP.
           
          
     END.
@@ -657,6 +688,8 @@ PROCEDURE ip-ProcessReport :
         DATE(lc-lodate),
         DATE(lc-hidate),
         SUBSTR(TRIM(lc-classlist),2),
+        lc-st-num,
+        lc-dtype,
         OUTPUT TABLE tt-ilog
 
         ).
@@ -674,17 +707,17 @@ PROCEDURE ip-Selection :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE iloop       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE cPart       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cCode       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE cDesc       AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE iloop AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE cPart AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cCode AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE cDesc AS CHARACTER NO-UNDO.
     
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
     IF NOT ll-customer THEN
     DO:
-         {&out}
+        {&out}
             '<td align=right valign=top>' 
             (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("From Customer")
@@ -692,65 +725,71 @@ PROCEDURE ip-Selection :
             
             '</td>'
             '<td align=left valign=top>' .
-         {&out-long}   
-                htmlib-SelectLong("loaccount",lc-list-acc,lc-list-aname,lc-lo-account).
-         {&out} '</td>'.
+        {&out-long}   
+            htmlib-SelectLong("loaccount",lc-list-acc,lc-list-aname,lc-lo-account).
+        {&out} 
+            '</td>'.
     END.
     
     
     {&out} 
-    '<td valign="top" align="right">' 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td>' SKIP.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP.
 
     IF NOT ll-customer THEN 
     DO:
         {&out}
-        '</tr><tr>' SKIP
-           '<td align=right valign=top>' 
-           (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
+            '</tr><tr>' SKIP
+            '<td align=right valign=top>' 
+            (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("To Customer")
             ELSE htmlib-SideLabel("To Customer"))
         
             '</td>'
-           '<td align=left valign=top>'.
-           {&out-long}
-                htmlib-SelectLong("hiaccount",lc-list-acc,lc-list-aname,lc-hi-account).
+            '<td align=left valign=top>'.
+        {&out-long}
+            htmlib-SelectLong("hiaccount",lc-list-acc,lc-list-aname,lc-hi-account).
                 
-            {&out} '</td>'.
+        {&out} 
+            '</td>'.
     END.
     
-    {&out} '<td valign="top" align="right">' 
+    {&out} 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("hidate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("To Date")
         ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td>' SKIP.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("hidate",10,lc-hidate) 
+        htmlib-CalendarLink("hidate")
+        '</td>' SKIP.
 
-    {&out} '</tr>' SKIP.
+    {&out} 
+        '</tr>' SKIP.
 
     IF NOT ll-customer THEN
     DO:
-        {&out} '<tr><td valign="top" align="right">' 
-        htmlib-SideLabel("All Customers")
-        '</td>'
-        '<td valign="top" align="left">'
-        REPLACE(htmlib-checkBox("allcust",get-value("allcust") = "on"),
-        ">",' onChange="ChangeAccount()">')
-        '</td></tr>' SKIP.
+        {&out} 
+            '<tr><td valign="top" align="right">' 
+            htmlib-SideLabel("All Customers")
+            '</td>'
+            '<td valign="top" align="left">'
+            REPLACE(htmlib-checkBox("allcust",get-value("allcust") = "on"),
+            ">",' onChange="ChangeAccount()">')
+            '</td></tr>' SKIP.
         
 
     END.
-     {&out} '<tr><td valign="top" align="right">' 
+    {&out} 
+        '<tr><td valign="top" align="right">' 
         htmlib-SideLabel("Show Over 1 Day Completions")
         '</td>'
         '<td valign="top" align="left">'
@@ -766,32 +805,48 @@ PROCEDURE ip-Selection :
         cDesc = com-DecodeLookup(cCode,lc-global-iclass-code,lc-global-iclass-desc).
         
 
-        {&out} '<tr><td valign="top" align="right">' 
-        htmlib-SideLabel("Include Class " +  cDesc)
-        '</td>'
-        '<td valign="top" align="left">'
-        htmlib-checkBox(lc-CodeName,get-value(lc-CodeName) = "on")
-        '</td></tr>' SKIP.
+        {&out} 
+            '<tr><td valign="top" align="right">' 
+            htmlib-SideLabel("Include Class " +  cDesc)
+            '</td>'
+            '<td valign="top" align="left">'
+            htmlib-checkBox(lc-CodeName,get-value(lc-CodeName) = "on")
+            '</td></tr>' SKIP.
     
     END.
-    {&out} '<tr><td valign="top" align="right">' 
-    htmlib-SideLabel("Summary Details On Web Output")
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-checkBox("summary",get-value("summary") = "on")
-    '</td></tr>' SKIP.
+    {&out} 
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Summary Details On Web Output")
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-checkBox("summary",get-value("summary") = "on")
+        '</td></tr>' SKIP.
         
+    {&out}
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Support Team")
+        '</td>'
+        '<td align=left valign=top>' 
+        htmlib-Select("st-num",lc-list-stcode,lc-list-stname,lc-st-num) '</td></tr>'.
+    
+    {&out}
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Date Selection By")
+        '</td>'
+        '<td align=left valign=top>' 
+        htmlib-Select("dtype",lc-list-dtcode,lc-list-dtdesc,lc-dtype) '</td></tr>'.
         
     
     {&out}
-    '<tr><td valign="top" align="right">' 
-    htmlib-SideLabel("Report Output")
-    '</td>'
-    '<td align=left valign=top>' 
-    htmlib-Select("output","WEB|CSV|PDF","Web Page|Email CSV|Email PDF",get-value("output")) '</td></tr>'.
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Report Output")
+        '</td>'
+        '<td align=left valign=top>' 
+        htmlib-Select("output","WEB|CSV|PDF","Web Page|Email CSV|Email PDF",get-value("output")) '</td></tr>'.
     
   
-    {&out} '</table>' SKIP.
+    {&out} 
+        '</table>' SKIP.
 END PROCEDURE.
 
 
@@ -807,38 +862,38 @@ PROCEDURE ip-SummaryPage:
     DEFINE INPUT PARAMETER pc-account   AS CHARACTER NO-UNDO.
     
 
-    DEFINE BUFFER customer     FOR customer.
-    DEFINE BUFFER issue        FOR issue.
-    DEFINE VARIABLE li-count        AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE li-sla          AS INTEGER EXTENT 2     NO-UNDO.
-    DEFINE VARIABLE ld-sla          AS DECIMAL EXTENT 2     NO-UNDO.
-    DEFINE VARIABLE li-loop         AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE li-time         AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE li-Tot-Time     AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE li-temp         AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE ld-temp         AS DECIMAL              NO-UNDO.
-    DEFINE VARIABLE lc-id           AS CHARACTER EXTENT 3   NO-UNDO.
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER issue    FOR issue.
+    DEFINE VARIABLE li-count    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-sla      AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE ld-sla      AS DECIMAL   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-loop     AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-time     AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-Tot-Time AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-temp     AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE ld-temp     AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lc-id       AS CHARACTER EXTENT 3 NO-UNDO.
     
         
-    DEFINE VARIABLE lc-tr           AS CHARACTER            NO-UNDO.
-    DEFINE VARIABLE li-eng          AS INTEGER              NO-UNDO.
-    DEFINE VARIABLE lc-Co           AS CHARACTER            NO-UNDO.
-    DEFINE VARIABLE lc-hi           AS CHARACTER            NO-UNDO.
-    DEFINE VARIABLE li-tCol         AS INT                  NO-UNDO.
-    DEFINE VARIABLE lc-lb           AS CHARACTER            NO-UNDO.
-    DEFINE VARIABLE li-set          AS INTEGER              NO-UNDO.
+    DEFINE VARIABLE lc-tr       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-Co       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-hi       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-tCol     AS INT       NO-UNDO.
+    DEFINE VARIABLE lc-lb       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-set      AS INTEGER   NO-UNDO.
       
     
     
     
     ASSIGN
         lc-co = "#F7464A,#46BFBD,#FDB45C,#949FB1,#4D5360,#FF5A5E,#5AD3D1,#FFC870,#A8B3C5,#616774" 
-        lc-hi  = lc-co.
+        lc-hi = lc-co.
     /*
     ASSIGN lc-co = "aqua,black,blue,gray,green,lime,maroon,navy,olive,orange,purple,red,silver,teal,yellow"
            lc-hi = lc-co.  
     */ 
-    DEFINE BUFFER tt-ilog   FOR tt-ilog.
+    DEFINE BUFFER tt-ilog FOR tt-ilog.
     
     FIND customer WHERE customer.CompanyCode = lc-global-company
         AND customer.AccountNumber = pc-Account
@@ -850,10 +905,10 @@ PROCEDURE ip-SummaryPage:
         :
        
         ASSIGN 
-            li-count = li-count + 1
-            li-Tot-Time  = li-Tot-Time + tt-ilog.iActDuration
-            li-sla[1] = li-sla[1] + IF tt-ilog.SLAAchieved THEN 1 ELSE 0 
-            li-sla[2] = li-sla[2] + IF tt-ilog.SLAAchieved THEN 0 ELSE 1
+            li-count    = li-count + 1
+            li-Tot-Time = li-Tot-Time + tt-ilog.iActDuration
+            li-sla[1]   = li-sla[1] + IF tt-ilog.SLAAchieved THEN 1 ELSE 0 
+            li-sla[2]   = li-sla[2] + IF tt-ilog.SLAAchieved THEN 0 ELSE 1
             .
               
     END.
@@ -864,78 +919,78 @@ PROCEDURE ip-SummaryPage:
     END.
     
     {&out} SKIP
-           '<div style="padding: 15px;">' SKIP
-                REPLACE(htmlib-StartMntTable(),"100%","35%") SKIP.
+        '<div style="padding: 15px;">' SKIP
+        REPLACE(htmlib-StartMntTable(),"100%","35%") SKIP.
                 
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Reporting Period")
+        htmlib-SideLabel("Reporting Period")
        
-       '</td><td valign="top" align="left" colspan=2>'
+        '</td><td valign="top" align="left" colspan=2>'
         (lc-lodate) ' - '
         (lc-hidate)
-       '</td></tr>' SKIP.
+        '</td></tr>' SKIP.
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Technical Account Manager")
+        htmlib-SideLabel("Technical Account Manager")
        
-       '</td><td valign="top" align="left" colspan=2>'
+        '</td><td valign="top" align="left" colspan=2>'
         DYNAMIC-FUNCTION('com-UserName',Customer.AccountManager)
-       '</td></tr>' SKIP.
+        '</td></tr>' SKIP.
        
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Total Activity Duration")
+        htmlib-SideLabel("Total Activity Duration")
        
-       '</td><td valign="top" align="left" colspan=2>'
-         /*li-time ' - ' */
-         fnTimeString(li-Tot-Time)
-       '</td></tr>' SKIP.
+        '</td><td valign="top" align="left" colspan=2>'
+        /*li-time ' - ' */
+        fnTimeString(li-Tot-Time)
+        '</td></tr>' SKIP.
              
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Number Of Issues")
+        htmlib-SideLabel("Number Of Issues")
        
-       '</td><td valign="top" align="left" colspan=2>'
-         li-count
-       '</td></tr>' SKIP.
+        '</td><td valign="top" align="left" colspan=2>'
+        li-count
+        '</td></tr>' SKIP.
      
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("SLA Achieved")
-       '</td></tr>' SKIP.
+        htmlib-SideLabel("SLA Achieved")
+        '</td></tr>' SKIP.
        
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       "Yes"
+        "Yes"
        
-       '</td><td valign="top" align="right">'
-         li-sla[1] 
-          '</td><td valign="top" align="right">'
-           STRING(ld-sla[1],"zzzz9.99-") '%'
-       '</td></tr>' SKIP.
+        '</td><td valign="top" align="right">'
+        li-sla[1] 
+        '</td><td valign="top" align="right">'
+        STRING(ld-sla[1],"zzzz9.99-") '%'
+        '</td></tr>' SKIP.
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-      "No"
+        "No"
        
-       '</td><td valign="top" align="right">'
-         li-sla[2]
-          '</td><td valign="top" align="right">'
-           STRING(ld-sla[2],"zzzz9.99-") '%'
-       '</td></tr>' SKIP.
+        '</td><td valign="top" align="right">'
+        li-sla[2]
+        '</td><td valign="top" align="right">'
+        STRING(ld-sla[2],"zzzz9.99-") '%'
+        '</td></tr>' SKIP.
          
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Number Of Issues By SLA Level")
-       '</td></tr>' SKIP.
+        htmlib-SideLabel("Number Of Issues By SLA Level")
+        '</td></tr>' SKIP.
     
     ASSIGN
         li-Temp = 0.
@@ -956,11 +1011,11 @@ PROCEDURE ip-SummaryPage:
             '<td valign="top" align="right">'
             tt-ilog.SLALevel
        
-       '</td><td valign="top" align="right">'
-         li-temp 
-        '</td><td valign="top" align="right">'
-          STRING(ld-temp,">>>>9.99-") '%'
-       '</td></tr>' SKIP.
+            '</td><td valign="top" align="right">'
+            li-temp 
+            '</td><td valign="top" align="right">'
+            STRING(ld-temp,">>>>9.99-") '%'
+            '</td></tr>' SKIP.
        
         
         ASSIGN 
@@ -971,8 +1026,8 @@ PROCEDURE ip-SummaryPage:
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Number Of Issues By Class")
-       '</td></tr>' SKIP.
+        htmlib-SideLabel("Number Of Issues By Class")
+        '</td></tr>' SKIP.
     
     ASSIGN
         li-Temp = 0.
@@ -993,11 +1048,11 @@ PROCEDURE ip-SummaryPage:
             '<td valign="top" align="right">'
             tt-ilog.iType
        
-       '</td><td valign="top" align="right">'
-         li-temp 
-        '</td><td valign="top" align="right">'
-          STRING(ld-temp,">>>>9.99-") '%'
-       '</td></tr>' SKIP.
+            '</td><td valign="top" align="right">'
+            li-temp 
+            '</td><td valign="top" align="right">'
+            STRING(ld-temp,">>>>9.99-") '%'
+            '</td></tr>' SKIP.
        
         
         ASSIGN 
@@ -1007,12 +1062,12 @@ PROCEDURE ip-SummaryPage:
     {&out} SKIP
         '<tr>'
         '<td valign="top" align="right">'
-       htmlib-SideLabel("Issues By System Area")
-       '</td></tr>' SKIP.
+        htmlib-SideLabel("Issues By System Area")
+        '</td></tr>' SKIP.
     
     ASSIGN
-        li-Temp = 0
-        li-Time = 0
+        li-Temp  = 0
+        li-Time  = 0
         lc-id[1] = "N" + string(ROWID(Customer)) /* Number of issues */
         lc-id[2] = "T" + string(ROWID(Customer)) /* Time */
         lc-id[3] = "B" + string(ROWID(Customer)) /* Bar Graph */
@@ -1037,25 +1092,25 @@ PROCEDURE ip-SummaryPage:
         IF NOT LAST-OF(tt-ilog.AreaCode) THEN NEXT.
         
         IF lc-lb = ""
-        THEN lc-lb = tt-ilog.AreaCode.
+            THEN lc-lb = tt-ilog.AreaCode.
         ELSE lc-lb = lc-lb + "," + tt-ilog.AreaCode.
         
         CREATE ttd.
         ASSIGN 
-            ttd.id = lc-id[1]
+            ttd.id  = lc-id[1]
             ttd.lbl = tt-ilog.AreaCode
             ttd.val = li-temp.
                
         CREATE ttd.
         ASSIGN 
-            ttd.id = lc-id[2]
+            ttd.id  = lc-id[2]
             ttd.lbl = tt-ilog.AreaCode
             ttd.val = ROUND(ROUND(li-time / 60,2) / 60,2).
                
         CREATE ttd.
         ASSIGN 
-            ttd.id = lc-id[3]
-            ttd.lbl = tt-ilog.AreaCode
+            ttd.id        = lc-id[3]
+            ttd.lbl       = tt-ilog.AreaCode
             ttd.SetVal[1] = li-temp.
         ttd.SetVal[2] = ROUND(ROUND(li-time / 60,2) / 60,2).
                       
@@ -1064,13 +1119,13 @@ PROCEDURE ip-SummaryPage:
             '<td valign="top" align="right">'
             STRING(tt-ilog.AreaCode)
        
-       '</td><td valign="top" align="right">'
-         li-temp 
-        '</td><td valign="top" align="right">'
-          /*li-time ' - ' */
-         fnTimeString(li-Time)
+            '</td><td valign="top" align="right">'
+            li-temp 
+            '</td><td valign="top" align="right">'
+            /*li-time ' - ' */
+            fnTimeString(li-Time)
          
-       '</td></tr>' SKIP.
+            '</td></tr>' SKIP.
        
         
         ASSIGN 
@@ -1080,42 +1135,47 @@ PROCEDURE ip-SummaryPage:
     END.      
                
     {&out} SKIP 
-                htmlib-EndTable() SKIP.
+        htmlib-EndTable() SKIP.
                 
-    {&out} '<table width="100%" border="0">' SKIP
-            '<TR>'
-            '<td valign="top" align="CENTER">'
-       REPLACE(htmlib-SideLabel("Number of Issues By System Area"),":","")
-       '</td>'
-       '<td valign="top" align="CENTER">'
-       REPLACE(htmlib-SideLabel("Time By System Area In Hours"),":","")
-       '</td></tr>'
-       
-            '<tr><td align="CENTER" style="border: 1px solid #E4ECF0;">' SKIP.            
     {&out} 
-    '<div id="canvas-holder1" >' SKIP
+        '<table width="100%" border="0">' SKIP
+        '<TR>'
+        '<td valign="top" align="CENTER">'
+        REPLACE(htmlib-SideLabel("Number of Issues By System Area"),":","")
+        '</td>'
+        '<td valign="top" align="CENTER">'
+        REPLACE(htmlib-SideLabel("Time By System Area In Hours"),":","")
+        '</td></tr>'
+       
+        '<tr><td align="CENTER" style="border: 1px solid #E4ECF0;">' SKIP.            
+    {&out} 
+        '<div id="canvas-holder1" >' SKIP
         
         '<canvas id="' lc-id[1] '" width="300" height="300"/>' SKIP
         
         '</div>' SKIP.
         
-    {&out} '</td><td align="CENTER" style="border: 1px solid #E4ECF0;">'.
+    {&out} 
+        '</td><td align="CENTER" style="border: 1px solid #E4ECF0;">'.
      
     {&out} 
-    '<div id="canvas-holder2">' SKIP
+        '<div id="canvas-holder2">' SKIP
         '<canvas id="' lc-id[2] '" width="300" height="300"/>' SKIP
-         '</div>' SKIP.
-     
-    {&out} '</td></tr><tr><td colspan="2" align="CENTER" style="border: 1px solid #E4ECF0;">'.
+        '</div>' SKIP.
      
     {&out} 
-    '<div id="canvas-holder3">' SKIP
+        '</td></tr><tr><td colspan="2" align="CENTER" style="border: 1px solid #E4ECF0;">'.
+     
+    {&out} 
+        '<div id="canvas-holder3">' SKIP
         '<canvas id="' lc-id[3] '" width="500" height="300"/>' SKIP
-         '</div>' SKIP.
+        '</div>' SKIP.
          
-    {&out} '</td></tr></table>'     SKIP.
+    {&out} 
+        '</td></tr></table>'     SKIP.
       
-    {&out} '<script>' SKIP.
+    {&out} 
+        '<script>' SKIP.
     
     /*
     ***
@@ -1125,7 +1185,7 @@ PROCEDURE ip-SummaryPage:
     DO li-loop = 1 TO 2:
         
         {&out} SKIP
-               'var pd' lc-id[li-loop] ' = [' SKIP.
+            'var pd' lc-id[li-loop] ' = [' SKIP.
                
         li-tcol = 0.
         FOR EACH ttd NO-LOCK 
@@ -1137,23 +1197,25 @@ PROCEDURE ip-SummaryPage:
             IF li-tCol > num-entries(lc-co)
                 THEN li-tCol = 1.
               
-            {&out} '~{' SKIP
-                    ' value: ' ttd.val ',' SKIP
-                    ' color: ~"' ENTRY(li-tCol,lc-co) '",' SKIP
-                    ' highlight: ~"' ENTRY(li-tCol,lc-hi) '",' SKIP
-                    ' label: ~"' ttd.lbl '"' SKIP
-                    '~}'.
+            {&out} 
+                '~{' SKIP
+                ' value: ' ttd.val ',' SKIP
+                ' color: ~"' ENTRY(li-tCol,lc-co) '",' SKIP
+                ' highlight: ~"' ENTRY(li-tCol,lc-hi) '",' SKIP
+                ' label: ~"' ttd.lbl '"' SKIP
+                '~}'.
                     
             IF NOT LAST-OF(ttd.id)
                 THEN {&out} ',' SKIP.
-               ELSE {&out} SKIP.     
+            ELSE {&out} SKIP.     
                     
-            .
+                .
               
                   
                  
         END.       
-        {&out} '];' SKIP.
+        {&out} 
+            '];' SKIP.
                 
           
             
@@ -1162,21 +1224,23 @@ PROCEDURE ip-SummaryPage:
     /* Array Object for Bar */
     
     {&out} SKIP(2)
-               'var pd' lc-id[3] ' = ~{' SKIP
-               ' labels : [ ' .
+        'var pd' lc-id[3] ' = ~{' SKIP
+        ' labels : [ ' .
     DO li-loop = 1 TO NUM-ENTRIES(lc-lb):
         IF li-loop > 1
-        THEN {&out} ','.
+            THEN {&out} ','.
         
-        {&out} '"' ENTRY(li-loop,lc-lb) '"'.
+        {&out} 
+            '"' ENTRY(li-loop,lc-lb) '"'.
     END.
     
-    {&out} "]," SKIP /* end of 'labels' array */
-           " datasets : [" SKIP.
+    {&out} 
+        "]," SKIP /* end of 'labels' array */
+        " datasets : [" SKIP.
               
     DO li-set = 1 TO 2:
         IF li-set = 1
-        THEN {&out} 
+            THEN {&out} 
                 ' ~{' SKIP
                 '   fillColor : "rgba(220,220,220,0.5)",' SKIP
                 '   strokeColor : "rgba(220,220,220,0.8)",' SKIP
@@ -1194,29 +1258,32 @@ PROCEDURE ip-SummaryPage:
                 '   ['.
         DO li-loop = 1 TO NUM-ENTRIES(lc-lb):
             FIND ttd WHERE ttd.id = lc-id[3]
-              AND ttd.lbl = entry(li-loop,lc-lb) NO-LOCK.
-             {&out} ttd.setVal[li-set].
-             IF li-loop <  NUM-ENTRIES(lc-lb)
-             THEN {&out} ','.
-             ELSE {&out} ']' SKIP.
+                AND ttd.lbl = entry(li-loop,lc-lb) NO-LOCK.
+            {&out} ttd.setVal[li-set].
+            IF li-loop <  NUM-ENTRIES(lc-lb)
+                THEN {&out} ','.
+            ELSE {&out} ']' SKIP.
         END. 
         IF li-set = 1
-        THEN {&out} '~},' SKIP.
+            THEN {&out} '~},' SKIP.
         ELSE {&out} '~}' SKIP.     
                            
     END.
                
-    {&out} "]" SKIP. /* end of 'datasets' array */
+    {&out} 
+        "]" SKIP. /* end of 'datasets' array */
     
-    {&out} SKIP '~};' SKIP. /* End bar obj */
+    {&out} SKIP 
+        '~};' SKIP. /* End bar obj */
     
     {&out} SKIP
-           '</script>'.
+        '</script>'.
     
                
                 
-    {&out} '</div>'
-                SKIP.
+    {&out} 
+        '</div>'
+        SKIP.
                 
         
         
@@ -1232,10 +1299,10 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    DEFINE VARIABLE ld-lodate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE ld-hidate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE li-loop     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-rowid    AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE ld-lodate AS DATE      NO-UNDO.
+    DEFINE VARIABLE ld-hidate AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
     ASSIGN
         ld-lodate = DATE(lc-lodate) no-error.
@@ -1421,10 +1488,11 @@ PROCEDURE process-web-request :
     {&out} htmlib-JScript-Maintenance() SKIP.
     {&out} htmlib-StartForm("mainform","post", appurl + '/rep/issuelog.p' ) SKIP.
     {&out} htmlib-ProgramTitle("Issue Log") 
-    htmlib-hidden("submitsource","") SKIP.
+        htmlib-hidden("submitsource","") SKIP.
     {&out} htmlib-BeginCriteria("Report Criteria").
     
-    {&out} '<table align=center><tr>' SKIP.
+    {&out} 
+        '<table align=center><tr>' SKIP.
 
     RUN ip-Selection.
 
@@ -1434,12 +1502,14 @@ PROCEDURE process-web-request :
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
-    {&out} '<center>' htmlib-SubmitButton("submitform","Report") 
-    '</center>' SKIP.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Report") 
+        '</center>' SKIP.
 
     
     
@@ -1451,8 +1521,8 @@ PROCEDURE process-web-request :
         IF lc-output = "WEB" THEN RUN ip-PrintReport.   
         ELSE
             {&out} '<div class="infobox" style="font-size: 10px;">Your report has been emailed to '
-        this-user.email
-        '</div>'.
+                this-user.email
+                '</div>'.
             
         
     END.
@@ -1462,7 +1532,7 @@ PROCEDURE process-web-request :
     
     {&out} htmlib-EndForm() SKIP.
     {&out} htmlib-CalendarScript("lodate") SKIP
-           htmlib-CalendarScript("hidate") SKIP.
+        htmlib-CalendarScript("hidate") SKIP.
    
 
     {&OUT} htmlib-Footer() SKIP.
@@ -1484,11 +1554,11 @@ FUNCTION fnTimeString RETURNS CHARACTER
             Notes:  																	  
     ------------------------------------------------------------------------------*/	
 
-    DEFINE VARIABLE result AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE result  AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE li-min      AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-hr       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-work     AS INTEGER      NO-UNDO.
+    DEFINE VARIABLE li-min  AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-hr   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-work AS INTEGER   NO-UNDO.
     
     IF pi-seconds > 0 THEN
     DO:

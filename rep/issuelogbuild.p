@@ -14,13 +14,12 @@
     07/03/2015  phoski      Put activity seconds on tt
     29/03/2015  phoski      Class Code/Desc
     19/12/2016  phoski      First Activity Date & time
+    09/04/2027  phoski      Support Team selection & Date Type
     
 ***********************************************************************/
 
 {rep/issuelogtt.i}
 
-
-&IF DEFINED(UIB_is_Running) EQ 0 &THEN
 
 DEFINE INPUT PARAMETER pc-companycode          AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-loginid              AS CHARACTER         NO-UNDO.
@@ -31,22 +30,10 @@ DEFINE INPUT PARAMETER pl-oneday               AS LOG               NO-UNDO.
 DEFINE INPUT PARAMETER pd-FromDate             AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pd-ToDate               AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pc-ClassList            AS CHARACTER         NO-UNDO.
+DEFINE INPUT PARAMETER pc-st-num               AS CHARACTER         NO-UNDO.
+DEFINE INPUT PARAMETER pc-dtype                AS CHARACTER         NO-UNDO.
 
 DEFINE OUTPUT PARAMETER table              FOR tt-ilog.
-
-&ELSE
-
-DEFINE VARIABLE pc-companycode       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-loginid           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-FromAccountNumber AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-ToAccountNumber   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pl-allcust           AS LOGICAL   NO-UNDO.
-DEFINE VARIABLE pd-FromDate          AS DATE      NO-UNDO.
-DEFINE VARIABLE pd-ToDate            AS DATE      NO-UNDO.
-
-
-
-&ENDIF
 
 {lib/common.i}
 {iss/issue.i}
@@ -67,23 +54,23 @@ PROCEDURE ip-BuildData :
       Notes:       
     ------------------------------------------------------------------------------*/
     
-    DEFINE BUFFER issue        FOR issue.
-    DEFINE BUFFER IssStatus    FOR IssStatus.
-    DEFINE BUFFER IssActivity  FOR IssActivity.
-    DEFINE BUFFER issnote      FOR issnote.
-    DEFINE BUFFER customer     FOR Customer.
+    DEFINE BUFFER issue       FOR issue.
+    DEFINE BUFFER IssStatus   FOR IssStatus.
+    DEFINE BUFFER IssActivity FOR IssActivity.
+    DEFINE BUFFER issnote     FOR issnote.
+    DEFINE BUFFER customer    FOR Customer.
     
 
     
-    DEFINE VARIABLE li-seconds  AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-min      AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-hr       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-work     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE ldt-Comp    AS DATETIME     NO-UNDO.
+    DEFINE VARIABLE li-seconds AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-min     AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-hr      AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-work    AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE ldt-Comp   AS DATETIME NO-UNDO.
     
-    DEFINE VARIABLE ldt-st      AS DATETIME     NO-UNDO.
-    DEFINE VARIABLE ldt-en      AS DATETIME     NO-UNDO.
-    DEFINE VARIABLE ldt-day     AS DATETIME     NO-UNDO.
+    DEFINE VARIABLE ldt-st     AS DATETIME NO-UNDO.
+    DEFINE VARIABLE ldt-en     AS DATETIME NO-UNDO.
+    DEFINE VARIABLE ldt-day    AS DATETIME NO-UNDO.
     
     
 
@@ -98,16 +85,33 @@ PROCEDURE ip-BuildData :
         WHERE issue.CompanyCode = pc-companyCode
         AND issue.AccountNumber >= pc-FromAccountNumber
         AND issue.AccountNumber <= pc-ToAccountNumber
+        /*
         AND issue.IssueDate >= pd-fromDate
         AND issue.IssueDate <= pd-ToDate
+        */
+        
         AND CAN-DO(pc-classList,issue.iClass)
         :
 
+        IF pc-dType  = "ISS"
+            OR pc-dType = "ISSACT" THEN
+        DO:
+            IF  issue.IssueDate < pd-fromDate
+                OR  issue.IssueDate > pd-ToDate THEN NEXT.
+
+        END.
+        
         FIND customer OF Issue NO-LOCK NO-ERROR.
         IF NOT AVAILABLE Customer THEN NEXT.
         
         IF pl-allcust = NO
-        AND Customer.IsActive = NO THEN NEXT.
+            AND Customer.IsActive = NO THEN NEXT.
+        
+        IF pc-st-num <> "ALL" THEN
+        DO:
+            IF Customer.st-num <> integer(pc-st-num) THEN NEXT.
+        END. 
+        
                         
         CREATE tt-ilog.
         BUFFER-COPY issue TO tt-ilog.
@@ -118,7 +122,7 @@ PROCEDURE ip-BuildData :
 
 
         ASSIGN
-            tt-ilog.isClosed =  NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
+            tt-ilog.isClosed = NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
 
         IF tt-ilog.isClosed = FALSE AND pl-oneday THEN
         DO:
@@ -180,10 +184,10 @@ PROCEDURE ip-BuildData :
         
 
         ASSIGN 
-            tt-ilog.AreaCode = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
+            tt-ilog.AreaCode      = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
             tt-ilog.RaisedLoginID = DYNAMIC-FUNCTION("com-UserName",tt-ilog.RaisedLoginID).
         IF tt-ilog.AreaCode = ""
-        THEN tt-ilog.AreaCode = "Not defined".
+            THEN tt-ilog.AreaCode = "Not defined".
         
 
         /*
@@ -198,14 +202,27 @@ PROCEDURE ip-BuildData :
             BY issActivity.StartDate
             BY issActivity.StartTime:
 
+            IF pc-dType = "ACT"
+                OR pc-dType = "ISSACT" THEN
+            DO:
+                IF issActivity.StartDate < pd-fromDate
+                OR issActivity.StartDate > pd-ToDate THEN NEXT.
+                           
+            END.
             IF tt-ilog.fActDate = ?
-            THEN ASSIGN tt-ilog.fActDate =  issActivity.StartDate
-                        tt-ilog.fActTime = issActivity.StartTime.  
+                THEN ASSIGN tt-ilog.fActDate = issActivity.StartDate
+                    tt-ilog.fActTime = issActivity.StartTime.  
 
             ASSIGN 
                 li-seconds = li-seconds + IssActivity.Duration.
 
         END.
+        IF pc-dType = "ACT" AND tt-ilog.fActDate = ? THEN
+        DO:
+            DELETE tt-iLog.
+            NEXT.
+        END.
+
         li-work = li-seconds.
         ASSIGN
             tt-ilog.iActDuration = li-Seconds.
@@ -232,7 +249,7 @@ PROCEDURE ip-BuildData :
             ASSIGN
                 ldt-st = DATETIME(STRING(tt-ilog.CreateDate,"99/99/9999") + " " + string(tt-ilog.CreateTime,"HH:MM:SS")).
                 
-           ASSIGN
+            ASSIGN
                 ldt-en = DATETIME(STRING(tt-ilog.CompDate,"99/99/9999") + " " + string(tt-ilog.CompTime,"HH:MM:SS")).
                 
             ASSIGN
