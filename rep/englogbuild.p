@@ -10,8 +10,8 @@
     When        Who         What
     24/01/2015  phoski      Initial  
     29/03/2015  phoski      Class Code/Desc
-    
-    
+    15/04/2017  phoski      ExcludeReports flag
+  
 ***********************************************************************/
 
 {rep/englogtt.i}
@@ -32,13 +32,13 @@ DEFINE OUTPUT PARAMETER table              FOR tt-ilog.
 
 &ELSE
 
-DEFINE VARIABLE pc-companycode       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-loginid           AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-FromEng AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-ToEng   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pl-allcust           AS LOGICAL   NO-UNDO.
-DEFINE VARIABLE pd-FromDate          AS DATE      NO-UNDO.
-DEFINE VARIABLE pd-ToDate            AS DATE      NO-UNDO.
+DEFINE VARIABLE pc-companycode AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pc-loginid     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pc-FromEng     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pc-ToEng       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pl-allcust     AS LOGICAL   NO-UNDO.
+DEFINE VARIABLE pd-FromDate    AS DATE      NO-UNDO.
+DEFINE VARIABLE pd-ToDate      AS DATE      NO-UNDO.
 
 
 
@@ -63,20 +63,20 @@ PROCEDURE ip-BuildData :
       Notes:       
     ------------------------------------------------------------------------------*/
     
-    DEFINE BUFFER issue        FOR issue.
-    DEFINE BUFFER IssStatus    FOR IssStatus.
-    DEFINE BUFFER IssActivity  FOR IssActivity.
-    DEFINE BUFFER issnote      FOR issnote.
-    DEFINE BUFFER customer     FOR Customer.
-    DEFINE BUFFER bAct         FOR issActivity.
+    DEFINE BUFFER issue       FOR issue.
+    DEFINE BUFFER IssStatus   FOR IssStatus.
+    DEFINE BUFFER IssActivity FOR IssActivity.
+    DEFINE BUFFER issnote     FOR issnote.
+    DEFINE BUFFER customer    FOR Customer.
+    DEFINE BUFFER bAct        FOR issActivity.
     
 
     
-    DEFINE VARIABLE li-seconds  AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-min      AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-hr       AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE li-work     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE ldt-Comp    AS DATETIME NO-UNDO.
+    DEFINE VARIABLE li-seconds AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-min     AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-hr      AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-work    AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE ldt-Comp   AS DATETIME NO-UNDO.
 
   
     /*
@@ -86,11 +86,11 @@ PROCEDURE ip-BuildData :
     */  
     FOR EACH bAct NO-LOCK
         WHERE bact.CompanyCode = pc-companyCode
-          AND bact.ActivityBy >= pc-FromEng
-          AND bact.ActivityBy <= pc-ToEng
-          AND bact.ActDate >= pd-fromDate
-          AND bact.ActDate <= pd-toDate
-          ,           
+        AND bact.ActivityBy >= pc-FromEng
+        AND bact.ActivityBy <= pc-ToEng
+        AND bact.ActDate >= pd-fromDate
+        AND bact.ActDate <= pd-toDate
+        ,           
         FIRST issue NO-LOCK
         WHERE issue.CompanyCode = pc-companyCode
         AND Issue.IssueNumber = bAct.issueNumber
@@ -101,25 +101,25 @@ PROCEDURE ip-BuildData :
         IF NOT AVAILABLE Customer THEN NEXT.
         
         IF pl-allcust = NO
-        AND Customer.IsActive = NO THEN NEXT.
+            AND Customer.IsActive = NO THEN NEXT.
                        
         FIND FIRST tt-ilog
             WHERE tt-ilog.eng = bact.ActivityBy
-              AND tt-ilog.issueNumber = Issue.IssueNumber
-              EXCLUSIVE-LOCK NO-ERROR.
+            AND tt-ilog.issueNumber = Issue.IssueNumber
+            EXCLUSIVE-LOCK NO-ERROR.
         IF NOT AVAILABLE tt-ilog
-        THEN CREATE tt-ilog.
+            THEN CREATE tt-ilog.
         
         BUFFER-COPY issue TO tt-ilog.
         
        
         ASSIGN  
-            tt-ilog.eng = bact.ActivityBy
+            tt-ilog.eng   = bact.ActivityBy
             tt-ilog.iType = com-DecodeLookup(Issue.iClass,lc-global-iclass-code,lc-global-iclass-desc).
 
 
         ASSIGN
-            tt-ilog.isClosed =  NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
+            tt-ilog.isClosed = NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
 
         IF tt-ilog.SLALevel = ?
             THEN tt-ilog.SLALevel = 0.
@@ -166,7 +166,7 @@ PROCEDURE ip-BuildData :
         END.
 
         ASSIGN 
-            tt-ilog.AreaCode = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
+            tt-ilog.AreaCode      = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
             tt-ilog.RaisedLoginID = DYNAMIC-FUNCTION("com-UserName",tt-ilog.RaisedLoginID).
 
 
@@ -178,7 +178,7 @@ PROCEDURE ip-BuildData :
         ASSIGN 
             tt-ilog.iSeconds = tt-ilog.iSeconds + bact.Duration
             
-            li-seconds = tt-ilog.iSeconds.
+            li-seconds       = tt-ilog.iSeconds.
             
         /*
         FOR EACH IssActivity OF Issue NO-LOCK:

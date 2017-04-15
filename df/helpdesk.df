@@ -7043,6 +7043,14 @@ ADD FIELD "TwoFactor_Disable" OF "WebUser" AS logical
   MAX-WIDTH 1
   ORDER 370
 
+ADD FIELD "ExcludeReports" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Exclude Reports"
+  POSITION 40
+  MAX-WIDTH 1
+  ORDER 380
+
 ADD INDEX "LoginID" ON "WebUser" 
   AREA "Schema Area"
   UNIQUE
@@ -7187,4 +7195,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142608
+0000142768

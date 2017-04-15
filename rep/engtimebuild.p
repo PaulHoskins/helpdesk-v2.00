@@ -12,7 +12,8 @@
     12/03/2016  phoski      Engineer in lookup list instead of range
     02/07/2016  phoski      Exclude Admin
     31/07/2016  phoski      Exclude disabled users option
-     
+    15/04/2017  phoski      ExcludeReports flag
+  
    
 ***********************************************************************/
 
@@ -59,8 +60,8 @@ PROCEDURE ip-BuildData :
       Notes:       
     ------------------------------------------------------------------------------*/
     
-    DEFINE BUFFER iact FOR issActivity.
-    DEFINE BUFFER iss FOR Issue.
+    DEFINE BUFFER iact    FOR issActivity.
+    DEFINE BUFFER iss     FOR Issue.
     DEFINE BUFFER WebUser FOR WebUser.
     
     FOR EACH iact NO-LOCK
@@ -74,11 +75,12 @@ PROCEDURE ip-BuildData :
         
         :
         IF pl-ExcludeAdmin 
-        AND com-IsActivityChargeable(iAct.IssActivityID) = FALSE THEN NEXT.
+            AND com-IsActivityChargeable(iAct.IssActivityID) = FALSE THEN NEXT.
             
              
         FIND WebUser WHERE WebUser.LoginID = iact.activityBy NO-LOCK NO-ERROR.
         IF NOT AVAILABLE WebUser THEN NEXT.
+        IF WebUser.excludeReports  THEN NEXT.
         IF pc-SelectEngineer <> "ALL" THEN
         DO:
             IF LOOKUP(WebUser.LoginID,pc-SelectEngineer) = 0 THEN NEXT.
@@ -98,14 +100,14 @@ PROCEDURE ip-BuildData :
                   
             CREATE tt-engtime.
             ASSIGN
-                tt-engtime.loginid       = WebUser.LoginID
-                tt-engtime.startdate     = iact.startdate.
+                tt-engtime.loginid   = WebUser.LoginID
+                tt-engtime.startdate = iact.startdate.
                 
         END.
             
         ASSIGN
-            tt-engTime.billable      = tt-engTime.billable + IF iact.Billable THEN iact.Duration ELSE 0
-            tt-engTime.nonbillable   = tt-engTime.nonbillable + IF NOT iact.Billable THEN iact.Duration ELSE 0.
+            tt-engTime.billable    = tt-engTime.billable + IF iact.Billable THEN iact.Duration ELSE 0
+            tt-engTime.nonbillable = tt-engTime.nonbillable + IF NOT iact.Billable THEN iact.Duration ELSE 0.
             
     
                    
@@ -122,18 +124,19 @@ PROCEDURE ip-BuildDefaultInfo:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
     
-    DEFINE BUFFER WebUser FOR WebUser.
+    DEFINE BUFFER WebUser    FOR WebUser.
     DEFINE BUFFER WebStdTime FOR WebStdTime.
     
-    DEFINE VARIABLE li-loop     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE li-day      AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE li-loop  AS INTEGER NO-UNDO.
+    DEFINE VARIABLE li-day   AS INTEGER NO-UNDO.
     
-    DEFINE VARIABLE lf-hours    AS DECIMAL  NO-UNDO.
+    DEFINE VARIABLE lf-hours AS DECIMAL NO-UNDO.
        
     
     FOR EACH WebUser NO-LOCK
         WHERE webuser.companyCode = pc-companyCode
         AND WebUser.UserClass = "INTERNAL"
+        AND WebUser.excludeReports = FALSE
         : 
         
               
@@ -150,8 +153,8 @@ PROCEDURE ip-BuildDefaultInfo:
         DO li-loop = 0 TO ( pd-toDate - pd-FromDate):
             CREATE tt-engtime.
             ASSIGN
-                tt-engtime.loginid       = WebUser.LoginID
-                tt-engtime.startdate     = pd-fromDate + li-loop.
+                tt-engtime.loginid   = WebUser.LoginID
+                tt-engtime.startdate = pd-fromDate + li-loop.
                 
             
         END.
@@ -169,8 +172,7 @@ PROCEDURE ip-BuildDefaultInfo:
             IF AVAILABLE WebStdTime THEN
             DO:
                 ASSIGN
-                    lf-Hours = 
-                    ((TRUNCATE(WebStdTime.StdAMEndTime[li-Day] / 100,0) + dec(WebStdTime.StdAMEndTime[li-Day] MODULO 100 / 60))          /* convert time to decimal  */ 
+                    lf-Hours = ((TRUNCATE(WebStdTime.StdAMEndTime[li-Day] / 100,0) + dec(WebStdTime.StdAMEndTime[li-Day] MODULO 100 / 60))          /* convert time to decimal  */ 
                     - (TRUNCATE(WebStdTime.StdAMStTime[li-Day] / 100,0) + dec(WebStdTime.StdAMStTime[li-Day] MODULO 100 / 60)))            /* convert time to decimal  */ 
                      + ((TRUNCATE(WebStdTime.StdPMEndTime[li-Day] / 100,0) + dec(WebStdTime.StdPMEndTime[li-Day] MODULO 100 / 60))          /* convert time to decimal  */                               
                       - (TRUNCATE(WebStdTime.StdPMStTime[li-Day] / 100,0) + dec(WebStdTime.StdPMStTime[li-Day] MODULO 100 / 60))) 
@@ -189,7 +191,7 @@ PROCEDURE ip-BuildDefaultInfo:
             IF AVAILABLE WebUserTime THEN
             DO:
                 ASSIGN 
-                    tt-engtime.AdjTime = (( WebUserTime.EventHours * 60) * 60 ) *
+                    tt-engtime.AdjTime   = (( WebUserTime.EventHours * 60) * 60 ) *
                                             IF  WebUserTime.EventType = "OT" THEN 1 ELSE -1
                     tt-engtime.AdjReason = WebUserTime.EventType.
                     
@@ -217,7 +219,7 @@ PROCEDURE ip-BuildDefaultInfo:
                     NO-LOCK NO-ERROR.
                 IF AVAILABLE Holiday
                     THEN ASSIGN
-                        tt-engtime.AdjTime = tt-engtime.StdMins * -1
+                        tt-engtime.AdjTime   = tt-engtime.StdMins * -1
                         tt-engtime.AdjReason = Holiday.descr.     
             
             END.

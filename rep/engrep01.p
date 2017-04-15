@@ -16,6 +16,7 @@
                             date range
     02/07/2016  phoski      Admin Time option
     01/08/2016  phoski      CRM
+    15/04/2017  phoski      ExcludeReports flag
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -144,7 +145,7 @@ FUNCTION percentage-calc RETURNS DECIMAL
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 {lib/replib.i}
 
@@ -168,13 +169,14 @@ PROCEDURE ip-customer-select :
     ------------------------------------------------------------------------------*/
     
  
-    {&out}  '<div id="customerdiv" style="display:none;">' skip
-            '<span class="tableheading" >Please select customer(s)</span><br>' skip
-            '<select id="selectcustomer" name="selectcustomer" class="inputfield" ' skip
-            'multiple="multiple" size=8 width="200px" style="width:200px;" >' skip.
+    {&out}  
+        '<div id="customerdiv" style="display:none;">' SKIP
+        '<span class="tableheading" >Please select customer(s)</span><br>' SKIP
+        '<select id="selectcustomer" name="selectcustomer" class="inputfield" ' SKIP
+        'multiple="multiple" size=8 width="200px" style="width:200px;" >' SKIP.
  
     {&out}
-    '<option value="ALL" selected >Select All</option>' skip.
+        '<option value="ALL" selected >Select All</option>' SKIP.
 
     FOR EACH customer NO-LOCK
         WHERE customer.company = lc-global-company
@@ -182,9 +184,10 @@ PROCEDURE ip-customer-select :
  
         IF  LOOKUP(customer.accStatus,lc-global-accStatus-HelpDesk-All ,"|") = 0 THEN NEXT.
         {&out}
-        '<option value="'  customer.accountnumber '" ' '>'  html-encode(customer.name) '</option>' skip.
+            '<option value="'  customer.accountnumber '" ' '>'  html-encode(customer.name) '</option>' SKIP.
     END.
-    {&out} '</select></div>'.
+    {&out} 
+        '</select></div>'.
 END PROCEDURE.
 
 
@@ -239,7 +242,8 @@ PROCEDURE ip-CustomerReport:
     END.   
     
     
-    {&out} '<table width=100% class="rptable">' SKIP.
+    {&out} 
+        '<table width=100% class="rptable">' SKIP.
     
     CASE pc-rep-type:
         WHEN 1 THEN
@@ -276,17 +280,17 @@ PROCEDURE ip-CustomerReport:
                 AND tt-issCust.period-of  = tt-IssRep.period-of NO-LOCK NO-ERROR.
             
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(Customer.Name,'','font-weight:bold')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right','font-weight:bold')
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right','font-weight:bold')
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right','font-weight:bold')
+                '<tr>' SKIP
+                replib-RepField(Customer.Name,'','font-weight:bold')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right','font-weight:bold')
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right','font-weight:bold')
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right','font-weight:bold')
                 '</tr>' SKIP.
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-IssTotal.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-IssTotal.nonbillable
+                li-tot-billable    = li-tot-billable + tt-IssTotal.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-IssTotal.nonbillable
                 .
                 
         END.
@@ -308,30 +312,30 @@ PROCEDURE ip-CustomerReport:
             IF FIRST-OF(tt-IssRep.SortField)
                 THEN lc-style = lc-style + "border-top:1px solid black;".
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(IF first-of(tt-IssRep.SortField) then Customer.name ELSE '','',lc-style)
-                  replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
+                '<tr>' SKIP
+                replib-RepField(IF FIRST-OF(tt-IssRep.SortField) THEN Customer.name ELSE '','',lc-style)
+                replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
                   
                 '</tr>' SKIP.
             ASSIGN
                 lc-style = 'font-weight:bold;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','',lc-style)
-                  replib-RepField('Issue No','',lc-style)
-                  replib-RepField('','right',lc-style)
-                  replib-RepField('Contract Type','left',lc-style)
-              '</tr>' SKIP.
+                '<tr>' SKIP
+                replib-RepField('','',lc-style)
+                replib-RepField('Issue No','',lc-style)
+                replib-RepField('','right',lc-style)
+                replib-RepField('Contract Type','left',lc-style)
+                '</tr>' SKIP.
                 
               
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-issCust.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-issCust.nonbillable
+                li-tot-billable    = li-tot-billable + tt-issCust.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-issCust.nonbillable
                 .
                     
             
@@ -350,18 +354,18 @@ PROCEDURE ip-CustomerReport:
             ASSIGN
                 lc-style = ''.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(IF first-of(tt-IssRep.SortField) then Customer.name ELSE '','',lc-style)
-                  replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
+                '<tr>' SKIP
+                replib-RepField(IF FIRST-OF(tt-IssRep.SortField) THEN Customer.name ELSE '','',lc-style)
+                replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
                   
-                  replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
                   
                 '</tr>' SKIP.
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-issCust.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-issCust.nonbillable
+                li-tot-billable    = li-tot-billable + tt-issCust.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-issCust.nonbillable
                 .
                 
         END.
@@ -378,13 +382,13 @@ PROCEDURE ip-CustomerReport:
             DO:
            
                 {&out}
-                '<tr>' SKIP
+                    '<tr>' SKIP
                     replib-RepField('','','')
                     replib-RepField('Issue Number','left','font-weight:bold')
                     replib-RepField("Contract Type          Date: " + string(tt-IssRep.IssueDate,"99/99/9999"),'left','font-weight:bold')
                     '</tr>' SKIP 
                                
-                '<tr>' SKIP
+                    '<tr>' SKIP
                     replib-RepField('','','')
                     replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
                     replib-RepField(tt-IssRep.ContractType,'left','')
@@ -395,20 +399,20 @@ PROCEDURE ip-CustomerReport:
                     
                     '</tr>' SKIP. 
                 {&out} 
-                '<tr>' SKIP
-                        replib-RepField('','','')
-                        replib-RepField('Brief Description','left','')
-                        replib-RepField(tt-IssRep.Description,'left','')
-                        '</tr>' SKIP
-                        '<tr>' SKIP
-                        replib-RepField('','','')
-                        replib-RepField('Action Desc','left','')
+                    '<tr>' SKIP
+                    replib-RepField('','','')
+                    replib-RepField('Brief Description','left','')
+                    replib-RepField(tt-IssRep.Description,'left','')
+                    '</tr>' SKIP
+                    '<tr>' SKIP
+                    replib-RepField('','','')
+                    replib-RepField('Action Desc','left','')
                        
-                        replib-RepField(replace(tt-IssRep.ActionDesc,'~n','<br/>'),'left',' max-width: 100px;')
+                    replib-RepField(REPLACE(tt-IssRep.ActionDesc,'~n','<br/>'),'left',' max-width: 100px;')
                         
-                        '</tr>' SKIP
+                    '</tr>' SKIP
                         
-                .
+                    .
      
                                    
             END.
@@ -416,17 +420,17 @@ PROCEDURE ip-CustomerReport:
                 IF pc-rep-type = 2 THEN
                 DO:
                     {&out}
-                    '<tr>' SKIP
-                    replib-RepField('','','')
-                    replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
-                    replib-RepField(replace(tt-IssRep.Description,'~n','<br/>'),'left','max-width: 400px;')
-                    replib-RepField(tt-IssRep.ContractType,'left','')
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable ELSE 0),"right","")
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.nonbillable ELSE 0),"right","")
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable + tt-IssTime.nonbillable ELSE 0),"right","")
+                        '<tr>' SKIP
+                        replib-RepField('','','')
+                        replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
+                        replib-RepField(REPLACE(tt-IssRep.Description,'~n','<br/>'),'left','max-width: 400px;')
+                        replib-RepField(tt-IssRep.ContractType,'left','')
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable ELSE 0),"right","")
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.nonbillable ELSE 0),"right","")
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable + tt-IssTime.nonbillable ELSE 0),"right","")
                     
                     
-                    '</tr>' SKIP. 
+                        '</tr>' SKIP. 
                     ASSIGN
                         i-fuck[1] = i-fuck[1] + IF AVAILABLE tt-IssTime THEN tt-IssTime.billable ELSE 0      
                         i-fuck[2] = i-fuck[2] + IF AVAILABLE tt-IssTime THEN tt-IssTime.nonbillable ELSE 0
@@ -443,33 +447,33 @@ PROCEDURE ip-CustomerReport:
         DO:
            
             {&out} 
-            '<tr>' SKIP
+                '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Activity','left','')
-                        replib-RepField(tt-IssRep.ActivityType + " by: " + fnFullName(tt-IssRep.ActivityBy) + " on: " + string(tt-IssRep.StartDate,"99/99/9999"),'left','')
+                replib-RepField('Activity','left','')
+                replib-RepField(tt-IssRep.ActivityType + " by: " + fnFullName(tt-IssRep.ActivityBy) + " on: " + string(tt-IssRep.StartDate,"99/99/9999"),'left','')
                         
                 '</tr>' SKIP
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Billable','left','')
-                        replib-RepField(IF tt-IssRep.Billable THEN "Yes" ELSE "No",'left','')
+                replib-RepField('Billable','left','')
+                replib-RepField(IF tt-IssRep.Billable THEN "Yes" ELSE "No",'left','')
                         
                 '</tr>' SKIP
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Time','left','')
-                        replib-RepField(lcom-ts(tt-IssRep.Duration),'left','')
+                replib-RepField('Time','left','')
+                replib-RepField(lcom-ts(tt-IssRep.Duration),'left','')
                         
                 '</tr>' SKIP
                 
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Activity Desc','left','')
-                        replib-RepField(replace(tt-IssRep.Notes,'~n','<br/>'),'left',' max-width: 100px;')
+                replib-RepField('Activity Desc','left','')
+                replib-RepField(REPLACE(tt-IssRep.Notes,'~n','<br/>'),'left',' max-width: 100px;')
                        
                 '</tr>' SKIP
                 
-            .
+                .
                 
         END.
         
@@ -487,27 +491,27 @@ PROCEDURE ip-CustomerReport:
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
      
             {&out}
-            '<tr>' SKIP
+                '<tr>' SKIP
             
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  /*
-                  replib-RepField(lcom-ts(i-fuck[1]),'right',lc-style)
-                  replib-RepField(lcom-ts(i-fuck[2]),'right',lc-style)
-                  replib-RepField(lcom-ts(i-fuck[3]),'right',lc-style)
-                  */
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                /*
+                replib-RepField(lcom-ts(i-fuck[1]),'right',lc-style)
+                replib-RepField(lcom-ts(i-fuck[2]),'right',lc-style)
+                replib-RepField(lcom-ts(i-fuck[3]),'right',lc-style)
+                */
                   
-                  replib-RepField('Total Period - ' + string(tt-IssRep.period-of,"99"),'right',lc-style)
+                replib-RepField('Total Period - ' + string(tt-IssRep.period-of,"99"),'right',lc-style)
                
-                  replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-issCust.billable + tt-issCust.nonbillable),'right',lc-style)
                   
                 '</tr>' SKIP
                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                replib-RepField('','','')
+                '</tr>' SKIP.
                 
         END.
     
@@ -517,13 +521,13 @@ PROCEDURE ip-CustomerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Customer Total - ' +  Customer.Name ,'',lc-style)
-                                    replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('Customer Total - ' +  Customer.Name ,'',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
                 '</tr>' SKIP.
                 
                 
@@ -538,21 +542,21 @@ PROCEDURE ip-CustomerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('','','')
                   
-                  replib-RepField('Customer Total - ' + Customer.name,'',lc-style)
-                  replib-RepField('','',lc-style)
+                replib-RepField('Customer Total - ' + Customer.name,'',lc-style)
+                replib-RepField('','',lc-style)
                   
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
                   
                 '</tr>' SKIP
-                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                '<tr>' SKIP
+                replib-RepField('','','')
+                '</tr>' SKIP.
                  
                       
         END.
@@ -567,17 +571,17 @@ PROCEDURE ip-CustomerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                   replib-RepField('','','')
-                  replib-RepField('Customer Total - ' + Customer.name ,'',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('Customer Total - ' + Customer.name ,'',lc-style)
                   
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
-                  '</tr>' SKIP
-                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                '</tr>' SKIP
+                '<tr>' SKIP
+                replib-RepField('','','')
+                '</tr>' SKIP.
                  
                       
         END.
@@ -593,14 +597,14 @@ PROCEDURE ip-CustomerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
@@ -609,15 +613,15 @@ PROCEDURE ip-CustomerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField('','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
@@ -626,20 +630,21 @@ PROCEDURE ip-CustomerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
     
     
      
-    {&out} '</table>' SKIP.
+    {&out} 
+        '</table>' SKIP.
 
 END PROCEDURE.
 
@@ -652,30 +657,31 @@ PROCEDURE ip-engcust-table :
  
 
     {&out}
-    htmlib-StartMntTable()
-    htmlib-TableHeading("Customer or Engineer") skip.
+        htmlib-StartMntTable()
+        htmlib-TableHeading("Customer or Engineer") SKIP.
     
     {&out}
-    /*htmlib-trmouse() '<td>' skip */
-    '<tr><td>' skip
-      Format-Select-Type(htmlib-Radio("engcust", "eng" , true ) ) '</td>' skip
-      htmlib-TableField(html-encode("Engineer"),'left') '</tr>' skip.
+        /*htmlib-trmouse() '<td>' skip */
+        '<tr><td>' SKIP
+        Format-Select-Type(htmlib-Radio("engcust", "eng" , TRUE ) ) '</td>' SKIP
+        htmlib-TableField(html-encode("Engineer"),'left') '</tr>' SKIP.
     
     {&out}
-    '<tr><td>' SKIP /*htmlib-trmouse() '<td>' skip*/
-      Format-Select-Type(htmlib-Radio("engcust" , "cust", false) ) '</td>' skip
-      htmlib-TableField(html-encode("Customer"),'left') '</tr>' SKIP
-      '<tr><td align="right"><b>Sort By</b></td><td>' SKIP
+        '<tr><td>' SKIP /*htmlib-trmouse() '<td>' skip*/
+        Format-Select-Type(htmlib-Radio("engcust" , "cust", FALSE) ) '</td>' SKIP
+        htmlib-TableField(html-encode("Customer"),'left') '</tr>' SKIP
+        '<tr><td align="right"><b>Sort By</b></td><td>' SKIP
       
-      htmlib-Select("custsort",lc-csort-cde,lc-csort-cde,get-value("custsort")) SKIP.
+        htmlib-Select("custsort",lc-csort-cde,lc-csort-cde,get-value("custsort")) SKIP.
       
       
     
-    {&out} '</td><tr>' SKIP.
+    {&out} 
+        '</td><tr>' SKIP.
     
-    {&out} skip 
-      htmlib-EndTable()
-      skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 
 END PROCEDURE.
@@ -693,30 +699,33 @@ PROCEDURE ip-engineer-select :
     ------------------------------------------------------------------------------*/
   
  
-    {&out}  '<div id="engineerdiv" style="display:block;">' skip
-            '<span class="tableheading" >Please select engineer(s)</span><br>' skip
-            '<select id="selectengineer" name="selectengineer" class="inputfield" ' skip
-            'multiple="multiple" size=8 width="200px" style="width:200px;" >' skip.
+    {&out}  
+        '<div id="engineerdiv" style="display:block;">' SKIP
+        '<span class="tableheading" >Please select engineer(s)</span><br>' SKIP
+        '<select id="selectengineer" name="selectengineer" class="inputfield" ' SKIP
+        'multiple="multiple" size=8 width="200px" style="width:200px;" >' SKIP.
 
  
     {&out}
-    '<option value="ALL" selected >Select All</option>' skip.
+        '<option value="ALL" selected >Select All</option>' SKIP.
 
     FOR EACH webUser NO-LOCK
         WHERE webuser.company = lc-global-company
-        AND   webuser.UserClass = "internal"
+        AND webuser.UserClass = "internal"
+        AND WebUser.excludeReports = FALSE
         BY webUser.name:
 
                 
  
         {&out}
-        '<option value="'  webUser.loginid '" ' '>'  html-encode(webuser.name) '</option>' skip.
+            '<option value="'  webUser.loginid '" ' '>'  html-encode(webuser.name) '</option>' SKIP.
  
     END.
   
       
 
-    {&out} '</select></div>'.
+    {&out} 
+        '</select></div>'.
 
 
 END PROCEDURE.
@@ -738,7 +747,8 @@ PROCEDURE ip-EngineerReport:
      
     
     
-    {&out} '<table width=100% class="rptable">' SKIP.
+    {&out} 
+        '<table width=100% class="rptable">' SKIP.
     
     CASE pc-rep-type:
         WHEN 1 THEN
@@ -772,17 +782,17 @@ PROCEDURE ip-EngineerReport:
             
             
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(fnFullName(tt-IssRep.ActivityBy),'','font-weight:bold')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right','font-weight:bold')
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right','font-weight:bold')
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right','font-weight:bold')
+                '<tr>' SKIP
+                replib-RepField(fnFullName(tt-IssRep.ActivityBy),'','font-weight:bold')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right','font-weight:bold')
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right','font-weight:bold')
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right','font-weight:bold')
                 '</tr>' SKIP.
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-IssTotal.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-IssTotal.nonbillable
+                li-tot-billable    = li-tot-billable + tt-IssTotal.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-IssTotal.nonbillable
                 .
                 
         END.
@@ -802,39 +812,39 @@ PROCEDURE ip-EngineerReport:
             IF FIRST-OF(tt-IssRep.ActivityBy)
                 THEN lc-style = lc-style + "border-top:1px solid black;".
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(IF first-of(tt-IssRep.ActivityBy) then fnFullName(tt-IssRep.ActivityBy) ELSE '','',lc-style)
-                  replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField(string(tt-IssUser.productivity,">>>>>>>>>9.99-"),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(
-                    IF tt-IssUser.productivity <> 0 then
-                    STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
-                    ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
+                '<tr>' SKIP
+                replib-RepField(IF FIRST-OF(tt-IssRep.ActivityBy) THEN fnFullName(tt-IssRep.ActivityBy) ELSE '','',lc-style)
+                replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField(STRING(tt-IssUser.productivity,">>>>>>>>>9.99-"),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(
+                IF tt-IssUser.productivity <> 0 THEN
+                STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
+                ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
                 '</tr>' SKIP.
             ASSIGN
                 lc-style = 'font-weight:bold;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','',lc-style)
-                  replib-RepField('Issue No','',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField('','',lc-style)
-                  replib-RepField('Contract Type','left',lc-style)
-                  replib-RepField('','right',lc-style)
-                  replib-RepField('','right',lc-style)
-                  replib-RepField('','right',lc-style)
-                  replib-RepField('','right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','',lc-style)
+                replib-RepField('Issue No','',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField('','',lc-style)
+                replib-RepField('Contract Type','left',lc-style)
+                replib-RepField('','right',lc-style)
+                replib-RepField('','right',lc-style)
+                replib-RepField('','right',lc-style)
+                replib-RepField('','right',lc-style)
                 '</tr>' SKIP.
                 
               
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-IssUser.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-IssUser.nonbillable
+                li-tot-billable    = li-tot-billable + tt-IssUser.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-IssUser.nonbillable
                 .
                     
             
@@ -854,21 +864,21 @@ PROCEDURE ip-EngineerReport:
             ASSIGN
                 lc-style = ''.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField(IF first-of(tt-IssRep.ActivityBy) then fnFullName(tt-IssRep.ActivityBy) ELSE '','',lc-style)
-                  replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
-                  replib-RepField(string(tt-IssUser.productivity,">>>>>>>>>9.99-"),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(
-                    IF tt-IssUser.productivity <> 0 then
-                    STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
-                    ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
+                '<tr>' SKIP
+                replib-RepField(IF FIRST-OF(tt-IssRep.ActivityBy) THEN fnFullName(tt-IssRep.ActivityBy) ELSE '','',lc-style)
+                replib-RepField(STRING(tt-IssRep.period-of,"99"),'',lc-style)
+                replib-RepField(STRING(tt-IssUser.productivity,">>>>>>>>>9.99-"),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(
+                IF tt-IssUser.productivity <> 0 THEN
+                STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
+                ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
                 '</tr>' SKIP.
             ASSIGN
-                li-tot-billable     = li-tot-billable + tt-IssUser.billable
-                li-tot-nonbillable  = li-tot-nonbillable + tt-IssUser.nonbillable
+                li-tot-billable    = li-tot-billable + tt-IssUser.billable
+                li-tot-nonbillable = li-tot-nonbillable + tt-IssUser.nonbillable
                 .
                 
         END.
@@ -887,13 +897,13 @@ PROCEDURE ip-EngineerReport:
             DO:
            
                 {&out}
-                '<tr>' SKIP
+                    '<tr>' SKIP
                     replib-RepField('','','')
                     replib-RepField('Issue Number','left','font-weight:bold')
                     replib-RepField("Contract Type          Date: " + string(tt-IssRep.IssueDate,"99/99/9999"),'left','font-weight:bold')
                     '</tr>' SKIP 
                                
-                '<tr>' SKIP
+                    '<tr>' SKIP
                     replib-RepField('','','')
                     replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
                     replib-RepField(tt-IssRep.ContractType,'left','')
@@ -904,25 +914,25 @@ PROCEDURE ip-EngineerReport:
                     
                     '</tr>' SKIP. 
                 {&out} 
-                '<tr>' SKIP
-                        replib-RepField('','','')
-                        replib-RepField('Client','left','')
-                        replib-RepField(IF AVAILABLE customer THEN Customer.Name ELSE "Unknown",'left','')
-                        '</tr>' SKIP
-                        '<tr>' SKIP
-                        replib-RepField('','','')
-                        replib-RepField('Brief Description','left','')
-                        replib-RepField(tt-IssRep.Description,'left','')
-                        '</tr>' SKIP
-                        '<tr>' SKIP
-                        replib-RepField('','','')
-                        replib-RepField('Action Desc','left','')
+                    '<tr>' SKIP
+                    replib-RepField('','','')
+                    replib-RepField('Client','left','')
+                    replib-RepField(IF AVAILABLE customer THEN Customer.Name ELSE "Unknown",'left','')
+                    '</tr>' SKIP
+                    '<tr>' SKIP
+                    replib-RepField('','','')
+                    replib-RepField('Brief Description','left','')
+                    replib-RepField(tt-IssRep.Description,'left','')
+                    '</tr>' SKIP
+                    '<tr>' SKIP
+                    replib-RepField('','','')
+                    replib-RepField('Action Desc','left','')
                        
-                        replib-RepField(replace(tt-IssRep.ActionDesc,'~n','<br/>'),'left',' max-width: 100px;')
+                    replib-RepField(REPLACE(tt-IssRep.ActionDesc,'~n','<br/>'),'left',' max-width: 100px;')
                         
-                        '</tr>' SKIP
+                    '</tr>' SKIP
                         
-                .
+                    .
      
                                    
             END.
@@ -930,18 +940,18 @@ PROCEDURE ip-EngineerReport:
                 IF pc-rep-type = 2 THEN
                 DO:
                     {&out}
-                    '<tr>' SKIP
-                    replib-RepField('','','')
-                    replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
-                    replib-RepField(Customer.name,'left','')
-                    replib-RepField(replace(tt-IssRep.Description,'~n','<br/>'),'left','max-width: 400px;')
-                    replib-RepField(tt-IssRep.ContractType,'left','')
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable ELSE 0),"right","")
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.nonbillable ELSE 0),"right","")
-                    replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable + tt-IssTime.nonbillable ELSE 0),"right","")
+                        '<tr>' SKIP
+                        replib-RepField('','','')
+                        replib-RepField(STRING(tt-IssRep.IssueNumber),'left','')
+                        replib-RepField(Customer.name,'left','')
+                        replib-RepField(REPLACE(tt-IssRep.Description,'~n','<br/>'),'left','max-width: 400px;')
+                        replib-RepField(tt-IssRep.ContractType,'left','')
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable ELSE 0),"right","")
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.nonbillable ELSE 0),"right","")
+                        replib-RepField(lcom-ts(IF AVAILABLE tt-IssTime THEN tt-IssTime.billable + tt-IssTime.nonbillable ELSE 0),"right","")
                     
                     
-                    '</tr>' SKIP. 
+                        '</tr>' SKIP. 
                     
                 
                 END.
@@ -953,33 +963,33 @@ PROCEDURE ip-EngineerReport:
         DO:
            
             {&out} 
-            '<tr>' SKIP
+                '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Activity','left','')
-                        replib-RepField(tt-IssRep.ActivityType + " by: " + fnFullName(tt-IssRep.ActivityBy) + " on: " + string(tt-IssRep.StartDate,"99/99/9999"),'left','')
+                replib-RepField('Activity','left','')
+                replib-RepField(tt-IssRep.ActivityType + " by: " + fnFullName(tt-IssRep.ActivityBy) + " on: " + string(tt-IssRep.StartDate,"99/99/9999"),'left','')
                         
                 '</tr>' SKIP
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Billable','left','')
-                        replib-RepField(IF tt-IssRep.Billable THEN "Yes" ELSE "No",'left','')
+                replib-RepField('Billable','left','')
+                replib-RepField(IF tt-IssRep.Billable THEN "Yes" ELSE "No",'left','')
                         
                 '</tr>' SKIP
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Time','left','')
-                        replib-RepField(lcom-ts(tt-IssRep.Duration),'left','')
+                replib-RepField('Time','left','')
+                replib-RepField(lcom-ts(tt-IssRep.Duration),'left','')
                         
                 '</tr>' SKIP
                 
                 '<tr>' SKIP
                 replib-RepField('','','')
-                        replib-RepField('Activity Desc','left','')
-                        replib-RepField(replace(tt-IssRep.Notes,'~n','<br/>'),'left',' max-width: 100px;')
+                replib-RepField('Activity Desc','left','')
+                replib-RepField(REPLACE(tt-IssRep.Notes,'~n','<br/>'),'left',' max-width: 100px;')
                        
                 '</tr>' SKIP
                 
-            .
+                .
                 
         END.
         
@@ -997,24 +1007,24 @@ PROCEDURE ip-EngineerReport:
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
      
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Total Period - ' + string(tt-IssRep.period-of,"99"),'right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('Total Period - ' + string(tt-IssRep.period-of,"99"),'right',lc-style)
                   
-                  replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
-                  replib-RepField(
-                    IF tt-IssUser.productivity <> 0 then
-                    STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
-                    ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssUser.billable + tt-IssUser.nonbillable),'right',lc-style)
+                replib-RepField(
+                IF tt-IssUser.productivity <> 0 THEN
+                STRING(percentage-calc(dec(std-hours),tt-IssUser.productivity)
+                ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
                 '</tr>' SKIP
-                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                '<tr>' SKIP
+                replib-RepField('','','')
+                '</tr>' SKIP.
                 
         END.
     
@@ -1026,13 +1036,13 @@ PROCEDURE ip-EngineerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy),'',lc-style)
-                                    replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy),'',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
                 '</tr>' SKIP.
                 
                 
@@ -1049,23 +1059,23 @@ PROCEDURE ip-EngineerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy) ,'',lc-style)
-                  replib-RepField(string(tt-IssTotal.productivity,">>>>>>>>>9.99-"),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(
-                    IF tt-IssTotal.productivity <> 0 then
-                    STRING(percentage-calc(dec(std-hours),tt-IssTotal.productivity)
-                    ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('','','')
+                replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy) ,'',lc-style)
+                replib-RepField(STRING(tt-IssTotal.productivity,">>>>>>>>>9.99-"),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(
+                IF tt-IssTotal.productivity <> 0 THEN
+                STRING(percentage-calc(dec(std-hours),tt-IssTotal.productivity)
+                ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
                 '</tr>' SKIP
-                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                '<tr>' SKIP
+                replib-RepField('','','')
+                '</tr>' SKIP.
                  
                       
         END.
@@ -1081,21 +1091,21 @@ PROCEDURE ip-EngineerReport:
             ASSIGN 
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
             {&out}
-            '<tr>' SKIP
-                   replib-RepField('','','')
-                  replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy) ,'',lc-style)
-                  replib-RepField(string(tt-IssTotal.productivity,">>>>>>>>>9.99-"),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
-                  replib-RepField(
-                    IF tt-IssTotal.productivity <> 0 then
-                    STRING(percentage-calc(dec(std-hours),tt-IssTotal.productivity)
-                    ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
+                '<tr>' SKIP
+                replib-RepField('','','')
+                replib-RepField('Engineer Total - ' +  fnFullName(tt-IssRep.ActivityBy) ,'',lc-style)
+                replib-RepField(STRING(tt-IssTotal.productivity,">>>>>>>>>9.99-"),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(lcom-ts(tt-IssTotal.billable + tt-IssTotal.nonbillable),'right',lc-style)
+                replib-RepField(
+                IF tt-IssTotal.productivity <> 0 THEN
+                STRING(percentage-calc(dec(std-hours),tt-IssTotal.productivity)
+                ,">>>>>>>>>9.99-") ELSE '','right',lc-style)
                 '</tr>' SKIP
-                 '<tr>' SKIP
-                 replib-RepField('','','')
-                 '</tr>' SKIP.
+                '<tr>' SKIP
+                replib-RepField('','','')
+                '</tr>' SKIP.
                  
                       
         END.
@@ -1110,14 +1120,14 @@ PROCEDURE ip-EngineerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
@@ -1126,16 +1136,16 @@ PROCEDURE ip-EngineerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
@@ -1144,21 +1154,22 @@ PROCEDURE ip-EngineerReport:
         ASSIGN 
             lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:2px solid black;'.
         {&out}
-        '<tr>' SKIP
-                  replib-RepField('','','')
-                  replib-RepField('','','')
-                  replib-RepField('Report Total','',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
-                  replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
-                '</tr>' SKIP.
+            '<tr>' SKIP
+            replib-RepField('','','')
+            replib-RepField('','','')
+            replib-RepField('Report Total','',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-nonbillable),'right',lc-style)
+            replib-RepField(lcom-ts(li-tot-billable + li-tot-nonbillable),'right',lc-style)
+            '</tr>' SKIP.
                     
         
     END.
     
     
      
-    {&out} '</table>' SKIP.
+    {&out} 
+        '</table>' SKIP.
 
 END PROCEDURE.
 
@@ -1171,16 +1182,16 @@ PROCEDURE ip-ExportJavascript :
 
   
     {&out}
-    '<script language="JavaScript">' skip
+        '<script language="JavaScript">' SKIP
 
 
-        'function validateForm()' skip
+        'function validateForm()' SKIP
         '~{' SKIP
-          ' return true;' SKIP
+        ' return true;' SKIP
         '~}' SKIP
         
 
-        '</script>' skip.              
+        '</script>' SKIP.              
               
               
               
@@ -1197,27 +1208,29 @@ PROCEDURE ip-GenerateReport:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE li-loop     AS INT      NO-UNDO.
-    DEFINE BUFFER webuser       FOR webuser.
-    DEFINE BUFFER customer      FOR Customer.
+    DEFINE VARIABLE li-loop AS INT NO-UNDO.
+    DEFINE BUFFER webuser  FOR webuser.
+    DEFINE BUFFER customer FOR Customer.
     
      
 
 
     {&out} htmlib-BeginCriteria("Report Criteria").
     
-    {&out} '<table align=center><tr>' skip.
+    {&out} 
+        '<table align=center><tr>' SKIP.
 
-    {&out} '<th valign="top">Report Type: </th><td valign="top">' 
-    ENTRY(LOOKUP(lc-reptypeA,typedesc),typeof)
-    '</td>' SKIP
-           '<th valign="top">For: </th><td valign="top">' 
-                entry(LOOKUP(lc-reptypeE,engcust),issue)
-             '</td>' SKIP
+    {&out} 
+        '<th valign="top">Report Type: </th><td valign="top">' 
+        ENTRY(LOOKUP(lc-reptypeA,typedesc),typeof)
+        '</td>' SKIP
+        '<th valign="top">For: </th><td valign="top">' 
+        ENTRY(LOOKUP(lc-reptypeE,engcust),issue)
+        '</td>' SKIP
            
-           '<th valign="top">Date Range: </th><td valign="top">' lc-lodate ' - ' lc-hidate '</td>' SKIP
-           '<th valign="top">' IF LOOKUP(lc-reptypeE,engcust) = 1 THEN "Customer(s)"
-                  ELSE 'Engineer(s)' ': </th><td valign="top">'.
+        '<th valign="top">Date Range: </th><td valign="top">' lc-lodate ' - ' lc-hidate '</td>' SKIP
+        '<th valign="top">' IF LOOKUP(lc-reptypeE,engcust) = 1 THEN "Customer(s)"
+        ELSE 'Engineer(s)' ': </th><td valign="top">'.
                   
          
     IF LOOKUP(lc-reptypeE,engcust) = 2 THEN
@@ -1228,7 +1241,7 @@ PROCEDURE ip-GenerateReport:
             IF AVAILABLE webuser THEN 
                 {&out} WebUser.Name '<br/>'.
             ELSE 
-            {&out} entry(li-loop,lc-selectEngineer) '<br/>'.
+                {&out} ENTRY(li-loop,lc-selectEngineer) '<br/>'.
             
         END.
         ELSE {&out} lc-SelectEngineer.
@@ -1243,24 +1256,27 @@ PROCEDURE ip-GenerateReport:
             IF AVAILABLE customer THEN 
                 {&out} Customer.Name '<br/>'.
             ELSE 
-            {&out} entry(li-loop,lc-selectCustomer) '<br/>'.
+                {&out} ENTRY(li-loop,lc-selectCustomer) '<br/>'.
             
         END.
         ELSE {&out} lc-SelectCustomer.
         
-        {&out} '</td><th>Sort By:</th><td>' lc-custSort.
+        {&out} 
+            '</td><th>Sort By:</th><td>' lc-custSort.
         
     END.
     
     
              
-    {&out} '</td>' SKIP
+    {&out} 
+        '</td>' SKIP
         '<th>' IF lc-admin = "on" THEN "Exclude Administration Time"
-               ELSE "Include Administration Time" '</th>' SKIP.
+        ELSE "Include Administration Time" '</th>' SKIP.
                
     .
        
-    {&out} '</tr></table>' skip.
+    {&out} 
+        '</tr></table>' SKIP.
     
     {&out} htmlib-EndCriteria().
     
@@ -1280,7 +1296,8 @@ PROCEDURE ip-GenerateReport:
         
     END.  
     
-    {&out} '</div>
+    {&out} 
+        '</div>
             'htmlib-EndCriteria().
        
         
@@ -1343,36 +1360,40 @@ PROCEDURE ip-report-type :
     ------------------------------------------------------------------------------*/
 
     {&out}
-    htmlib-StartMntTable()
-    htmlib-TableHeading("Report Type") skip.
+        htmlib-StartMntTable()
+        htmlib-TableHeading("Report Type") SKIP.
     
     {&out}
-    /*htmlib-trmouse() '<td>' */ '<tr><td>' skip 
-    htmlib-Radio("reptype", "detail" , TRUE ) '</td>'
-    htmlib-TableField(html-encode("Detail"),'left') '</tr>' skip.
+        /*htmlib-trmouse() '<td>' */ 
+        '<tr><td>' SKIP 
+        htmlib-Radio("reptype", "detail" , TRUE ) '</td>'
+        htmlib-TableField(html-encode("Detail"),'left') '</tr>' SKIP.
     
     {&out}
-    /* htmlib-trmouse() '<td>' */ '<tr><td>' skip 
-    htmlib-Radio("reptype" , "sumdet", FALSE) '</td>'
-    htmlib-TableField(html-encode("Summary Detail"),'left') '</tr>' skip.
+        /* htmlib-trmouse() '<td>' */ 
+        '<tr><td>' SKIP 
+        htmlib-Radio("reptype" , "sumdet", FALSE) '</td>'
+        htmlib-TableField(html-encode("Summary Detail"),'left') '</tr>' SKIP.
 
     {&out}
-    /* htmlib-trmouse() '<td>' */ '<tr><td>' skip 
-    htmlib-Radio("reptype" , "summary", FALSE) '</td>'
-    htmlib-TableField(html-encode("Summary"),'left') '</tr>' skip.
+        /* htmlib-trmouse() '<td>' */ 
+        '<tr><td>' SKIP 
+        htmlib-Radio("reptype" , "summary", FALSE) '</td>'
+        htmlib-TableField(html-encode("Summary"),'left') '</tr>' SKIP.
     
-    {&out} '<tr>'
-            '<TD VALIGN="TOP" colspan="2" nowrap ALIGN="right">&nbsp;' 
-            htmlib-SideLabel("Exclude Administration Time?")
+    {&out} 
+        '<tr>'
+        '<TD VALIGN="TOP" colspan="2" nowrap ALIGN="right">&nbsp;' 
+        htmlib-SideLabel("Exclude Administration Time?")
      
-             '</td><TD VALIGN="TOP" ALIGN="left">'
-                htmlib-CheckBox("admin", IF lc-admin = 'on'
-                                        THEN TRUE ELSE FALSE) 
-            '</TD><tr>'.
+        '</td><TD VALIGN="TOP" ALIGN="left">'
+        htmlib-CheckBox("admin", IF lc-admin = 'on'
+        THEN TRUE ELSE FALSE) 
+        '</TD><tr>'.
             
-    {&out} skip 
-      htmlib-EndTable()
-      skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 
 END PROCEDURE.
@@ -1388,8 +1409,8 @@ PROCEDURE ip-Validate :
       Parameters:  <none>
       emails:       
     ------------------------------------------------------------------------------*/
-     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
-     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
     
@@ -1398,10 +1419,10 @@ PROCEDURE ip-Validate :
     IF lc-selectcustomer BEGINS "ALL," AND NUM-ENTRIES(lc-selectcustomer) > 1 THEN lc-selectcustomer = substr(lc-selectcustomer,INDEX(lc-selectcustomer,",") + 1).
 
     
-    DEFINE VARIABLE ld-lodate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE ld-hidate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE li-loop     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-rowid    AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE ld-lodate AS DATE      NO-UNDO.
+    DEFINE VARIABLE ld-hidate AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
     ASSIGN
         ld-lodate = DATE(lc-lodate) no-error.
@@ -1432,7 +1453,7 @@ PROCEDURE ip-Validate :
             INPUT-OUTPUT pc-error-msg ).
             
     IF pc-error-field <> ""
-    THEN RETURN.
+        THEN RETURN.
     IF YEAR(ld-lodate) <> YEAR(ld-hidate) 
         THEN RUN htmlib-AddErrorMessage(
             'lodate', 
@@ -1459,36 +1480,37 @@ PROCEDURE ip-week-month :
     ------------------------------------------------------------------------------*/
 
     {&out}
-    htmlib-StartMntTable()
-    htmlib-TableHeading("Date Range|") skip.
+        htmlib-StartMntTable()
+        htmlib-TableHeading("Date Range|") SKIP.
     
     
     
     {&out} 
-    '<tr><td valign="top" align="right">' 
+        '<tr><td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From")
         ELSE htmlib-SideLabel("From"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td></tr>' skip.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td></tr>' SKIP.
     
-    {&out} '<tr><td valign="top" align="right">' 
+    {&out} 
+        '<tr><td valign="top" align="right">' 
         (IF LOOKUP("hidate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("To")
         ELSE htmlib-SideLabel("To"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td></tr>' skip.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("hidate",10,lc-hidate) 
+        htmlib-CalendarLink("hidate")
+        '</td></tr>' SKIP.
     
     
-    {&out} skip 
-      htmlib-EndTable()
-      skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 END PROCEDURE.
 
@@ -1575,12 +1597,12 @@ PROCEDURE process-web-request :
             lc-selectengineer = get-value("selectengineer")
             lc-selectcustomer = get-value("selectcustomer")
             lc-custsort       = get-value("custsort")
-            lc-lodate   = get-value("lodate")         
-            lc-hidate   = get-value("hidate")
-            lc-admin    = get-value("admin").  
+            lc-lodate         = get-value("lodate")         
+            lc-hidate         = get-value("hidate")
+            lc-admin          = get-value("admin").  
 
         
-         RUN ip-Validate( OUTPUT lc-error-field,
+        RUN ip-Validate( OUTPUT lc-error-field,
             OUTPUT lc-error-msg ).
        
         IF lc-error-field = "" 
@@ -1589,8 +1611,8 @@ PROCEDURE process-web-request :
     END.
 
     IF request_method <> "post"
-        THEN ASSIGN lc-date = STRING(TODAY,"99/99/9999")
-            lc-days = "7"
+        THEN ASSIGN lc-date   = STRING(TODAY,"99/99/9999")
+            lc-days   = "7"
             lc-lodate = STRING(TODAY - 7, "99/99/9999")
             lc-hidate = STRING(TODAY, "99/99/9999")
             .
@@ -1599,66 +1621,75 @@ PROCEDURE process-web-request :
     
     
     {&out} htmlib-Header(lc-title) SKIP.
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
     {&out}
-    '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' skip
-    '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' skip
-    '<script language="JavaScript" src="/scripts/js/effects.js"></script>' skip
-    .
+        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/effects.js"></script>' SKIP
+        .
     
     RUN ip-ExportJavascript.
     
     {&out}
-    htmlib-StartForm("mainform","post", appurl + '/rep/engrep01.p'  )
-    htmlib-ProgramTitle("Engineers Time Report") skip.
+        htmlib-StartForm("mainform","post", appurl + '/rep/engrep01.p'  )
+        htmlib-ProgramTitle("Engineers Time Report") SKIP.
 
     
     IF request_method <> "POST" OR lc-error-field <> "" THEN
     DO:
-        {&out} '<div id="content">' SKIP. 
+        {&out} 
+            '<div id="content">' SKIP. 
         {&out} htmlib-StartTable("mnt",
             0,
             0,
             5,
             0,
-            "center") skip.
+            "center") SKIP.
 
-        {&out} '<TD VALIGN="TOP" ALIGN="center" WIDTH="200px">'  skip.
+        {&out} 
+            '<TD VALIGN="TOP" ALIGN="center" WIDTH="200px">'  SKIP.
         RUN ip-report-type.
-        {&out}         '</TD> ' skip.
+        {&out}         
+            '</TD> ' SKIP.
 
    
-        {&out} ' <TD VALIGN="TOP" ALIGN="center" WIDTH="200px">'  skip.
+        {&out} 
+            ' <TD VALIGN="TOP" ALIGN="center" WIDTH="200px">'  SKIP.
         RUN ip-engcust-table.
         RUN ip-week-month.
-        {&out}         '</TD>' skip.
+        {&out}         
+            '</TD>' SKIP.
     
      
      
 
      
-        {&out} '<TD VALIGN="TOP" ALIGN="center" HEIGHT="150px">'  skip.
+        {&out} 
+            '<TD VALIGN="TOP" ALIGN="center" HEIGHT="150px">'  SKIP.
         RUN ip-engineer-select.
         RUN ip-customer-select.
-        {&out}         '</TD></TR>' skip.
+        {&out}         
+            '</TD></TR>' SKIP.
 
-        {&out} htmlib-EndTable() skip.
+        {&out} htmlib-EndTable() SKIP.
 
 
         IF lc-error-msg <> "" THEN
         DO:
-            {&out} '<BR><BR><CENTER>' 
-            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+            {&out} 
+                '<BR><BR><CENTER>' 
+                htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
         END.
     
-        {&out} '<center>' Format-Submit-Button("submitform","Report")
-        '</center><br>' skip.
+        {&out} 
+            '<center>' Format-Submit-Button("submitform","Report")
+            '</center><br>' SKIP.
     
         {&out} htmlib-Hidden("submitsource","") SKIP
-               '</div>' skip.
+            '</div>' SKIP.
   
-        {&out} htmlib-CalendarScript("lodate") skip
-           htmlib-CalendarScript("hidate") skip.
+        {&out} htmlib-CalendarScript("lodate") SKIP
+            htmlib-CalendarScript("hidate") SKIP.
    
     END.
     ELSE
@@ -1666,11 +1697,11 @@ PROCEDURE process-web-request :
         RUN ip-GenerateReport.
     END.
     
-    {&out} htmlib-EndForm() skip.
+    {&out} htmlib-EndForm() SKIP.
     
     
          
-    {&out} htmlib-Footer() skip.
+    {&out} htmlib-Footer() SKIP.
     
 
 END PROCEDURE.
@@ -1689,14 +1720,14 @@ FUNCTION Date2Wk RETURNS INTEGER
         Notes:  
     ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE cYear AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE iDayNo AS INTEGER NO-UNDO.
-    DEFINE VARIABLE iCent AS INTEGER NO-UNDO.
-    DEFINE VARIABLE iWkNo AS INTEGER  NO-UNDO.
+    DEFINE VARIABLE cYear  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iDayNo AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iCent  AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iWkNo  AS INTEGER   NO-UNDO.
     ASSIGN
-        cYear = SUBSTRING(STRING(dMyDate),7)
-        cYear = IF LENGTH(cYear) = 4 THEN SUBSTRING(cYear,3) ELSE cYear
-        iCent = TRUNCATE(YEAR(TODAY) / 100,0)
+        cYear  = SUBSTRING(STRING(dMyDate),7)
+        cYear  = IF LENGTH(cYear) = 4 THEN SUBSTRING(cYear,3) ELSE cYear
+        iCent  = TRUNCATE(YEAR(TODAY) / 100,0)
         iDayNo = dMyDate - date(12,31,(iCent * 100) + (INTEGER(cYear) - 1)).
     iWkNo = iDayNo / 7. 
 

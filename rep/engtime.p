@@ -14,6 +14,7 @@
     02/07/2016  phoski      Admin Time option
     31/07/2016  phoski      Exclude disabled users option
     15/04/2017  phoski      CSV Export
+    15/04/2017  phoski      ExcludeReports flag
        
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -124,6 +125,7 @@ PROCEDURE ip-engineer-select:
     FOR EACH webUser NO-LOCK
         WHERE webuser.company = lc-global-company
         AND   webuser.UserClass = "internal"
+        AND   WebUser.excludeReports = FALSE
         BY webUser.name:
 
                 

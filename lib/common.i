@@ -38,6 +38,7 @@
     19/12/2016  phoski      com-FilterSave com-FilterLoad
     22/12/2016  phoski      Marketing constants
     09/01/2016  phoski      com-GetFilterLoad
+    15/04/2017  phoski      ExcludeReports flag
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -1215,6 +1216,7 @@ PROCEDURE com-GetEngineerList:
         WHERE CAN-DO(lc-global-internal,b-user.UserClass)
         AND b-user.EngType <> ""
         AND b-user.CompanyCode = pc-CompanyCode
+        AND b-user.excludeReports = FALSE
         BY b-user.name:
 
         IF pc-engType <> ""

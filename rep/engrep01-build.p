@@ -15,6 +15,7 @@
     23/10/2015  phoski      Date Range instead of DJS drivel and
                             removed all period week/month stuff
     02/07/2016  phoski      Exclude Admin
+    15/04/2017  phoski      ExcludeReports flag
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -386,6 +387,7 @@ PROCEDURE ipBuildData:
             WHERE ro-user.companycode = pc-CompanyCode
             AND ro-user.LoginID = IssActivity.ActivityBy 
             AND ro-user.UserClass = "internal"
+            AND ro-user.excludeReports = FALSE
             :
             INNER: 
             DO:
@@ -413,6 +415,7 @@ PROCEDURE ipBuildData:
             FOR EACH webuser NO-LOCK
                 WHERE webuser.companycode = pc-CompanyCode
                 AND   webuser.UserClass = "internal"
+                AND webuser.excludeReports = FALSE
                 AND IF pc-Engineers = "ALL" THEN TRUE ELSE  LOOKUP(webuser.loginid,pc-Engineers,",") > 0
                 :
                 FOR EACH IssActivity NO-LOCK
@@ -445,6 +448,7 @@ PROCEDURE ipBuildData:
                 WHERE ro-user.companycode = pc-CompanyCode
                 AND ro-user.LoginID = IssActivity.ActivityBy 
                 AND ro-user.UserClass = "internal"
+                AND ro-user.excludeReports = FALSE
               
                 :
                     
@@ -607,6 +611,7 @@ PROCEDURE ReportB :
     FOR EACH webuser NO-LOCK
         WHERE webuser.companycode = pc-CompanyCode
         AND WebUser.UserClass = "Internal"
+        AND Webuser.excludeReports = FALSE
         AND IF pc-Engineers = "ALL" THEN TRUE ELSE LOOKUP(webuser.loginid,pc-Engineers,",") > 0
         :
         li-tot-productivity = 0.

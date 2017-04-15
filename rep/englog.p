@@ -11,6 +11,8 @@
     
     24/01/2015  phoski      Initial
     29/03/2015  phoski      Class Code/Desc
+    15/04/2017  phoski      ExcludeReports flag
+    
            
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -123,27 +125,27 @@ PROCEDURE ip-ExportJScript :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} skip
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} SKIP
+            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+          '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function ChangeAccount() ~{' skip
-        '   SubmitThePage("AccountChange")' skip
-        '~}' skip
+    {&out} SKIP
+        'function ChangeAccount() ~{' SKIP
+        '   SubmitThePage("AccountChange")' SKIP
+        '~}' SKIP
 
-        'function ChangeStatus() ~{' skip
-        '   SubmitThePage("StatusChange")' skip
-        '~}' skip
+        'function ChangeStatus() ~{' SKIP
+        '   SubmitThePage("StatusChange")' SKIP
+        '~}' SKIP
 
-            'function ChangeDates() ~{' skip
+            'function ChangeDates() ~{' SKIP
         /* '   SubmitThePage("DatesChange")' skip */
-        '~}' skip.
+        '~}' SKIP.
 
-    {&out} skip
-           '</script>' skip.
+    {&out} SKIP
+           '</script>' SKIP.
 END PROCEDURE.
 
 
@@ -352,27 +354,27 @@ PROCEDURE ip-PDF:
                 
             '</tr>'
             '</thead>'
-        skip.
+        SKIP.
 
 
         END.
 
 
         {&prince}
-            skip
+            SKIP
             '<tr>'
-            skip
-            htmlib-MntTableField(html-encode(string(tt-ilog.issuenumber)),'right')
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.briefDescription)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.iType)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.RaisedLoginID)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.AreaCode)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.SLALevel)),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateDate,"99/99/9999")),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateTime,"hh:mm")),'right').
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLALevel)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
         
         IF tt-ilog.CompDate <> ? THEN
             {&prince}
@@ -403,9 +405,9 @@ PROCEDURE ip-PDF:
 
         IF LAST-OF(tt-ilog.Eng) THEN
         DO:
-            {&prince} skip 
+            {&prince} SKIP 
                 htmlib-EndTable()
-                skip.
+                SKIP.
 
             {&prince} htmlib-EndCriteria().
 
@@ -456,13 +458,13 @@ PROCEDURE ip-PrintReport :
             {&out} htmlib-BeginCriteria("Engineer - "  + 
                 DYNAMIC-FUNCTION("com-UserName",tt-ilog.eng)) SKIP.
                 
-            {&out} skip
-                htmlib-StartMntTable() skip
+            {&out} SKIP
+                htmlib-StartMntTable() SKIP
                 htmlib-TableHeading(
                 "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA Level^left|" +
                 "Date Raised^right|Time Raised^left|Date Completed^right|Time Completed^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left"
-            ) skip.
+            ) SKIP.
 
             li-count = 0.
 
@@ -475,20 +477,20 @@ PROCEDURE ip-PrintReport :
             
 
         {&out}
-            skip
+            SKIP
             lc-tr
-            skip
-            htmlib-MntTableField(html-encode(string(tt-ilog.issuenumber)),'right')
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.briefDescription)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.iType)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.iType)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.RaisedLoginID)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
-            htmlib-MntTableField(html-encode(string(tt-ilog.AreaCode)),'left')
-            htmlib-MntTableField(html-encode(string(tt-ilog.SLALevel)),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateDate,"99/99/9999")),'right')
-            htmlib-MntTableField(html-encode(string(tt-ilog.CreateTime,"hh:mm")),'right').
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLALevel)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
         
         IF tt-ilog.CompDate <> ? THEN
             {&out} 
@@ -519,9 +521,9 @@ PROCEDURE ip-PrintReport :
 
         IF LAST-OF(tt-ilog.eng) THEN
         DO:
-            {&out} skip 
+            {&out} SKIP 
                 htmlib-EndTable()
-                skip.
+                SKIP.
 
             {&out} htmlib-EndCriteria().
 
@@ -602,15 +604,15 @@ PROCEDURE ip-Selection :
     '<td valign="top" align="left">'
     htmlib-CalendarInputField("lodate",10,lc-lodate) 
     htmlib-CalendarLink("lodate")
-    '</td>' skip.
+    '</td>' SKIP.
 
     IF NOT ll-customer
         THEN {&out}
     '</tr><tr>' SKIP
            '<td align=right valign=top>' 
-           (if lookup("loaccount",lc-error-field,'|') > 0 
-            then htmlib-SideLabelError("To Engineer")
-            else htmlib-SideLabel("To Engineer"))
+           (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("To Engineer")
+            ELSE htmlib-SideLabel("To Engineer"))
         
         '</td>'
            '<td align=left valign=top>' 
@@ -624,7 +626,7 @@ PROCEDURE ip-Selection :
     '<td valign="top" align="left">'
     htmlib-CalendarInputField("hidate",10,lc-hidate) 
     htmlib-CalendarLink("hidate")
-    '</td>' skip.
+    '</td>' SKIP.
 
     {&out} '</tr>' SKIP.
 
@@ -635,7 +637,7 @@ PROCEDURE ip-Selection :
         '</td>'
         '<td valign="top" align="left">'
         htmlib-checkBox("allcust",get-value("allcust") = "on")
-        '</td></tr>' skip.
+        '</td></tr>' SKIP.
         
 
     END.
@@ -651,7 +653,7 @@ PROCEDURE ip-Selection :
         '</td>'
         '<td valign="top" align="left">'
         htmlib-checkBox(lc-CodeName,get-value(lc-CodeName) = "on")
-        '</td></tr>' skip.
+        '</td></tr>' SKIP.
     
     END.
     
@@ -663,7 +665,7 @@ PROCEDURE ip-Selection :
     htmlib-Select("output","WEB|CSV|PDF","Web Page|Email CSV|Email PDF",get-value("output")) '</td></tr>'.
     
   
-    {&out} '</table>' skip.
+    {&out} '</table>' SKIP.
 END PROCEDURE.
 
 
@@ -865,16 +867,16 @@ PROCEDURE process-web-request :
     
     RUN outputHeader.
 
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
-    {&out} htmlib-Header("Engineer Log") skip.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
+    {&out} htmlib-Header("Engineer Log") SKIP.
     RUN ip-ExportJScript.
-    {&out} htmlib-JScript-Maintenance() skip.
-    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/englog.p' ) skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/englog.p' ) SKIP.
     {&out} htmlib-ProgramTitle("Engineer Log") 
-    htmlib-hidden("submitsource","") skip.
+    htmlib-hidden("submitsource","") SKIP.
     {&out} htmlib-BeginCriteria("Report Criteria").
     
-    {&out} '<table align=center><tr>' skip.
+    {&out} '<table align=center><tr>' SKIP.
 
     RUN ip-Selection.
 
@@ -885,11 +887,11 @@ PROCEDURE process-web-request :
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     {&out} '<center>' htmlib-SubmitButton("submitform","Report") 
-    '</center>' skip.
+    '</center>' SKIP.
 
     
     
@@ -910,12 +912,12 @@ PROCEDURE process-web-request :
 
 
     
-    {&out} htmlib-EndForm() skip.
-    {&out} htmlib-CalendarScript("lodate") skip
-           htmlib-CalendarScript("hidate") skip.
+    {&out} htmlib-EndForm() SKIP.
+    {&out} htmlib-CalendarScript("lodate") SKIP
+           htmlib-CalendarScript("hidate") SKIP.
    
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 
 
 END PROCEDURE.
