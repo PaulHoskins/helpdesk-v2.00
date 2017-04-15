@@ -13,6 +13,7 @@
     12/03/2016  phoski      Engineer in multi select instead of range
     02/07/2016  phoski      Admin Time option
     31/07/2016  phoski      Exclude disabled users option
+    15/04/2017  phoski      CSV Export
        
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -36,7 +37,8 @@ DEFINE VARIABLE lc-eng-desc       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-selectengineer AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-admin          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-exclude        AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-output         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-filename       AS CHARACTER NO-UNDO.
 
 DEFINE BUFFER this-user FOR WebUser.
 {rep/engtimett.i}
@@ -78,7 +80,7 @@ FUNCTION percentage-calc RETURNS DECIMAL
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/replib.i}
 
 
@@ -112,12 +114,12 @@ PROCEDURE ip-engineer-select:
     DEFINE BUFFER WebUser FOR WebUser.
     
     {&out} 
-    '<select id="selectengineer" name="selectengineer" class="inputfield" ' skip
-            'multiple="multiple" size=8 width="200px" style="width:200px;" >' skip.
+        '<select id="selectengineer" name="selectengineer" class="inputfield" ' SKIP
+        'multiple="multiple" size=8 width="200px" style="width:200px;" >' SKIP.
 
  
     {&out}
-    '<option value="ALL" selected >Select All</option>' skip.
+        '<option value="ALL" selected >Select All</option>' SKIP.
 
     FOR EACH webUser NO-LOCK
         WHERE webuser.company = lc-global-company
@@ -127,19 +129,102 @@ PROCEDURE ip-engineer-select:
                 
  
         {&out}
-        '<option value="'  webUser.loginid '" ' '>'  html-encode(webuser.name) '</option>' skip.
+            '<option value="'  webUser.loginid '" ' '>'  html-encode(webuser.name) '</option>' SKIP.
  
     END.
   
       
 
-    {&out} '</select>'.
+    {&out} 
+        '</select>'.
 
 
 
 END PROCEDURE.
 
 
+
+PROCEDURE ip-ExportCSV:
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    DEFINE OUTPUT PARAMETER pc-filename AS CHARACTER NO-UNDO.
+    
+    DEFINE VARIABLE lc-info        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-style       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lf-paid%       AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lf-prod%       AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE li-stdmins     AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-adjtime     AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-availtime   AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-billable    AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-nonbillable AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-count       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-tr          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng         AS INTEGER   NO-UNDO.
+    
+
+    DEFINE BUFFER customer FOR customer.
+    DEFINE BUFFER issue    FOR issue.
+    
+
+    DEFINE VARIABLE lc-GenKey AS CHARACTER NO-UNDO.
+
+   
+    ASSIGN
+        lc-genkey = STRING(NEXT-VALUE(ReportNumber)).
+    
+        
+    pc-filename = SESSION:TEMP-DIR + "/EngTime-" + lc-GenKey
+        + ".csv".
+
+    OUTPUT TO VALUE(pc-filename).
+
+    PUT UNFORMATTED
+                
+        '"Engineer","Date","Standard Mins","Adjustment Mins","Reason","Total Available","Billable","Non Billable","Total Worked","Paid %","Productivity %"' SKIP.
+        
+    FOR EACH  tt-engtime NO-LOCK:
+        
+          
+        ASSIGN
+            lf-paid% = 0
+            lf-prod% = 0.
+            
+        IF tt-engtime.AvailTime <> 0 THEN
+        DO:
+            ASSIGN
+                lf-paid% = percentage-calc(tt-engtime.BillAble,tt-engtime.AvailTime)
+                lf-prod% = percentage-calc(tt-engtime.BillAble +  tt-engtime.NonBillAble,tt-engtime.AvailTime)
+                .
+        END.
+        
+        EXPORT DELIMITER ","
+          com-userName(tt-engtime.loginid)
+          tt-engtime.startdate
+          tt-engtime.StdMins / 60
+          tt-engtime.AdjTime / 60
+          tt-engtime.AdjReason
+          tt-engtime.AvailTime / 60
+          tt-engtime.billable / 60
+          tt-engtime.nonbillable / 60
+          ( tt-engtime.billable + tt-engtime.nonbillable ) / 60
+          lf-paid%
+          lf-prod%
+                
+          
+          .
+          
+          
+          
+    END.     
+        
+    OUTPUT CLOSE.
+    
+END PROCEDURE.
 
 PROCEDURE ip-ExportJScript :
     /*------------------------------------------------------------------------------
@@ -148,27 +233,27 @@ PROCEDURE ip-ExportJScript :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} skip
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} SKIP
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+        '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function ChangeAccount() ~{' skip
-        '   SubmitThePage("AccountChange")' skip
-        '~}' skip
+    {&out} SKIP
+        'function ChangeAccount() ~{' SKIP
+        '   SubmitThePage("AccountChange")' SKIP
+        '~}' SKIP
 
-        'function ChangeStatus() ~{' skip
-        '   SubmitThePage("StatusChange")' skip
-        '~}' skip
+        'function ChangeStatus() ~{' SKIP
+        '   SubmitThePage("StatusChange")' SKIP
+        '~}' SKIP
 
-            'function ChangeDates() ~{' skip
-       /* '   SubmitThePage("DatesChange")' skip */
-        '~}' skip.
+        'function ChangeDates() ~{' SKIP
+        /* '   SubmitThePage("DatesChange")' skip */
+        '~}' SKIP.
 
-    {&out} skip
-           '</script>' skip.
+    {&out} SKIP
+        '</script>' SKIP.
 END PROCEDURE.
 
 
@@ -192,11 +277,12 @@ PROCEDURE ip-InitialProcess :
         lc-hidate                           = get-value("hidate")
         lc-engType                          = get-value("engtype")
         lc-repType                          = get-value("reptype")
-        lc-selectengineer = get-value("selectengineer")
-        lc-admin          = get-value("admin")
-        lc-exclude        = get-value("exclude")
-        
+        lc-selectengineer                   = get-value("selectengineer")
+        lc-admin                            = get-value("admin")
+        lc-exclude                          = get-value("exclude")
+        lc-output                           = get-value("output")
         .
+        
     IF request_method = "GET" THEN
     DO:
         ASSIGN
@@ -262,73 +348,90 @@ PROCEDURE ip-Selection :
 
            
     {&out}
-    '<table align="center"><tr>' 
-    '<td valign="top" align="right">' 
+        '<table align="center"><tr>' 
+        '<td valign="top" align="right">' 
         (IF LOOKUP("lodate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("From Date")
         ELSE htmlib-SideLabel("From Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("lodate",10,lc-lodate) 
-    htmlib-CalendarLink("lodate")
-    '</td>' SKIP
-    '<td valign="top" align="right">' 
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP
+        '<td valign="top" align="right">' 
         (IF LOOKUP("hidate",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("To Date")
         ELSE htmlib-SideLabel("To Date"))
-    '</td>'
-    '<td valign="top" align="left">'
-    htmlib-CalendarInputField("hidate",10,lc-hidate) 
-    htmlib-CalendarLink("hidate")
-    '</td></tr><tr>' skip.
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-CalendarInputField("hidate",10,lc-hidate) 
+        htmlib-CalendarLink("hidate")
+        '</td></tr><tr>' SKIP.
     
-    {&out} '<TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("engtype",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Engineer Type")
         ELSE htmlib-SideLabel("Engineer Type"))    '</TD>'.
     
-    {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("engtype",lc-global-EngType-Code,lc-global-EngType-desc,lc-engtype) 
-    '</TD>' skip.
+    {&out} 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-Select("engtype",lc-global-EngType-Code,lc-global-EngType-desc,lc-engtype) 
+        '</TD>' SKIP.
     
-    {&out} '<TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("reptype",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Report Type")
         ELSE htmlib-SideLabel("Report Type"))    '</TD>'.
     
-    {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("reptype","DET|SUM","Detailed|Summary",lc-reptype) 
-    '</TD></tr>' skip.
+    {&out} 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-Select("reptype","DET|SUM","Detailed|Summary",lc-reptype) 
+        '</TD></tr>' SKIP.
     
-    {&out} '<tr><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<tr><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("selectengineer",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Engineer(s)")
         ELSE htmlib-SideLabel("Engineer(s)"))    '</TD><td colpan="7">'.
     RUN ip-engineer-select.
      
-    {&out} '</td>'.
+    {&out} 
+        '</td>'.
     
-     {&out} '</tr><tr>'
-            '<TD VALIGN="TOP"  ALIGN="right">&nbsp;' 
-            htmlib-SideLabel("Exclude Administration Time?")
+    {&out} 
+        '</tr><tr>'
+        '<TD VALIGN="TOP"  ALIGN="right">&nbsp;' 
+        htmlib-SideLabel("Exclude Administration Time?")
      
-             '</td><TD VALIGN="TOP" ALIGN="left">'
-                htmlib-CheckBox("admin", IF lc-admin = 'on'
-                                        THEN TRUE ELSE FALSE) 
-            '</TD>'.
+        '</td><TD VALIGN="TOP" ALIGN="left">'
+        htmlib-CheckBox("admin", IF lc-admin = 'on'
+        THEN TRUE ELSE FALSE) 
+        '</TD>'.
             
-    {&out} '</tr><tr>'
-            '<TD VALIGN="TOP"  ALIGN="right">&nbsp;' 
-            htmlib-SideLabel("Exclude Disabled Users?")
+    {&out} 
+        '</tr><tr>'
+        '<TD VALIGN="TOP"  ALIGN="right">&nbsp;' 
+        htmlib-SideLabel("Exclude Disabled Users?")
      
-             '</td><TD VALIGN="TOP" ALIGN="left">'
-                htmlib-CheckBox("exclude", IF lc-exclude = 'on'
-                                        THEN TRUE ELSE FALSE) 
-            '</TD>'.
+        '</td><TD VALIGN="TOP" ALIGN="left">'
+        htmlib-CheckBox("exclude", IF lc-exclude = 'on'
+        THEN TRUE ELSE FALSE) 
+        '</TD>'.
                  
-
+    {&out} 
+        '</tr>'
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Report Output")
+        '</td>'
+        '<td align=left valign=top>' 
+        htmlib-Select("output","WEB|CSV","Web Page|Email CSV",get-value("output")) '</td></tr>'.
+    
+  
    
-    {&out} '</tr></table>' skip.
+    {&out} 
+        '</tr></table>' SKIP.
 END PROCEDURE.
 
 
@@ -353,7 +456,7 @@ PROCEDURE ip-Validate :
     IF lc-selectengineer BEGINS "ALL," AND NUM-ENTRIES(lc-selectengineer) > 1 THEN lc-selectengineer = substr(lc-selectengineer,INDEX(lc-selectengineer,",") + 1).
     
     IF lc-selectEngineer = ""
-    THEN lc-selectEngineer  = "ALL".
+        THEN lc-selectEngineer  = "ALL".
     
     ASSIGN
         ld-lodate = DATE(lc-lodate) no-error.
@@ -393,19 +496,19 @@ PROCEDURE ip-Web:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE lc-info         AS CHARACTER        NO-UNDO.
-    DEFINE VARIABLE lc-style        AS CHARACTER        NO-UNDO.
-    DEFINE VARIABLE lf-paid%        AS DECIMAL          NO-UNDO.
-    DEFINE VARIABLE lf-prod%        AS DECIMAL          NO-UNDO.
-    DEFINE VARIABLE li-stdmins      AS INTEGER EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-adjtime      AS INTEGER EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-availtime    AS INTEGER EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-billable     AS INTEGER EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-nonbillable  AS INTEGER EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-loop         AS INTEGER          NO-UNDO.
-    DEFINE VARIABLE li-count        AS INTEGER          NO-UNDO.
-    DEFINE VARIABLE lc-tr           AS CHARACTER        NO-UNDO.
-    DEFINE VARIABLE li-eng          AS INTEGER          NO-UNDO.
+    DEFINE VARIABLE lc-info        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-style       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lf-paid%       AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lf-prod%       AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE li-stdmins     AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-adjtime     AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-availtime   AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-billable    AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-nonbillable AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-count       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-tr          AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng         AS INTEGER   NO-UNDO.
     
         
     
@@ -427,17 +530,17 @@ PROCEDURE ip-Web:
         IF FIRST-OF(tt-engtime.loginid) THEN
         DO:
             ASSIGN
-                lc-info = com-userName(tt-engtime.loginid)
-                lc-style = 'font-weight:bold'
-                li-stdmins[1] = 0
-                li-adjtime[1] = 0
-                li-availtime[1] = 0
-                li-billable[1] = 0
+                lc-info           = com-userName(tt-engtime.loginid)
+                lc-style          = 'font-weight:bold'
+                li-stdmins[1]     = 0
+                li-adjtime[1]     = 0
+                li-availtime[1]   = 0
+                li-billable[1]    = 0
                 li-nonbillable[1] = 0
-                li-count = 0
+                li-count          = 0
                 .
         END.
-        ELSE ASSIGN lc-info = ""
+        ELSE ASSIGN lc-info  = ""
                 lc-style = ""
                 li-count = li-count + 1.
         
@@ -445,10 +548,10 @@ PROCEDURE ip-Web:
         DO li-loop = 1 TO 2:
         
             ASSIGN
-                li-stdmins[li-loop] = li-stdmins[li-loop] + tt-engtime.StdMins
-                li-adjtime[li-loop] = li-adjtime[li-loop] + tt-engtime.AdjTime
-                li-availtime[li-loop] = li-availtime[li-loop] + tt-engtime.AvailTime
-                li-billable[li-loop] = li-billable[li-loop] + tt-engtime.BillAble
+                li-stdmins[li-loop]     = li-stdmins[li-loop] + tt-engtime.StdMins
+                li-adjtime[li-loop]     = li-adjtime[li-loop] + tt-engtime.AdjTime
+                li-availtime[li-loop]   = li-availtime[li-loop] + tt-engtime.AvailTime
+                li-billable[li-loop]    = li-billable[li-loop] + tt-engtime.BillAble
                 li-nonbillable[li-loop] = li-nonbillable[li-loop] + tt-engtime.nonBillAble
                 .
                 
@@ -473,20 +576,20 @@ PROCEDURE ip-Web:
                 THEN lc-tr = '<tr style="background: #EBEBE6;">'.
             ELSE lc-tr = '<tr style="background: white;">'.            
             {&out}
-            lc-tr SKIP
-                  replib-RepField(lc-info,'',lc-style)
-                  replib-RepField( string(tt-engtime.startdate,"99/99/9999")  + ' ' +
-                                    com-DayName(tt-engtime.startdate,"S")
-                                  ,'left','')
-                  replib-RepField(com-TimeToString(tt-engtime.StdMins),'right','')
-                  replib-RepField(com-TimeToString(tt-engtime.AdjTime),'right','')
-                  replib-RepField(tt-engtime.AdjReason,'left','')
-                  replib-RepField(com-TimeToString(tt-engtime.AvailTime),'right','')
-                  replib-RepField(com-TimeToString(tt-engtime.billable),'right','')
-                  replib-RepField(com-TimeToString(tt-engtime.nonbillable),'right','')
-                  replib-RepField(com-TimeToString(tt-engtime.billable + tt-engtime.nonbillable),'right','')
-                  replib-RepField(String(lf-paid%,"->>>>>>>>>>>9.99"),'right','')
-                  replib-RepField(String(lf-prod%,"->>>>>>>>>>>9.99"),'right','')
+                lc-tr SKIP
+                replib-RepField(lc-info,'',lc-style)
+                replib-RepField( STRING(tt-engtime.startdate,"99/99/9999")  + ' ' +
+                com-DayName(tt-engtime.startdate,"S")
+                ,'left','')
+                replib-RepField(com-TimeToString(tt-engtime.StdMins),'right','')
+                replib-RepField(com-TimeToString(tt-engtime.AdjTime),'right','')
+                replib-RepField(tt-engtime.AdjReason,'left','')
+                replib-RepField(com-TimeToString(tt-engtime.AvailTime),'right','')
+                replib-RepField(com-TimeToString(tt-engtime.billable),'right','')
+                replib-RepField(com-TimeToString(tt-engtime.nonbillable),'right','')
+                replib-RepField(com-TimeToString(tt-engtime.billable + tt-engtime.nonbillable),'right','')
+                replib-RepField(STRING(lf-paid%,"->>>>>>>>>>>9.99"),'right','')
+                replib-RepField(STRING(lf-prod%,"->>>>>>>>>>>9.99"),'right','')
                   
                 '</tr>' SKIP.
         END.
@@ -494,11 +597,11 @@ PROCEDURE ip-Web:
         IF LAST-OF(tt-engtime.loginid) THEN
         DO:
             ASSIGN
-                lc-info = (IF lc-repType = 'DET' THEN 'Total ' ELSE '' ) + com-userName(tt-engtime.loginid)
+                lc-info  = (IF lc-repType = 'DET' THEN 'Total ' ELSE '' ) + com-userName(tt-engtime.loginid)
                 lc-style = IF lc-repType = 'DET' THEN
                            'font-weight:bold;border-top:1px solid black;border-bottom:1px solid black;'
                            ELSE ''
-                li-loop = 1.
+                li-loop  = 1.
             IF li-availtime[li-loop] <> 0 THEN
             DO:
                 ASSIGN
@@ -521,57 +624,57 @@ PROCEDURE ip-Web:
             IF lc-repType = "DET" THEN
             DO:         
                 {&out}
-                lc-tr SKIP
-                  replace(replib-RepField(lc-info,'right','font-weight:bold;'),'<td','<td colspan=2 ')
+                    lc-tr SKIP
+                    REPLACE(replib-RepField(lc-info,'right','font-weight:bold;'),'<td','<td colspan=2 ')
                                          
-                  replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField('','left','')
+                    replib-RepField('','left','')
                   
-                  replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(String(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
-                  replib-RepField(String(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(STRING(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(STRING(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
                   
-                '</tr>' SKIP
-                '<tr>'
-                replib-RepField('','left','')
-                '</tr>' SKIP
-                .
+                    '</tr>' SKIP
+                    '<tr>'
+                    replib-RepField('','left','')
+                    '</tr>' SKIP
+                    .
             END.
             ELSE
             DO:
                 {&out}
-                lc-tr SKIP
-                  replib-RepField(lc-info,'left','')
+                    lc-tr SKIP
+                    replib-RepField(lc-info,'left','')
                                          
-                  replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
                   
                            
-                  replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(String(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
-                  replib-RepField(String(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(STRING(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(STRING(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
                   
-                '</tr>' SKIP
-                .
+                    '</tr>' SKIP
+                    .
             END.
               
         END.
         IF LAST(tt-engtime.loginid) THEN
         DO:
             ASSIGN
-                lc-info = 'Report Total'
+                lc-info  = 'Report Total'
                 lc-style = 'font-weight:bold;border-top:1px solid black;border-bottom:1px solid black;'
-                li-loop = 2.
+                li-loop  = 2.
             IF li-availtime[li-loop] <> 0 THEN
             DO:
                 ASSIGN
@@ -583,45 +686,45 @@ PROCEDURE ip-Web:
             IF lc-repType = 'DET' THEN
             DO:             
                 {&out}
-                '<tr>' SKIP
-                  replace(replib-RepField(lc-info,'right','font-weight:bold;'),'<td','<td colspan=2 ')
+                    '<tr>' SKIP
+                    REPLACE(replib-RepField(lc-info,'right','font-weight:bold;'),'<td','<td colspan=2 ')
                
                                  
-                  replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField('','left','')
+                    replib-RepField('','left','')
                   
-                  replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(String(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
-                  replib-RepField(String(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(STRING(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(STRING(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
                   
-                '</tr>' SKIP.
+                    '</tr>' SKIP.
             END.
             ELSE
             DO:
                 {&out}
-                '<tr>' SKIP
-                  replib-RepField(lc-info,'right','font-weight:bold;')
+                    '<tr>' SKIP
+                    replib-RepField(lc-info,'right','font-weight:bold;')
                                    
-                  replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-stdmins[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-adjtime[li-loop]),'right',lc-style)
                   
           
                   
-                  replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-availtime[li-loop]),'right',lc-style)
                   
-                  replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
-                  replib-RepField(String(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
-                  replib-RepField(String(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(com-TimeToString(li-billable[li-loop] + li-nonbillable[li-loop]),'right',lc-style)
+                    replib-RepField(STRING(lf-paid%,"->>>>>>>>>>>9.99"),'right',lc-style)
+                    replib-RepField(STRING(lf-prod%,"->>>>>>>>>>>9.99"),'right',lc-style)
                   
-                '</tr>' SKIP.
+                    '</tr>' SKIP.
                     
             END.    
                     
@@ -631,7 +734,8 @@ PROCEDURE ip-Web:
                     
                 
     END.
-    {&out} '</table>' SKIP.
+    {&out} 
+        '</table>' SKIP.
     
             
 END PROCEDURE.
@@ -720,6 +824,24 @@ PROCEDURE process-web-request :
         IF lc-error-msg = "" THEN
         DO:
             RUN ip-ProcessReport.
+            IF lc-output = "CSV" THEN 
+            DO:
+                RUN ip-ExportCSV (OUTPUT lc-filename).
+                mlib-SendAttEmail 
+                    ( lc-global-company,
+                    "",
+                    "HelpDesk Engineer Time Management Report ",
+                    "Please find attached your report covering the period "
+                    + string(DATE(lc-lodate),"99/99/9999") + " to " +
+                    string(DATE(lc-hidate),'99/99/9999'),
+                    this-user.email,
+                    "",
+                    "",
+                    lc-filename).
+                OS-DELETE value(lc-filename).
+                
+            END.
+            
             
             
             
@@ -729,13 +851,13 @@ PROCEDURE process-web-request :
     
     RUN outputHeader.
 
-    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
-    {&out} htmlib-Header("Engineer Time Management") skip.
+    {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
+    {&out} htmlib-Header("Engineer Time Management") SKIP.
     RUN ip-ExportJScript.
-    {&out} htmlib-JScript-Maintenance() skip.
-    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/engtime.p' ) skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/rep/engtime.p' ) SKIP.
     {&out} htmlib-ProgramTitle("Engineer Time Management") 
-    htmlib-hidden("submitsource","") skip.
+        htmlib-hidden("submitsource","") SKIP.
     {&out} htmlib-BeginCriteria("Report Criteria").
     
     
@@ -747,36 +869,46 @@ PROCEDURE process-web-request :
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
-    {&out} '<center>' htmlib-SubmitButton("submitform","Report") 
-    '</center>' skip.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Report") 
+        '</center>' SKIP.
 
     
     
     
     IF request_method = "POST" 
-        AND lc-error-msg = "" THEN
+        AND lc-error-msg = ""  THEN
     DO:
-       
-        {&out} htmlib-BeginCriteria("Report") '<div id="repdata">' SKIP.
+        IF lc-output = "WEB" THEN
+        DO:
+            {&out} htmlib-BeginCriteria("Report") '<div id="repdata">' SKIP.
         
-        RUN ip-Web. 
-        {&out} '</div>' htmlib-EndCriteria() SKIP.               
+            RUN ip-Web. 
+            {&out} 
+                '</div>' htmlib-EndCriteria() SKIP.               
+        END.
+        ELSE
+            {&out} '<div class="infobox" style="font-size: 10px;">Your report has been emailed to '
+                this-user.email
+                '</div>'.
+            
         
     END.
 
 
 
     
-    {&out} htmlib-EndForm() skip.
-    {&out} htmlib-CalendarScript("lodate") skip
-           htmlib-CalendarScript("hidate") skip.
+    {&out} htmlib-EndForm() SKIP.
+    {&out} htmlib-CalendarScript("lodate") SKIP
+        htmlib-CalendarScript("hidate") SKIP.
    
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 
 
 END PROCEDURE.
