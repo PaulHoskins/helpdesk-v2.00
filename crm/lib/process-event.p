@@ -9,6 +9,7 @@
     
     When        Who         What
     06/08/2016  phoski      Initial
+    09/04/2017  phoski      Note on Unqual Lead email
    
 ***********************************************************************/
 {lib/common.i}
@@ -205,11 +206,18 @@ PROCEDURE SendUnqualLeadEmail:
             
         ASSIGN 
             lc-text = lc-text + "~n~nEmail: " + b-login.Email.
-                
+       
         
     END.
     ASSIGN 
         lc-text = lc-text + "~n~nPost Code: " + Customer.Postcode.
+        
+     ASSIGN 
+            lc-text = lc-text + "~n~nDescription: " + op_master.descr.
+       
+    ASSIGN 
+            lc-text = lc-text + "~n~nNote:~n~n " + op_master.OpNote.
+               
         
     IF Company.helpdesklink <> ""  THEN 
     DO:
