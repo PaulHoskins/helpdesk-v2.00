@@ -1,0 +1,9 @@
+DROP FIELD "AutoGen" OF "WebStdTime"
+
+DROP FIELD "ExcludeReports" OF "WebUser"
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000087

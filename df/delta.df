@@ -1,0 +1,20 @@
+ADD FIELD "AutoGen" OF "WebStdTime" AS logical
+  FORMAT "yes/no"
+  POSITION 10
+  INITIAL "no"
+  ORDER 120
+  MAX-WIDTH 1
+
+ADD FIELD "ExcludeReports" OF "WebUser" AS logical
+  FORMAT "yes/no"
+  POSITION 40
+  INITIAL "no"
+  LABEL "Exclude Reports"
+  ORDER 380
+  MAX-WIDTH 1
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000000290
