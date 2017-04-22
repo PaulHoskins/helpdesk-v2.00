@@ -11,6 +11,7 @@
     16/07/2006  phoski      Initial 
     24/07/2014  phoski      Team
     21/03/2016  phoski      Document Link Encrypt
+    22/04/2017  phoski      Show boby of email
     
     
 ***********************************************************************/
@@ -103,21 +104,21 @@ PROCEDURE ip-ExportJScript :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} skip
-            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} SKIP
+            '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
     {&out}
-    '<script>' skip
-        'function DeleteEmail(row) ~{' skip
-            'if (!confirm("Delete this email?"))' skip 
-            'return' skip
-            'var FName = "submitsource"' skip
-            'document.mainform.elements[FName].value = "DeleteEmail"' skip
-            'FName = "deleterow"' skip
-            'document.mainform.elements[FName].value = row' skip
-            'document.mainform.submit()' skip
-           '~}' skip
-        '</script>' skip.
+    '<script>' SKIP
+        'function DeleteEmail(row) ~{' SKIP
+            'if (!confirm("Delete this email?"))' SKIP 
+            'return' SKIP
+            'var FName = "submitsource"' SKIP
+            'document.mainform.elements[FName].value = "DeleteEmail"' SKIP
+            'FName = "deleterow"' SKIP
+            'document.mainform.elements[FName].value = row' SKIP
+            'document.mainform.submit()' SKIP
+           '~}' SKIP
+        '</script>' SKIP.
 
     
 END PROCEDURE.
@@ -222,17 +223,17 @@ PROCEDURE process-web-request :
     RUN outputHeader.
     
     
-    {&out} htmlib-Header("HelpDesk Emails") skip.
+    {&out} htmlib-Header("HelpDesk Emails") SKIP.
 
     RUN ip-ExportJScript.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/mail/mail.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/mail/mail.p' ) SKIP.
 
     {&out} htmlib-ProgramTitle("HelpDesk Emails") 
-    htmlib-hidden("submitsource","") skip
-           htmlib-hidden("deleterow","") skip.
+    htmlib-hidden("submitsource","") SKIP
+           htmlib-hidden("deleterow","") SKIP.
   
     {&out}
     tbar-Begin(
@@ -246,11 +247,11 @@ PROCEDURE process-web-request :
     tbar-EndOption()
     tbar-End().
 
-    {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="97%"') skip
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="97%"') SKIP
            htmlib-TableHeading(
-            "Customer^left|Date^left|Subject|Attachments"
-            ) skip.
+            "Customer^left|Date^left|Subject|Attachments|ServerID"
+            ) SKIP.
  
     ll-Steam =
         DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?).
@@ -298,11 +299,11 @@ PROCEDURE process-web-request :
         DO:
             
             {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
             htmlib-MntTableField(html-encode(lc-customer),'left')
-            htmlib-MntTableField(string(b-query.RcpDate,'99/99/9999') 
+            htmlib-MntTableField(STRING(b-query.RcpDate,'99/99/9999') 
                                 ,'left').
 
         
@@ -326,7 +327,7 @@ PROCEDURE process-web-request :
             
                 {&out} 
                 '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-                lc-object '~')">':U skip.
+                lc-object '~')">':U SKIP.
                 {&out} lc-info.
     
                 DEFINE VARIABLE lc-work AS CHARACTER NO-UNDO.
@@ -339,7 +340,7 @@ PROCEDURE process-web-request :
                     "STATUS : ERROR</span>").
                 {&out} lc-work.
 
-                {&out} '</td>' skip.
+                {&out} '</td>' SKIP.
             END.
             ELSE {&out} htmlib-MntTableField(html-encode(b-query.subject),"left").
  
@@ -354,8 +355,8 @@ PROCEDURE process-web-request :
                 NO-LOCK NO-ERROR.
             IF NOT AVAILABLE doch 
                 THEN {&out} htmlib-MntTableField("&nbsp;","left").
-            else
-            do:
+            ELSE
+            DO:
                 {&out} SKIP(4)
                 '<td nowrap>'.
         
@@ -386,20 +387,22 @@ PROCEDURE process-web-request :
                 {&out} '</td>' SKIP(4).
     
             END.
-            {&out} skip
-                    tbar-BeginHidden(rowid(b-query))
-                    tbar-Link("emailissue",rowid(b-query),
+       
+            {&out}  htmlib-MntTableField(html-encode(b-query.uidl),'left')
+            SKIP
+                    tbar-BeginHidden(ROWID(b-query))
+                    tbar-Link("emailissue",ROWID(b-query),
                               appurl + '/' + "iss/addissue.p",
                               "emailid=" + string(b-query.EmailID) + "&issuesource=email"
                               )
-                    tbar-Link("emailsave",rowid(b-query),
-                              if li-Attach > 0 then
-                              appurl + '/' + "mail/mailsave.p" else "off",
+                    tbar-Link("emailsave",ROWID(b-query),
+                              IF li-Attach > 0 THEN
+                              appurl + '/' + "mail/mailsave.p" ELSE "off",
                               ""
                               )
-                    tbar-Link("emaildelete",rowid(b-query),
+                    tbar-Link("emaildelete",ROWID(b-query),
                               'javascript:DeleteEmail('
-                              + '~'' + string(rowid(b-query))
+                              + '~'' + string(ROWID(b-query))
                               + '~'' 
                               + ');'
                               ,"")
@@ -409,8 +412,8 @@ PROCEDURE process-web-request :
             {&out}
                     
                 tbar-EndHidden()
-                skip
-               '</tr>' skip.
+                SKIP
+               '</tr>' SKIP.
     
         END.
        
@@ -419,15 +422,15 @@ PROCEDURE process-web-request :
                 
     END.
     
-    {&out} skip 
+    {&out} SKIP 
                htmlib-EndTable()
-               skip.
+               SKIP.
     
        
     {&out} htmlib-EndForm().
     
         
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

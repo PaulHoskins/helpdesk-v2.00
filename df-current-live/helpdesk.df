@@ -4768,6 +4768,20 @@ ADD FIELD "mk_keyword" OF "op_master" AS character
   MAX-WIDTH 16
   ORDER 340
 
+ADD FIELD "recCostOfSale" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 43
+  MAX-WIDTH 4
+  ORDER 420
+
+ADD FIELD "RecRevenue" OF "op_master" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 44
+  MAX-WIDTH 4
+  ORDER 430
+
 ADD INDEX "op_id" ON "op_master" 
   AREA "Schema Area"
   UNIQUE
@@ -6712,6 +6726,13 @@ ADD FIELD "StdColour" OF "WebStdTime" AS character
   COLUMN-LABEL "Colour"
   ORDER 110
 
+ADD FIELD "AutoGen" OF "WebStdTime" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 10
+  MAX-WIDTH 1
+  ORDER 120
+
 ADD INDEX "prim" ON "WebStdTime" 
   AREA "Schema Area"
   UNIQUE
@@ -7022,6 +7043,14 @@ ADD FIELD "TwoFactor_Disable" OF "WebUser" AS logical
   MAX-WIDTH 1
   ORDER 370
 
+ADD FIELD "ExcludeReports" OF "WebUser" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  LABEL "Exclude Reports"
+  POSITION 40
+  MAX-WIDTH 1
+  ORDER 380
+
 ADD INDEX "LoginID" ON "WebUser" 
   AREA "Schema Area"
   UNIQUE
@@ -7166,4 +7195,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142208
+0000142768

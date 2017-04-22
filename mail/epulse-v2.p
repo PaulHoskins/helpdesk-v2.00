@@ -151,9 +151,24 @@ PROCEDURE ip-ProcessEmail :
     FIND company WHERE company.CompanyCode = lc-global-company NO-LOCK NO-ERROR.
 
 
+    IF lc-uidl <> "" THEN
+    DO:
+        FIND emrcv WHERE emrcv.companyCode = lc-global-company
+            AND emrcv.uidl = lc-uidl NO-LOCK NO-ERROR.
+        MESSAGE "Email Ignored " AVAILABLE emrcv.
+        IF AVAILABLE emrcv THEN RETURN.
+    END. 
 
     REPEAT TRANSACTION ON ERROR UNDO , LEAVE:
-
+        IF lc-uidl <> "" THEN
+        DO:
+            CREATE emrcv.
+            ASSIGN 
+                emrcv.companyCode = lc-global-company
+                emrcv.uidl        = lc-uidl.
+        END. 
+        
+        
 
 
         RUN ip-Decode ( lc-subject, OUTPUT lc-AccountNumber).
@@ -168,38 +183,15 @@ PROCEDURE ip-ProcessEmail :
                 THEN lc-AccountNumber = "".
         END.
       
-        
+        /**
         IF INDEX(lc-body,"Status : Error") = 0 THEN LEAVE.
-
+        **/
         ld-date = ?.
        
         IF lc-date <> "" THEN
         DO:
             ASSIGN 
-                li-year = int(substr(lc-date,1,4)) no-error.
-            IF ERROR-STATUS:ERROR 
-                THEN li-year = 0.
-
-            ASSIGN 
-                li-month = int(substr(lc-date,6,2)) no-error.
-            IF ERROR-STATUS:ERROR
-                THEN li-month = 0.
-
-            ASSIGN 
-                li-day = int(substr(lc-date,9,2)) no-error.
-            IF ERROR-STATUS:ERROR
-                THEN li-day = 0.
-
-            IF li-year <> 0
-                AND li-month <> 0
-                AND li-day <> 0 THEN
-            DO:
-                ld-date = DATE(li-month,li-day,li-year) NO-ERROR.
-                IF ERROR-STATUS:ERROR
-                    THEN ld-date = ?.
-            END.
-
-
+                ld-date = DATE(lc-date) NO-ERROR.
         END.
         
 
@@ -216,12 +208,13 @@ PROCEDURE ip-ProcessEmail :
             b.EmailID     = lf-EmailID.
 
         ASSIGN
-            b.Email   = lc-from
-            b.mText   = lc-body
-            b.Subject = lc-Subject
-            b.RcpDate = ld-date
-            b.RcpTime = TIME.
-        b.AccountNumber = lc-AccountNumber.
+            b.Email         = lc-from
+            b.mText         = lc-body
+            b.Subject       = lc-Subject
+            b.RcpDate       = ld-date
+            b.RcpTime       = TIME
+            b.uidl          = lc-uidl
+            b.AccountNumber = lc-AccountNumber.
 
         {&out} SKIP
             'Created msg ' lf-EmailID.
@@ -311,15 +304,17 @@ PROCEDURE process-web-request :
         lc-subject = get-value("subject")
         lc-body    = get-value("body")
         lc-date    = get-value("date")
-   
         .
+    IF lc-date <> ""
+        THEN lc-date = ENTRY(1,lc-date," ").
+    
     
     MESSAGE "EMAIL: ".
+    MESSAGE "uidl       " lc-uidl       SKIP.    
     MESSAGE "from       " lc-from     SKIP.     
-    MESSAGE "uidl       " lc-uidl       SKIP.         
     MESSAGE "subject    " lc-subject  SKIP.
     MESSAGE "Date       " lc-date SKIP.        
-    MESSAGE "body       " lc-body     SKIP.            
+    /*    MESSAGE "body       " lc-body     SKIP.*/
   
 
     RUN outputHeader.
@@ -335,11 +330,11 @@ PROCEDURE process-web-request :
         " subject " lc-subject 
         .
 
-/*
-IF lc-global-company <> "" 
-    AND lc-from <> ""
-    THEN RUN ip-ProcessEmail.
-*/
+
+    IF lc-global-company <> "" 
+        AND lc-from <> ""
+        THEN RUN ip-ProcessEmail.
+
      
    
   

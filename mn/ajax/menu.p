@@ -23,6 +23,7 @@
     13/03/2016  phoski      Change assignment build query
     10/09/2016  phoski      CRM
     19/09/2016  phoski      Re-instate 'Diary'
+    22/04/2017  phoski      Tidy up alert box
                               
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -171,9 +172,9 @@ PROCEDURE ip-InternalUser :
         
         {&out} 
         '<br /><a class="tlink" style="width: 100%;" href="' appurl
-        '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' skip
+        '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' SKIP
                 'Your Diary' 
-                '</a><br /><br />' skip.     
+                '</a><br /><br />' SKIP.     
                 
         IF DYNAMIC-FUNCTION("com-HasSchedule",webuser.CompanyCode,WebUser.LoginID) > 0 THEN
         DO:
@@ -183,9 +184,9 @@ PROCEDURE ip-InternalUser :
                  
             {&out} 
             '<br /><a class="tlink" style="width: 100%;" href="' appurl
-            '/sched/yourschedule.p?engineer=' url-encode(lc-enc-key,"Query")  '" target="mainwindow" title="Project Schedule">' skip
+            '/sched/yourschedule.p?engineer=' url-encode(lc-enc-key,"Query")  '" target="mainwindow" title="Project Schedule">' SKIP
                 'Your Project Schedule' 
-                    '</a><br /><br />' skip. 
+                    '</a><br /><br />' SKIP. 
         END.        
                  
     END.
@@ -194,15 +195,15 @@ PROCEDURE ip-InternalUser :
 
     IF ll-Alert THEN
     DO:
-        {&out} '<div class="menualert">'.
+        {&out} '<div class="menualert" style="background-color: #E1EAFB;">'.
         ASSIGN
             lc-Random = "?random=" + string(int(TODAY)) + string(TIME) + string(ETIME) + string(ROWID(webuser)).
         IF li-ActionCount > 0
             OR li-AlertCount > 0 THEN
         DO:
             {&out} 
-            '<a class="tlink" style="border:none; width: 100%;" href="' appurl
-            '/mn/alertpage.p' lc-random '" target="mainwindow" title="Alerts">Your' skip.
+            '<BR /><a class="tlink" style="border:none; width: 100%;" href="' appurl
+            '/mn/alertpage.p' lc-random '" target="mainwindow" title="Alerts">Your' SKIP.
          
             IF li-ActionCount > 0 THEN
                 {&out} ' actions (' li-ActionCount ')'.
@@ -210,34 +211,34 @@ PROCEDURE ip-InternalUser :
             DO:
                 {&out} ( IF li-ActionCount > 0 THEN ' & ' ELSE ' ' ) 'SLA alerts (' li-AlertCount ')'.
             END.
-            {&out} '</a><br />' skip.
+            {&out} '</a><br />' SKIP.
         END.
         IF li-unCount > 0 
             THEN {&out} 
-        '<a class="tlink" style="border: none; width: 100%;" href="' appurl
+        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
         '/iss/issue.p' lc-random '&status=allopen&assign=NotAssigned" target="mainwindow" title="Unassigned Issues">'
         li-uncount ' Unassigned Issues</a><br />'.
 
         IF li-EmailCount > 0 
             THEN {&out} 
-        '<a class="tlink" style="border: none; width: 100%;" href="' appurl
+        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
         '/mail/mail.p' lc-random '" target="mainwindow" title="HelpDesk Emails">'
         li-EmailCount ' HelpDesk Emails</a><br />'.
 
         IF li-Inventory > 0 
             THEN {&out} 
-        '<a class="tlink" style="border: none; width: 100%;" href="' appurl
+        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
         '/cust/ivrenewal.p' lc-random '" target="mainwindow" title="Inventory Renewals">'
         li-Inventory ' Inventory Renewals</a><br />'.
         IF li-OpenAction > 0
             THEN {&out} 
-        '<a class="tlink" style="border: none; width: 100%;" href="' appurl
-        '/iss/openaction.p' lc-random '" target="mainwindow" title="Open Actions">' skip
+        '</BR><a class="tlink" style="border: none; width: 100%;" href="' appurl
+        '/iss/openaction.p' lc-random '" target="mainwindow" title="Open Actions">' SKIP
                 'Open Actions (' li-OpenAction ')'
-                '</a><br />' skip.
+                '</a><br />' SKIP.
 
    
-        {&out} '</div>'.
+        {&out} '</BR /></div>'.
 
     END.
 
@@ -259,15 +260,12 @@ PROCEDURE ip-NewMenu :
     DEFINE BUFFER b-sub-menu FOR tt-menu.
     DEFINE VARIABLE lc-object AS CHARACTER NO-UNDO.
 
-    
-
-
     DEFINE VARIABLE lc-desc   AS CHARACTER NO-UNDO.
 
 
     {&out} '<div id="menustrip" style="margin: 7px;">' htmlib-BeginCriteria("Menu").
 
-    {&out} '<div id="menu">' skip.
+    {&out} '<div id="menu">' SKIP.
 
     FOR EACH tt-menu NO-LOCK :
         IF tt-menu.Level > 1 THEN NEXT.
@@ -280,17 +278,17 @@ PROCEDURE ip-NewMenu :
                 THEN lc-unq = '&UniqueID='  + cGUID.
             ELSE lc-unq = '?UniqueID='  + cGUID.
 
-            {&out} '<div class="menusub" style="margin-left: 0px;">' skip
+            {&out} '<div class="menusub" style="margin-left: 0px;">' SKIP
                    '<table><tr><td nowrap>'.
-            {&out} '<a href="'  appurl  '/' tt-menu.ObjURL lc-unq  '" target="' tt-menu.ObjTarget '"' skip.
+            {&out} '<a href="'  appurl  '/' tt-menu.ObjURL lc-unq  '" target="' tt-menu.ObjTarget '"' SKIP.
               
             {&out} ' title="' + html-encode(tt-menu.description) '"'.
 
-            {&out} '>' skip
+            {&out} '>' SKIP
                      html-encode(tt-menu.description) 
-                    '</a></br>' skip.
+                    '</a></br>' SKIP.
             {&out} '</td></tr>'.
-            {&out} '</table></div>' skip.
+            {&out} '</table></div>' SKIP.
 
             NEXT.
         END.
@@ -307,9 +305,9 @@ PROCEDURE ip-NewMenu :
         lc-object '~')">'
         '&nbsp;'
         lc-desc
-        '</div>' skip.
+        '</div>' SKIP.
         
-        {&out} '<div class="menusub" style="display:none;" id="' lc-Object  '">' skip.
+        {&out} '<div class="menusub" style="display:none;" id="' lc-Object  '">' SKIP.
 
         {&out} '<table>'.
 
@@ -331,18 +329,18 @@ PROCEDURE ip-NewMenu :
             {&out} ' title="' + html-encode(b-sub-menu.description) '"'.
             {&out}  '>'
             html-encode(b-sub-menu.description) 
-            '</a></br>' skip.
+            '</a></br>' SKIP.
             {&out} '</td></tr>'.
                    
             
         END.
         {&out} '</table>'.
 
-        {&out} '</div>' skip.
+        {&out} '</div>' SKIP.
 
     END.
 
-    {&out} '</div>' skip.
+    {&out} '</div>' SKIP.
 
     {&out} htmlib-EndCriteria() '</div>'.
 

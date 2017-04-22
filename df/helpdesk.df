@@ -2330,6 +2330,14 @@ ADD FIELD "HTMLBody" OF "EmailH" AS character
   MAX-WIDTH 16
   ORDER 90
 
+ADD FIELD "uidl" OF "EmailH" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Email Server Id"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 100
+
 ADD INDEX "EmailID" ON "EmailH" 
   AREA "Schema Area"
   UNIQUE
@@ -2341,6 +2349,37 @@ ADD INDEX "Company" ON "EmailH"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "RcpDate" DESCENDING 
   INDEX-FIELD "RcpTime" DESCENDING 
+
+ADD INDEX "uidl" ON "EmailH" 
+  AREA "Schema Area"
+  INDEX-FIELD "uidl" ASCENDING 
+
+ADD TABLE "emrcv"
+  AREA "Schema Area"
+  LABEL "Email Id Recieved"
+  DUMP-NAME "emrcv"
+
+ADD FIELD "CompanyCode" OF "emrcv" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "uidl" OF "emrcv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Email Server Id"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD INDEX "uidl" ON "emrcv" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "uidl" ASCENDING 
 
 ADD TABLE "eSched"
   AREA "Schema Area"
@@ -7195,4 +7234,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000142768
+0000143530

@@ -35,7 +35,7 @@ ASSIGN
     config.emailaccount = "paulanhoskins@outlook.com"
     config.pwd = "00pudsey"
     config.fromEmail = "paulh@proteussoftware.com"
-    config.subject = "Epulse"
+    config.subject = "Our IT Department report"
     config.posturl = "https://localhost/cgi-bin/cgiip.exe/WService=helpdesk/mail/epulse-v2.p".
    
    
