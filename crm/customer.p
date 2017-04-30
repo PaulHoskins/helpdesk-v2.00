@@ -10,6 +10,7 @@
     When        Who         What
     01/08/2016  phoski      Initial
     15/10/2016  phoski      CRM Phase 2
+    30/04/2017  phoski      Update main site
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -670,6 +671,9 @@ PROCEDURE process-web-request :
                               
             IF b-table.salesContact = lc-global-selcode
                 THEN b-table.salesContact = "".
+            
+            RUN cust/lib/mainsite.p ( ROWID(b-table)).
+                
             FOR EACH op_master EXCLUSIVE-LOCK
                 WHERE op_master.CompanyCode = b-table.CompanyCode
                   AND op_master.AccountNumber = b-table.AccountNumber:

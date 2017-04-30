@@ -18,6 +18,7 @@
     24/07/2016  phoski      CRM
     01/08/2016  phoski      CRM Page link
     15/10/2016  phoski      CRM Phase 2
+    30/04/2017  phoski      Site address link
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -233,6 +234,7 @@ PROCEDURE process-web-request :
     tbar-Link("CustAsset",?,"off",lc-link-otherp)
     tbar-Link("CustContract",?,"off",lc-link-otherp)
     tbar-Link("CRM",?,"off",lc-link-otherp)
+    tbar-Link("Site",?,"off",lc-link-otherp)
     tbar-EndOption()
     tbar-End().
 
@@ -388,7 +390,11 @@ PROCEDURE process-web-request :
                                                 "&returnback=" + string(lr-first-row)
                                                 ) */
                   lc-crm-link
-                                                
+                  tbar-Link("Site",ROWID(b-query),appurl + '/' + "cust/custsite.p","customer=" + 
+                                                string(ROWID(b-query)) + 
+                                                "&returnback=" + string(lr-first-row)
+                                                )
+                                                                             
 
             tbar-EndHidden()
 

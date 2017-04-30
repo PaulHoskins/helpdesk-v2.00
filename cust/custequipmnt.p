@@ -11,6 +11,7 @@
     30/07/2006  phoski      Initial
     23/10/2015  phoski      create and update audits
     23/02/2016  phoski      isDecom flag    
+    30/04/2017  phoski      Site 
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -57,9 +58,12 @@ DEFINE VARIABLE lc-ref          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ivClass      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-decom        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop         AS INTEGER   NO-UNDO.
+DEFINE VARIABLE lc-site         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-temp         AS CHARACTER NO-UNDO.
+ 
 
 DEFINE TEMP-TABLE tu NO-UNDO
-    FIELD upd-by AS CHARACTER
+    FIELD upd-by       AS CHARACTER
     FIELD upd-datetime AS DATETIME
     INDEX prim upd-datetime.
     
@@ -110,7 +114,7 @@ FUNCTION fnSelectClass RETURNS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -140,13 +144,13 @@ PROCEDURE ip-GetClass :
     DEFINE OUTPUT PARAMETER pc-Name AS CHARACTER NO-UNDO.
 
     
-    DEFINE BUFFER ivClass  FOR IvClass.
-    DEFINE BUFFER ivSub    FOR ivSub.
+    DEFINE BUFFER ivClass FOR IvClass.
+    DEFINE BUFFER ivSub   FOR ivSub.
 
 
     ASSIGN 
         pc-Code = htmlib-Null()
-        pc-Name          = "Select Inventory".
+        pc-Name = "Select Inventory".
 
 
     FOR EACH ivClass NO-LOCK
@@ -157,7 +161,7 @@ PROCEDURE ip-GetClass :
 
         ASSIGN 
             pc-Code = pc-Code + '|' + "C" + string(ivSub.ivSubid)
-            pc-Name          = pc-Name + '|' + 
+            pc-Name = pc-Name + '|' + 
                                   ivClass.name + " - " + ivSub.name.
 
     END.
@@ -176,11 +180,11 @@ PROCEDURE ip-GetCurrent :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    DEFINE BUFFER ivField      FOR ivField.
-    DEFINE BUFFER CustField    FOR CustField.
-    DEFINE VARIABLE lc-object       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-value        AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lf-ivSubID      AS DECIMAL      NO-UNDO.
+    DEFINE BUFFER ivField   FOR ivField.
+    DEFINE BUFFER CustField FOR CustField.
+    DEFINE VARIABLE lc-object  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-value   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lf-ivSubID AS DECIMAL   NO-UNDO.
 
     
     FOR EACH ivField OF ivSub NO-LOCK
@@ -218,25 +222,25 @@ PROCEDURE ip-InventoryTable :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    DEFINE BUFFER ivClass      FOR ivClass.
-    DEFINE BUFFER ivSub        FOR ivSub.
-    DEFINE BUFFER ivField      FOR ivField.
-    DEFINE VARIABLE lc-object       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-value        AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lf-ivSubID      AS DECIMAL      NO-UNDO.
+    DEFINE BUFFER ivClass FOR ivClass.
+    DEFINE BUFFER ivSub   FOR ivSub.
+    DEFINE BUFFER ivField FOR ivField.
+    DEFINE VARIABLE lc-object  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-value   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lf-ivSubID AS DECIMAL   NO-UNDO.
 
     {&out}
-    '<tr><td colspan=2>'.
+        '<tr><td colspan=2>'.
 
 
-    {&out} skip
-           htmlib-StartFieldSet("Inventory Details") 
-           htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartFieldSet("Inventory Details") 
+        htmlib-StartMntTable().
 
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "^right|Details^left|Notes^left"
-        ) skip.
+        ) SKIP.
 
     IF lc-ivClass BEGINS "C" THEN
     DO:
@@ -252,15 +256,17 @@ PROCEDURE ip-InventoryTable :
                 BY ivField.dOrder
                 BY ivField.dLabel:
 
-                {&out} '<tr class="tabrow1">'.
+                {&out} 
+                    '<tr class="tabrow1">'.
 
-                {&out} '<th style="text-align: right; vertical-align: text-top;">'
-                html-encode(ivField.dLabel + ":").
+                {&out} 
+                    '<th style="text-align: right; vertical-align: text-top;">'
+                    html-encode(ivField.dLabel + ":").
 
                 IF ivField.dMandatory AND can-do("add,update",lc-mode)
                     THEN {&out} '<br><span style="font-size: 8px;">Mandatory</span>'.
                 {&out}
-                '</th>'.
+                    '</th>'.
 
                 ASSIGN 
                     lc-object = "FLD" + string(ivField.ivFieldID).
@@ -269,11 +275,12 @@ PROCEDURE ip-InventoryTable :
 
                 IF CAN-DO("view,delete",lc-mode) THEN 
                 DO:
-                    {&out} htmlib-MntTableField(REPLACE(html-encode(lc-value),"~n","<br>"),'left') skip.
+                    {&out} htmlib-MntTableField(REPLACE(html-encode(lc-value),"~n","<br>"),'left') SKIP.
                 END.
                 ELSE
                 DO:
-                    {&out} '<td>' skip.
+                    {&out} 
+                        '<td>' SKIP.
 
                     CASE ivField.dType:
                         WHEN "TEXT" THEN
@@ -302,27 +309,30 @@ PROCEDURE ip-InventoryTable :
                         END.
 
                     END CASE.
-                    {&out} '</td>' skip.
+                    {&out} 
+                        '</td>' SKIP.
 
                 END.
-                {&out} htmlib-MntTableField(html-encode(ivField.dPrompt),'left') skip.
+                {&out} htmlib-MntTableField(html-encode(ivField.dPrompt),'left') SKIP.
 
 
 
 
 
-                {&out} '</tr>' skip.
+                {&out} 
+                    '</tr>' SKIP.
             END.
         END.
 
     END.
 
-    {&out} skip 
-           htmlib-EndTable()
-           htmlib-EndFieldSet() 
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        htmlib-EndFieldSet() 
+        SKIP.
 
-    {&out} '</td></tr>'.
+    {&out} 
+        '</td></tr>'.
 
 END PROCEDURE.
 
@@ -337,18 +347,18 @@ PROCEDURE ip-JavaScript :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    {&out} skip 
-          '<script language="JavaScript">' skip.
+    {&out} SKIP 
+        '<script language="JavaScript">' SKIP.
 
-    {&out} skip
-        'function ChangeClass() ~{' skip
-        '   SubmitThePage("ClassChange")' skip
-        '~}' skip.
+    {&out} SKIP
+        'function ChangeClass() ~{' SKIP
+        '   SubmitThePage("ClassChange")' SKIP
+        '~}' SKIP.
 
       
-    {&out} skip
-           '</script>' skip.
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} SKIP
+        '</script>' SKIP.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 END PROCEDURE.
 
 
@@ -365,14 +375,14 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
-    DEFINE BUFFER ivClass      FOR ivClass.
-    DEFINE BUFFER ivSub        FOR ivSub.
-    DEFINE BUFFER ivField      FOR ivField.
-    DEFINE VARIABLE lc-object       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-value        AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lf-ivSubID      AS DECIMAL      NO-UNDO.
-    DEFINE VARIABLE ld-date         AS DATE     NO-UNDO.
-    DEFINE VARIABLE lf-number       AS DECIMAL      NO-UNDO.
+    DEFINE BUFFER ivClass FOR ivClass.
+    DEFINE BUFFER ivSub   FOR ivSub.
+    DEFINE BUFFER ivField FOR ivField.
+    DEFINE VARIABLE lc-object  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-value   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lf-ivSubID AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE ld-date    AS DATE      NO-UNDO.
+    DEFINE VARIABLE lf-number  AS DECIMAL   NO-UNDO.
 
     
     IF lc-ivClass = htmlib-Null() 
@@ -534,21 +544,21 @@ PROCEDURE process-web-request :
     {lib/checkloggedin.i} 
 
     ASSIGN 
-        lc-mode = get-value("mode")
-        lc-rowid = get-value("rowid")
-        lc-search = get-value("search")
-        lc-firstrow = get-value("firstrow")
-        lc-lastrow  = get-value("lastrow")
+        lc-mode       = get-value("mode")
+        lc-rowid      = get-value("rowid")
+        lc-search     = get-value("search")
+        lc-firstrow   = get-value("firstrow")
+        lc-lastrow    = get-value("lastrow")
         lc-navigation = get-value("navigation")
         lc-customer   = get-value("customer")
         lc-returnback = get-value("returnback").
 
     IF lc-mode = "" 
-        THEN ASSIGN lc-mode = get-field("savemode")
-            lc-rowid = get-field("saverowid")
-            lc-search = get-value("savesearch")
-            lc-firstrow = get-value("savefirstrow")
-            lc-lastrow  = get-value("savelastrow")
+        THEN ASSIGN lc-mode       = get-field("savemode")
+            lc-rowid      = get-field("saverowid")
+            lc-search     = get-value("savesearch")
+            lc-firstrow   = get-value("savefirstrow")
+            lc-lastrow    = get-value("savelastrow")
             lc-navigation = get-value("savenavigation").
 
     ASSIGN 
@@ -560,26 +570,26 @@ PROCEDURE process-web-request :
         WHEN 'add'
         THEN 
             ASSIGN 
-                lc-title = 'Add'
-                lc-link-label = "Cancel addition"
+                lc-title        = 'Add'
+                lc-link-label   = "Cancel addition"
                 lc-submit-label = "Add Inventory".
         WHEN 'view'
         THEN 
             ASSIGN 
-                lc-title = 'View'
-                lc-link-label = "Back"
+                lc-title        = 'View'
+                lc-link-label   = "Back"
                 lc-submit-label = "".
         WHEN 'delete'
         THEN 
             ASSIGN 
-                lc-title = 'Delete'
-                lc-link-label = 'Cancel deletion'
+                lc-title        = 'Delete'
+                lc-link-label   = 'Cancel deletion'
                 lc-submit-label = 'Delete Inventory'.
         WHEN 'Update'
         THEN 
             ASSIGN 
-                lc-title = 'Update'
-                lc-link-label = 'Cancel update'
+                lc-title        = 'Update'
+                lc-link-label   = 'Cancel update'
                 lc-submit-label = 'Update Inventory'.
     END CASE.
 
@@ -593,7 +603,7 @@ PROCEDURE process-web-request :
     RUN ip-GetClass ( OUTPUT lc-list-class, OUTPUT lc-list-Name ).
 
     ASSIGN 
-        lc-title = lc-title + ' Customer Inventory'
+        lc-title    = lc-title + ' Customer Inventory'
         lc-link-url = appurl + '/cust/custequip.p' + 
                                   '?search=' + lc-search + 
                                   '&firstrow=' + lc-firstrow + 
@@ -648,10 +658,10 @@ PROCEDURE process-web-request :
             IF lc-mode <> "delete" THEN
             DO:
                 ASSIGN 
-                    lc-ref          = get-value("ref")
-                    lc-ivclass      = get-value("ivclass")
-                    lc-decom        = get-value("decom")
-                    .
+                    lc-ref     = get-value("ref")
+                    lc-ivclass = get-value("ivclass")
+                    lc-decom   = get-value("decom")
+                    lc-site    = get-value("site").
                 
                 RUN ip-Validate( OUTPUT lc-error-field,
                     OUTPUT lc-error-msg ).
@@ -697,8 +707,9 @@ PROCEDURE process-web-request :
                     END.
                     
                     ASSIGN 
-                        b-table.ref = lc-ref
+                        b-table.ref     = lc-ref
                         b-table.isDecom = lc-decom = "on"
+                        b-table.site    = lc-site
                         .
                     /* 
                     ***
@@ -712,20 +723,22 @@ PROCEDURE process-web-request :
                             IF b-table.upd-by[li-loop] = "" THEN NEXT.
                             CREATE tu.
                             ASSIGN 
-                                tu.upd-by = b-table.upd-by[li-loop]
+                                tu.upd-by       = b-table.upd-by[li-loop]
                                 tu.upd-datetime = b-table.upd-datetime[li-loop].
                                 
                         END. 
                         CREATE tu.
                         ASSIGN 
-                            tu.upd-by = lc-global-user
+                            tu.upd-by       = lc-global-user
                             tu.upd-datetime = NOW.
-                        ASSIGN li-loop = 0.
+                        ASSIGN 
+                            li-loop = 0.
                         FOR EACH tu BY tu.upd-datetime DESCENDING:
-                            ASSIGN li-loop = li-loop + 1.
+                            ASSIGN 
+                                li-loop = li-loop + 1.
                             IF li-loop > EXTENT(b-table.upd-by) THEN LEAVE.
                             ASSIGN 
-                                b-table.upd-by[li-loop] = tu.upd-by 
+                                b-table.upd-by[li-loop]       = tu.upd-by 
                                 b-table.upd-datetime[li-loop] = tu.upd-datetime.
                                 
                         END.
@@ -801,8 +814,9 @@ PROCEDURE process-web-request :
             OR request_method <> "post" THEN 
         DO:
             ASSIGN 
-                lc-ref      = b-table.ref
-                lc-decom    = IF b-table.isDecom THEN "on" ELSE ""
+                lc-ref   = b-table.ref
+                lc-decom = IF b-table.isDecom THEN "on" ELSE ""
+                lc-site  = b-table.Site
                 .
             
         END.
@@ -818,94 +832,162 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
     RUN ip-JavaScript.
 
 
     {&out}
-    htmlib-StartForm("mainform","post", selfurl )
-    htmlib-ProgramTitle(lc-title) skip.
+        htmlib-StartForm("mainform","post", selfurl )
+        htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+        htmlib-Hidden ("saverowid", lc-rowid) SKIP
+        htmlib-Hidden ("savesearch", lc-search) SKIP
+        htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+        htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("savenavigation", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("ivclass",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Inventory Type")
         ELSE htmlib-SideLabel("Inventory Type"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'.
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">'.
 
     IF lc-mode = "ADD" 
         THEN {&out} fnSelectClass(htmlib-Select("ivclass",lc-list-class,lc-list-Name,
-        lc-ivclass)) skip.
-    else {&out} html-encode(get-value("inventory")).
+            lc-ivclass)) SKIP.
+    ELSE {&out} html-encode(get-value("inventory")).
 
     {&out}
-    '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("ref",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Reference")
         ELSE htmlib-SideLabel("Reference"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("ref",40,lc-ref) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(lc-ref),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-InputField("ref",40,lc-ref) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-ref),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
-      {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    FIND FIRST CustSite 
+        WHERE CustSite.CompanyCode =  customer.CompanyCode
+        AND CustSite.AccountNumber =  Customer.AccountNumber
+        AND CustSite.Site > "" 
+        NO-LOCK NO-ERROR.
+    IF AVAILABLE CustSite THEN
+    DO:
+        ASSIGN 
+            lc-list-class = ""
+            lc-list-name  = "".
+            
+       
+        
+               
+        FOR EACH CustSite NO-LOCK
+            WHERE CustSite.CompanyCode =  customer.CompanyCode
+            AND CustSite.AccountNumber =  Customer.AccountNumber:
+            
+            
+            lc-temp = IF  CustSite.Site = "" THEN "(Main)" ELSE "(" +  CustSite.Site + ")".
+            lc-temp = lc-temp + " " + CustSite.Address1.
+            IF CustSite.Address2 <> ""
+                THEN lc-temp = lc-temp + " " + CustSite.Address2.
+            IF CustSite.City <> ""
+                THEN lc-temp = lc-temp + " " + CustSite.City.
+            IF CustSite.PostCode <> ""
+                THEN lc-temp = lc-temp + " " + CustSite.PostCode.
+            
+            
+            IF CustSite.Site = ""
+                THEN  ASSIGN 
+                    lc-list-class = ""
+                    lc-list-name  = lc-temp.
+            ELSE   ASSIGN 
+                    lc-list-class = lc-list-class + "|" + CustSite.Site
+                    lc-list-name  = lc-list-name + "|" + lc-temp.
+        
+        END.
+        
+               
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("Site",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Site")
+            ELSE htmlib-SideLabel("Site"))
+            '</TD>'.
+    
+        IF NOT CAN-DO("view,delete",lc-mode) THEN
+        DO:
+            {&out} 
+                '<TD VALIGN="TOP" ALIGN="left">'
+                htmlib-Select("site",lc-list-class,lc-list-name,lc-site) 
+                '</TD>' SKIP.
+        END.
+        ELSE 
+            {&out} htmlib-TableField(html-encode(lc-site),'left')
+                SKIP.
+        {&out} 
+            '</TR>' SKIP.
+    END.
+        
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("decom",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Decommissioned?")
         ELSE htmlib-SideLabel("Decommissioned?"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-CheckBox("decom",lc-decom = "on") 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(IF lc-decom = "on" THEN "Yes" ELSE "No"),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-CheckBox("decom",lc-decom = "on") 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(IF lc-decom = "on" THEN "Yes" ELSE "No"),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
     
     RUN ip-InventoryTable.
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
-        {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        {&out} 
+            '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+            '</center>' SKIP.
     END.
          
-    {&out} skip
-           htmlib-Hidden("customer",lc-customer) skip
-           htmlib-Hidden("returnback",lc-returnback) skip
-           htmlib-hidden("submitsource","") skip.
+    {&out} SKIP
+        htmlib-Hidden("customer",lc-customer) SKIP
+        htmlib-Hidden("returnback",lc-returnback) SKIP
+        htmlib-hidden("submitsource","") SKIP.
    
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

@@ -39,6 +39,7 @@
     22/12/2016  phoski      Marketing constants
     09/01/2016  phoski      com-GetFilterLoad
     15/04/2017  phoski      ExcludeReports flag
+    30/04/2017  phoski      CustSite
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -1988,6 +1989,7 @@ FUNCTION com-CanDelete RETURNS LOGICAL
     DEFINE BUFFER acs_res    FOR acs_res.
     DEFINE BUFFER op_master  FOR op_master.
     DEFINE BUFFER thisUser   FOR WebUser.
+    DEFINE BUFFER custsite   FOR custsite.
     
     
     FIND thisuser WHERE thisuser.LoginID = pc-loginid NO-LOCK NO-ERROR.
@@ -2284,6 +2286,25 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                     THEN RETURN FALSE.
                 RETURN TRUE.
             END.
+         WHEN "site" THEN
+         DO:
+                FIND custsite WHERE ROWID(custsite) = pr-rowid NO-LOCK NO-ERROR.
+                IF NOT AVAILABLE custsite THEN RETURN FALSE.
+                FOR FIRST Issue NO-LOCK
+                    WHERE Issue.CompanyCode = custsite.companycode
+                      AND Issue.AccountNumber = CustSite.AccountNumber
+                      AND Issue.Site = CustSite.Site:
+                    RETURN FALSE.
+                END.
+                FOR FIRST CustIV NO-LOCK
+                    WHERE CustIV.CompanyCode = custsite.companycode
+                      AND CustIV.AccountNumber = CustSite.AccountNumber
+                      AND CustIV.Site = CustSite.Site:
+                    RETURN FALSE.
+                END.
+                RETURN TRUE.
+                
+         END.
         OTHERWISE
         DO:
             MESSAGE "com-CanDelete invalid table for " pc-table.

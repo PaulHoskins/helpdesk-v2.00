@@ -1483,6 +1483,14 @@ ADD FIELD "isDecom" OF "CustIv" AS logical
   MAX-WIDTH 1
   ORDER 100
 
+ADD FIELD "Site" OF "CustIv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 110
+
 ADD INDEX "Customer" ON "CustIv" 
   AREA "Schema Area"
   UNIQUE
@@ -1835,6 +1843,116 @@ ADD INDEX "st-num" ON "Customer"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "st-num" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD TABLE "CustSite"
+  AREA "Schema Area"
+  LABEL "Customer Site Address"
+  DUMP-NAME "custaddr"
+
+ADD FIELD "CompanyCode" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "AccountNumber" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Address1" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 1"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "Address2" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 2"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "City" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "County" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "County"
+  POSITION 7
+  MAX-WIDTH 80
+  ORDER 70
+
+ADD FIELD "Country" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Country"
+  POSITION 8
+  MAX-WIDTH 80
+  COLUMN-LABEL "Country"
+  ORDER 80
+
+ADD FIELD "Postcode" OF "CustSite" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Post Code"
+  POSITION 9
+  MAX-WIDTH 30
+  ORDER 90
+
+ADD FIELD "Telephone" OF "CustSite" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Telephone"
+  POSITION 10
+  MAX-WIDTH 40
+  ORDER 100
+
+ADD FIELD "Contact" OF "CustSite" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Contact"
+  POSITION 11
+  MAX-WIDTH 80
+  ORDER 110
+
+ADD FIELD "notes" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Notes"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "Site" OF "CustSite" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 25
+
+ADD INDEX "prim" ON "CustSite" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "Site" ASCENDING 
 
 ADD TABLE "dashb"
   AREA "Schema Area"
@@ -3735,6 +3853,14 @@ ADD FIELD "AlertUsers" OF "Issue" AS character
   POSITION 48
   MAX-WIDTH 16
   ORDER 470
+
+ADD FIELD "Site" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 49
+  MAX-WIDTH 16
+  ORDER 480
 
 ADD INDEX "IssueNumber" ON "Issue" 
   AREA "Schema Area"
@@ -7234,4 +7360,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000143530
+0000145873

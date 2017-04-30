@@ -38,6 +38,7 @@ ASSIGN
     config.subject = "Our IT Department report"
     config.posturl = "https://localhost/cgi-bin/cgiip.exe/WService=helpdesk/mail/epulse-v2.p".
    
+ASSIGN config.postURL = "https://ouritdept-helpdesk.co.uk/cgi-bin/helpdesk.sh/mail/epulse-v2.p".
    
 TEMP-TABLE config:WRITE-XML("file", "c:\epulse\config.xml", TRUE, ?, ?, FALSE, FALSE).
     

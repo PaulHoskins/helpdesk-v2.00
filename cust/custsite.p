@@ -1,16 +1,14 @@
 /***********************************************************************
 
-    Program:        cust/custequip.p
+    Program:        cust/custsite.p
     
-    Purpose:        Customer Maintenance - Equipment Browse        
+    Purpose:        Customer Maintenance - Sites    
     
     Notes:
     
     
     When        Who         What
-    22/04/2006  phoski      Initial
-    23/02/2016  phoski      isDecom flag
-    30/04/2017  phoski      custSite
+    30/04/2017  phoski      Initial
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -45,11 +43,10 @@ DEFINE VARIABLE lc-returnback  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-temp        AS CHARACTER NO-UNDO.
 
+
 DEFINE BUFFER Customer FOR Customer.
-DEFINE BUFFER ivClass  FOR ivClass.
-DEFINE BUFFER ivSub    FOR ivSub.
-DEFINE BUFFER b-query  FOR CustIv.
-DEFINE BUFFER b-search FOR CustIv.
+DEFINE BUFFER b-query  FOR CustSite.
+DEFINE BUFFER b-search FOR CustSite.
 
 
 DEFINE QUERY q FOR b-query SCROLLING.
@@ -75,8 +72,8 @@ DEFINE QUERY q FOR b-query SCROLLING.
 
 /* DESIGN Window definition (used by the UIB) 
   CREATE WINDOW Procedure ASSIGN
-         HEIGHT             = 14.14
-         WIDTH              = 60.6.
+         HEIGHT             = 14.15
+         WIDTH              = 60.57.
 /* END WINDOW DEFINITION */
                                                                         */
 
@@ -206,23 +203,23 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Customer Inventory") SKIP.
+    {&out} htmlib-Header("Maintain Customer Sites") SKIP.
 
    
     {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/custequip.p' ) SKIP.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/custsite.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Customer Inventory - " + 
+    {&out} htmlib-ProgramTitle("Maintain Customer Sites -  " + 
         customer.name) SKIP.
     
     {&out} htmlib-TextLink("Back",lc-link-url) '<BR><BR>' SKIP.
 
     {&out}
     tbar-Begin(
-        tbar-Find(appurl + "/cust/custequip.p")
+        tbar-Find(appurl + "/cust/custsite.p")
         )
-    tbar-Link("add",?,appurl + '/cust/custequipmnt.p',"customer=" +
+    tbar-Link("add",?,appurl + '/cust/custsitemnt.p',"customer=" +
         lc-customer + "&returnback=" + lc-returnback)
     tbar-BeginOption()
     tbar-Link("view",?,"off",lc-link-otherp)
@@ -236,13 +233,15 @@ PROCEDURE process-web-request :
 
     {&out}
     htmlib-TableHeading(
-        "Inventory|Reference|Decommissioned?|Site"
+        "Site Code|Address|Contact|Telephone|Notes"
         ) SKIP.
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
-        OF customer
-        BY b-query.site.
+    WHERE b-query.companyCode = Customer.CompanyCode
+      AND b-query.AccountNumber = Customer.AccountNumber
+      AND b-query.site > "".
+       
 
     GET FIRST q NO-LOCK.
 
@@ -273,8 +272,8 @@ PROCEDURE process-web-request :
             DO:
                 FIND FIRST b-search
                     WHERE b-search.CompanyCode = lc-global-company
-                    AND b-search.accountnumber = customer.AccountNumber
-                    AND b-search.Ref >= lc-Search NO-LOCK NO-ERROR.
+                    AND b-search.AccountNumber = customer.AccountNumber
+                    AND b-search.Site >= lc-Search NO-LOCK NO-ERROR.
                 IF AVAILABLE b-search THEN
                 DO:
                     REPOSITION q TO ROWID ROWID(b-search) NO-ERROR.
@@ -285,13 +284,7 @@ PROCEDURE process-web-request :
             ELSE
                 IF lc-navigation = "refresh" THEN
                 DO:
-                    REPOSITION q TO ROWID TO-ROWID(lc-firstrow) NO-ERROR.
-                    IF ERROR-STATUS:ERROR = FALSE THEN
-                    DO:
-                        GET NEXT q NO-LOCK.
-                        IF NOT AVAILABLE b-query THEN GET FIRST q.
-                    END.  
-                    ELSE GET FIRST q.
+                    GET FIRST q.
                 END.
 
     ASSIGN 
@@ -318,56 +311,61 @@ PROCEDURE process-web-request :
                                 '&customer=' + lc-customer + 
                                 '&returnback=' + lc-returnback.
 
-        ASSIGN 
-            lc-temp = "".
+      
 
-        FIND ivSub OF b-query NO-LOCK NO-ERROR.
-        IF AVAILABLE ivSub THEN
-        DO:
-            FIND ivClass OF ivSub NO-LOCK NO-ERROR.
-            IF AVAILABLE ivClass 
-                THEN ASSIGN lc-temp = ivClass.name + " - " + ivSub.name.
-        END.
-
+        ASSIGN lc-temp = b-query.address1.
+        
+        IF b-query.address2 <> ""
+        THEN lc-temp = lc-temp + "<br />" + b-query.address2.
+        
+        IF b-query.city <> ""
+        THEN lc-temp = lc-temp + "<br />" + b-query.city.
+        IF b-query.county <> ""
+        THEN lc-temp = lc-temp + "<br />" + b-query.county.
+        
+        IF b-query.country <> ""
+        THEN lc-temp = lc-temp + "<br />" + b-query.country.
+        
+        IF b-query.postcode <> ""
+        THEN lc-temp = lc-temp + "<br />" + b-query.postcode.
+        
+        
         {&out}
             SKIP
             tbar-tr(ROWID(b-query))
             SKIP
+           
+            htmlib-MntTableField(html-encode(b-query.site),'left')
+            htmlib-MntTableField(lc-temp,'left')
+            htmlib-MntTableField(html-encode(b-query.Contact),'left')
+            htmlib-MntTableField(html-encode(b-query.Telephone),'left')
+            htmlib-MntTableField(REPLACE(html-encode(b-query.notes),"~n","<br>"),"left")
+           
+          
 
-            htmlib-MntTableField(html-encode(lc-temp),'left')
-            htmlib-MntTableField(html-encode(b-query.ref),'left')
-            htmlib-MntTableField(html-encode(IF b-query.isDecom THEN "Yes" ELSE ""),'left')
-            htmlib-MntTableField(html-encode(b-query.Site),'left')
             tbar-BeginHidden(ROWID(b-query))
-                tbar-Link("view",ROWID(b-query),appurl + '/cust/custequipmnt.p',lc-link-otherp)
-                tbar-Link("update",ROWID(b-query),appurl + '/cust/custequipmnt.p',lc-link-otherp)
-                tbar-Link("delete",ROWID(b-query),
-                          IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"customerequip",ROWID(b-query))
-                          THEN ( appurl + '/cust/custequipmnt.p') ELSE "off",
+                tbar-Link("view",ROWID(b-query),appurl + '/cust/custsitemnt.p',lc-link-otherp)
+                tbar-Link("update",ROWID(b-query),appurl + '/cust/custsitemnt.p',lc-link-otherp)
+                tbar-Link("delete",ROWID(b-query),IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"site",ROWID(b-query))
+                          THEN ( appurl + '/' + "cust/custsitemnt.p") ELSE "off",
                           lc-link-otherp)
-                
+                                
             tbar-EndHidden()
             '</tr>' SKIP.
 
        
 
-        IF li-count = li-max-lines THEN LEAVE.
+        
 
         GET NEXT q NO-LOCK.
             
     END.
-
-    IF li-count < li-max-lines THEN
-    DO:
-        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
-    END.
-
+    
     {&out} SKIP 
            htmlib-EndTable()
            SKIP.
 
-    {lib/navpanel.i "cust/custequip.p"}
-
+ 
     {&out} SKIP
            htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
            htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP

@@ -27,6 +27,7 @@
     31/07/2016  phoski      AccStatus field instead of active field
     02/08/2016  phoski      CRM fields update
     15/10/2016  phoski      CRM Phase 2
+    30/04/2017  phoski      Update main site
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -1257,6 +1258,8 @@ PROCEDURE process-web-request :
                         END.
     
                     END.
+                    RUN cust/lib/mainsite.p ( ROWID(b-table)).
+                    
                     FOR EACH op_master EXCLUSIVE-LOCK
                         WHERE op_master.CompanyCode = b-table.CompanyCode
                         AND op_master.AccountNumber = b-table.AccountNumber:
@@ -1281,6 +1284,10 @@ PROCEDURE process-web-request :
                     INPUT-OUTPUT lc-error-msg ).
             ELSE 
             DO:
+                FOR EACH CustSite OF b-table EXCLUSIVE-LOCK:
+                    DELETE CustSite.
+                END.
+                
                 FOR EACH WebUser EXCLUSIVE-LOCK
                     WHERE WebUser.CompanyCode = b-table.CompanyCode
                     AND WebUser.AccountNumber  = b-table.AccountNumber:
