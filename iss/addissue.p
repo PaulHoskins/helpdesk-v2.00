@@ -38,6 +38,7 @@
     02/07/2016  phoski      issActivity.ActivityType    
     02/07/2016  phoski      com-GetTicketBalance for ticket balance
     01/08/2016  phoski      CRM
+    01/05/2017  phoski      Customer Sites
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -65,6 +66,10 @@ DEFINE VARIABLE lc-AreaCode         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Address          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Ticket           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-title            AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-site             AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-site-site   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-site-name   AS CHARACTER NO-UNDO.
+
 
 DEFINE VARIABLE lc-list-number      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-list-name        AS CHARACTER NO-UNDO.
@@ -289,15 +294,15 @@ PROCEDURE ip-AreaSelect :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    {&out}  skip
-            '<select id="areacode" name="areacode" class="inputfield">' skip.
+    {&out}  SKIP
+            '<select id="areacode" name="areacode" class="inputfield">' SKIP.
     {&out}
     '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
     IF lc-AreaCode = dynamic-function("htmlib-Null") 
         THEN "selected" 
-    ELSE "" '>Select Area</option>' skip
-            '<option value="" ' if lc-AreaCode = ""
-                then "selected" else "" '>Not Applicable/Unknown</option>' skip        
+    ELSE "" '>Select Area</option>' SKIP
+            '<option value="" ' IF lc-AreaCode = ""
+                THEN "selected" ELSE "" '>Not Applicable/Unknown</option>' SKIP        
     .
     FOR EACH webIssArea NO-LOCK
         WHERE webIssArea.CompanyCode = lc-Global-Company 
@@ -310,16 +315,16 @@ PROCEDURE ip-AreaSelect :
                 WHERE webissagrp.companycode = webissArea.CompanyCode
                 AND webissagrp.Groupid     = webissArea.GroupID NO-LOCK NO-ERROR.
             {&out}
-            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' skip.
+            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' SKIP.
         END.
 
         {&out}
         '<option value="' webIssArea.AreaCode '" ' 
         IF lc-AreaCode = webIssArea.AreaCode  
             THEN "selected" 
-        ELSE "" '>' html-encode(webIssArea.Description) '</option>' skip.
+        ELSE "" '>' html-encode(webIssArea.Description) '</option>' SKIP.
 
-        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' skip.
+        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' SKIP.
     END.
 
     {&out} '</select>'.
@@ -339,10 +344,10 @@ PROCEDURE ip-ContractSelect :
     ------------------------------------------------------------------------------*/
     
   
-    {&out}  skip
-            '<select id="selectcontract" name="selectcontract" class="inputfield"  onchange=~"javascript:ChangeContract();~">' skip.
+    {&out}  SKIP
+            '<select id="selectcontract" name="selectcontract" class="inputfield"  onchange=~"javascript:ChangeContract();~">' SKIP.
     {&out}
-    '<option value="SELECT|yes" >Select Contract Type</option>' skip
+    '<option value="SELECT|yes" >Select Contract Type</option>' SKIP
     .
  
 
@@ -411,7 +416,7 @@ PROCEDURE ip-ContractSelect :
                     THEN " selected " 
                 ELSE "" '>' 
                   
-                html-encode(IF AVAILABLE ContractType THEN ContractType.Description ELSE "Unknown") '</option>' skip.
+                html-encode(IF AVAILABLE ContractType THEN ContractType.Description ELSE "Unknown") '</option>' SKIP.
  
             END.
         END.
@@ -436,26 +441,26 @@ PROCEDURE ip-ExportJScript :
 
 
  
-    {&out} skip 
-       '<script language="JavaScript">' skip
-       'var manualTime = false;' skip
+    {&out} SKIP 
+       '<script language="JavaScript">' SKIP
+       'var manualTime = false;' SKIP
 
-       ' function ChangeDuration() ' skip
-       '~{' skip
-       '  var curHourDuration   = parseInt(document.mainform.ffhours.value,10) ' skip
-       '  var curMinDuration    = parseInt(document.mainform.ffmins.value,10)  ' skip
-       '  var startDate         = parseInt(document.mainform.startdate.value,10) ' skip
-       '  var endDate           = parseInt(document.mainform.enddate.value,10)  ' skip
-       '  var endHourOption     = parseInt(document.getElementById("endhour").value,10); ' skip
-       '  var endMinuteOption   = parseInt(document.getElementById("endmin").value,10);' skip
-       '  var startHourOption   = parseInt(document.getElementById("starthour").value,10); ' skip
-       '  var startMinuteOption = parseInt(document.getElementById("startmin").value,10);' skip
-       '  var startTime         = internalTime(startHourOption,startMinuteOption) ; '  skip
-       '  var endTime           = internalTime(endHourOption,endMinuteOption) ; '  skip
-       '  var durationTime      = internalTime(curHourDuration,curMinDuration) ; '  skip
-       '  document.mainform.manualTime.checked = true;' skip
-       '  document.mainform.ffmins.value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' skip
-       '  manualTime = true; ' skip 
+       ' function ChangeDuration() ' SKIP
+       '~{' SKIP
+       '  var curHourDuration   = parseInt(document.mainform.ffhours.value,10) ' SKIP
+       '  var curMinDuration    = parseInt(document.mainform.ffmins.value,10)  ' SKIP
+       '  var startDate         = parseInt(document.mainform.startdate.value,10) ' SKIP
+       '  var endDate           = parseInt(document.mainform.enddate.value,10)  ' SKIP
+       '  var endHourOption     = parseInt(document.getElementById("endhour").value,10); ' SKIP
+       '  var endMinuteOption   = parseInt(document.getElementById("endmin").value,10);' SKIP
+       '  var startHourOption   = parseInt(document.getElementById("starthour").value,10); ' SKIP
+       '  var startMinuteOption = parseInt(document.getElementById("startmin").value,10);' SKIP
+       '  var startTime         = internalTime(startHourOption,startMinuteOption) ; '  SKIP
+       '  var endTime           = internalTime(endHourOption,endMinuteOption) ; '  SKIP
+       '  var durationTime      = internalTime(curHourDuration,curMinDuration) ; '  SKIP
+       '  document.mainform.manualTime.checked = true;' SKIP
+       '  document.mainform.ffmins.value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' SKIP
+       '  manualTime = true; ' SKIP 
 
 
 /*        '  document.mainform.ffmins.value = (curMinDuration < 10 ? "0" : "") + curMinDuration ;' skip                                                         */
@@ -467,7 +472,7 @@ PROCEDURE ip-ExportJScript :
 /*        '      document.mainform.manualTime.checked = true; ' skip                                                                                            */
 /*        '      manualTime = true; ' skip                                                                                                                      */
 /*        '  ~}' skip                                                                                                                                           */
-       '~}' skip.
+       '~}' SKIP.
 
     /*
     ***
@@ -477,18 +482,18 @@ PROCEDURE ip-ExportJScript :
     IF NOT ll-customer THEN
         {&out}
       
-    ' function PrePost(Indx) ' skip
-      '~{' skip
-       '  var curHourDuration   = parseInt(document.mainform.ffhours.value,10) ' skip
-       '  var curMinDuration    = parseInt(document.mainform.ffmins.value,10)  ' skip
-       '  var startDate         = parseInt(document.mainform.startdate.value,10) ' skip
-       '  var endDate           = parseInt(document.mainform.enddate.value,10)  ' skip
-       '  var endHourOption     = parseInt(document.getElementById("endhour").value,10); ' skip
-       '  var endMinuteOption   = parseInt(document.getElementById("endmin").value,10);' skip
-       '  var startHourOption   = parseInt(document.getElementById("starthour").value,10); ' skip
-       '  var startMinuteOption = parseInt(document.getElementById("startmin").value,10);' skip
-       '  var startTime         = internalTime(startHourOption,startMinuteOption) ; '  skip
-       '  var endTime           = internalTime(endHourOption,endMinuteOption) ; '  skip
+    ' function PrePost(Indx) ' SKIP
+      '~{' SKIP
+       '  var curHourDuration   = parseInt(document.mainform.ffhours.value,10) ' SKIP
+       '  var curMinDuration    = parseInt(document.mainform.ffmins.value,10)  ' SKIP
+       '  var startDate         = parseInt(document.mainform.startdate.value,10) ' SKIP
+       '  var endDate           = parseInt(document.mainform.enddate.value,10)  ' SKIP
+       '  var endHourOption     = parseInt(document.getElementById("endhour").value,10); ' SKIP
+       '  var endMinuteOption   = parseInt(document.getElementById("endmin").value,10);' SKIP
+       '  var startHourOption   = parseInt(document.getElementById("starthour").value,10); ' SKIP
+       '  var startMinuteOption = parseInt(document.getElementById("startmin").value,10);' SKIP
+       '  var startTime         = internalTime(startHourOption,startMinuteOption) ; '  SKIP
+       '  var endTime           = internalTime(endHourOption,endMinuteOption) ; '  SKIP
        '  var durationTime      = internalTime(curHourDuration,curMinDuration) ; '  SKIP
        '  document.forms["mainform"].submit();' SKIP
        /**
@@ -500,14 +505,14 @@ PROCEDURE ip-ExportJScript :
       '  ~}' skip
       '  else ~{ document.forms["mainform"].submit();  ~} ' skip
       **/
-      '~}' skip.
+      '~}' SKIP.
     ELSE
     {&out}
-    ' function PrePost(Indx) ' skip
-      '~{' skip
+    ' function PrePost(Indx) ' SKIP
+      '~{' SKIP
        
-      '  document.forms["mainform"].submit();   ' skip
-      '~}' skip.
+      '  document.forms["mainform"].submit();   ' SKIP
+      '~}' SKIP.
 
 
 
@@ -515,121 +520,121 @@ PROCEDURE ip-ExportJScript :
 
 
 
-       'function internalTime(piHours,piMins) ' skip
-       '~{' skip
-       '  return ( ( piHours * 60 ) * 60 ) + ( piMins * 60 ); ' skip
-       '~}' skip.
+       'function internalTime(piHours,piMins) ' SKIP
+       '~{' SKIP
+       '  return ( ( piHours * 60 ) * 60 ) + ( piMins * 60 ); ' SKIP
+       '~}' SKIP.
 
-    {&out} skip
-        'function ChangeAccount() ~{' skip
-        '   SubmitThePage("AccountChange")' skip
-        '~}' skip.
+    {&out} SKIP
+        'function ChangeAccount() ~{' SKIP
+        '   SubmitThePage("AccountChange")' SKIP
+        '~}' SKIP.
 
-    {&out} skip
-        'function Quick(box) ~{' skip
-        ' if ( box.checked == true) ~{' skip
-        '   document.mainform.actionstatus.value="CLOSED";' skip.
+    {&out} SKIP
+        'function Quick(box) ~{' SKIP
+        ' if ( box.checked == true) ~{' SKIP
+        '   document.mainform.actionstatus.value="CLOSED";' SKIP.
     IF AVAILABLE webStatus 
-        THEN {&out} '   document.mainform.currentstatus.value="' webStatus.StatusCode '";' skip.
+        THEN {&out} '   document.mainform.currentstatus.value="' webStatus.StatusCode '";' SKIP.
     {&out}
-    '   return;' skip
-        '~}' skip
-        '   document.mainform.actionstatus.value="OPEN";' skip
-        '   document.mainform.currentstatus.value="' entry(1,lc-list-status,"|") '";' skip
-        '~}' skip.
-    {&out} skip
-        '</script>' skip.
+    '   return;' SKIP
+        '~}' SKIP
+        '   document.mainform.actionstatus.value="OPEN";' SKIP
+        '   document.mainform.currentstatus.value="' ENTRY(1,lc-list-status,"|") '";' SKIP
+        '~}' SKIP.
+    {&out} SKIP
+        '</script>' SKIP.
 
     {&out} 
-    '<script>' skip
-        'function copyinfo() ~{' skip
-        'document.mainform.elements["actionnote"].value = document.mainform.elements["longdescription"].value' skip
-        '~}' skip
-        '</script>' skip.
+    '<script>' SKIP
+        'function copyinfo() ~{' SKIP
+        'document.mainform.elements["actionnote"].value = document.mainform.elements["longdescription"].value' SKIP
+        '~}' SKIP
+        '</script>' SKIP.
 
     {&out} 
-    '<script type="text/javascript" language="JavaScript">' skip
-      '// --  Clock --' skip
-      'var timerID = null;' skip
-      'var timerRunning = false;' skip
-      'var timerStart = null;' skip
-      'var timeSet = null;' skip
-      'var defaultTime = parseInt(' lc-DefaultTimeSet ',10);' skip
-      'var timeSecondSet = parseInt(' lc-timeSecondSet ',10);' skip
-      'var timeMinuteSet = parseInt(' lc-timeMinuteSet ',10);' skip
-      'var timeHourSet =  ' string(integer(lc-timeHourSet)) ';' SKIP
-      'var timerStartseconds = 0;' skip
+    '<script type="text/javascript" language="JavaScript">' SKIP
+      '// --  Clock --' SKIP
+      'var timerID = null;' SKIP
+      'var timerRunning = false;' SKIP
+      'var timerStart = null;' SKIP
+      'var timeSet = null;' SKIP
+      'var defaultTime = parseInt(' lc-DefaultTimeSet ',10);' SKIP
+      'var timeSecondSet = parseInt(' lc-timeSecondSet ',10);' SKIP
+      'var timeMinuteSet = parseInt(' lc-timeMinuteSet ',10);' SKIP
+      'var timeHourSet =  ' STRING(INTEGER(lc-timeHourSet)) ';' SKIP
+      'var timerStartseconds = 0;' SKIP
       
-      'function manualTimeSet()~{' skip
-      'manualTime = (manualTime == true) ? false : true;' skip
-      'if (!manualTime) ~{document.getElementById("throbber").src="/images/ajax/ajax-loader-red.gif"~}' skip
-      'else ~{document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"~}' skip
-      '~}' skip
+      'function manualTimeSet()~{' SKIP
+      'manualTime = (manualTime == true) ? false : true;' SKIP
+      'if (!manualTime) ~{document.getElementById("throbber").src="/images/ajax/ajax-loader-red.gif"~}' SKIP
+      'else ~{document.getElementById("throbber").src="/images/ajax/ajax-loaded-red.gif"~}' SKIP
+      '~}' SKIP
 
-      'function stopclock()~{' skip
-      'if(timerRunning)' skip
-      'clearTimeout(timerID);' skip
-      'timerRunning = false;' skip
-      '~}' skip
+      'function stopclock()~{' SKIP
+      'if(timerRunning)' SKIP
+      'clearTimeout(timerID);' SKIP
+      'timerRunning = false;' SKIP
+      '~}' SKIP
 
-      'function startclock()~{' skip
-      'stopclock();' skip
+      'function startclock()~{' SKIP
+      'stopclock();' SKIP
       /*'timeHourSet = 0;' skip */
-      'document.getElementById("clockface").innerHTML =  "00" +   ((defaultTime < 10) ? ":0" : ":") + defaultTime  + ":00" ' skip
-      'document.mainform.ffmins.value = ((defaultTime < 10) ? "0" : "") + defaultTime ' skip
-      'showtime();' skip
+      'document.getElementById("clockface").innerHTML =  "00" +   ((defaultTime < 10) ? ":0" : ":") + defaultTime  + ":00" ' SKIP
+      'document.mainform.ffmins.value = ((defaultTime < 10) ? "0" : "") + defaultTime ' SKIP
+      'showtime();' SKIP
       '~}' SKIP
     .
       
      
     {&out}
     
-    'function showtime()~{' skip
-      'var curMinuteOption;' skip
-      'var curHourOption;' skip
-      'var now = new Date()' skip
-      'var hours = now.getHours()' skip
-      'var minutes = now.getMinutes()' skip
-      'var seconds = now.getSeconds()' skip
-      'var millisec = now.getMilliseconds()' skip
-      'var timeValue = "" +   hours' skip 
-      'timeSecondSet = timeSecondSet + 1' skip
-      'if (!manualTime)' skip
+    'function showtime()~{' SKIP
+      'var curMinuteOption;' SKIP
+      'var curHourOption;' SKIP
+      'var now = new Date()' SKIP
+      'var hours = now.getHours()' SKIP
+      'var minutes = now.getMinutes()' SKIP
+      'var seconds = now.getSeconds()' SKIP
+      'var millisec = now.getMilliseconds()' SKIP
+      'var timeValue = "" +   hours' SKIP 
+      'timeSecondSet = timeSecondSet + 1' SKIP
+      'if (!manualTime)' SKIP
       '~{' SKIP
-      'timeValue  += ((minutes < 10) ? ":0" : ":") + minutes' skip
+      'timeValue  += ((minutes < 10) ? ":0" : ":") + minutes' SKIP
       'timeValue  += ((seconds < 10) ? ":0" : ":") + seconds' SKIP
        
-      'curHourOption = document.getElementById("endhour"  + ((hours == 0) ? "0" : "") + hours) ' skip
-      'curHourOption.selected = true' skip
-      'curMinuteOption = document.getElementById("endmin" + ((minutes < 10) ? "0" : "") + minutes)' skip
-      'curMinuteOption.selected = true' skip
-      'if ( timeSecondSet >= 60 ) ~{ timeSecondSet = 0 ; timeMinuteSet = timeMinuteSet + 1; ~}' skip
+      'curHourOption = document.getElementById("endhour"  + ((hours == 0) ? "0" : "") + hours) ' SKIP
+      'curHourOption.selected = true' SKIP
+      'curMinuteOption = document.getElementById("endmin" + ((minutes < 10) ? "0" : "") + minutes)' SKIP
+      'curMinuteOption.selected = true' SKIP
+      'if ( timeSecondSet >= 60 ) ~{ timeSecondSet = 0 ; timeMinuteSet = timeMinuteSet + 1; ~}' SKIP
       'if ( timeMinuteSet >= 60 ) ' SKIP
       '~{ ' SKIP 
       '     timeMinuteSet = 0 ; ' SKIP
       '     timeHourSet = timeHourSet + 1; ' SKIP
       '~}' SKIP
       
-      'if ( defaultTime <= timeMinuteSet || defaultTime == 0 || timeHourSet > 0)' skip
-      '  ~{' skip
-      '     document.mainform.ffhours.value = ((timeHourSet  < 10) ? "0" : "") + timeHourSet' skip
-      '     document.mainform.ffmins.value = ((timeMinuteSet < 10) ? "0" : "") + timeMinuteSet ' skip
+      'if ( defaultTime <= timeMinuteSet || defaultTime == 0 || timeHourSet > 0)' SKIP
+      '  ~{' SKIP
+      '     document.mainform.ffhours.value = ((timeHourSet  < 10) ? "0" : "") + timeHourSet' SKIP
+      '     document.mainform.ffmins.value = ((timeMinuteSet < 10) ? "0" : "") + timeMinuteSet ' SKIP
       '     document.getElementById("clockface").innerHTML = ((timeHourSet < 10) ? "0" : "") + timeHourSet '
-      '       +   ((timeMinuteSet < 10) ? ":0" : ":") + timeMinuteSet  + ((timeSecondSet < 10) ? ":0" : ":") + timeSecondSet ' skip
-      '  ~}'  skip
+      '       +   ((timeMinuteSet < 10) ? ":0" : ":") + timeMinuteSet  + ((timeSecondSet < 10) ? ":0" : ":") + timeSecondSet ' SKIP
+      '  ~}'  SKIP
       '~}' SKIP
-      'document.getElementById("timeHourSet").value = timeHourSet ;' skip
-      'document.getElementById("timeSecondSet").value = timeSecondSet ;' skip
-      'document.getElementById("timeMinuteSet").value = timeMinuteSet ;' skip
-      'timerRunning = true;' skip
+      'document.getElementById("timeHourSet").value = timeHourSet ;' SKIP
+      'document.getElementById("timeSecondSet").value = timeSecondSet ;' SKIP
+      'document.getElementById("timeMinuteSet").value = timeMinuteSet ;' SKIP
+      'timerRunning = true;' SKIP
       'timerID = setTimeout("showtime()",1000);' SKIP /* 1000=1second */
-      '~}' skip
+      '~}' SKIP
       '</script>' SKIP.
       
     {&out} 
-    '<script language="JavaScript" src="/scripts/js/tree.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' skip.
+    '<script language="JavaScript" src="/scripts/js/tree.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' SKIP.
 
 END PROCEDURE.
 
@@ -644,66 +649,66 @@ PROCEDURE ip-GenHTML :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
     RUN ip-ExportJScript.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/addissue.p' ) htmlib-ProgramTitle(lc-title) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/addissue.p' ) htmlib-ProgramTitle(lc-title) SKIP.
     
     IF NOT ll-Customer THEN
     DO:
-        {&out} htmlib-StartInputTable() skip
+        {&out} htmlib-StartInputTable() SKIP
                     '<tr><td>&nbsp;</td><td  align="right" width="50%">' SKIP
-                    '<span id="clockface" class="clockface">' skip
-                    '00:00:00' skip
-                    '</span><img id="throbber" src="/images/ajax/ajax-loader-red.gif"></td></tr>' skip
-                    '<tr><td valign="top"><fieldset><legend>Main Issue Entry</legend>' skip                 .
+                    '<span id="clockface" class="clockface">' SKIP
+                    '00:00:00' SKIP
+                    '</span><img id="throbber" src="/images/ajax/ajax-loader-red.gif"></td></tr>' SKIP
+                    '<tr><td valign="top"><fieldset><legend>Main Issue Entry</legend>' SKIP                 .
     END.
     RUN ip-MainEntry.
     IF NOT ll-Customer THEN 
     DO: 
-        {&out} '</td><td valign="top" style="padding-left: 5px;">' skip .
+        {&out} '</td><td valign="top" style="padding-left: 5px;">' SKIP .
         RUN ip-QuickFinish.
         {&out} '</td></tr>'.
         {&out} htmlib-EndTable().
-        {&out} '</fieldset>' skip
-                    '</td></tr>' skip.
+        {&out} '</fieldset>' SKIP
+                    '</td></tr>' SKIP.
     END.
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<br><br><center>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' SKIP.
     END.
     {&out} '<center>' Return-Submit-Button("submitform","Add Issue","PrePost()") 
-    '</center>' skip.
+    '</center>' SKIP.
     IF NOT ll-Customer AND CAN-FIND(customer WHERE customer.CompanyCode = lc-global-company AND 
         customer.AccountNumber = lc-AccountNumber) THEN
     DO:
         RUN ip-Inventory ( lc-global-company, lc-AccountNumber ).
     END.
 
-    {&out} htmlib-Hidden("submitsource","null") skip
-         htmlib-Hidden("emailid",lc-emailid) skip
-         htmlib-Hidden("issuesource",lc-issuesource) skip
-         htmlib-Hidden("timeSecondSet",lc-timeSecondSet) skip
+    {&out} htmlib-Hidden("submitsource","null") SKIP
+         htmlib-Hidden("emailid",lc-emailid) SKIP
+         htmlib-Hidden("issuesource",lc-issuesource) SKIP
+         htmlib-Hidden("timeSecondSet",lc-timeSecondSet) SKIP
          htmlib-Hidden("timeMinuteSet",lc-timeMinuteSet) SKIP
-         htmlib-Hidden("timeHourSet",lc-timeHourSet) skip
-         htmlib-Hidden("defaultTime",lc-DefaultTimeSet) skip
-         htmlib-Hidden("contract",lc-contract-type) skip
-         htmlib-Hidden("billable",lc-billable-flag) skip
-         htmlib-Hidden("savedactivetype",lc-saved-activity) skip   
-         htmlib-Hidden("actDesc",lc-list-activdesc) skip     
-         htmlib-Hidden("actTime",lc-list-activtime) skip 
-         htmlib-Hidden("actID",lc-list-actid) skip 
-         htmlib-EndForm() skip.
+         htmlib-Hidden("timeHourSet",lc-timeHourSet) SKIP
+         htmlib-Hidden("defaultTime",lc-DefaultTimeSet) SKIP
+         htmlib-Hidden("contract",lc-contract-type) SKIP
+         htmlib-Hidden("billable",lc-billable-flag) SKIP
+         htmlib-Hidden("savedactivetype",lc-saved-activity) SKIP   
+         htmlib-Hidden("actDesc",lc-list-activdesc) SKIP     
+         htmlib-Hidden("actTime",lc-list-activtime) SKIP 
+         htmlib-Hidden("actID",lc-list-actid) SKIP 
+         htmlib-EndForm() SKIP.
     IF NOT ll-customer THEN
-        {&out}  htmlib-CalendarScript("date") skip
+        {&out}  htmlib-CalendarScript("date") SKIP
                                     htmlib-CalendarScript("startdate") SKIP
                                     .
     {&out}
-    '<script type="text/javascript">' skip
-    'startclock();' skip
-    '</script>' skip.
-    {&out} htmlib-Footer() skip.
+    '<script type="text/javascript">' SKIP
+    'startclock();' SKIP
+    '</script>' SKIP.
+    {&out} htmlib-Footer() SKIP.
   
 END PROCEDURE.
 
@@ -1026,18 +1031,18 @@ PROCEDURE ip-Inventory :
         lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(customer))).
                             
     
-    {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
 
     {&out}
     htmlib-TableHeading(
         "Select Inventory|"
-        ) skip.
+        ) SKIP.
 
     
     {&out}
     '<tr class="tabrow1">'
-    '<td valign="top" nowrap class="tree">' skip
+    '<td valign="top" nowrap class="tree">' SKIP
     .
     FOR EACH b-query NO-LOCK OF Customer
         WHERE b-query.isDecom = FALSE,
@@ -1062,12 +1067,12 @@ PROCEDURE ip-Inventory :
                 THEN {&out} '<img src="/images/general/menuopen.gif" onClick="hdexpandcontent(this, ~''
             lc-object '~')">'
             '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
-            '<div id="' lc-object '" style="padding-left: 15px; display: block;">' skip.
-            else {&out}
+            '<div id="' lc-object '" style="padding-left: 15px; display: block;">' SKIP.
+            ELSE {&out}
                 '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
                         lc-object '~')">'
                 '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
-                '<div id="' lc-object '" style="padding-left: 15px; display: none;">' skip.
+                '<div id="' lc-object '" style="padding-left: 15px; display: none;">' SKIP.
         END.
 
         IF FIRST-OF(ivSub.name) THEN
@@ -1079,16 +1084,16 @@ PROCEDURE ip-Inventory :
             lc-subobject '~')">'
             '&nbsp;'
             '<span style="' ivSub.Style '">'
-            html-encode(ivSub.name) '</span><br>' skip
-                '<div id="' lc-subobject '" style="padding-left: 15px; display: block;">' skip.
+            html-encode(ivSub.name) '</span><br>' SKIP
+                '<div id="' lc-subobject '" style="padding-left: 15px; display: block;">' SKIP.
                 
-            else {&out} 
+            ELSE {&out} 
                 '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
                         lc-subobject '~')">'
                 '&nbsp;'
                 '<span style="' ivSub.Style '">'
-                html-encode(ivSub.name) '</span><br>' skip
-                '<div id="' lc-subobject '" style="padding-left: 15px; display: none;">' skip.
+                html-encode(ivSub.name) '</span><br>' SKIP
+                '<div id="' lc-subobject '" style="padding-left: 15px; display: none;">' SKIP.
         END.
        
          
@@ -1103,13 +1108,13 @@ PROCEDURE ip-Inventory :
 
         
         {&out}
-        '">' html-encode(b-query.ref) '</a><br>' skip.
+        '">' html-encode(b-query.ref) '</a><br>' SKIP.
 
         
         
         IF LAST-OF(ivSub.name) THEN
         DO:
-            {&out} '</div>' skip.
+            {&out} '</div>' SKIP.
             
              
         END.
@@ -1117,7 +1122,7 @@ PROCEDURE ip-Inventory :
 
         IF LAST-OF(ivClass.name) THEN
         DO:
-            {&out} '</div>' skip.
+            {&out} '</div>' SKIP.
             
         END.
 
@@ -1125,15 +1130,15 @@ PROCEDURE ip-Inventory :
             
     END.
 
-    {&out} '</td>' skip.
+    {&out} '</td>' SKIP.
                 
     {&out} '<td valign="top" rowspan="100" ><div id="inventory">&nbsp;</div></td>'.
-    {&out} '</tr>' skip.
+    {&out} '</tr>' SKIP.
 
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
 END PROCEDURE.
 
@@ -1149,7 +1154,7 @@ PROCEDURE ip-MainEntry :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
     
     DEFINE BUFFER bcust FOR customer.
 
@@ -1163,7 +1168,7 @@ PROCEDURE ip-MainEntry :
         '<TD VALIGN="TOP" ALIGN="left">'
         format-Select-Account(htmlib-Select("accountnumber",lc-list-number,lc-list-name,
             lc-accountnumber) )
-        '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
     END.
     ELSE
     DO:
@@ -1177,7 +1182,7 @@ PROCEDURE ip-MainEntry :
             ,'left')
                     
 
-        '</tr>' skip.
+        '</tr>' SKIP.
         FIND company WHERE company.companycode = lc-global-company
             NO-LOCK NO-ERROR.
         IF company.issueinfo <> "" THEN
@@ -1186,11 +1191,37 @@ PROCEDURE ip-MainEntry :
             '<div class="infobox">'
             REPLACE(html-encode(company.issueinfo),'~n','<br>')
             '</div>'
-            '</td></tr>' skip.
+            '</td></tr>' SKIP.
 
         END.
 
     END.
+          
+    IF com-CustomerHasSites(lc-global-company,lc-accountNumber) THEN
+    DO:
+  
+        RUN com-GetCustomerSites (lc-global-company,lc-accountNumber,
+                OUTPUT lc-list-site-site ,
+                OUTPUT lc-list-site-name  ).
+ 
+               
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("Site",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Site")
+            ELSE htmlib-SideLabel("Site"))
+            '</TD>'.
+    
+   
+            {&out} 
+                '<TD VALIGN="TOP" ALIGN="left">'
+                htmlib-Select("site",lc-list-site-site,lc-list-site-name,lc-site) 
+                '</TD></tr>' SKIP.
+    
+       
+    END.
+    
+    
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("raisedlogin",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Raised By")
@@ -1198,7 +1229,7 @@ PROCEDURE ip-MainEntry :
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-Select("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin)
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
 
 
     IF NOT ll-customer THEN
@@ -1222,7 +1253,7 @@ PROCEDURE ip-MainEntry :
         '<div class="infobox" style="font-size: 15px;">'
         "Ticketed Customer Balance: "
              DYNAMIC-FUNCTION("com-TimeToString",com-GetTicketBalance(lc-global-company,lc-accountnumber))
-        '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
 
 
 
@@ -1241,7 +1272,7 @@ PROCEDURE ip-MainEntry :
     RUN ip-AreaSelect.
 
     {&out}
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
 
     IF NOT ll-customer THEN
     DO:
@@ -1254,8 +1285,8 @@ PROCEDURE ip-MainEntry :
         '<TD VALIGN="TOP" ALIGN="left">'
         htmlib-InputField("date",10,lc-date) 
         htmlib-CalendarLink("date")
-        '</TD>' skip.
-        {&out} '</TR>' skip.
+        '</TD>' SKIP.
+        {&out} '</TR>' SKIP.
 
 
     
@@ -1269,14 +1300,14 @@ PROCEDURE ip-MainEntry :
 
         RUN ip-ContractSelect.
 
-        {&out} '</TD></tr> ' skip.  
+        {&out} '</TD></tr> ' SKIP.  
 
         {&out} '<tr><td valign="top" align="right">' 
         htmlib-SideLabel("Billable?")
         '</td><td valign="top" align="left">'
         REPLACE(htmlib-CheckBox("billcheck", IF ll-billing THEN TRUE ELSE FALSE),
             '>',' onClick="ChangeBilling(this);">')
-        '</td></tr>' skip.
+        '</td></tr>' SKIP.
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("iclass",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Class")
@@ -1284,7 +1315,7 @@ PROCEDURE ip-MainEntry :
         '</TD>' 
         '<TD VALIGN="TOP" ALIGN="left">'
         htmlib-Select("iclass",lc-global-iclass-Add-code,lc-global-iclass-Add-desc,lc-iclass)
-        '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
 
     END.
     
@@ -1295,18 +1326,18 @@ PROCEDURE ip-MainEntry :
     '</TD>'
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("briefdescription",50,lc-briefdescription) 
-    '</TD>' skip.
-    {&out} '</TR>' skip.
+    '</TD>' SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("longdescription",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Details")
         ELSE htmlib-SideLabel("Details"))
-    '</TD>' skip
+    '</TD>' SKIP
             '<TD VALIGN="TOP" ALIGN="left">'
             htmlib-TextArea("longdescription",lc-longdescription,10,40)
-           '</TD>' skip
-            skip.
+           '</TD>' SKIP
+            SKIP.
     
     IF lc-sla-rows <> "" AND lc-accountnumber <> "" AND NOT ll-customer THEN
     DO:
@@ -1315,11 +1346,11 @@ PROCEDURE ip-MainEntry :
             THEN htmlib-SideLabelError("SLA")
             ELSE htmlib-SideLabel("SLA"))
         '</TD>'
-        '<TD VALIGN="TOP" ALIGN="left">' skip.
+        '<TD VALIGN="TOP" ALIGN="left">' SKIP.
         RUN ip-SLATable.
         {&out}
-        '</TD>' skip.
-        {&out} '</TR>' skip.
+        '</TD>' SKIP.
+        {&out} '</TR>' SKIP.
 
     END. 
 
@@ -1336,7 +1367,7 @@ PROCEDURE ip-MainEntry :
         '<TD VALIGN="TOP" ALIGN="left">'
         htmlib-CheckBox("ticket", IF lc-ticket = 'on'
             THEN TRUE ELSE FALSE) 
-        '</TD></TR>' skip.
+        '</TD></TR>' SKIP.
     END.
 
     IF NOT ll-customer THEN
@@ -1350,7 +1381,7 @@ PROCEDURE ip-MainEntry :
         '<TD VALIGN="TOP" ALIGN="left">'
         htmlib-Select("catcode",lc-list-catcode,lc-list-cname,
             lc-catcode)
-        '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
 
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("gotomaint",lc-error-field,'|') > 0 
@@ -1360,12 +1391,12 @@ PROCEDURE ip-MainEntry :
         '<TD VALIGN="TOP" ALIGN="left">'
         htmlib-CheckBox("gotomaint", IF lc-gotomaint = 'on'
             THEN TRUE ELSE FALSE) 
-        '</TD></TR>' skip.
+        '</TD></TR>' SKIP.
     END.
 
     
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
 
@@ -1397,7 +1428,7 @@ PROCEDURE ip-NewUserHTML :
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("uadd-loginid",20,lc-uadd-loginid) 
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
         
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("uadd-name",lc-error-field,'|') > 0 
@@ -1406,7 +1437,7 @@ PROCEDURE ip-NewUserHTML :
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("uadd-name",40,lc-uadd-name) 
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("uadd-email",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Email")
@@ -1414,7 +1445,7 @@ PROCEDURE ip-NewUserHTML :
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("uadd-email",40,lc-uadd-email) 
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("uadd-phone",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Telephone")
@@ -1422,11 +1453,11 @@ PROCEDURE ip-NewUserHTML :
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("uadd-phone",40,lc-uadd-phone) 
-    '</TD></TR>' skip. 
+    '</TD></TR>' SKIP. 
     
-    {&out} skip 
+    {&out} SKIP 
         htmlib-EndTable()
-         htmlib-EndCriteria() skip.
+         htmlib-EndCriteria() SKIP.
 
 END PROCEDURE.
 
@@ -1450,7 +1481,7 @@ PROCEDURE ip-QuickFinish :
 
     {&out} htmlib-CustomerViewable(lc-global-company,lc-AccountNumber).
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
     htmlib-SideLabel("Issue Resolved?")
@@ -1458,7 +1489,7 @@ PROCEDURE ip-QuickFinish :
     REPLACE(htmlib-CheckBox("quick", IF lc-quick = 'on'
         THEN TRUE ELSE FALSE),
         '>',' onClick="Quick(this);">')
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("currentstatus",lc-error-field,'|') > 0 
@@ -1467,7 +1498,7 @@ PROCEDURE ip-QuickFinish :
     '</td>' 
     '<td valign="top" align="left">'
     htmlib-Select("currentstatus",lc-list-status,lc-list-sname,lc-currentstatus)
-    '</td></tr>' skip. 
+    '</td></tr>' SKIP. 
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("currentassign",lc-error-field,'|') > 0 
@@ -1477,35 +1508,35 @@ PROCEDURE ip-QuickFinish :
     '<td valign="top" align="left">'
     htmlib-Select("currentassign",lc-list-assign,lc-list-assname,
         lc-currentassign)
-    '</td></tr>' skip. 
+    '</td></tr>' SKIP. 
 
     {&out} '<tr><td valign="top" align="right">' 
         ( IF LOOKUP("actioncode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Action Type")
         ELSE htmlib-SideLabel("Action Type"))
-    '</td>' skip
+    '</td>' SKIP
            '<td valign="top" align="left">'
            htmlib-Select("actioncode",lc-list-actcode,lc-list-actdesc,
                 lc-actioncode)
-           '</td></tr>' skip.
+           '</td></tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("actionnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
         ELSE htmlib-SideLabel("Note"))
-    '</td>' skip
+    '</td>' SKIP
            '<td valign="top" align="left">'
            '<input type="button" class="submitbutton" onclick="copyinfo();" value="Copy Issue Details"><br>'
            htmlib-TextArea("actionnote",lc-actionnote,6,40)
-          '</td></tr>' skip
-           skip.
+          '</td></tr>' SKIP
+           SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
     htmlib-SideLabel("Customer View?")
     '</td><td valign="top" align="left">'
     htmlib-CheckBox("customerview", IF lc-customerview = 'on'
         THEN TRUE ELSE FALSE) 
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("actionstatus",lc-error-field,'|') > 0 
@@ -1515,7 +1546,7 @@ PROCEDURE ip-QuickFinish :
     htmlib-Select("actionstatus",lc-global-action-code,lc-global-action-display,lc-actionstatus)
     '</td></tr>' 
             
-        skip.
+        SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("activitytype",lc-error-field,'|') > 0 
@@ -1523,8 +1554,8 @@ PROCEDURE ip-QuickFinish :
         ELSE htmlib-SideLabel("Activity Type"))
     '</td>' 
     '<td valign="top" align="left">'
-    Format-Select-Activity(htmlib-Select("activitytype",lc-list-actid,lc-list-activtype,lc-saved-activity)) skip
-             '</td></tr>' skip. 
+    Format-Select-Activity(htmlib-Select("activitytype",lc-list-actid,lc-list-activtype,lc-saved-activity)) SKIP
+             '</td></tr>' SKIP. 
 
 
     {&out} '<tr><td valign="top" align="right">' 
@@ -1539,10 +1570,10 @@ PROCEDURE ip-QuickFinish :
     htmlib-CalendarLink("startdate")
     "&nbsp;@&nbsp;"
     htmlib-TimeSelect("starthour",lc-starthour,"startmin",lc-startmin)
-    '</td>' skip.
+    '</td>' SKIP.
     
            
-    {&out} '</tr>' skip.
+    {&out} '</tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("enddate",lc-error-field,'|') > 0 
@@ -1555,9 +1586,9 @@ PROCEDURE ip-QuickFinish :
     REPLACE(htmlib-CalendarLink("enddate"),">"," disabled>") 
     "&nbsp;@&nbsp;"
     REPLACE(htmlib-TimeSelect-By-Id("endhour",lc-endhour,"endmin",lc-endmin),">"," disabled>") 
-    '</td>' skip.
+    '</td>' SKIP.
     
-    {&out} '</tr>' skip.
+    {&out} '</tr>' SKIP.
 
 
 
@@ -1571,9 +1602,9 @@ PROCEDURE ip-QuickFinish :
     Format-Select-Duration(htmlib-InputField("hours",4,lc-hours))
     ':'
     Format-Select-Duration(htmlib-InputField("mins",2,lc-mins))
-    '</td>' skip.
+    '</td>' SKIP.
     
-    {&out} '</tr>' skip.
+    {&out} '</tr>' SKIP.
 
     {&out} '<tr><td valign="top" align="right">' 
         (IF LOOKUP("manualTime",lc-error-field,'|') > 0 
@@ -1584,7 +1615,7 @@ PROCEDURE ip-QuickFinish :
 
     {&out} '<td valign="top" align="left">'
     '<input class="inputfield" type="checkbox" onclick="javascript:manualTimeSet()" id="manualTime" name="manualTime" ' lc-manChecked ' >' 
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 
 
 
@@ -1596,19 +1627,19 @@ PROCEDURE ip-QuickFinish :
     '</td><td valign="top" align="left">'
     /*             htmlib-InputField("actdescription",40,lc-actdescription) */
     Format-Select-Desc(htmlib-ThisInputField("actdescription",40,lc-actdescription) )
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 
 
 
 
     
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     {&out}
                 
     '</fieldset>'
-    '</td></tr>' skip.
+    '</td></tr>' SKIP.
 END PROCEDURE.
 
 
@@ -1864,13 +1895,13 @@ PROCEDURE ip-SLATable :
     DEFINE VARIABLE lc-object AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
-    {&out} htmlib-Hidden("djs",lc-sla-selected) skip.
+    {&out} htmlib-Hidden("djs",lc-sla-selected) SKIP.
 
     {&out}
     htmlib-StartMntTable()
     htmlib-TableHeading(
         "Select?^left|SLA"
-        ) skip.
+        ) SKIP.
 
     IF lc-global-company = "MICAR" THEN
     DO:
@@ -1881,7 +1912,7 @@ PROCEDURE ip-SLATable :
         '</td>'
         htmlib-TableField(html-encode("None"),'left')
     
-        '</tr>' skip.
+        '</tr>' SKIP.
     END.
 
     DO li-loop = 1 TO NUM-ENTRIES(lc-sla-rows,"|"):
@@ -1899,14 +1930,14 @@ PROCEDURE ip-SLATable :
         '</td>'
         htmlib-TableField(html-encode(slahead.description),'left')
                 
-        '</tr>' skip.
+        '</tr>' SKIP.
 
     END.
     
         
-    {&out} skip 
+    {&out} SKIP 
        htmlib-EndTable()
-       skip.
+       SKIP.
 
 
 END PROCEDURE.
@@ -2331,6 +2362,7 @@ PROCEDURE process-web-request :
             lc-uadd-name        = get-value("uadd-name")
             lc-uadd-email       = get-value("uadd-email")
             lc-uadd-phone       = get-value("uadd-phone")
+            lc-site             = get-value("site")
             .
         IF lc-iclass = ""
             THEN lc-iclass = ENTRY(1,lc-global-iclass-code,"|").
@@ -2432,7 +2464,8 @@ PROCEDURE process-web-request :
                     issue.ActDescription   = lc-actDescription
                     Issue.ContractType     = lc-contract-type   
                     Issue.Billable         = lc-billable-flag = "on"
-                    issue.iclass           = lc-iclass.
+                    issue.iclass           = lc-iclass
+                    Issue.site             = lc-site.
                 IF lc-emailID <> ""
                     THEN ASSIGN issue.CreateSource = "EMAIL".
                 IF ll-customer THEN
@@ -2530,7 +2563,6 @@ PROCEDURE process-web-request :
                 END.
                 ELSE
                 DO:
-                    
                     
                     FIND Company WHERE Company.CompanyCode = lc-global-company NO-LOCK NO-ERROR.
                                        

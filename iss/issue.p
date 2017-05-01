@@ -263,6 +263,17 @@ PROCEDURE ip-BuildIssueTable:
         FIND b-user WHERE b-user.LoginID = b-query.RaisedLogin NO-LOCK NO-ERROR.
         ASSIGN 
             lc-raised = IF AVAILABLE b-user THEN b-user.name ELSE "".
+          
+        FIND CustSite WHERE CustSite.CompanyCode = b-query.CompanyCode
+                        AND CustSite.AccountNumber = b-query.AccountNumber
+                        AND CustSite.Site = b-query.Site NO-LOCK NO-ERROR.
+             
+       IF lc-raised = ""                 
+       THEN ASSIGN lc-raised =  com-SiteDescription(ROWID(CustSite), "<br>").
+       ELSE ASSIGN lc-raised =  com-SiteDescription(ROWID(CustSite),"<br>" ) + "~nRaised by " + lc-raised.                   
+            
+       ASSIGN lc-raised = REPLACE(lc-raised,"<br>","~n").     
+            
         ASSIGN 
             lc-assigned = "".
         FIND b-user WHERE b-user.LoginID = b-query.AssignTo NO-LOCK NO-ERROR.

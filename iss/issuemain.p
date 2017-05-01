@@ -20,6 +20,7 @@
     08/04/2015  phoski      Complex Project - Main work begins
     29/04/2015  phoski      Complex Project - Main info page
     14/11/2015  phoski      No adhoc issues, must be against a contract
+    01/05/2017  phoski      Customer Sites
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -106,6 +107,10 @@ DEFINE VARIABLE lc-billable-flag     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ll-isBillable        AS LOG       NO-UNDO.
 DEFINE VARIABLE lc-ContractAccount   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Enc-Key           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-site              AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-site-site    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-site-name    AS CHARACTER NO-UNDO.
+
 
 DEFINE VARIABLE ll-customer          AS LOG       NO-UNDO.
 DEFINE BUFFER this-user FOR WebUser.
@@ -148,7 +153,7 @@ FUNCTION fn-DescribeSLA RETURNS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {iss/issue.i}
 {lib/ticket.i}
 {lib/project.i}
@@ -179,22 +184,22 @@ PROCEDURE ip-ActionPage :
       Notes:       
     ------------------------------------------------------------------------------*/
     {&out}
-           skip
-           tbar-BeginID(lc-Action-TBAR,"") SKIP.
+        SKIP
+        tbar-BeginID(lc-Action-TBAR,"") SKIP.
     IF b-table.iClass <> lc-global-iclass-complex  THEN
     DO:      
         {&out} 
-           tbar-Link("add",?,
-                     'javascript:PopUpWindow('
-                          + '~'' + appurl 
-                     + '/iss/actionupdate.p?mode=add&issuerowid=' + string(ROWID(b-table))
-                          + '~'' 
-                          + ');'
-                          ,"")
-                      SKIP.
+            tbar-Link("add",?,
+            'javascript:PopUpWindow('
+            + '~'' + appurl 
+            + '/iss/actionupdate.p?mode=add&issuerowid=' + string(ROWID(b-table))
+            + '~'' 
+            + ');'
+            ,"")
+            SKIP.
     END.
     {&out}
-            tbar-BeginOptionID(lc-Action-TBAR) skip.
+        tbar-BeginOptionID(lc-Action-TBAR) SKIP.
 
     IF ll-SuperUser
         THEN {&out} tbar-Link("delete",?,"off","").
@@ -206,7 +211,7 @@ PROCEDURE ip-ActionPage :
         tbar-End().
 
     {&out}
-    '<div id="IDAction"></div>'.
+        '<div id="IDAction"></div>'.
     
 
 END PROCEDURE.
@@ -222,16 +227,16 @@ PROCEDURE ip-AreaCode :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    {&out}  skip
-            '<select name="areacode" class="inputfield">' skip.
+    {&out}  SKIP
+        '<select name="areacode" class="inputfield">' SKIP.
     {&out}
-    '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
-    IF lc-AreaCode = dynamic-function("htmlib-Null") 
+        '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
+        IF lc-AreaCode = dynamic-function("htmlib-Null") 
         THEN "selected" 
-    ELSE "" '>Select Area</option>' skip
-            '<option value="" ' if lc-AreaCode = ""
-                then "selected" else "" '>Not Applicable/Unknown</option>' skip        
-    .
+        ELSE "" '>Select Area</option>' SKIP
+        '<option value="" ' IF lc-AreaCode = ""
+        THEN "selected" ELSE "" '>Not Applicable/Unknown</option>' SKIP        
+        .
     FOR EACH webIssArea NO-LOCK
         WHERE webIssArea.CompanyCode = lc-Global-Company 
         BREAK BY webIssArea.GroupID
@@ -243,19 +248,20 @@ PROCEDURE ip-AreaCode :
                 WHERE webissagrp.companycode = webissArea.CompanyCode
                 AND webissagrp.Groupid     = webissArea.GroupID NO-LOCK NO-ERROR.
             {&out}
-            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' skip.
+                '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' SKIP.
         END.
 
         {&out}
-        '<option value="' webIssArea.AreaCode '" ' 
-        IF lc-AreaCode = webIssArea.AreaCode  
+            '<option value="' webIssArea.AreaCode '" ' 
+            IF lc-AreaCode = webIssArea.AreaCode  
             THEN "selected" 
-        ELSE "" '>' html-encode(webIssArea.Description) '</option>' skip.
+            ELSE "" '>' html-encode(webIssArea.Description) '</option>' SKIP.
 
-        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' skip.
+        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' SKIP.
     END.
 
-    {&out} '</select>'.
+    {&out} 
+        '</select>'.
 
 END PROCEDURE.
 
@@ -275,7 +281,7 @@ PROCEDURE ip-BackToIssue :
     
 
     RUN outputHeader.
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
    
     ASSIGN 
         request_method = "get".
@@ -298,19 +304,20 @@ PROCEDURE ip-BackToIssue :
                         '"'.
     
     IF lc-submitsource = "print" THEN
-        {&out} '<script language="javascript">' skip
-           'function PrintWindow(HelpPageURL) ~{' skip
-           '    PrintWinHdl = window.open(HelpPageURL,"PrintWindow","width=600,height=400,scrollbars=yes,resizable")' skip
-               '    PrintWinHdl.focus()' skip
-           '~}' skip
-           '</script>' skip.
+        {&out} '<script language="javascript">' SKIP
+            'function PrintWindow(HelpPageURL) ~{' SKIP
+            '    PrintWinHdl = window.open(HelpPageURL,"PrintWindow","width=600,height=400,scrollbars=yes,resizable")' SKIP
+            '    PrintWinHdl.focus()' SKIP
+            '~}' SKIP
+            '</script>' SKIP.
 
-    {&out} '<script language="javascript">' skip.
+    {&out} 
+        '<script language="javascript">' SKIP.
 
            
     IF lc-submitsource = "print" 
         THEN {&out} 
-    'PrintWindow("' appurl '/iss/issueview.p?autoprint=yes&rowid=' STRING(ROWID(b-table)) '")' skip.
+            'PrintWindow("' appurl '/iss/issueview.p?autoprint=yes&rowid=' STRING(ROWID(b-table)) '")' SKIP.
 
 
     IF get-value("fromcview") = "yes" THEN
@@ -321,8 +328,7 @@ PROCEDURE ip-BackToIssue :
             NO-LOCK NO-ERROR.
          
         ASSIGN 
-            lc-enc-key =
-             DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(customer))).
+            lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"customer",STRING(ROWID(customer))).
         
         ASSIGN
             lc-link-url = appurl + "/cust/custview.p?mode=view&source=menu&rowid=" + 
@@ -333,12 +339,13 @@ PROCEDURE ip-BackToIssue :
     END.
     
     
-    {&out} 'myParent = self.parent' skip
-           'NewURL = ' lc-link-url  skip
-           'myParent.location = NewURL' skip
-            '</script>' skip.
+    {&out} 
+        'myParent = self.parent' SKIP
+        'NewURL = ' lc-link-url  SKIP
+        'myParent.location = NewURL' SKIP
+        '</script>' SKIP.
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 END PROCEDURE.
 
 
@@ -354,8 +361,8 @@ PROCEDURE ip-ContractSelect :
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE lc-char AS CHARACTER NO-UNDO.
 
-    {&out}  skip
-            '<select id="selectcontract" name="selectcontract" class="inputfield"  onchange=~"javascript:ChangeContract();~">' skip.
+    {&out}  SKIP
+        '<select id="selectcontract" name="selectcontract" class="inputfield"  onchange=~"javascript:ChangeContract();~">' SKIP.
     /*
     {&out}
         '<option value="ADHOC|yes" >Ad Hoc (Billable)</option>' skip.
@@ -387,23 +394,26 @@ PROCEDURE ip-ContractSelect :
                   
 
                 {&out}
-                '<option value="' WebIssCont.ContractCode "|" STRING(WebissCont.Billable) '" ' .
+                    '<option value="' WebIssCont.ContractCode "|" STRING(WebissCont.Billable) '" ' .
 
                 IF  ENTRY(1,lc-contract-type,"|") = WebIssCont.ContractCode THEN
                 DO:   
-                    {&out}      " selected " .
+                    {&out}      
+                        " selected " .
                 END.
 
-                {&out}  '>'  html-encode(IF AVAILABLE ContractType THEN ContractType.Description + (
+                {&out}  
+                    '>'  html-encode(IF AVAILABLE ContractType THEN ContractType.Description + (
                     IF WebissCont.Billable THEN " (Billable)" ELSE "") ELSE "Unknown") 
                    
 
 
-                '</option>' skip.
+                    '</option>' SKIP.
             END.
         END.
     END.
-    {&out} '</select>'.
+    {&out} 
+        '</select>'.
 
 
 
@@ -422,19 +432,19 @@ PROCEDURE ip-Documents :
       Notes:       
     ------------------------------------------------------------------------------*/
     {&out}
-           skip
-           tbar-BeginID(lc-Doc-TBAR,"")
-           tbar-Link("add",?,'javascript:documentAdd();',"") skip
-            tbar-BeginOptionID(lc-Doc-TBAR) skip
-            tbar-Link("delete",?,"off","")
-            tbar-Link("customerview",?,"off","")
-            tbar-Link("documentview",?,"off","")
-            tbar-EndOption()
+        SKIP
+        tbar-BeginID(lc-Doc-TBAR,"")
+        tbar-Link("add",?,'javascript:documentAdd();',"") SKIP
+        tbar-BeginOptionID(lc-Doc-TBAR) SKIP
+        tbar-Link("delete",?,"off","")
+        tbar-Link("customerview",?,"off","")
+        tbar-Link("documentview",?,"off","")
+        tbar-EndOption()
             
-           tbar-End().
+        tbar-End().
 
     {&out}
-    '<div id="IDDocument"></div>'.
+        '<div id="IDDocument"></div>'.
 
 END PROCEDURE.
 
@@ -450,7 +460,7 @@ PROCEDURE ip-GanttPage:
     ------------------------------------------------------------------------------*/
     
     {&out} 
-    '<div id="gantt_here" style="width:100%; height:1800px"></div>' SKIP.
+        '<div id="gantt_here" style="width:100%; height:1800px"></div>' SKIP.
 
   
 END PROCEDURE.
@@ -501,97 +511,134 @@ PROCEDURE ip-IssueMain :
         NO-LOCK NO-ERROR.
     ASSIGN 
         lc-raised = IF AVAILABLE b-user THEN b-user.name ELSE "".
-    {&out} htmlib-StartInputTable() skip.
-
-
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Customer")
-    '</TD>' skip
-           htmlib-TableField(html-encode(lc-icustname),'left') skip
-           '<TR><TD VALIGN="TOP" ALIGN="right">' 
-           htmlib-SideLabel("Date")
-           '</TD>' skip
-           htmlib-TableField(
-               ( if b-table.IssueDate = ? then "" else string(b-table.IssueDate,'99/99/9999')) + 
-               " " + string(b-table.IssueTime,"hh:mm am")
-                   ,'left') skip
-           '</tr>'
-           '<TR><TD VALIGN="TOP" ALIGN="right">' 
-           htmlib-SideLabel("SLA")
-           '</TD>' skip
-           htmlib-TableField(
-                    replace(if lc-sla-describe = "" then "&nbsp" else lc-sla-describe,
-                        "~n","<br>")
-                   ,'left') skip
-           '</tr>'.
-
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Contract")
-    '</TD><td>' skip .
-
-    RUN ip-ContractSelect.
-
-    {&out} '</TD></tr> ' skip.  
-
-
-    {&out} '<tr><td valign="top" align="right">' 
-    htmlib-SideLabel("Billable?")
-    '</td><td valign="top" align="left">'
-    REPLACE(htmlib-CheckBox("billcheck", IF ll-isBillable THEN TRUE ELSE FALSE),
-        '>',' onClick="ChangeBilling(this);">')
-    '</td></tr>' skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} 
-    '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Raised By")
-    '</TD>' skip
-           htmlib-TableField(html-encode(lc-raised),'left') skip
-          '</tr>'
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Customer")
+        '</TD>' SKIP
+        htmlib-TableField(html-encode(lc-icustname),'left') SKIP
+        '</td><TR/>' SKIP.
+    IF com-CustomerHasSites(lc-global-company, b-table.AccountNumber) THEN
+    DO:
+  
+        RUN com-GetCustomerSites (lc-global-company, b-table.AccountNumber,
+                OUTPUT lc-list-site-site ,
+                OUTPUT lc-list-site-name  ).
+ 
+               
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("Site",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Site")
+            ELSE htmlib-SideLabel("Site"))
+            '</TD>'.
+    
+   
+            {&out} 
+                '<TD VALIGN="TOP" ALIGN="left">'
+                htmlib-Select("site",lc-list-site-site,lc-list-site-name,lc-site) 
+                '</TD></tr>' SKIP.
+    
+       
+    END.
+        
+        
+    {&out} '<tr><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Date")
+        '</TD>' SKIP
+        htmlib-TableField(
+        ( IF b-table.IssueDate = ? THEN "" ELSE STRING(b-table.IssueDate,'99/99/9999')) + 
+        " " + string(b-table.IssueTime,"hh:mm am")
+        ,'left') SKIP
+        '</tr>'
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("SLA")
+        '</TD>' SKIP
+        htmlib-TableField(
+        REPLACE(IF lc-sla-describe = "" THEN "&nbsp" ELSE lc-sla-describe,
+        "~n","<br>")
+        ,'left') SKIP
+        '</tr>'.
 
-    .
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Contract")
+        '</TD><td>' SKIP .
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    RUN ip-ContractSelect.
+
+    {&out} 
+        '</TD></tr> ' SKIP.  
+
+
+    {&out} 
+        '<tr><td valign="top" align="right">' 
+        htmlib-SideLabel("Billable?")
+        '</td><td valign="top" align="left">'
+        REPLACE(htmlib-CheckBox("billcheck", IF ll-isBillable THEN TRUE ELSE FALSE),
+        '>',' onClick="ChangeBilling(this);">')
+        '</td></tr>' SKIP.
+
+
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Raised By")
+        '</TD>' SKIP
+        htmlib-TableField(html-encode(lc-raised),'left') SKIP
+        '</tr>'
+
+        .
+
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("briefdescription",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Brief Description")
         ELSE htmlib-SideLabel("Brief Description"))
-    '</TD>'
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("briefdescription",60,lc-briefdescription) 
-    '</TD>' skip.
-    {&out} '</TR>' skip.
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("briefdescription",60,lc-briefdescription) 
+        '</TD>' SKIP.
+    {&out} 
+        '</TR>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("longdescription",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Details")
         ELSE htmlib-SideLabel("Details"))
-    '</TD>' skip
-           '<TD VALIGN="TOP" ALIGN="left">'
-           htmlib-TextArea("longdescription",lc-longdescription,5,60)
-          '</TD>' skip
-           skip.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-TextArea("longdescription",lc-longdescription,5,60)
+        '</TD>' SKIP
+        SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("areacode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Area")
         ELSE htmlib-SideLabel("Area"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">' skip.
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">' SKIP.
 
     RUN ip-AreaCode.         
-    {&out}        '</TD></TR>' skip. 
+    {&out}        
+        '</TD></TR>' SKIP. 
 
-    {&out} '<TR><TD VALIGN="BOTTOM" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="BOTTOM" ALIGN="right">' 
         (IF LOOKUP("currentstatus",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Status")
         ELSE htmlib-SideLabel("Status"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left"><div id="actionbox1">'.
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left"><div id="actionbox1">'.
     IF li-OpenActions <> 0  THEN
     DO:
-        {&out} '<div class="infobox" style="font-size: 10px;">This issue has open actions ('
-        li-openActions 
-        ') and can not be closed.</div>'
+        {&out} 
+            '<div class="infobox" style="font-size: 10px;">This issue has open actions ('
+            li-openActions 
+            ') and can not be closed.</div>'
             SKIP.
     END.
     ELSE
@@ -602,37 +649,39 @@ PROCEDURE ip-IssueMain :
              
             IF AVAILABLE webattr THEN
             DO:
-                {&out} '<div class="infobox" style="font-size: 10px;">' REPLACE(webattr.attrValue,'~n','<br/>')
-                '</div>'
-                SKIP.
+                {&out} 
+                    '<div class="infobox" style="font-size: 10px;">' REPLACE(webattr.attrValue,'~n','<br/>')
+                    '</div>'
+                    SKIP.
             END.
         END.
      
     
     {&out} htmlib-Select("currentstatus",lc-list-status,lc-list-sname,
         lc-currentstatus)
-    '</div></TD></TR>' skip. 
+        '</div></TD></TR>' SKIP. 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("statnote",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("New Status Note")
         ELSE htmlib-SideLabel("New Status Note"))
-    '</TD>' skip
-           '<TD VALIGN="TOP" ALIGN="left">'
-           htmlib-TextArea("statnote",lc-statnote,3,60)
-          '</TD>' skip
-           skip.
+        '</TD>' SKIP
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-TextArea("statnote",lc-statnote,3,60)
+        '</TD>' SKIP
+        SKIP.
 
     IF lc-list-catcode <> "" THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("catcode",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Category")
-        ELSE htmlib-SideLabel("Category"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("catcode",lc-list-catcode,lc-list-cname,
-        lc-catcode)
-    '</TD></TR>' skip. 
+            (IF LOOKUP("catcode",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Category")
+            ELSE htmlib-SideLabel("Category"))
+            '</TD>' 
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("catcode",lc-list-catcode,lc-list-cname,
+            lc-catcode)
+            '</TD></TR>' SKIP. 
     /*
     ***
     *** Complex Project 
@@ -640,52 +689,56 @@ PROCEDURE ip-IssueMain :
     */
     IF b-table.iClass = lc-global-iclass-complex THEN
     DO:
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("iclass",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Class")
             ELSE htmlib-SideLabel("Class"))
-        '<TD VALIGN="TOP" ALIGN="left">'
+            '<TD VALIGN="TOP" ALIGN="left">'
                         
-        htmlib-hidden("iclass",lc-global-iclass-complex)
-        htmlib-BeginCriteria("Complex Project")
-        htmlib-StartMntTable().
+            htmlib-hidden("iclass",lc-global-iclass-complex)
+            htmlib-BeginCriteria("Complex Project")
+            htmlib-StartMntTable().
     
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("prj-start",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Project Start")
             ELSE htmlib-SideLabel("Project Start"))
-        '</TD>'
-        '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-InputField("prj-start",10,lc-prj-start) 
-        htmlib-CalendarLink("prj-start")
-        '</TD>' SKIP
-            '</TR>' skip.
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-InputField("prj-start",10,lc-prj-start) 
+            htmlib-CalendarLink("prj-start")
+            '</TD>' SKIP
+            '</TR>' SKIP.
     
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("currentassign",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Senior Engineer")
             ELSE htmlib-SideLabel("Senior Engineer"))
-        '</TD>' 
-        '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-Select("currentassign",lc-list-proj-assign,lc-list-proj-assname,
+            '</TD>' 
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("currentassign",lc-list-proj-assign,lc-list-proj-assname,
             lc-currentassign)
-        '</TD></TR>' SKIP
+            '</TD></TR>' SKIP
             '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("prj-eng",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Project Engineer")
             ELSE htmlib-SideLabel("Project Engineer"))
             '</TD>' 
-                '<TD VALIGN="TOP" ALIGN="left">'
-                htmlib-Select("prj-eng",lc-list-proj-assign,lc-list-proj-assname,
-                lc-prj-eng)
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("prj-eng",lc-list-proj-assign,lc-list-proj-assname,
+            lc-prj-eng)
             '</TD></TR>' SKIP.
             
-        {&out} skip 
+        {&out} SKIP 
             htmlib-EndTable()
-            htmlib-EndCriteria() skip.
+            htmlib-EndCriteria() SKIP.
              
             
-        {&out} '</TD></TR>' skip. /* End row of standard */
+        {&out} 
+            '</TD></TR>' SKIP. /* End row of standard */
                
  
     END.
@@ -697,83 +750,92 @@ PROCEDURE ip-IssueMain :
     ELSE
     DO:
             
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("iclass",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Class")
             ELSE htmlib-SideLabel("Class"))
-        '</TD>' 
-        '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-Select("iclass",lc-global-iclass-add-code,lc-global-iclass-add-desc,
+            '</TD>' 
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("iclass",lc-global-iclass-add-code,lc-global-iclass-add-desc,
             lc-iclass)
-        '</TD></TR>' skip. 
+            '</TD></TR>' SKIP. 
     END.
     
     IF lc-sla-rows <> "" THEN
     DO:
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("sla",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("SLA")
             ELSE htmlib-SideLabel("SLA"))
-        '</TD>'
-        '<TD VALIGN="TOP" ALIGN="left">' skip.
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">' SKIP.
         RUN ip-SLATable.
         {&out}
-        '</TD>' skip.
-        {&out} '</TR>' skip.
+            '</TD>' SKIP.
+        {&out} 
+            '</TR>' SKIP.
 
     END.
         
     IF b-table.iClass <> lc-global-iclass-complex THEN
     DO:
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("currentassign",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Assigned To")
             ELSE htmlib-SideLabel("Assigned To"))
-        '</TD>' 
-        '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-Select("currentassign",lc-list-assign,lc-list-assname,
+            '</TD>' 
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("currentassign",lc-list-assign,lc-list-assname,
             lc-currentassign)
-        '</TD></TR>' skip. 
+            '</TD></TR>' SKIP. 
     END.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("planned",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Planned Completion")
         ELSE htmlib-SideLabel("Planned Completion"))
-    '</TD>'
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("planned",10,lc-planned) 
-    htmlib-CalendarLink("planned")
-    '</TD>' skip.
-    {&out} '</TR>' skip.
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("planned",10,lc-planned) 
+        htmlib-CalendarLink("planned")
+        '</TD>' SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
     
 
     IF com-AskTicket(lc-global-company,b-cust.AccountNumber) THEN
     DO:
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("ticket",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Ticketed Issue?")
             ELSE htmlib-SideLabel("Ticketed Issue?"))
-        '</TD>'
-        '<TD VALIGN="TOP" ALIGN="left">'
-        htmlib-CheckBox("ticket", IF lc-ticket = 'on'
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-CheckBox("ticket", IF lc-ticket = 'on'
             THEN TRUE ELSE FALSE) 
-        '</TD></TR>' skip.
+            '</TD></TR>' SKIP.
     END.
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
-    {&out} '<center>' htmlib-SubmitButton("submitform","Update Issue") 
-    '&nbsp;'
-    '<input class="submitbutton" type=button name=print value="Update & Print" onclick="SubmitThePage(~'print~')">'
-    '</center>' skip.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Update Issue") 
+        '&nbsp;'
+        '<input class="submitbutton" type=button name=print value="Update & Print" onclick="SubmitThePage(~'print~')">'
+        '</center>' SKIP.
 
 END PROCEDURE.
 
@@ -800,10 +862,10 @@ PROCEDURE ip-IssueStatusHistory :
     IF AVAILABLE b-issue THEN
     DO:
         {&out}
-        REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"')
-        htmlib-tableHeading(
+            REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"')
+            htmlib-tableHeading(
             "Date^right|Time^right|Status|By"
-            ) skip.
+            ) SKIP.
 
         FOR EACH b-IStatus NO-LOCK
             WHERE b-IStatus.CompanyCode = b-issue.CompanyCode
@@ -820,16 +882,16 @@ PROCEDURE ip-IssueStatusHistory :
                 lc-name = IF AVAILABLE b-user THEN b-user.name ELSE "".
 
             {&out} 
-            htmlib-trmouse()
-            htmlib-tableField(STRING(b-IStatus.ChangeDate,'99/99/9999'),'right')
-            htmlib-tableField(STRING(b-IStatus.ChangeTime,'hh:mm am'),'right')
-            htmlib-tableField(html-encode(lc-status),'left')
-            htmlib-tableField(html-encode(lc-name),'left')
-            '</tr>' skip.
+                htmlib-trmouse()
+                htmlib-tableField(STRING(b-IStatus.ChangeDate,'99/99/9999'),'right')
+                htmlib-tableField(STRING(b-IStatus.ChangeTime,'hh:mm am'),'right')
+                htmlib-tableField(html-encode(lc-status),'left')
+                htmlib-tableField(html-encode(lc-name),'left')
+                '</tr>' SKIP.
         END.
-        {&out} skip 
-           htmlib-EndTable()
-           skip.
+        {&out} SKIP 
+            htmlib-EndTable()
+            SKIP.
 
 
     END.
@@ -847,117 +909,119 @@ PROCEDURE ip-Javascript:
     ------------------------------------------------------------------------------*/
 
     {&out}  
-    '<script>'
-    'var NoteAjax = "' appurl '/iss/ajax/note.p?rowid=' STRING(ROWID(b-table)) '"' skip
-           'var CustomerAjax = "' appurl '/cust/custequiplist.p?expand=yes&ajaxsubwindow=yes&customer=' url-encode(lc-enc-key,"Query")  '"' skip
-           'var DocumentAjax = "' appurl '/iss/ajax/document.p?rowid=' string(rowid(b-table)) 
-                    '&toolbarid=' lc-Doc-TBAR 
-                    '"' skip
-           'var ActionAjax = "' appurl '/iss/ajax/action.p?allowdelete=' if ll-SuperUser then "yes" else "no" '&rowid=' string(rowid(b-table)) 
-                    '&toolbarid=' lc-Action-TBAR 
-                    '"' skip
-           'var NoteAddURL = "' appurl '/iss/addnote.p?rowid=' + lc-rowid '"' skip
-           'var DocumentAddURL = "' appurl '/iss/adddocument.p?rowid=' + lc-rowid '"' SKIP
-           'var ActionBox1URL = "' appurl '/iss/ajax/actionbox.p?box=1&rowid=' + lc-rowid '"' SKIP
-           'var ActionBox2URL = "' appurl '/iss/ajax/actionbox.p?box=2&rowid=' + lc-rowid '"' skip
-           'var IssueROWID = "' string(rowid(b-table)) '"' SKIP
-           'var ganttURL = "' appurl '/iss/ajax/ganttupd.p?mode=build&rowid=' + lc-rowid '"' SKIP
-           'var ganttupdURL = "' appurl '/iss/ajax/ganttupd.p?rowid=' + lc-rowid '"' SKIP
+        '<script>'
+        'var NoteAjax = "' appurl '/iss/ajax/note.p?rowid=' STRING(ROWID(b-table)) '"' SKIP
+        'var CustomerAjax = "' appurl '/cust/custequiplist.p?expand=yes&ajaxsubwindow=yes&customer=' url-encode(lc-enc-key,"Query")  '"' SKIP
+        'var DocumentAjax = "' appurl '/iss/ajax/document.p?rowid=' STRING(ROWID(b-table)) 
+        '&toolbarid=' lc-Doc-TBAR 
+        '"' SKIP
+        'var ActionAjax = "' appurl '/iss/ajax/action.p?allowdelete=' IF ll-SuperUser THEN "yes" ELSE "no" '&rowid=' STRING(ROWID(b-table)) 
+        '&toolbarid=' lc-Action-TBAR 
+        '"' SKIP
+        'var NoteAddURL = "' appurl '/iss/addnote.p?rowid=' + lc-rowid '"' SKIP
+        'var DocumentAddURL = "' appurl '/iss/adddocument.p?rowid=' + lc-rowid '"' SKIP
+        'var ActionBox1URL = "' appurl '/iss/ajax/actionbox.p?box=1&rowid=' + lc-rowid '"' SKIP
+        'var ActionBox2URL = "' appurl '/iss/ajax/actionbox.p?box=2&rowid=' + lc-rowid '"' SKIP
+        'var IssueROWID = "' STRING(ROWID(b-table)) '"' SKIP
+        'var ganttURL = "' appurl '/iss/ajax/ganttupd.p?mode=build&rowid=' + lc-rowid '"' SKIP
+        'var ganttupdURL = "' appurl '/iss/ajax/ganttupd.p?rowid=' + lc-rowid '"' SKIP
            
-       '</script>' skip.
+        '</script>' SKIP.
 
 
 
     {&out} 
-    '<script type="text/javascript" src="/scripts/js/issue/custom.js?v=1.0.0"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/tree.js?v=1.0.0"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/prototype.js?v=1.0.0"></script>' skip
+        '<script type="text/javascript" src="/scripts/js/issue/custom.js?v=1.0.0"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/tree.js?v=1.0.0"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/prototype.js?v=1.0.0"></script>' SKIP
         '<script language="JavaScript" src="/scripts/js/scriptaculous.js?v=1.0.0"></script>' SKIP
-        lc-global-jquery skip
-        '<script type="text/javascript" src="/scripts/js/tabber.js?v=1.0.0"></script>' skip
-        '<link rel="stylesheet" href="/style/tab.css" TYPE="text/css" MEDIA="screen">' skip
+        lc-global-jquery SKIP
+        '<script type="text/javascript" src="/scripts/js/tabber.js?v=1.0.0"></script>' SKIP
+        '<link rel="stylesheet" href="/style/tab.css" TYPE="text/css" MEDIA="screen">' SKIP
         '<script language="JavaScript" src="/scripts/js/standard.js?v=1.0.0"></script>' SKIP
         '<script src="/asset/gantt/codebase/dhtmlxgantt.js" type="text/javascript" charset="utf-8"></script>' SKIP
         '<link rel="stylesheet" href="/asset/gantt/codebase/dhtmlxgantt.css" type="text/css" media="screen" title="no title" charset="utf-8">' SKIP
-         DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
+        DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
 
     
-    {&out} tbar-JavaScript(lc-Doc-TBAR) skip.
-    {&out} tbar-JavaScript(lc-Action-TBAR) skip.
+    {&out} tbar-JavaScript(lc-Doc-TBAR) SKIP.
+    {&out} tbar-JavaScript(lc-Action-TBAR) SKIP.
 
 
     /* 3678 ----------------------> */ 
-    {&out}  '<script type="text/javascript" >~n'
-    'var pIP =  window.location.host; ~n'
-    'function goGMAP(pCODE, pNAME, pADD) ~{~n'
-    'var pOPEN = "http://www.google.co.uk/maps/preview?q=";' SKIP
-            'pOPEN = pOPEN + pCODE;~n' SKIP
-            'window.open(pOPEN, ~'WinName~' , ~'width=645,height=720,left=0,top=0~');~n'
-            ' ~}~n'
-            '</script>'  skip.
+    {&out}  
+        '<script type="text/javascript" >~n'
+        'var pIP =  window.location.host; ~n'
+        'function goGMAP(pCODE, pNAME, pADD) ~{~n'
+        'var pOPEN = "http://www.google.co.uk/maps/preview?q=";' SKIP
+        'pOPEN = pOPEN + pCODE;~n' SKIP
+        'window.open(pOPEN, ~'WinName~' , ~'width=645,height=720,left=0,top=0~');~n'
+        ' ~}~n'
+        '</script>'  SKIP.
     /* ----------------------- 3678 */ 
 
     /* 3677 ----------------------> */ 
-    {&out}  '<script type="text/javascript" >~n'
-    'function newRDP(rdpI, rdpU, rdpD) ~{~n'
-    'var sIP =  window.location.host; ~n'
-    'var sHTML="<div style:visibility=~'hidden~' >Connect to customer</div>";~n'
-    'var sScript="<SCRIPT DEFER>  ";~n'
-    'sScript = sScript +  "function goRDP()~{ window.open("~n'
-    'sScript = sScript +  "~'";~n'
-    'sScript = sScript + "http://";~n'
-    'sScript = sScript + sIP;~n'
-    'sScript = sScript + ":8090/TSweb.html?server=";~n'
-    'sScript = sScript + rdpI;~n'
-    'sScript = sScript + "&username=";~n'
-    'sScript = sScript + rdpU;~n'
-    'sScript = sScript + "&domain=";~n'
-    'sScript = sScript + rdpD;~n'
-    'sScript = sScript + "~'";~n'
-    'sScript = sScript + ", ~'WinName~', ~'width=655,height=420,left=0,top=0~'); ~} ";~n'
-    'sScript = sScript + " </SCRIPT" + ">";~n'
-    'ScriptDiv.innerHTML = sHTML + sScript;~n'
-    'document.getElementById(~'ScriptDiv~').style.visibility=~'hidden~';~n'
-    ' ~}~n'
-    '</script>'  skip.
+    {&out}  
+        '<script type="text/javascript" >~n'
+        'function newRDP(rdpI, rdpU, rdpD) ~{~n'
+        'var sIP =  window.location.host; ~n'
+        'var sHTML="<div style:visibility=~'hidden~' >Connect to customer</div>";~n'
+        'var sScript="<SCRIPT DEFER>  ";~n'
+        'sScript = sScript +  "function goRDP()~{ window.open("~n'
+        'sScript = sScript +  "~'";~n'
+        'sScript = sScript + "http://";~n'
+        'sScript = sScript + sIP;~n'
+        'sScript = sScript + ":8090/TSweb.html?server=";~n'
+        'sScript = sScript + rdpI;~n'
+        'sScript = sScript + "&username=";~n'
+        'sScript = sScript + rdpU;~n'
+        'sScript = sScript + "&domain=";~n'
+        'sScript = sScript + rdpD;~n'
+        'sScript = sScript + "~'";~n'
+        'sScript = sScript + ", ~'WinName~', ~'width=655,height=420,left=0,top=0~'); ~} ";~n'
+        'sScript = sScript + " </SCRIPT" + ">";~n'
+        'ScriptDiv.innerHTML = sHTML + sScript;~n'
+        'document.getElementById(~'ScriptDiv~').style.visibility=~'hidden~';~n'
+        ' ~}~n'
+        '</script>'  SKIP.
     /* ------------------------ 3677 */ 
     {&out} 
-    '<script>' skip
-        'function ConfirmDeleteAttachment(ObjectID,DocID) ~{' skip
-        '   var DocumentAjax = "' appurl '/iss/ajax/deldocument.p?docid=" + DocID' skip
-        '   if (confirm("Are you sure you want to delete this document?")) ~{' skip
-        "       ObjectID.style.display = 'none';" skip
-        "       ahah(DocumentAjax,'placeholder');" skip
-        '       var objtoolBarOption = document.getElementById("doctbtboption");' skip
-        '       objtoolBarOption.innerHTML = doctbobjRowDefault;' skip
-        '   ~}' skip
-        '~}' skip
-        '</script>' skip.
+        '<script>' SKIP
+        'function ConfirmDeleteAttachment(ObjectID,DocID) ~{' SKIP
+        '   var DocumentAjax = "' appurl '/iss/ajax/deldocument.p?docid=" + DocID' SKIP
+        '   if (confirm("Are you sure you want to delete this document?")) ~{' SKIP
+        "       ObjectID.style.display = 'none';" SKIP
+        "       ahah(DocumentAjax,'placeholder');" SKIP
+        '       var objtoolBarOption = document.getElementById("doctbtboption");' SKIP
+        '       objtoolBarOption.innerHTML = doctbobjRowDefault;' SKIP
+        '   ~}' SKIP
+        '~}' SKIP
+        '</script>' SKIP.
 
     {&out} 
-    '<script>' skip
-        'function CustomerView(ObjectID,DocID) ~{' skip
-        'var NewDocumentAjax = "' appurl '/iss/ajax/document.p?rowid=' string(rowid(b-table)) 
-                    '&toolbarid=' lc-Doc-TBAR '&toggle='
-                    '" + DocID;' skip
-        'var objtoolBarOption = document.getElementById("doctbtboption");' skip
-        'objtoolBarOption.innerHTML = doctbobjRowDefault;' skip
+        '<script>' SKIP
+        'function CustomerView(ObjectID,DocID) ~{' SKIP
+        'var NewDocumentAjax = "' appurl '/iss/ajax/document.p?rowid=' STRING(ROWID(b-table)) 
+        '&toolbarid=' lc-Doc-TBAR '&toggle='
+        '" + DocID;' SKIP
+        'var objtoolBarOption = document.getElementById("doctbtboption");' SKIP
+        'objtoolBarOption.innerHTML = doctbobjRowDefault;' SKIP
         "ahah(NewDocumentAjax,'IDDocument');"
-        '~}' skip
-        '</script>' skip.
+        '~}' SKIP
+        '</script>' SKIP.
 
     {&out} 
-    '<script>' skip
-        'function ConfirmDeleteAction(ObjectID,ActionID) ~{' skip
-        '   var DocumentAjax = "' appurl '/iss/ajax/delaction.p?actionid=" + ActionID' skip
-        '   if (confirm("Are you sure you want to delete this action?")) ~{' skip
-        "       ObjectID.style.display = 'none';" skip
-        "       ahah(DocumentAjax,'placeholder');" skip
-        '       var objtoolBarOption = document.getElementById("acttbtboption");' skip
-        '       objtoolBarOption.innerHTML = acttbobjRowDefault;' skip
-        '       actionTableBuild();' skip
-        '   ~}' skip
-        '~}' skip
+        '<script>' SKIP
+        'function ConfirmDeleteAction(ObjectID,ActionID) ~{' SKIP
+        '   var DocumentAjax = "' appurl '/iss/ajax/delaction.p?actionid=" + ActionID' SKIP
+        '   if (confirm("Are you sure you want to delete this action?")) ~{' SKIP
+        "       ObjectID.style.display = 'none';" SKIP
+        "       ahah(DocumentAjax,'placeholder');" SKIP
+        '       var objtoolBarOption = document.getElementById("acttbtboption");' SKIP
+        '       objtoolBarOption.innerHTML = acttbobjRowDefault;' SKIP
+        '       actionTableBuild();' SKIP
+        '   ~}' SKIP
+        '~}' SKIP
         '</script>'.
 END PROCEDURE.
 
@@ -968,13 +1032,13 @@ PROCEDURE ip-NotePage :
       Notes:       
     ------------------------------------------------------------------------------*/
     {&out}
-    SKIP(5)
-    tbar-Begin("")
-    tbar-Link("addnote",?,'javascript:noteAdd();',"")
-    tbar-End().
+        SKIP(5)
+        tbar-Begin("")
+        tbar-Link("addnote",?,'javascript:noteAdd();',"")
+        tbar-End().
 
     {&out}
-    '<div id="IDNoteAjax"></div>'.
+        '<div id="IDNoteAjax"></div>'.
 
 END PROCEDURE.
 
@@ -997,21 +1061,21 @@ PROCEDURE ip-SLATable :
 
 
     {&out}
-    htmlib-StartMntTable()
-    htmlib-TableHeading(
+        htmlib-StartMntTable()
+        htmlib-TableHeading(
         "Select?^left|SLA"
-        ) skip.
+        ) SKIP.
 
     IF lc-global-company = "MICAR" THEN
     DO:
         {&out}
-        htmlib-trmouse()
-        '<td>'
-        htmlib-Radio("sla", "slanone" , IF lc-sla-selected = "slanone" THEN TRUE ELSE FALSE)
-        '</td>'
-        htmlib-TableField(html-encode("None"),'left')
+            htmlib-trmouse()
+            '<td>'
+            htmlib-Radio("sla", "slanone" , IF lc-sla-selected = "slanone" THEN TRUE ELSE FALSE)
+            '</td>'
+            htmlib-TableField(html-encode("None"),'left')
 
-        '</tr>' skip.
+            '</tr>' SKIP.
     END.
 
     DO li-loop = 1 TO NUM-ENTRIES(lc-sla-rows,"|"):
@@ -1023,20 +1087,20 @@ PROCEDURE ip-SLATable :
         ASSIGN
             lc-object = "sla" + lc-rowid.
         {&out}
-        htmlib-trmouse()
-        '<td>'
-        htmlib-Radio("sla" , lc-object, IF lc-sla-selected = lc-object THEN TRUE ELSE FALSE) 
-        '</td>'
-        htmlib-TableField(html-encode(slahead.description),'left')
+            htmlib-trmouse()
+            '<td>'
+            htmlib-Radio("sla" , lc-object, IF lc-sla-selected = lc-object THEN TRUE ELSE FALSE) 
+            '</td>'
+            htmlib-TableField(html-encode(slahead.description),'left')
                 
-        '</tr>' skip.
+            '</tr>' SKIP.
 
     END.
     
         
-    {&out} skip 
-       htmlib-EndTable()
-       skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 
 
@@ -1056,12 +1120,12 @@ PROCEDURE ip-Update :
     DEFINE INPUT PARAMETER pr-rowid        AS ROWID         NO-UNDO.
     DEFINE INPUT PARAMETER pc-user         AS CHARACTER     NO-UNDO.
 
-    DEFINE VARIABLE lc-old-status     AS CHARACTER  NO-UNDO.
-    DEFINE VARIABLE lc-old-assign     AS CHARACTER  NO-UNDO.
-    DEFINE VARIABLE ll-old-ticket     AS LOG        NO-UNDO.
-    DEFINE VARIABLE lc-old-AreaCode   AS CHARACTER  NO-UNDO.
-    DEFINE VARIABLE ld-prj-start      AS DATE       NO-UNDO.
-    DEFINE VARIABLE li-prj-diff       AS INTEGER    NO-UNDO.
+    DEFINE VARIABLE lc-old-status     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-old-assign     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-old-ticket     AS LOG       NO-UNDO.
+    DEFINE VARIABLE lc-old-AreaCode   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ld-prj-start      AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-prj-diff       AS INTEGER   NO-UNDO.
     
     
 
@@ -1089,10 +1153,11 @@ PROCEDURE ip-Update :
         Issue.Ticket           = lc-ticket = "on"
         Issue.ContractType     = ENTRY(1,lc-contract-type,"|")  
         Issue.Billable         = lc-billable-flag  = "on"
-        ll-isBillable            = Issue.Billable
+        ll-isBillable          = Issue.Billable
         Issue.SearchField      = Issue.briefdescription + " " + 
                                       Issue.LongDescription
         Issue.iClass           = lc-iclass
+        Issue.site             = lc-site
         .
         
     IF Issue.iClass = lc-global-iclass-complex THEN
@@ -1113,13 +1178,13 @@ PROCEDURE ip-Update :
                 Issue.CompanyCode,
                 Issue.IssueNumber,
                 li-prj-diff 
-            ).
+                ).
             
             RUN islib-CreateNote( Issue.CompanyCode,
-                    Issue.IssueNumber,
-                    lc-global-user,
-                    "SYS.INFO",
-                    "Project Start adjusted by " + string(li-prj-diff) + " days... Schedule/Plan adjusted").
+                Issue.IssueNumber,
+                lc-global-user,
+                "SYS.INFO",
+                "Project Start adjusted by " + string(li-prj-diff) + " days... Schedule/Plan adjusted").
                     
             
         END.
@@ -1303,8 +1368,8 @@ PROCEDURE ip-Validate :
 
     DEFINE VARIABLE li-OpenActions AS INTEGER NO-UNDO.
     
-    DEFINE VARIABLE ld-date AS DATE    NO-UNDO.
-    DEFINE VARIABLE lf-dec  AS DECIMAL NO-UNDO.
+    DEFINE VARIABLE ld-date        AS DATE    NO-UNDO.
+    DEFINE VARIABLE lf-dec         AS DECIMAL NO-UNDO.
     
     IF lc-briefdescription = "" 
         THEN RUN htmlib-AddErrorMessage(
@@ -1488,24 +1553,25 @@ PROCEDURE process-web-request :
         
 
     ASSIGN 
-        lc-mode          = get-value("mode")
-        lc-rowid         = get-value("rowid")
-        lc-search        = get-value("search")
-        lc-firstrow      = get-value("firstrow")
-        lc-lastrow       = get-value("lastrow")
+        lc-mode           = get-value("mode")
+        lc-rowid          = get-value("rowid")
+        lc-search         = get-value("search")
+        lc-firstrow       = get-value("firstrow")
+        lc-lastrow        = get-value("lastrow")
         lc-accountmanager = get-value("accountmanager")
-        lc-navigation    = get-value("navigation")
-        lc-account       = get-value("account")
-        lc-status        = get-value("status")
-        lc-assign        = get-value("assign")
-        lc-area          = get-value("area")
-        lc-category      = get-value("category")
-        lc-submitsource  = get-value("submitsource")
-        lc-contract-type = get-value("contract")
-        lc-billable-flag = get-value("billcheck")
-        ll-isBillable      = NO
-        lc-iclass        = get-value("iclass")
-        lc-prj-start     = get-value("prj-start").
+        lc-navigation     = get-value("navigation")
+        lc-account        = get-value("account")
+        lc-status         = get-value("status")
+        lc-assign         = get-value("assign")
+        lc-area           = get-value("area")
+        lc-category       = get-value("category")
+        lc-submitsource   = get-value("submitsource")
+        lc-contract-type  = get-value("contract")
+        lc-billable-flag  = get-value("billcheck")
+        ll-isBillable     = NO
+        lc-iclass         = get-value("iclass")
+        lc-prj-start      = get-value("prj-start")
+        lc-site           = get-value("site").
 
     .
     IF lc-iclass = ""
@@ -1514,19 +1580,19 @@ PROCEDURE process-web-request :
 
     IF lc-mode = "" 
         THEN ASSIGN 
-            lc-mode          = get-field("savemode")
-            lc-rowid         = get-field("saverowid")
-            lc-search        = get-value("savesearch")
-            lc-firstrow      = get-value("savefirstrow")
+            lc-mode           = get-field("savemode")
+            lc-rowid          = get-field("saverowid")
+            lc-search         = get-value("savesearch")
+            lc-firstrow       = get-value("savefirstrow")
             lc-accountmanager = get-value("saveaccountmanager")
-            lc-lastrow       = get-value("savelastrow")
-            lc-navigation    = get-value("savenavigation")
-            lc-account       = get-value("saveaccount")
-            lc-status        = get-value("savestatus")
-            lc-assign        = get-value("saveassign")
-            lc-area          = get-value("savearea")
-            lc-category      = get-value("savecategory")
-            lc-contract-type = get-value("savecontract")  
+            lc-lastrow        = get-value("savelastrow")
+            lc-navigation     = get-value("savenavigation")
+            lc-account        = get-value("saveaccount")
+            lc-status         = get-value("savestatus")
+            lc-assign         = get-value("saveassign")
+            lc-area           = get-value("savearea")
+            lc-category       = get-value("savecategory")
+            lc-contract-type  = get-value("savecontract")  
             /*lc-billable-flag = get-value("savebillable") 
             */
             .
@@ -1598,8 +1664,7 @@ PROCEDURE process-web-request :
         lc-title           = lc-title + ' Issue ' + string(b-table.issuenumber) + ' - ' +
            html-encode(customer.accountNumber + " - " + customer.name)
         lc-ContractAccount = customer.accountNumber
-        lc-enc-key =
-        DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+        lc-enc-key         = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
     
     ASSIGN
         lc-sla-rows = com-CustomerAvailableSLA(lc-global-company,b-table.AccountNumber).
@@ -1622,7 +1687,8 @@ PROCEDURE process-web-request :
             lc-billable-flag    = get-value("billcheck")
             ll-isBillable       = lc-billable-flag = "on"
             lc-prj-start        = get-value("prj-start")
-            lc-iclass           = get-value("iclass").
+            lc-iclass           = get-value("iclass")
+            lc-site             = get-value("site").
           
           
         IF com-TicketOnly(lc-global-company,
@@ -1657,6 +1723,7 @@ PROCEDURE process-web-request :
             lc-billable-flag    = IF b-table.Billable THEN "on" ELSE ""
             ll-isBillable       = b-table.Billable
             lc-iclass           = b-table.iclass
+            lc-site             = b-table.site
             lc-prj-start        = STRING(b-table.prj-start,"99/99/9999")
             .
 
@@ -1680,102 +1747,102 @@ PROCEDURE process-web-request :
     RUN outputHeader.
     
     {&out}
-    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' skip 
-         '<HTML>' skip
-         '<HEAD>' skip
-         '<meta http-equiv="Cache-Control" content="No-Cache">' skip
-         '<meta http-equiv="Pragma"        content="No-Cache">' skip
-         '<meta http-equiv="Expires"       content="0">' skip
-         '<TITLE>' lc-title '</TITLE>' skip
-         DYNAMIC-FUNCTION('htmlib-StyleSheet':U) skip.
+        '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' SKIP 
+        '<HTML>' SKIP
+        '<HEAD>' SKIP
+        '<meta http-equiv="Cache-Control" content="No-Cache">' SKIP
+        '<meta http-equiv="Pragma"        content="No-Cache">' SKIP
+        '<meta http-equiv="Expires"       content="0">' SKIP
+        '<TITLE>' lc-title '</TITLE>' SKIP
+        DYNAMIC-FUNCTION('htmlib-StyleSheet':U) SKIP.
 
     RUN ip-Javascript.
     
 
     {&out}
-    '</HEAD>' skip
-        '<body class="normaltext" onUnload="ClosePage()">' skip
-        htmlib-StartForm("mainform","post", appurl + '/iss/issuemain.p') skip
-        htmlib-ProgramTitle(lc-title) skip.
+        '</HEAD>' SKIP
+        '<body class="normaltext" onUnload="ClosePage()">' SKIP
+        htmlib-StartForm("mainform","post", appurl + '/iss/issuemain.p') SKIP
+        htmlib-ProgramTitle(lc-title) SKIP.
 
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
-           htmlib-hidden ("saveaccountmanager",lc-accountmanager) SKIP
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("saveaccount", lc-account) skip
-           htmlib-Hidden ("savestatus", lc-status) skip
-           htmlib-Hidden ("saveassign", lc-assign) skip
-           htmlib-Hidden ("savearea", lc-area) skip
-           htmlib-Hidden ("savecategory", lc-category ) skip
-           htmlib-Hidden ("savecontract", lc-contract-type  ) skip
-           htmlib-Hidden ("savebillable", lc-billable-flag   ) skip
-    .
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+        htmlib-Hidden ("saverowid", lc-rowid) SKIP
+        htmlib-Hidden ("savesearch", lc-search) SKIP
+        htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+        htmlib-hidden ("saveaccountmanager",lc-accountmanager) SKIP
+        htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+        htmlib-Hidden ("saveaccount", lc-account) SKIP
+        htmlib-Hidden ("savestatus", lc-status) SKIP
+        htmlib-Hidden ("saveassign", lc-assign) SKIP
+        htmlib-Hidden ("savearea", lc-area) SKIP
+        htmlib-Hidden ("savecategory", lc-category ) SKIP
+        htmlib-Hidden ("savecontract", lc-contract-type  ) SKIP
+        htmlib-Hidden ("savebillable", lc-billable-flag   ) SKIP
+        .
 
    
     {&out}
-    '<div class="tabber">' skip.
+        '<div class="tabber">' SKIP.
 
     /*
     *** Main Issue Details
     */
     
     IF b-table.iClass = lc-global-iclass-complex THEN
-    {&out} '<div class="tabbertab" title="Project Details">' skip.
-    else
-    {&out} '<div class="tabbertab" title="Issue Details">' skip.
+        {&out} '<div class="tabbertab" title="Project Details">' SKIP.
+    ELSE
+        {&out} '<div class="tabbertab" title="Issue Details">' SKIP.
     RUN ip-IssueMain.
     {&out}
-    '</div>' skip.  
+        '</div>' SKIP.  
 
     /*
     *** Actions
     */
     {&out} 
-    '<div class="tabbertab" title="Actions & Activities">' skip.
+        '<div class="tabbertab" title="Actions & Activities">' SKIP.
     RUN ip-ActionPage.
     {&out} 
-    '</div>'.
+        '</div>'.
 
     /*
     *** Notes
     */
     {&out} 
-    '<div class="tabbertab" title="Notes">' skip.
+        '<div class="tabbertab" title="Notes">' SKIP.
     RUN ip-NotePage.
     {&out} 
-    '</div>'.
+        '</div>'.
 
     /*
     *** Attachments
     */
     {&out} 
-    '<div class="tabbertab" title="Attachments">' skip.
+        '<div class="tabbertab" title="Attachments">' SKIP.
     RUN ip-Documents.
     {&out} 
-    '</div>'.
+        '</div>'.
 
 
     /*
     *** Status Changes
     */
     {&out} 
-    '<div class="tabbertab" title="Status Changes">' skip.
+        '<div class="tabbertab" title="Status Changes">' SKIP.
     RUN ip-IssueStatusHistory ( ROWID(b-table)).
     {&out} 
-    '</div>'.
+        '</div>'.
     /*
     *** Customer Details
     */
     {&out} 
-    '<div class="tabbertab" title="Customer Details">' skip.
+        '<div class="tabbertab" title="Customer Details">' SKIP.
     {&out}
-    '<div id="IDCustomerAjax">Loading Notes</div>'.
+        '<div id="IDCustomerAjax">Loading Notes</div>'.
     {&out} 
-    '</div>'.
+        '</div>'.
     /*
     *** Complex Project Gannt
     */
@@ -1783,37 +1850,39 @@ PROCEDURE process-web-request :
     IF b-table.iClass = lc-global-iclass-complex THEN
     DO:
         {&out}
-        '<div class="tabbertab" title="Project Plan">' SKIP.
+            '<div class="tabbertab" title="Project Plan">' SKIP.
         RUN ip-GanttPage.   
         {&out} 
-        '</div>' SKIP.
+            '</div>' SKIP.
              
     END.
     
 
 
-    {&out} '</div>' skip.           /* tabber */
+    {&out} 
+        '</div>' SKIP.           /* tabber */
     
 
-    {&out} '<div id="placeholder" style="display: none;"></div>' skip.
+    {&out} 
+        '<div id="placeholder" style="display: none;"></div>' SKIP.
 
     {&out} htmlib-Hidden("submitsource","null")
-    htmlib-Hidden("fromcview",get-value("fromcview"))
-    htmlib-Hidden("contract",lc-contract-type) skip
+        htmlib-Hidden("fromcview",get-value("fromcview"))
+        htmlib-Hidden("contract",lc-contract-type) SKIP
         /*
            htmlib-Hidden("billcheck",lc-billable-flag) */
-        skip.
+        SKIP.
 
     
-    {&OUT} htmlib-EndForm() skip.
+    {&OUT} htmlib-EndForm() SKIP.
 
     {&out}
-    htmlib-CalendarScript("planned") skip.
+        htmlib-CalendarScript("planned") SKIP.
     
     IF b-table.iClass = lc-global-iclass-complex 
-        THEN {&out} htmlib-CalendarScript("prj-start") skip.
+        THEN {&out} htmlib-CalendarScript("prj-start") SKIP.
 
-    {&out} htmlib-Footer() skip.
+    {&out} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

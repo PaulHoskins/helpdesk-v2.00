@@ -9,6 +9,7 @@
     
     When        Who         What
     10/07/2006  phoski      Initial
+    01/05/2017  phoski      Site    
 ***********************************************************************/
                                           
 {lib/htmlib.i}
@@ -25,26 +26,26 @@ DEFINE OUTPUT PARAMETER pc-pdf             AS CHARACTER NO-UNDO.
 
 &ELSE
 
-DEFINE VARIABLE pc-user                    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pc-CompanyCode             AS CHARACTER NO-UNDO.
-DEFINE VARIABLE pd-lodate                    AS DATE NO-UNDO.
-DEFINE VARIABLE pd-hidate                    AS DATE  NO-UNDO.
-DEFINE VARIABLE pc-pdf                     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pc-user        AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pc-CompanyCode AS CHARACTER NO-UNDO.
+DEFINE VARIABLE pd-lodate      AS DATE      NO-UNDO.
+DEFINE VARIABLE pd-hidate      AS DATE      NO-UNDO.
+DEFINE VARIABLE pc-pdf         AS CHARACTER NO-UNDO.
 
 ASSIGN 
     pc-CompanyCode = "MICAR"
-    pd-lodate        = TODAY - 100
-    pd-hidate        = TODAY + 100.
+    pd-lodate      = TODAY - 100
+    pd-hidate      = TODAY + 100.
 
 
 &ENDIF
 
 
 
-DEFINE VARIABLE lc-html         AS CHARACTER     NO-UNDO.
-DEFINE VARIABLE lc-pdf          AS CHARACTER     NO-UNDO.
-DEFINE VARIABLE ll-ok           AS LOG      NO-UNDO.
-DEFINE VARIABLE li-ReportNumber AS INTEGER      NO-UNDO.
+DEFINE VARIABLE lc-html         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-pdf          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ll-ok           AS LOG       NO-UNDO.
+DEFINE VARIABLE li-ReportNumber AS INTEGER   NO-UNDO.
 
 
 {prince/ivdue.i}
@@ -84,13 +85,13 @@ DEFINE VARIABLE li-ReportNumber AS INTEGER      NO-UNDO.
 
 
 ASSIGN
-    pc-pdf = ?
+    pc-pdf          = ?
     li-ReportNumber = NEXT-VALUE(ReportNumber).
 ASSIGN 
     lc-html = SESSION:TEMP-DIR + caps(pc-CompanyCode) + "-ivDue-" + string(li-ReportNumber).
 
 ASSIGN 
-    lc-pdf = lc-html + ".pdf"
+    lc-pdf  = lc-html + ".pdf"
     lc-html = lc-html + ".html".
 
 OS-DELETE value(lc-pdf) no-error.
@@ -135,7 +136,7 @@ PROCEDURE ip-BuildTT :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE VARIABLE ld-date     AS DATE         NO-UNDO.
+    DEFINE VARIABLE ld-date AS DATE NO-UNDO.
 
     FOR EACH ivField NO-LOCK
         WHERE ivField.dType = "date"
@@ -170,16 +171,20 @@ PROCEDURE ip-BuildTT :
                 WHERE customer.CompanyCode = pc-CompanyCode
                 AND customer.AccountNumber = custIv.AccountNumber NO-LOCK NO-ERROR.
             IF NOT AVAILABLE customer THEN NEXT.
-
+            FIND CustSite WHERE CustSite.CompanyCode = customer.CompanyCode
+                        AND CustSite.AccountNumber = customer.AccountNumber
+                        AND CustSite.Site = custiv.Site NO-LOCK NO-ERROR.
+                        
             CREATE tt.
             ASSIGN
-                tt.CustFieldRow     = ROWID(CustField)
-                tt.ivFieldRow       = ROWID(ivField)
-                tt.ivDate           = ld-date
-                tt.AccountNumber    = customer.AccountNumber
-                tt.name             = customer.name
-                tt.Ref              = custiv.Ref
-                tt.dLabel           = ivField.dLabel
+                tt.CustFieldRow  = ROWID(CustField)
+                tt.ivFieldRow    = ROWID(ivField)
+                tt.ivDate        = ld-date
+                tt.AccountNumber = customer.AccountNumber
+                tt.name          = customer.name
+                tt.site          = com-SiteDescription(ROWID(CustSite), " ")
+                tt.Ref           = custiv.Ref
+                tt.dLabel        = ivField.dLabel
                 .
 
 
@@ -205,44 +210,46 @@ PROCEDURE ip-Print :
 
   
     {&prince}
-    '<p style="text-align: center; font-size: 14px; font-weight: 900;">Customer Inventory Due Report - '
-    'From ' STRING(pd-lodate,"99/99/9999")
-    ' To ' STRING(pd-hidate,"99/99/9999") 
+        '<p style="text-align: center; font-size: 14px; font-weight: 900;">Customer Inventory Due Report - '
+        'From ' STRING(pd-lodate,"99/99/9999")
+        ' To ' STRING(pd-hidate,"99/99/9999") 
       
-    '</div>'.
+        '</div>'.
 
 
     {&prince}
-    '<table class="landrep">'
-    '<thead>'
-    '<tr>'
-    '<th>Account</th>'
-    '<th>Name</th>'
-    '<th>Reference</th>'
-    '<th>Field</th>'
-    '<th>Renewal</th>'
+        '<table class="landrep">'
+        '<thead>'
+        '<tr>'
+        '<th>Account</th>'
+        '<th>Name</th>'
+        '<th>Site</th>'
+        '<th>Reference</th>'
+        '<th>Field</th>'
+        '<th>Renewal</th>'
                 
-    '</tr>'
-    '</thead>'
-        skip.
+        '</tr>'
+        '</thead>'
+        SKIP.
 
 
     FOR EACH tt NO-LOCK:
 
         {&prince} 
-        '<tr>'
-        '<td>' pxml-safe(tt.AccountNumber) '</td>'
-        '<td>' pxml-safe(tt.name) '</td>'
-        '<td>' pxml-safe(tt.Ref)  '</td>'
-        '<td>' pxml-safe(tt.dLabel)  '</td>'
-        '<td>' STRING(tt.ivDate,"99/99/9999") '</td>'
-        '</tr>' skip
-        .
+            '<tr>'
+            '<td>' pxml-safe(tt.AccountNumber) '</td>'
+            '<td>' pxml-safe(tt.name) '</td>'
+            '<td>' pxml-safe(tt.site) '</td>'
+            '<td>' pxml-safe(tt.Ref)  '</td>'
+            '<td>' pxml-safe(tt.dLabel)  '</td>'
+            '<td>' STRING(tt.ivDate,"99/99/9999") '</td>'
+            '</tr>' SKIP
+            .
 
     END.
 
     {&prince} 
-    '</table>'.
+        '</table>'.
 
 
 END PROCEDURE.

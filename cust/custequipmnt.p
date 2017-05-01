@@ -885,45 +885,14 @@ PROCEDURE process-web-request :
     {&out} 
         '</TR>' SKIP.
 
-    FIND FIRST CustSite 
-        WHERE CustSite.CompanyCode =  customer.CompanyCode
-        AND CustSite.AccountNumber =  Customer.AccountNumber
-        AND CustSite.Site > "" 
-        NO-LOCK NO-ERROR.
-    IF AVAILABLE CustSite THEN
+      
+    IF com-CustomerHasSites(Customer.companyCode,customer.AccountNumber) THEN
     DO:
-        ASSIGN 
-            lc-list-class = ""
-            lc-list-name  = "".
-            
-       
-        
-               
-        FOR EACH CustSite NO-LOCK
-            WHERE CustSite.CompanyCode =  customer.CompanyCode
-            AND CustSite.AccountNumber =  Customer.AccountNumber:
-            
-            
-            lc-temp = IF  CustSite.Site = "" THEN "(Main)" ELSE "(" +  CustSite.Site + ")".
-            lc-temp = lc-temp + " " + CustSite.Address1.
-            IF CustSite.Address2 <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.Address2.
-            IF CustSite.City <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.City.
-            IF CustSite.PostCode <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.PostCode.
-            
-            
-            IF CustSite.Site = ""
-                THEN  ASSIGN 
-                    lc-list-class = ""
-                    lc-list-name  = lc-temp.
-            ELSE   ASSIGN 
-                    lc-list-class = lc-list-class + "|" + CustSite.Site
-                    lc-list-name  = lc-list-name + "|" + lc-temp.
-        
-        END.
-        
+  
+        RUN com-GetCustomerSites (Customer.companyCode,customer.AccountNumber,
+                OUTPUT lc-list-class,
+                OUTPUT lc-list-name ).
+ 
                
         {&out} 
             '<TR><TD VALIGN="TOP" ALIGN="right">' 

@@ -15,6 +15,7 @@
     23/02/2016  phoski      isDecom flag  
     02/07/2016  phoski      Show ticket balance 
     27/10/2016  phoski      Dont Show inventory for sales people
+    01/05/2019  phoski      Customer Sites
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -91,7 +92,7 @@ DEFINE VARIABLE lc-inv-key       AS CHARACTER NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -124,7 +125,7 @@ PROCEDURE ip-AccountHeader :
 
 
     {&out}
-    '<div class="toolbar"> <span style="margin-left:2px;">'
+        '<div class="toolbar"> <span style="margin-left:2px;">'
         '<a href="javascript:void(0)"onclick="goGMAP(~''
         + replace(p-postcode," ","+")                  
         + '~',~''                                               
@@ -132,10 +133,10 @@ PROCEDURE ip-AccountHeader :
         + '~',~''                                               
         + replace(REPLACE(lc-tempAddress,"~n","+"),"&","")                                              
         + '~')">'
-    '<img border="0" src="/images/toolbar3/Gmap.gif" alt="View map" class="tbarimg"></a>'
-    '<a href="javascript:void(0)"onclick="goRDP()">'
-    '<img border="0" src="/images/toolbar3/winrdp.gif" alt="Connect to customer" class="tbarimg"></a>'
-    '</span></div>'
+        '<img border="0" src="/images/toolbar3/Gmap.gif" alt="View map" class="tbarimg"></a>'
+        '<a href="javascript:void(0)"onclick="goRDP()">'
+        '<img border="0" src="/images/toolbar3/winrdp.gif" alt="Connect to customer" class="tbarimg"></a>'
+        '</span></div>'
         .
 
 END PROCEDURE.
@@ -154,15 +155,15 @@ PROCEDURE ip-AccountInformation :
     DEFINE INPUT PARAMETER pc-companycode      AS CHARACTER     NO-UNDO.
     DEFINE INPUT PARAMETER pc-AccountNumber    AS CHARACTER     NO-UNDO.
     
-    DEFINE BUFFER b-query  FOR Customer.
-    DEFINE BUFFER b-webu   FOR WebUser.
+    DEFINE BUFFER b-query FOR Customer.
+    DEFINE BUFFER b-webu  FOR WebUser.
     
 
-    DEFINE VARIABLE lc-address      AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-temp         AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-cam          AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-AMan         AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-def-cont     AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE lc-address  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-temp     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-cam      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-AMan     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-def-cont AS CHARACTER NO-UNDO.
     
    
 
@@ -184,8 +185,8 @@ PROCEDURE ip-AccountInformation :
     
     ASSIGN
         lc-address = ""
-        lc-cam = ""
-        lc-AMan = "".
+        lc-cam     = ""
+        lc-AMan    = "".
         
     FIND b-webu WHERE b-webu.LoginID = b-query.AccountManager NO-LOCK NO-ERROR.
     IF AVAILABLE b-webu
@@ -204,59 +205,90 @@ PROCEDURE ip-AccountInformation :
                                                                             
     RUN ip-AccountHeader(b-query.postcode, b-query.name).                   /* 3704 */ 
 
-    {&out} skip
-           replace(htmlib-StartMntTable(),'XXwidth="100%"','width="95%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'XXwidth="100%"','width="95%" align="center"').
 
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Account^left|Name^left|Address^left|Contact|Telephone|Support Team|Account<br>Manager|Account<br>Ref|Default<br>Contract|Notes")
-            skip.
+        SKIP.
             
 
     {&out}
-    '<tr>' skip
+        '<tr>' SKIP
         htmlib-MntTableField(html-encode(b-query.AccountNumber),'left')
         htmlib-MntTableField(html-encode(b-query.name),'left').
 
     /*     if b-query.PostCode = "" then                                                                                       */
     {&out}
-    htmlib-MntTableField(REPLACE(html-encode(lc-address),"~n","<br>"),'left').
+        htmlib-MntTableField(REPLACE(html-encode(lc-address),"~n","<br>"),'left').
  
     {&out}
-    htmlib-MntTableField(html-encode(b-query.Contact),'left')
-    htmlib-MntTableField(html-encode(b-query.Telephone),'left').
+        htmlib-MntTableField(html-encode(b-query.Contact),'left')
+        htmlib-MntTableField(html-encode(b-query.Telephone),'left').
     FIND steam WHERE steam.companyCode = b-query.CompanyCode
         AND steam.st-num = b-query.st-num NO-LOCK NO-ERROR.
     {&out} htmlib-MntTableField(IF AVAILABLE steam THEN STRING(steam.st-num) + " - " + steam.descr ELSE 'None','left').
 
     {&out}
-    htmlib-MntTableField(html-encode(lc-AMan),'left')
-    htmlib-MntTableField(html-encode(b-query.accountRef),'left')
-    htmlib-MntTableField(lc-def-cont,'left').
+        htmlib-MntTableField(html-encode(lc-AMan),'left')
+        htmlib-MntTableField(html-encode(b-query.accountRef),'left')
+        htmlib-MntTableField(lc-def-cont,'left').
     
     IF b-query.notes = ""
         THEN {&out} htmlib-MntTableField("",'left').
-    else {&out} replace(htmlib-TableField(replace(html-encode(b-query.notes),"~n",'<br>'),'left'),
-                '<td','<th style="color: red;') skip.
+    ELSE {&out} REPLACE(htmlib-TableField(REPLACE(html-encode(b-query.notes),"~n",'<br>'),'left'),
+            '<td','<th style="color: red;') SKIP.
     {&out}
      
-    '</tr>' skip.
+        '</tr>' SKIP.
 
+    FOR EACH CustSite OF b-Query WHERE CustSite.Site > "" NO-LOCK:
+        ASSIGN
+            lc-address = ""
+            lc-cam     = ""
+            lc-AMan    = "".
+
+        
+        {&out} 
+            '<tr><td colspan=10><hr style="border-top: 2px solid #E4ECF0;"></td></tr>' SKIP.
+        
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.Address1).
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.Address2).
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.City).
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.County).
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.Country).
+        lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.PostCode).
+        
+        {&out}
+            '<tr>' SKIP
+            htmlib-MntTableField(html-encode("Site: " + CustSite.site),'left')
+            htmlib-MntTableField(html-encode(""),'left')
+            htmlib-MntTableField(REPLACE(html-encode(lc-address),"~n","<br>"),'left')
+            htmlib-MntTableField(html-encode(CustSite.Contact),'left')
+            htmlib-MntTableField(html-encode(custSite.Telephone),'left')
+            '<td colspan=4>&nbsp;</td>' 
+            htmlib-TableField(REPLACE(html-encode(custsite.notes),"~n",'<br>'),'left')
+            '</tr>' SKIP.
+        
+    
+    
+    END.
        
 
 
 
-    {&out} skip 
-           htmlib-EndTable()
+    {&out} SKIP 
+        htmlib-EndTable()
            
-           skip.
+        SKIP.
 
     IF  b-query.SupportTicket <> "none" THEN
         {&out}      
-    '<div class="infobox" style="xxfont-size: 15px;">'
-    "Ticketed Customer Balance: "
-    DYNAMIC-FUNCTION("com-TimeToString",com-GetTicketBalance(lc-global-company,pc-accountnumber))
-    '</div>' skip. 
+            '<div class="infobox" style="xxfont-size: 15px;">'
+            "Ticketed Customer Balance: "
+            DYNAMIC-FUNCTION("com-TimeToString",com-GetTicketBalance(lc-global-company,pc-accountnumber))
+            '</div>' SKIP. 
     
     
 END PROCEDURE.
@@ -275,8 +307,8 @@ PROCEDURE ip-AccountUsers :
     DEFINE INPUT PARAMETER pc-companycode      AS CHARACTER     NO-UNDO.
     DEFINE INPUT PARAMETER pc-AccountNumber    AS CHARACTER     NO-UNDO.
     
-    DEFINE BUFFER b-query  FOR webUser.
-    DEFINE VARIABLE lc-nopass   AS CHARACTER NO-UNDO.
+    DEFINE BUFFER b-query FOR webUser.
+    DEFINE VARIABLE lc-nopass AS CHARACTER NO-UNDO.
 
 
     IF NOT CAN-FIND(FIRST b-query
@@ -284,14 +316,14 @@ PROCEDURE ip-AccountUsers :
         AND b-query.AccountNumber = pc-AccountNumber NO-LOCK) 
         THEN RETURN.
    
-    {&out} skip
-           htmlib-StartFieldSet("Customer Users") 
-           htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartFieldSet("Customer Users") 
+        htmlib-StartMntTable().
 
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "User Name^left|Name^left|Email^left|Telephone|Mobile|Track?|Disabled?"
-        ) skip.
+        ) SKIP.
 
 
     FOR EACH b-query NO-LOCK
@@ -307,32 +339,32 @@ PROCEDURE ip-AccountUsers :
                            ELSE "".
         
         {&out}
-        '<tr>' skip
+            '<tr>' SKIP
             htmlib-MntTableField(html-encode(b-query.loginid),'left')
             htmlib-MntTableField(html-encode(b-query.name),'left')
             htmlib-MntTableField(html-encode(b-query.email),'left')
             htmlib-MntTableField(html-encode(b-query.Telephone),'left')
             htmlib-MntTableField(html-encode(b-query.Mobile),'left')
-            htmlib-MntTableField(html-encode(if b-query.CustomerTrack = true
-                                          then 'Yes' else 'No'),'left')
-            htmlib-MntTableField(html-encode((if b-query.disabled = true
-                                          then 'Yes' else 'No') + lc-nopass),'left')
+            htmlib-MntTableField(html-encode(IF b-query.CustomerTrack = TRUE
+            THEN 'Yes' ELSE 'No'),'left')
+            htmlib-MntTableField(html-encode((IF b-query.disabled = TRUE
+            THEN 'Yes' ELSE 'No') + lc-nopass),'left')
 
-        .
+            .
             
         {&out}
             
-        '</tr>' skip.
+            '</tr>' SKIP.
 
        
             
     END.
 
 
-    {&out} skip 
-           htmlib-EndTable()
-           htmlib-EndFieldSet() 
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        htmlib-EndFieldSet() 
+        SKIP.
 
 END PROCEDURE.
 
@@ -350,8 +382,8 @@ PROCEDURE ip-SetRDP-M :
     DEFINE INPUT PARAMETER p-recid AS RECID NO-UNDO.
     DEFINE OUTPUT PARAMETER p-html         AS CHARACTER INITIAL "~',~'~',~'"  NO-UNDO.
     DEFINE OUTPUT PARAMETER  p-ok          AS LOG  INITIAL FALSE NO-UNDO.
-    DEFINE VARIABLE ou                      AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ip                      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ou AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ip AS CHARACTER NO-UNDO.
 
     FIND b-custIv WHERE RECID(b-custIv) = p-recid NO-LOCK NO-ERROR.
     FIND FIRST b-ivSub OF b-custIv NO-LOCK NO-ERROR.
@@ -374,7 +406,7 @@ PROCEDURE ip-SetRDP-M :
             ip = substr(ip,INDEX(ip,".") + 1)
             ou = ou + substr(ip,1,INDEX(ip,"."))
             ip = substr(ip,INDEX(ip,".") + 1)
-            ou =  ou + TRIM(substr(ip,1,3), "~/,.;:!? ~"~ '[]()abcdefghijklmnopqrstuvwxyz").
+            ou = ou + TRIM(substr(ip,1,3), "~/,.;:!? ~"~ '[]()abcdefghijklmnopqrstuvwxyz").
         
         IF NUM-ENTRIES(ou,".") <> 4 THEN RETURN.
         ELSE 
@@ -401,7 +433,7 @@ PROCEDURE ip-SetRDP-M :
                 AND CustField.ivFieldId = ivField.ivFieldId
                 NO-LOCK NO-ERROR.
     
-            IF AVAILABLE CustField THEN ASSIGN rdpPWord  = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
+            IF AVAILABLE CustField THEN ASSIGN rdpPWord = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
                                      
             FIND FIRST ivField OF b-ivSub
                 WHERE ivField.ivFieldID = 73933 NO-LOCK NO-ERROR.
@@ -411,7 +443,7 @@ PROCEDURE ip-SetRDP-M :
                 AND CustField.ivFieldId = ivField.ivFieldId
                 NO-LOCK NO-ERROR.
     
-            IF AVAILABLE CustField THEN ASSIGN rdpDomain  = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
+            IF AVAILABLE CustField THEN ASSIGN rdpDomain = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
   
             p-html =  rdpIP + '~',~'' + rdpUser + '~',~'' + rdpDomain.
 
@@ -435,8 +467,8 @@ PROCEDURE ip-SetRDP-O :
     DEFINE INPUT PARAMETER p-recid AS RECID NO-UNDO.
     DEFINE OUTPUT PARAMETER p-html         AS CHARACTER INITIAL "~',~'~',~'"  NO-UNDO.
     DEFINE OUTPUT PARAMETER p-ok           AS LOG  INITIAL FALSE NO-UNDO.
-    DEFINE VARIABLE ou                      AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ip                      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ou AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ip AS CHARACTER NO-UNDO.
 
 
     FIND b-custIv WHERE RECID(b-custIv) = p-recid NO-LOCK NO-ERROR.
@@ -461,7 +493,7 @@ PROCEDURE ip-SetRDP-O :
             ip = substr(ip,INDEX(ip,".") + 1)
             ou = ou + substr(ip,1,INDEX(ip,"."))
             ip = substr(ip,INDEX(ip,".") + 1)
-            ou =  ou + TRIM(substr(ip,1,3), "~/,.;:!? ~"~ '[]()abcdefghijklmnopqrstuvwxyz").
+            ou = ou + TRIM(substr(ip,1,3), "~/,.;:!? ~"~ '[]()abcdefghijklmnopqrstuvwxyz").
         
         IF NUM-ENTRIES(ou,".") <> 4 THEN RETURN.
         ELSE 
@@ -488,7 +520,7 @@ PROCEDURE ip-SetRDP-O :
                 AND CustField.ivFieldId = ivField.ivFieldId
                 NO-LOCK NO-ERROR.
     
-            IF AVAILABLE CustField THEN ASSIGN rdpPWord  = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
+            IF AVAILABLE CustField THEN ASSIGN rdpPWord = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
                                      
             FIND FIRST ivField OF b-ivSub
                 WHERE ivField.ivFieldID = 45619 NO-LOCK NO-ERROR.
@@ -498,7 +530,7 @@ PROCEDURE ip-SetRDP-O :
                 AND CustField.ivFieldId = ivField.ivFieldId
                 NO-LOCK NO-ERROR.
     
-            IF AVAILABLE CustField THEN ASSIGN rdpDomain  = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
+            IF AVAILABLE CustField THEN ASSIGN rdpDomain = IF TRIM(CustField.FieldData) <> "" THEN TRIM(CustField.FieldData) ELSE " ".
   
             p-html =  rdpIP + '~',~'' + rdpUser + '~',~'' + rdpDomain.
 
@@ -584,9 +616,9 @@ PROCEDURE process-web-request :
 
    
     ASSIGN
-        lc-customer = get-value("customer")
+        lc-customer      = get-value("customer")
         lc-ajaxSubWindow = get-value("ajaxsubwindow")
-        lc-expand = get-value("expand").
+        lc-expand        = get-value("expand").
     /*
     ***
     *** 'customer' contains encrypted rowid so decode it
@@ -608,18 +640,18 @@ PROCEDURE process-web-request :
     IF lc-AjaxSubWindow <> "yes" THEN
     DO:
     
-        {&out} htmlib-Header("Customer Inventory List") skip.
+        {&out} htmlib-Header("Customer Inventory List") SKIP.
     
         {&out} 
-        '<script language="JavaScript" src="/scripts/js/tree.js"></script>' skip.
+            '<script language="JavaScript" src="/scripts/js/tree.js"></script>' SKIP.
     
-        {&out} htmlib-StartForm("mainform","post", appurl + '/cust/custequip.p' ) skip.
+        {&out} htmlib-StartForm("mainform","post", appurl + '/cust/custequip.p' ) SKIP.
         
         {&out} htmlib-ProgramTitle("Customer Inventory List - " + 
-            customer.name) skip.
+            customer.name) SKIP.
     
-        {&out} skip
-           htmlib-StartMntTable().
+        {&out} SKIP
+            htmlib-StartMntTable().
     END.
     ELSE
     DO:
@@ -630,7 +662,7 @@ PROCEDURE process-web-request :
         FIND FIRST b-query OF Customer WHERE b-query.isDecom = FALSE NO-LOCK NO-ERROR.
         IF NOT AVAILABLE b-query THEN RETURN.
         {&out}
-        REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+            REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
 
     END.
     
@@ -638,173 +670,201 @@ PROCEDURE process-web-request :
     DO:
     
         {&out}
-        htmlib-TableHeading(
+            htmlib-TableHeading(
             "Select Inventory|"
-            ) skip.
+            ) SKIP.
 
     
         {&out}
-        '<tr class="tabrow1">'
-        '<td valign="top" nowrap class="tree">' skip
-        .
-        FOR EACH b-query NO-LOCK OF Customer
-            WHERE b-query.isDecom = FALSE,
-            FIRST ivSub NO-LOCK OF b-query,
-            FIRST ivClass NO-LOCK OF ivSub
-            BREAK BY ivClass.DisplayPriority DESCENDING
-            BY ivClass.Name
-            BY ivSub.DisplayPriority DESCENDING
-            BY ivSub.name
-            BY b-query.Ref:
+            '<tr class="tabrow1">'
+            '<td valign="top" nowrap class="tree">' SKIP
+            .
+        FOR EACH CustSite OF Customer NO-LOCK:
+        
+            FIND FIRST b-query OF Customer
+                WHERE b-query.Site = CustSite.Site 
+                AND b-query.isDecom = FALSE NO-LOCK NO-ERROR.
+            IF NOT AVAILABLE b-query THEN NEXT.
+            
+            IF CustSite.Site > "" THEN
+            DO:
+                lc-temp = com-SiteDescription(ROWID(CustSite)," ").
+                     
+            
+                {&out} 
+                    '<div class="infobox">Inventory At Site: ' lc-temp
+                    '</div>' SKIP.
+                        
+            END.       
+            FOR EACH b-query NO-LOCK OF Customer
+                WHERE b-query.isDecom = FALSE
+                AND b-query.Site = CustSite.Site,
+                FIRST ivSub NO-LOCK OF b-query,
+                FIRST ivClass NO-LOCK OF ivSub
+                BREAK BY ivClass.DisplayPriority DESCENDING
+                BY ivClass.Name
+                BY ivSub.DisplayPriority DESCENDING
+                BY ivSub.name
+                BY b-query.Ref:
 
         
         
 
-            ASSIGN 
-                lc-object = "CLASS" + string(ROWID(ivClass))
-                lc-subobject = "SUB" + string(ROWID(ivSub)).
-            IF FIRST-OF(ivClass.name) THEN
-            DO:
-                IF lc-expand = "yes" 
-                    THEN {&out} '<img src="/images/general/menuopen.gif" onClick="hdexpandcontent(this, ~''
-                lc-object '~')">'
-                '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
-                '<div id="' lc-object '" style="padding-left: 15px; display: block;">' skip.
-            else {&out}
-                '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
-                        lc-object '~')">'
-                '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
-                '<div id="' lc-object '" style="padding-left: 15px; display: none;">' skip.
-            END.
+                ASSIGN 
+                    lc-object    = "CLASS" + string(ROWID(ivClass))
+                    lc-subobject = "SUB" + string(ROWID(ivSub)).
+                IF FIRST-OF(ivClass.name) THEN
+                DO:
+                    IF lc-expand = "yes" 
+                        THEN {&out} '<img src="/images/general/menuopen.gif" onClick="hdexpandcontent(this, ~''
+                            lc-object '~')">'
+                            '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
+                            '<div id="' lc-object '" style="padding-left: 15px; display: block;">' SKIP.
+                    ELSE {&out}
+                            '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
+                            lc-object '~')">'
+                            '&nbsp;' '<span style="' ivClass.Style '">' html-encode(ivClass.name) '</span><br>'
+                            '<div id="' lc-object '" style="padding-left: 15px; display: none;">' SKIP.
+                END.
 
-            IF FIRST-OF(ivSub.name) THEN
-            DO:
-                IF lc-expand = "yes"
-                    THEN {&out} 
-                '<img src="/images/general/menuopen.gif" onClick="hdexpandcontent(this, ~''
-                lc-subobject '~')">'
-                '&nbsp;'
-                '<span style="' ivSub.Style '">'
-                html-encode(ivSub.name) '</span><br>' skip
-                '<div id="' lc-subobject '" style="padding-left: 15px; display: block;">' skip.
+                IF FIRST-OF(ivSub.name) THEN
+                DO:
+                    IF lc-expand = "yes"
+                        THEN {&out} 
+                            '<img src="/images/general/menuopen.gif" onClick="hdexpandcontent(this, ~''
+                            lc-subobject '~')">'
+                            '&nbsp;'
+                            '<span style="' ivSub.Style '">'
+                            html-encode(ivSub.name) '</span><br>' SKIP
+                            '<div id="' lc-subobject '" style="padding-left: 15px; display: block;">' SKIP.
                 
-            else {&out} 
-                '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
-                        lc-subobject '~')">'
-                '&nbsp;'
-                '<span style="' ivSub.Style '">'
-                html-encode(ivSub.name) '</span><br>' skip
-                '<div id="' lc-subobject '" style="padding-left: 15px; display: none;">' skip.
-            END.
+                    ELSE {&out} 
+                            '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
+                            lc-subobject '~')">'
+                            '&nbsp;'
+                            '<span style="' ivSub.Style '">'
+                            html-encode(ivSub.name) '</span><br>' SKIP
+                            '<div id="' lc-subobject '" style="padding-left: 15px; display: none;">' SKIP.
+                END.
        
-            /* -------------------------------------------------------------------------- 3704 STARTS */ 
+                /* -------------------------------------------------------------------------- 3704 STARTS */ 
  
 
-            ll-htmltrue = FALSE.
+                ll-htmltrue = FALSE.
         
-            {&out} '<a '.
+                {&out} 
+                    '<a '.
 
-            IF b-query.ivSubID = 52 THEN
-            DO:
-                RUN ip-SetRDP-O( RECID(b-query),
-                    OUTPUT lc-htmlreturn,
-                    OUTPUT ll-htmltrue).
-            END.
-            ELSE
-                IF b-query.ivSubID = 73928 THEN
+                IF b-query.ivSubID = 52 THEN
                 DO:
-                    RUN ip-SetRDP-M( RECID(b-query),
+                    RUN ip-SetRDP-O( RECID(b-query),
                         OUTPUT lc-htmlreturn,
                         OUTPUT ll-htmltrue).
                 END.
+                ELSE
+                    IF b-query.ivSubID = 73928 THEN
+                    DO:
+                        RUN ip-SetRDP-M( RECID(b-query),
+                            OUTPUT lc-htmlreturn,
+                            OUTPUT ll-htmltrue).
+                    END.
           
-            IF ll-htmltrue THEN {&out} ' onclick="javascript:newRDP(~'' + lc-htmlreturn + '~')"  '.
+                IF ll-htmltrue THEN {&out} ' onclick="javascript:newRDP(~'' + lc-htmlreturn + '~')"  '.
           
-            ASSIGN 
-                lc-inv-key = DYNAMIC-FUNCTION("sysec-EncodeValue","Inventory",TODAY,"Inventory",STRING(ROWID(b-query))).
+                ASSIGN 
+                    lc-inv-key = DYNAMIC-FUNCTION("sysec-EncodeValue","Inventory",TODAY,"Inventory",STRING(ROWID(b-query))).
         
         
-            {&out} 'href="'
-            "javascript:ahah('" 
-            appurl "/cust/custequiptable.p?rowid=" url-encode(lc-inv-key,"Query") "&customer=" url-encode(lc-enc-key,"Query")
-            "&sec=" url-encode(lc-global-secure,"Query")
-            "','inventory');".
+                {&out} 
+                    'href="'
+                    "javascript:ahah('" 
+                    appurl "/cust/custequiptable.p?rowid=" url-encode(lc-inv-key,"Query") "&customer=" url-encode(lc-enc-key,"Query")
+                    "&sec=" url-encode(lc-global-secure,"Query")
+                    "','inventory');".
 
-            {&out}
-            '">' html-encode(b-query.ref) '</a><br>' skip.
+                {&out}
+                    '">' html-encode(b-query.ref) '</a><br>' SKIP.
 
-            IF first-RDP THEN
-            DO:
-                IF ll-htmltrue THEN
+                IF first-RDP THEN
                 DO:
-                    ASSIGN 
-                        first-RDP = FALSE.
-                    {&out} '<div id="ScriptDiv" style="visibility:hidden; position:absolute; top:-1px; left:-1px " ></div>'.
-                    {&out} '<div id="ScriptSet" style="visibility:hidden; position:absolute; top:-1px; left:-1px " > ~n'
-                    '<script defer > ~n'
-                    '<!-- hide script from old browsers ~n'
-                    '   newRDP(~'' + lc-htmlreturn + '~'); ~n'
-                    ' --> ~n'
-                    '</script></div>~n'.
+                    IF ll-htmltrue THEN
+                    DO:
+                        ASSIGN 
+                            first-RDP = FALSE.
+                        {&out} 
+                            '<div id="ScriptDiv" style="visibility:hidden; position:absolute; top:-1px; left:-1px " ></div>'.
+                        {&out} 
+                            '<div id="ScriptSet" style="visibility:hidden; position:absolute; top:-1px; left:-1px " > ~n'
+                            '<script defer > ~n'
+                            '<!-- hide script from old browsers ~n'
+                            '   newRDP(~'' + lc-htmlreturn + '~'); ~n'
+                            ' --> ~n'
+                            '</script></div>~n'.
+                    END.
                 END.
-            END.
 
 
-            /* -------------------------------------------------------------------------- 3704  end */ 
+                /* -------------------------------------------------------------------------- 3704  end */ 
 
-            IF LAST-OF(ivSub.name) THEN
-            DO:
-                {&out} '</div>' skip.
+                IF LAST-OF(ivSub.name) THEN
+                DO:
+                    {&out} 
+                        '</div>' SKIP.
             
              
-            END.
+                END.
 
 
-            IF LAST-OF(ivClass.name) THEN
-            DO:
-                {&out} '</div>' skip.
+                IF LAST-OF(ivClass.name) THEN
+                DO:
+                    {&out} 
+                        '</div>' SKIP.
             
-            END.
+                END.
 
         
             
+            END.
         END.
-
-        {&out} '</td>' skip.
+        {&out} 
+            '</td>' SKIP.
                 
-        {&out} '<td valign="top" rowspan="100" ><div id="inventory">&nbsp;</div></td>'.
-        {&out} '</tr>' skip.
+        {&out} 
+            '<td valign="top" rowspan="100" ><div id="inventory">&nbsp;</div></td>'.
+        {&out} 
+            '</tr>' SKIP.
 
 
-        {&out} skip 
-           htmlib-EndTable()
-           skip.
+        {&out} SKIP 
+            htmlib-EndTable()
+            SKIP.
     END.
     /* -------------------------------------------------------------------------- 3704 */ 
     IF  first-RDP THEN
     DO:
-        {&out} '<div id="ScriptSet" style="visibility:hidden; position:absolute; top:-1px; left:-1px " > ~n'
-        '<script defer > ~n'
-        '<!-- hide script from old browsers   ~n'
-        '   function goRDP() ~{ ~n'
-        '     alert("No connection information found"); ~n'
-        '   ~}   ~n'
-        ' --> ~n'
-        '</script></div>~n'.
+        {&out} 
+            '<div id="ScriptSet" style="visibility:hidden; position:absolute; top:-1px; left:-1px " > ~n'
+            '<script defer > ~n'
+            '<!-- hide script from old browsers   ~n'
+            '   function goRDP() ~{ ~n'
+            '     alert("No connection information found"); ~n'
+            '   ~}   ~n'
+            ' --> ~n'
+            '</script></div>~n'.
     END.    
     
     /* -------------------------------------------------------------------------- 3704 */ 
     IF lc-AjaxSubWindow <> "yes" THEN
     DO:
-        {&out} skip
-               htmlib-Hidden("customer",lc-customer) skip
-               skip.
+        {&out} SKIP
+            htmlib-Hidden("customer",lc-customer) SKIP
+            SKIP.
     
         {&out} htmlib-EndForm().
     
 
 
-        {&OUT} htmlib-Footer() skip.
+        {&OUT} htmlib-Footer() SKIP.
 
     
     END.

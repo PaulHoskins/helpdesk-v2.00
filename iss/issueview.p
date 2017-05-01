@@ -11,6 +11,7 @@
     10/04/2006  phoski      CompanyCode    
     05/07/2006  phoski      Category  
     21/03/2016  phoski      Document Link Encrypt
+    01/05/2017  phoslki     Customer Site
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -70,7 +71,7 @@ DEFINE VARIABLE lc-Doc-TBAR    AS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -97,25 +98,25 @@ PROCEDURE ip-Action :
       Notes:       
     ------------------------------------------------------------------------------*/
         
-    DEFINE BUFFER b-query      FOR issAction.
-    DEFINE BUFFER IssActivity  FOR IssActivity.
+    DEFINE BUFFER b-query     FOR issAction.
+    DEFINE BUFFER IssActivity FOR IssActivity.
     
-    DEFINE VARIABLE lc-info             AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-object           AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-tag-end          AS INTEGER NO-UNDO.
-    DEFINE VARIABLE lc-dummy-return     AS CHARACTER INITIAL "MYXXX111PPP2222"   NO-UNDO.
-    DEFINE VARIABLE li-duration         AS INTEGER NO-UNDO.
-    DEFINE VARIABLE li-total-duration   AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lc-info           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-object         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-tag-end        AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-dummy-return   AS CHARACTER INITIAL "MYXXX111PPP2222" NO-UNDO.
+    DEFINE VARIABLE li-duration       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-total-duration AS INTEGER   NO-UNDO.
 
     FIND FIRST b-query OF b-table NO-LOCK NO-ERROR.
     IF NOT AVAILABLE b-query THEN RETURN.
 
-    {&out} skip
-          replace(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Action|Currently<br>Assigned To|Date|Activity|By|Duration<br>(H:MM)^right"
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode = b-table.CompanyCode
@@ -141,10 +142,10 @@ PROCEDURE ip-Action :
             li-total-duration = li-total-duration + li-duration.
 
         {&out}
-        SKIP(1)
-        '<tr>'
-        SKIP(1)
-        htmlib-MntTableField(STRING(b-query.ActionDate,"99/99/9999")
+            SKIP(1)
+            '<tr>'
+            SKIP(1)
+            htmlib-MntTableField(STRING(b-query.ActionDate,"99/99/9999")
             + ( IF b-query.ActionStatus = "CLOSED"
             THEN " - Closed" ELSE ""),'left') SKIP(2).
 
@@ -152,8 +153,7 @@ PROCEDURE ip-Action :
         DO:
         
             ASSIGN 
-                lc-info = 
-                REPLACE(htmlib-MntTableField(html-encode(WebAction.Description),'left'),'</td>','')
+                lc-info   = REPLACE(htmlib-MntTableField(html-encode(WebAction.Description),'left'),'</td>','')
                 lc-object = "hdobj" + string(b-query.issActionID).
         
             ASSIGN 
@@ -165,29 +165,30 @@ PROCEDURE ip-Action :
                 substr(lc-info,1,li-tag-end) = "".
             
             {&out} 
-            '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-            lc-object '~')">':U skip.
+                '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+                lc-object '~')">':U SKIP.
             {&out} lc-info.
     
             {&out} htmlib-ExpandBox(lc-object,b-query.Notes).
 
-            {&out} '</td>' skip.
+            {&out} 
+                '</td>' SKIP.
         END.
         ELSE {&out}
-        htmlib-MntTableField(WebAction.Description,'left').
+                htmlib-MntTableField(WebAction.Description,'left').
         {&out}
-        htmlib-MntTableField(
+            htmlib-MntTableField(
             DYNAMIC-FUNCTION("com-UserName",b-query.AssignTo)
             ,'left')
-        htmlib-MntTableField("",'left')
-        htmlib-MntTableField("",'left')
-        htmlib-MntTableField("",'left')
-        htmlib-MntTableField(
+            htmlib-MntTableField("",'left')
+            htmlib-MntTableField("",'left')
+            htmlib-MntTableField("",'left')
+            htmlib-MntTableField(
             IF li-Duration > 0 
             THEN '<strong>' + html-encode(com-TimeToString(li-duration)) + '</strong>'
             ELSE "",'right')
             
-        '</tr>' skip.
+            '</tr>' SKIP.
 
         FOR EACH IssActivity NO-LOCK
             WHERE issActivity.CompanyCode = b-query.CompanyCode
@@ -198,22 +199,21 @@ PROCEDURE ip-Action :
             BY IssActivity.CreateTime DESCENDING:
 
             {&out}
-            SKIP(1)
-            '<tr>'
-            SKIP(1)
-            htmlib-MntTableField("",'left') 
-            htmlib-MntTableField("",'left')
-            htmlib-MntTableField("",'left')
+                SKIP(1)
+                '<tr>'
+                SKIP(1)
+                htmlib-MntTableField("",'left') 
+                htmlib-MntTableField("",'left')
+                htmlib-MntTableField("",'left')
 
-            htmlib-MntTableField(STRING(IssActivity.ActDate,'99/99/9999'),'left') skip.
+                htmlib-MntTableField(STRING(IssActivity.ActDate,'99/99/9999'),'left') SKIP.
 
 
             IF IssActivity.notes <> "" THEN
             DO:
             
                 ASSIGN 
-                    lc-info = 
-                    REPLACE(htmlib-MntTableField(html-encode(IssActivity.Description),'left'),'</td>','')
+                    lc-info   = REPLACE(htmlib-MntTableField(html-encode(IssActivity.Description),'left'),'</td>','')
                     lc-object = "hdobj" + string(IssActivity.issActivityID).
             
                 ASSIGN 
@@ -225,28 +225,29 @@ PROCEDURE ip-Action :
                     substr(lc-info,1,li-tag-end) = "".
                 
                 {&out} 
-                '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
-                lc-object '~')">':U skip.
+                    '<img class="expandboxi" src="/images/general/plus.gif" onClick="hdexpandcontent(this, ~''
+                    lc-object '~')">':U SKIP.
                 {&out} lc-info.
         
                 {&out} htmlib-ExpandBox(lc-object,IssActivity.Notes).
     
-                {&out} '</td>' skip.
+                {&out} 
+                    '</td>' SKIP.
             END.
             ELSE {&out}
-            htmlib-MntTableField(IssActivity.Description,'left').
+                    htmlib-MntTableField(IssActivity.Description,'left').
 
                 
             {&out}
-            htmlib-MntTableField(
+                htmlib-MntTableField(
                 DYNAMIC-FUNCTION("com-UserName",IssActivity.ActivityBy)
                 ,'left')
-            htmlib-MntTableField(IF IssActivity.Duration > 0 
+                htmlib-MntTableField(IF IssActivity.Duration > 0 
                 THEN html-encode(com-TimeToString(IssActivity.Duration))
                 ELSE "",'right')
             
                 
-            '</tr>' skip.
+                '</tr>' SKIP.
 
 
         END.
@@ -255,14 +256,14 @@ PROCEDURE ip-Action :
     
     IF li-total-duration <> 0 THEN
         {&out} '<tr class="tabrow1" style="font-weight: bold; border: 1px solid black;">'
-    REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=6 ")
-    htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
-        ,'right')
+            REPLACE(htmlib-MntTableField("Total Duration","right"),"<td","<td colspan=6 ")
+            htmlib-MntTableField(html-encode(com-TimeToString(li-total-duration))
+            ,'right')
                 
-    '</tr>'.
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+            '</tr>'.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 END PROCEDURE.
 
@@ -277,9 +278,9 @@ PROCEDURE ip-BuildPage :
       Parameters:  <none>
       Notes:       
     ------------------------------------------------------------------------------*/
-    DEFINE BUFFER b-cust   FOR customer.
-    DEFINE BUFFER b-user   FOR WebUser.
-    DEFINE BUFFER b-cat    FOR WebIssCat.
+    DEFINE BUFFER b-cust FOR customer.
+    DEFINE BUFFER b-user FOR WebUser.
+    DEFINE BUFFER b-cat  FOR WebIssCat.
 
     DEFINE VARIABLE lc-icustname AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-raised    AS CHARACTER NO-UNDO.
@@ -300,89 +301,106 @@ PROCEDURE ip-BuildPage :
     ASSIGN
         lc-assign = com-UserName(b-table.AssignTo).
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
     FIND b-area OF b-table NO-LOCK NO-ERROR.
     FIND b-status OF b-table NO-LOCK NO-ERROR.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Customer")
-    '</TD>' skip
-           htmlib-TableField(html-encode(lc-icustname),'left') skip
-           '<TR><TD VALIGN="TOP" ALIGN="right">' 
-           htmlib-SideLabel("Date")
-           '</TD>' skip
-           htmlib-TableField(if b-table.IssueDate = ? then "" else 
-               string(b-table.IssueDate,'99/99/9999') + " " + 
-               string(b-table.IssueTime,'hh:mm am'),'left') skip
-           '<TR><TD VALIGN="TOP" ALIGN="right">' 
-           htmlib-SideLabel("Raised By")
-           '</TD>' skip
-           htmlib-TableField(html-encode(lc-raised),'left') skip
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Customer")
+        '</TD>' SKIP
+        htmlib-TableField(html-encode(lc-icustname),'left') SKIP
+        '</TR>'
+        .
+    
+    FIND CustSite WHERE CustSite.CompanyCode = b-table.CompanyCode
+                        AND CustSite.AccountNumber = b-table.AccountNumber
+                        AND CustSite.Site = b-table.Site NO-LOCK NO-ERROR.    
+   {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Site")
+        '</TD>' SKIP
+         htmlib-TableField(com-SiteDescription(ROWID(CustSite), "<br>"),'left') SKIP
+        '</TR>' SKIP.
+                                
+   {&out} '<tr><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Date")
+        '</TD>' SKIP
+        htmlib-TableField(IF b-table.IssueDate = ? THEN "" ELSE 
+        STRING(b-table.IssueDate,'99/99/9999') + " " + 
+        string(b-table.IssueTime,'hh:mm am'),'left') SKIP
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Raised By")
+        '</TD>' SKIP
+        htmlib-TableField(html-encode(lc-raised),'left') SKIP
 
-    .
+        .
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Description")
-    '</TD>'
-    htmlib-TableField(b-table.briefdescription,"") 
-    '</TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Description")
+        '</TD>'
+        htmlib-TableField(b-table.briefdescription,"") 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Notes")
-    '</TD>'
-    htmlib-TableField(REPLACE(b-table.longdescription,'~n','<BR>'),"") 
-    '</TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Notes")
+        '</TD>'
+        htmlib-TableField(REPLACE(b-table.longdescription,'~n','<BR>'),"") 
+        '</TR>' SKIP.
 
 
     IF AVAILABLE b-area THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Area")
-    '</TD>'
-    htmlib-TableField(b-area.description,"") 
-    '</TR>' skip.
+            htmlib-SideLabel("Area")
+            '</TD>'
+            htmlib-TableField(b-area.description,"") 
+            '</TR>' SKIP.
     
     IF AVAILABLE b-status THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Status")
-    '</TD>'
-    htmlib-TableField(b-status.description,"") 
-    '</TR>' skip.
+            htmlib-SideLabel("Status")
+            '</TD>'
+            htmlib-TableField(b-status.description,"") 
+            '</TR>' SKIP.
 
     IF AVAILABLE b-cat THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Category")
-    '</TD>'
-    htmlib-TableField(b-cat.description,"") 
-    '</TR>' skip.
+            htmlib-SideLabel("Category")
+            '</TD>'
+            htmlib-TableField(b-cat.description,"") 
+            '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-    htmlib-SideLabel("Class")
-    '</TD>'
-    htmlib-TableField(b-table.iClass,"") 
-    '</TR>' skip.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Class")
+        '</TD>'
+        htmlib-TableField(b-table.iClass,"") 
+        '</TR>' SKIP.
 
     IF NOT ll-Customer THEN
     DO:
         IF lc-assign <> "" THEN
             {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        htmlib-SideLabel("Assigned To")
-        '</TD>'
-        htmlib-TableField(lc-assign,"") 
-        '</TR>' skip.
+                htmlib-SideLabel("Assigned To")
+                '</TD>'
+                htmlib-TableField(lc-assign,"") 
+                '</TR>' SKIP.
     
         
         IF b-table.PlannedCompletion <> ?  THEN
             {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        htmlib-SideLabel("Planned Completion")
-        '</TD>'
-        htmlib-TableField(STRING(b-table.PlannedCompletion,'99/99/9999'),"") 
-        '</TR>' skip.
+                htmlib-SideLabel("Planned Completion")
+                '</TD>'
+                htmlib-TableField(STRING(b-table.PlannedCompletion,'99/99/9999'),"") 
+                '</TR>' SKIP.
     
          
    
     END.
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 END PROCEDURE.
 
@@ -400,18 +418,18 @@ PROCEDURE ip-CustomerViewAction :
    
     DEFINE INPUT PARAMETER pc-user AS CHARACTER NO-UNDO.
 
-    DEFINE BUFFER b-query      FOR issAction.
-    DEFINE BUFFER IssActivity  FOR IssActivity.
-    DEFINE BUFFER webuser      FOR webuser.
-    DEFINE BUFFER customer     FOR customer.
+    DEFINE BUFFER b-query     FOR issAction.
+    DEFINE BUFFER IssActivity FOR IssActivity.
+    DEFINE BUFFER webuser     FOR webuser.
+    DEFINE BUFFER customer    FOR customer.
 
    
 
-    DEFINE VARIABLE lc-info             AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-object           AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-tag-end          AS INTEGER NO-UNDO.
-    DEFINE VARIABLE lc-dummy-return     AS CHARACTER INITIAL "MYXXX111PPP2222"   NO-UNDO.
-    DEFINE VARIABLE lc-desc             AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-info         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-object       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-tag-end      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-dummy-return AS CHARACTER INITIAL "MYXXX111PPP2222" NO-UNDO.
+    DEFINE VARIABLE lc-desc         AS CHARACTER NO-UNDO.
 
    
     FIND WebUser
@@ -432,12 +450,12 @@ PROCEDURE ip-CustomerViewAction :
         WHERE b-query.CustomerView NO-LOCK NO-ERROR.
     IF NOT AVAILABLE b-query THEN RETURN.
 
-    {&out} skip
-         replace(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Action|Currently<br>Assigned To|Date|Activity|Site Visit?|By"
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode = b-table.CompanyCode
@@ -463,23 +481,23 @@ PROCEDURE ip-CustomerViewAction :
                   replace(html-encode(b-query.notes),"~n","<br>").
         END.
         {&out}
-        SKIP(1)
-        '<tr>'
-        SKIP(1)
-        htmlib-MntTableField(STRING(b-query.ActionDate,"99/99/9999")
+            SKIP(1)
+            '<tr>'
+            SKIP(1)
+            htmlib-MntTableField(STRING(b-query.ActionDate,"99/99/9999")
             + ( IF b-query.ActionStatus = "CLOSED"
             THEN " - Closed" ELSE ""),'left') SKIP(2).
 
         {&out}
-        htmlib-MntTableField(lc-desc,'left').
+            htmlib-MntTableField(lc-desc,'left').
         {&out}
-        htmlib-MntTableField(
+            htmlib-MntTableField(
             DYNAMIC-FUNCTION("com-UserName",b-query.AssignTo)
             ,'left')
-        htmlib-MntTableField("",'left')
-        htmlib-MntTableField("",'left')
-        htmlib-MntTableField("",'left')
-        '</tr>' skip.
+            htmlib-MntTableField("",'left')
+            htmlib-MntTableField("",'left')
+            htmlib-MntTableField("",'left')
+            '</tr>' SKIP.
 
         IF customer.viewActivity THEN
             FOR EACH IssActivity NO-LOCK
@@ -492,14 +510,14 @@ PROCEDURE ip-CustomerViewAction :
                 BY IssActivity.CreateTime DESCENDING:
 
                 {&out}
-                SKIP(1)
-                '<tr>'
-                SKIP(1)
-                htmlib-MntTableField("",'left') 
-                htmlib-MntTableField("",'left')
-                htmlib-MntTableField("",'left')
+                    SKIP(1)
+                    '<tr>'
+                    SKIP(1)
+                    htmlib-MntTableField("",'left') 
+                    htmlib-MntTableField("",'left')
+                    htmlib-MntTableField("",'left')
 
-                htmlib-MntTableField(STRING(IssActivity.ActDate,'99/99/9999'),'left') skip.
+                    htmlib-MntTableField(STRING(IssActivity.ActDate,'99/99/9999'),'left') SKIP.
 
 
                 ASSIGN
@@ -513,16 +531,16 @@ PROCEDURE ip-CustomerViewAction :
                 END.
 
                 {&out}
-                htmlib-MntTableField(lc-desc,'left')
-                htmlib-MntTableField(IF IssActivity.SiteVisit THEN "Yes" ELSE "No",'left').
+                    htmlib-MntTableField(lc-desc,'left')
+                    htmlib-MntTableField(IF IssActivity.SiteVisit THEN "Yes" ELSE "No",'left').
 
 
                 {&out}
-                htmlib-MntTableField(
+                    htmlib-MntTableField(
                     DYNAMIC-FUNCTION("com-UserName",IssActivity.ActivityBy)
                     ,'left')
                
-                '</tr>' skip.
+                    '</tr>' SKIP.
 
 
             END.
@@ -530,9 +548,9 @@ PROCEDURE ip-CustomerViewAction :
     END.
 
    
-    {&out} skip 
-          htmlib-EndTable()
-          skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
 END PROCEDURE.
 
@@ -553,7 +571,7 @@ PROCEDURE ip-Document :
 
 
     DEFINE BUFFER this-user FOR WebUser.
-    DEFINE VARIABLE ll-Customer  AS LOG NO-UNDO.
+    DEFINE VARIABLE ll-Customer AS LOG NO-UNDO.
 
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
@@ -561,8 +579,8 @@ PROCEDURE ip-Document :
     ASSIGN
         ll-customer = this-user.UserClass = "CUSTOMER".
 
-    DEFINE BUFFER b-query  FOR doch.
-    DEFINE BUFFER b-table  FOR Issue.
+    DEFINE BUFFER b-query FOR doch.
+    DEFINE BUFFER b-table FOR Issue.
 
     FIND b-table WHERE ROWID(b-table) = pr-rowid NO-LOCK NO-ERROR.
 
@@ -584,18 +602,18 @@ PROCEDURE ip-Document :
             THEN RETURN.
     END.
     {&out}
-    tbar-BeginID(pc-ToolBarID,"")
-    tbar-BeginOptionID(pc-ToolBarID) 
-    tbar-Link("documentview",?,"off","")
-    tbar-EndOption()
-    tbar-End().
+        tbar-BeginID(pc-ToolBarID,"")
+        tbar-BeginOptionID(pc-ToolBarID) 
+        tbar-Link("documentview",?,"off","")
+        tbar-EndOption()
+        tbar-End().
 
-    {&out} skip
-          replace(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
+    {&out} SKIP
+        REPLACE(htmlib-StartMntTable(),'width="100%"','width="95%" align="center"').
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Time|By|Description|Type|Size (KB)^right"
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode = b-table.CompanyCode
@@ -609,31 +627,31 @@ PROCEDURE ip-Document :
             lc-doc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"Document",STRING(ROWID(b-query))).
             
         {&out}
-        SKIP(1)
-        tbar-trID(pc-ToolBarID,ROWID(b-query))
-        SKIP(1)
-        htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
-        htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
-        htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
-        htmlib-MntTableField(b-query.descr,'left')
-        htmlib-MntTableField(b-query.DocType,'left')
-        htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
-        tbar-BeginHidden(ROWID(b-query))
-        tbar-Link("documentview",ROWID(b-query),
+            SKIP(1)
+            tbar-trID(pc-ToolBarID,ROWID(b-query))
+            SKIP(1)
+            htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
+            htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
+            htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
+            htmlib-MntTableField(b-query.descr,'left')
+            htmlib-MntTableField(b-query.DocType,'left')
+            htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
+            tbar-BeginHidden(ROWID(b-query))
+            tbar-Link("documentview",ROWID(b-query),
             'javascript:OpenNewWindow('
             + '~'' + appurl 
             + '/sys/docview.' + lc(b-query.doctype) + '?docid=' + url-encode(lc-doc-key,"Query")
             + '~'' 
             + ');'
             ,"")
-        tbar-EndHidden()
-        '</tr>' skip.
+            tbar-EndHidden()
+            '</tr>' SKIP.
 
     END.
 
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
    
 
@@ -659,10 +677,10 @@ PROCEDURE ip-NoteList :
     DEFINE BUFFER b-type FOR WebNote.
     DEFINE BUFFER b-iss  FOR Issue.
 
-    DEFINE VARIABLE lc-name AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-status AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ll-showprivate AS LOG NO-UNDO.
-    DEFINE VARIABLE li-count AS INTEGER NO-UNDO.
+    DEFINE VARIABLE lc-name        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-status      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-showprivate AS LOG       NO-UNDO.
+    DEFINE VARIABLE li-count       AS INTEGER   NO-UNDO.
 
     FIND b-iss 
         WHERE b-iss.companycode = lc-global-company
@@ -686,10 +704,10 @@ PROCEDURE ip-NoteList :
             li-count = li-count + 1.
         IF li-count = 1 THEN 
             {&out}
-        htmlib-StartMntTable()
-        htmlib-TableHeading(
-            "Date^right|Time^right|Details|By"
-            ) skip.
+                htmlib-StartMntTable()
+                htmlib-TableHeading(
+                "Date^right|Time^right|Details|By"
+                ) SKIP.
 
         FIND b-type OF b-note NO-LOCK NO-ERROR.
 
@@ -704,17 +722,18 @@ PROCEDURE ip-NoteList :
         ASSIGN
             lc-name = com-UserName(b-note.LoginID).
           
-        {&out} '<tr>' skip
-               htmlib-TableField(string(b-note.CreateDate,'99/99/9999'),'right')
-               htmlib-TableField(string(b-note.CreateTime,'hh:mm am'),'right')
-               htmlib-TableField(lc-status,'left')
-               htmlib-TableField(html-encode(lc-name),'left')
-               '</tr>' skip.
+        {&out} 
+            '<tr>' SKIP
+            htmlib-TableField(STRING(b-note.CreateDate,'99/99/9999'),'right')
+            htmlib-TableField(STRING(b-note.CreateTime,'hh:mm am'),'right')
+            htmlib-TableField(lc-status,'left')
+            htmlib-TableField(html-encode(lc-name),'left')
+            '</tr>' SKIP.
     END.
     IF li-count > 0 THEN
-        {&out} skip 
-        htmlib-EndTable()
-        skip.
+        {&out} SKIP 
+            htmlib-EndTable()
+            SKIP.
 END PROCEDURE.
 
 
@@ -732,20 +751,20 @@ PROCEDURE ip-StatusList :
     DEFINE INPUT PARAMETER pc-user  AS CHARACTER NO-UNDO.
 
 
-    DEFINE BUFFER b-table FOR IssStatus.
+    DEFINE BUFFER b-table  FOR IssStatus.
     DEFINE BUFFER b-status FOR WebStatus.
-    DEFINE BUFFER b-user FOR WebUser.
+    DEFINE BUFFER b-user   FOR WebUser.
     
     
 
-    DEFINE VARIABLE lc-name AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-name   AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-status AS CHARACTER NO-UNDO.
     
     {&out}
-    htmlib-StartMntTable()
-    htmlib-TableHeading(
+        htmlib-StartMntTable()
+        htmlib-TableHeading(
         "Date^right|Time^right|Status|By"
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-table NO-LOCK
         WHERE b-table.CompanyCode = lc-global-company
@@ -763,16 +782,17 @@ PROCEDURE ip-StatusList :
         ASSIGN 
             lc-name = IF AVAILABLE b-user THEN b-user.name ELSE "".
 
-        {&out} '<tr>' skip
-                htmlib-TableField(string(b-table.ChangeDate,'99/99/9999'),'right')
-                htmlib-TableField(string(b-table.ChangeTime,'hh:mm am'),'right')
-                htmlib-TableField(html-encode(lc-status),'left')
-                htmlib-TableField(html-encode(lc-name),'left')
-                '</tr>' skip.
+        {&out} 
+            '<tr>' SKIP
+            htmlib-TableField(STRING(b-table.ChangeDate,'99/99/9999'),'right')
+            htmlib-TableField(STRING(b-table.ChangeTime,'hh:mm am'),'right')
+            htmlib-TableField(html-encode(lc-status),'left')
+            htmlib-TableField(html-encode(lc-name),'left')
+            '</tr>' SKIP.
     END.
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 END PROCEDURE.
 
 
@@ -852,7 +872,7 @@ PROCEDURE process-web-request :
 
    
     ASSIGN 
-        lc-rowid = get-value("rowid")
+        lc-rowid     = get-value("rowid")
         lc-autoprint = get-value("autoprint").
     IF lc-rowid = ""
         THEN ASSIGN lc-rowid = get-value("saverowid").
@@ -868,17 +888,18 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-          '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' skip.
+    {&out} htmlib-Header(lc-title) SKIP
+        '<script language="JavaScript" src="/scripts/js/hidedisplay.js"></script>' SKIP.
 
-    {&out} tbar-JavaScript(lc-Doc-TBAR) skip.
+    {&out} tbar-JavaScript(lc-Doc-TBAR) SKIP.
 
     {&out}
-    htmlib-StartForm("mainform","post", appurl + '/iss/issueview.p' )
-    htmlib-ProgramTitle(lc-title).
-    {&out} htmlib-Hidden ("saverowid", lc-rowid) skip.
+        htmlib-StartForm("mainform","post", appurl + '/iss/issueview.p' )
+        htmlib-ProgramTitle(lc-title).
+    {&out} htmlib-Hidden ("saverowid", lc-rowid) SKIP.
 
-    {&out} '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' skip.
+    {&out} 
+        '<a href="javascript:window.print()"><img src="/images/general/print.gif" border=0 style="padding: 5px;"></a>' SKIP.
 
     
     RUN ip-BuildPage.
@@ -894,14 +915,15 @@ PROCEDURE process-web-request :
     RUN ip-Document ( ROWID(b-table), lc-Doc-TBAR ).
 
 
-    {&OUT} htmlib-EndForm() skip 
-           htmlib-Footer() skip.
+    {&OUT} htmlib-EndForm() SKIP 
+        htmlib-Footer() SKIP.
     
     IF lc-autoprint = "yes" THEN
     DO:
-        {&out} '<script language="javascript">' skip
-               'window.print()' skip
-               '</script>' skip.
+        {&out} 
+            '<script language="javascript">' SKIP
+            'window.print()' SKIP
+            '</script>' SKIP.
 
     END.
 END PROCEDURE.

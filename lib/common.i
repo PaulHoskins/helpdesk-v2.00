@@ -39,7 +39,7 @@
     22/12/2016  phoski      Marketing constants
     09/01/2016  phoski      com-GetFilterLoad
     15/04/2017  phoski      ExcludeReports flag
-    30/04/2017  phoski      CustSite
+    30/04/2017  phoski      CustSite stuff
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -310,6 +310,10 @@ FUNCTION com-CustomerAvailableSLA RETURNS CHARACTER
     pc-AccountNumber AS CHARACTER )  FORWARD.
 
 
+FUNCTION com-CustomerHasSites RETURNS LOGICAL 
+    (pc-companycode AS CHARACTER,
+    pc-accountNumber AS CHARACTER) FORWARD.
+
 FUNCTION com-CustomerName RETURNS CHARACTER
     ( pc-Company AS CHARACTER,
     pc-Account  AS CHARACTER )  FORWARD.
@@ -483,6 +487,10 @@ FUNCTION com-RequirePasswordChange RETURNS LOGICAL
     ( pc-user AS CHARACTER )  FORWARD.
 
 
+FUNCTION Com-SiteDescription RETURNS CHARACTER 
+    (pr-rowid AS ROWID,
+     pc-delim AS CHARACTER) FORWARD.
+
 FUNCTION com-SLADescription RETURNS CHARACTER
     ( pf-SLAID AS DECIMAL )  FORWARD.
 
@@ -630,7 +638,7 @@ PROCEDURE com-GenTabSelect :
     FOR EACH b-GenTab NO-LOCK 
         WHERE b-GenTab.CompanyCode = pc-CompanyCode
         AND b-GenTab.gType = pc-gType
-        BY b-gentab.IsActive DESC
+        BY b-gentab.IsActive DESCENDING
         BY b-Gentab.gCode
         :
         
@@ -1198,6 +1206,39 @@ PROCEDURE com-GetCustomerAccountActiveOnly:
 END PROCEDURE.
 
 
+
+PROCEDURE com-GetCustomerSites:
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+    DEFINE INPUT  PARAMETER pc-CompanyCode AS CHARACTER NO-UNDO.
+    DEFINE INPUT  PARAMETER pc-AccountNumber AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-Site        AS CHARACTER NO-UNDO.
+    DEFINE OUTPUT PARAMETER pc-Name        AS CHARACTER NO-UNDO.
+   
+    DEFINE VARIABLE lc-temp AS CHARACTER NO-UNDO.
+
+    DEFINE BUFFER CustSite FOR CustSite.
+    
+     
+    FOR EACH CustSite NO-LOCK
+        WHERE CustSite.CompanyCode =  pc-CompanyCode
+        AND CustSite.AccountNumber =  pc-AccountNumber:
+            
+        lc-temp = com-SiteDescription(ROWID(CustSite), " ").
+            
+        IF CustSite.Site = ""
+            THEN  ASSIGN 
+                pc-site = ""
+                pc-name = lc-temp.
+        ELSE   ASSIGN 
+                pc-site = pc-site + "|" + CustSite.Site
+                pc-name = pc-name + "|" + lc-temp.
+        
+    END.
+        
+END PROCEDURE.
 
 PROCEDURE com-GetEngineerList:
     /*------------------------------------------------------------------------------
@@ -2286,25 +2327,25 @@ FUNCTION com-CanDelete RETURNS LOGICAL
                     THEN RETURN FALSE.
                 RETURN TRUE.
             END.
-         WHEN "site" THEN
-         DO:
+        WHEN "site" THEN
+            DO:
                 FIND custsite WHERE ROWID(custsite) = pr-rowid NO-LOCK NO-ERROR.
                 IF NOT AVAILABLE custsite THEN RETURN FALSE.
                 FOR FIRST Issue NO-LOCK
                     WHERE Issue.CompanyCode = custsite.companycode
-                      AND Issue.AccountNumber = CustSite.AccountNumber
-                      AND Issue.Site = CustSite.Site:
+                    AND Issue.AccountNumber = CustSite.AccountNumber
+                    AND Issue.Site = CustSite.Site:
                     RETURN FALSE.
                 END.
                 FOR FIRST CustIV NO-LOCK
                     WHERE CustIV.CompanyCode = custsite.companycode
-                      AND CustIV.AccountNumber = CustSite.AccountNumber
-                      AND CustIV.Site = CustSite.Site:
+                    AND CustIV.AccountNumber = CustSite.AccountNumber
+                    AND CustIV.Site = CustSite.Site:
                     RETURN FALSE.
                 END.
                 RETURN TRUE.
                 
-         END.
+            END.
         OTHERWISE
         DO:
             MESSAGE "com-CanDelete invalid table for " pc-table.
@@ -2516,6 +2557,27 @@ FUNCTION com-CustomerAvailableSLA RETURNS CHARACTER
 END FUNCTION.
 
 
+FUNCTION com-CustomerHasSites RETURNS LOGICAL 
+    ( pc-companycode AS CHARACTER,
+    pc-accountNumber AS CHARACTER ):
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/	
+    
+    DEFINE BUFFER CustSite FOR CustSite.
+    
+    FIND FIRST CustSite 
+        WHERE CustSite.CompanyCode =  pc-CompanyCode
+        AND CustSite.AccountNumber =  pc-AccountNumber
+        AND CustSite.Site > "" 
+        NO-LOCK NO-ERROR.
+   
+    RETURN AVAILABLE CustSite.     
+
+		
+END FUNCTION.
+
 FUNCTION com-CustomerName RETURNS CHARACTER
     ( pc-Company AS CHARACTER,
     pc-Account  AS CHARACTER ) :
@@ -2672,7 +2734,7 @@ FUNCTION com-FilterLoad RETURNS CHARACTER
         AND uFilter.ProgName = pc-ProgName
         AND uFilter.FilterCode = pc-code 
         NO-LOCK NO-ERROR.
-    RETURN IF AVAIL uFilter THEN uFilter.FilterValue ELSE ?.
+    RETURN IF AVAILABLE uFilter THEN uFilter.FilterValue ELSE ?.
     
 		
 END FUNCTION.
@@ -3599,6 +3661,37 @@ FUNCTION com-RequirePasswordChange RETURNS LOGICAL
 
 END FUNCTION.
 
+
+FUNCTION Com-SiteDescription RETURNS CHARACTER 
+    ( pr-rowid AS ROWID,
+      pc-delim AS CHARACTER ):
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/	
+
+    DEFINE BUFFER CustSite FOR CustSite.
+    DEFINE VARIABLE lc-temp AS CHARACTER NO-UNDO.
+        
+    FIND CustSite WHERE ROWID(CustSite) = pr-rowid NO-LOCK.
+    
+    IF TRIM(pc-delim) = "" THEN pc-delim = " ".
+        
+    lc-temp = IF  CustSite.Site = "" THEN "(Main)" ELSE "(" +  CustSite.Site + ")".
+    lc-temp = lc-temp + pc-delim + CustSite.Address1.
+    IF CustSite.Address2 <> ""
+        THEN lc-temp = lc-temp + pc-delim + CustSite.Address2.
+    IF CustSite.City <> ""
+        THEN lc-temp = lc-temp + pc-delim + CustSite.City.
+    IF CustSite.PostCode <> ""
+        THEN lc-temp = lc-temp + pc-delim + CustSite.PostCode.
+        
+		
+    RETURN lc-temp.
+
+
+		
+END FUNCTION.
 
 FUNCTION com-SLADescription RETURNS CHARACTER
     ( pf-SLAID AS DECIMAL ) :

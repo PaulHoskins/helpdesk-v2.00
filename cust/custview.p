@@ -89,7 +89,7 @@ DEFINE VARIABLE rdpDomain         AS CHARACTER NO-UNDO.              /* 3677 & 3
 DEFINE VARIABLE first-RDP         AS LOG       INITIAL TRUE NO-UNDO. /* 3677 & 3678 */
 
 DEFINE VARIABLE ll-Customer       AS LOG       INITIAL FALSE NO-UNDO.
-DEFINE VARIABLE ll-hasSite        AS LOG       INITIAL FALSE NO-UNDO.
+
 
 
 DEFINE VARIABLE lc-inv-key        AS CHARACTER NO-UNDO.
@@ -566,14 +566,9 @@ PROCEDURE ip-CustomerMainInfo :
             lc-cam     = ""
             lc-AMan    = "".
 
-        IF ll-hasSite = FALSE THEN
-        DO:
-            ASSIGN 
-                ll-hasSite = TRUE.
-            
-        END.
+       
         {&out} 
-            '<tr><td colspan=10><hr></td></tr>' SKIP.
+            '<tr><td colspan=10><hr style="border-top: 2px solid #E4ECF0;"></td></tr>' SKIP.
         
         lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.Address1).
         lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,custsite.Address2).
@@ -1080,16 +1075,8 @@ PROCEDURE ip-Inventory :
             
         IF CustSite.Site > "" THEN
         DO:
-            lc-temp = IF  CustSite.Site = "" THEN "(Main)" ELSE "(" +  CustSite.Site + ")".
-             
-            lc-temp = lc-temp + " " + CustSite.Address1.
-            IF CustSite.Address2 <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.Address2.
-            IF CustSite.City <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.City.
-            IF CustSite.PostCode <> ""
-                THEN lc-temp = lc-temp + " " + CustSite.PostCode.
-            
+            lc-temp = com-SiteDescription(ROWID(CustSite)," ").
+                     
             
             {&out} 
               '<div class="infobox">Inventory At Site: ' lc-temp

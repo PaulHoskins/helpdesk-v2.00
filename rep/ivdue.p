@@ -56,7 +56,7 @@ DEFINE VARIABLE lc-pdf         AS CHARACTER NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 
 
@@ -128,10 +128,10 @@ PROCEDURE ip-Validate :
 
     
         
-    DEFINE VARIABLE ld-lodate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE ld-hidate   AS DATE     NO-UNDO.
-    DEFINE VARIABLE li-loop     AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-rowid    AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE ld-lodate AS DATE      NO-UNDO.
+    DEFINE VARIABLE ld-hidate AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
     
     ASSIGN
@@ -266,40 +266,41 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-           htmlib-StartForm("mainform","post", selfurl )
-           htmlib-ProgramTitle("Customer Inventory Renewals") skip.
+    {&out} htmlib-Header(lc-title) SKIP
+        htmlib-StartForm("mainform","post", selfurl )
+        htmlib-ProgramTitle("Customer Inventory Renewals") SKIP.
 
 
     
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
    
-    {&out} '<TR>' skip
-            '<TD VALIGN="TOP" ALIGN="right">' 
-            (if lookup("lodate",lc-error-field,'|') > 0 
-            then htmlib-SideLabelError("From Date")
-            else htmlib-SideLabel("From Date"))
-            '</TD>'
-            '<TD VALIGN="TOP" ALIGN="left">'
-            htmlib-InputField("lodate",10,lc-lodate) 
-            htmlib-CalendarLink("lodate")
-            '</td>' skip
-            '<td>&nbsp;</td>'
-            '<TD VALIGN="TOP" ALIGN="right">' 
-            (if lookup("hidate",lc-error-field,'|') > 0 
-            then htmlib-SideLabelError("To Date")
-            else htmlib-SideLabel("To Date"))
-            '</TD>'
-            '<TD VALIGN="TOP" ALIGN="left">'
-            htmlib-InputField("hidate",10,lc-hidate) 
-            htmlib-CalendarLink("hidate")
-            '</td>' skip
+    {&out} 
+        '<TR>' SKIP
+        '<TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("lodate",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("From Date")
+        ELSE htmlib-SideLabel("From Date"))
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("lodate",10,lc-lodate) 
+        htmlib-CalendarLink("lodate")
+        '</td>' SKIP
+        '<td>&nbsp;</td>'
+        '<TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("To Date")
+        ELSE htmlib-SideLabel("To Date"))
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("hidate",10,lc-hidate) 
+        htmlib-CalendarLink("hidate")
+        '</td>' SKIP
             
             
-            '</tr>' skip.
+        '</tr>' SKIP.
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     
     IF request_method = "post" AND lc-error-msg = "" THEN
@@ -309,28 +310,31 @@ PROCEDURE process-web-request :
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
     
-    {&out} '<center>' htmlib-SubmitButton("submitform","Report") 
-    '</center>' skip.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Report") 
+        '</center>' SKIP.
     
-    {&out} htmlib-EndForm() skip
-          htmlib-CalendarScript("lodate") skip
-          htmlib-CalendarScript("hidate") skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-CalendarScript("lodate") SKIP
+        htmlib-CalendarScript("hidate") SKIP.
 
 
     IF lc-pdf <> "" THEN
     DO:
-        {&out} '<script>' skip
+        {&out} 
+            '<script>' SKIP
             "OpenNewWindow('"
-                    appurl "/rep/viewpdf3.p?PDF=" 
-                    url-encode(lc-pdf,"query") "')" skip
-            '</script>' skip.
+            appurl "/rep/viewpdf3.p?PDF=" 
+            url-encode(lc-pdf,"query") "')" SKIP
+            '</script>' SKIP.
     END.
    
-    {&out} htmlib-Footer() skip.
+    {&out} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

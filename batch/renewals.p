@@ -11,6 +11,7 @@
     03/09/2010  DJS         Initial build
     10/12/2014  phoski      Tidy up from above hacker
     13/03/2016  phoski      Ignore decommission inventory
+    01/05/2017  phoski      Site
 
 ***********************************************************************/
 
@@ -88,7 +89,7 @@ DEFINE VARIABLE cdate               AS CHARACTER FORMAT "x(16)" NO-UNDO.
 DEFINE VARIABLE ddate               AS DATE      FORMAT "99/99/9999" INITIAL 01/01/1999 NO-UNDO.
 DEFINE VARIABLE li-new-iss          AS INTEGER FORMAT '>>>>>>>>>>>'       NO-UNDO.
 DEFINE VARIABLE lc-new-iss          AS CHARACTER FORMAT 'x(13)' NO-UNDO.
-
+DEFINE VARIABLE lc-site             AS CHARACTER NO-UNDO.
 
 DEFINE STREAM srep .
 
@@ -223,7 +224,8 @@ FOR EACH customer NO-LOCK
                         lc-htmldesc,
                         STRING(CustIv.CustIvID),
                         STRING(CustIv.ivSubID),
-                        STRING(ROWID(CustIv)) + "-" + trim(ivField.dLabel) + " " + string(ddate)
+                        STRING(ROWID(CustIv)) + "-" + trim(ivField.dLabel) + " " + string(ddate),
+                        CustIv.site
                         ).
                     
                         
@@ -538,6 +540,7 @@ PROCEDURE ip-GenerateIssue :
     DEFINE INPUT PARAMETER pc-custivid             AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER pc-subivid              AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER pc-RenRef               AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER pc-site                 AS CHARACTER NO-UNDO.
     
 
     ASSIGN 
@@ -566,7 +569,8 @@ PROCEDURE ip-GenerateIssue :
         lc-actdescription   = "Investigate"
         lc-currentstatus    = "NEW"
         lc-custivid         = pc-custivid   
-        lc-subivid          = pc-subivid  .
+        lc-subivid          = pc-subivid 
+        lc-site             = pc-site .
         
 
     FIND FIRST issue 
@@ -633,6 +637,8 @@ PROCEDURE ip-Initialise :
         issue.CreateSource     = "RENEWAL"
         issue.BatchID          = pc-RenRef
         issue.iClass           = "Issue"
+        Issue.site             = lc-site
+        
         .
 
    

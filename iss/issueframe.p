@@ -157,13 +157,13 @@ PROCEDURE process-web-request :
         "<TITLE>Issue Maintenance</TITLE>":U SKIP
         "</HEAD>":U SKIP.
  
-    {&out} '<frameset rows="*" frameborder="no" border="0" framespacing="0">' skip
-           '<frame name="inputframe" scrolling="YES" src="' appurl '/iss/issuemain.p' lc-param '">' skip
-           '</frameset>' skip.
+    {&out} '<frameset rows="*" frameborder="no" border="0" framespacing="0">' SKIP
+           '<frame name="inputframe" scrolling="YES" src="' appurl '/iss/issuemain.p' lc-param '">' SKIP
+           '</frameset>' SKIP.
     
    
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
