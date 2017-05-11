@@ -1229,13 +1229,8 @@ PROCEDURE ip-MainEntry :
         ELSE htmlib-SideLabel("Raised By"))
     '</TD>' 
     '<TD VALIGN="TOP" ALIGN="left">'.
-    /*
-    htmlib-Select("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin)
-    */
-    {&out-long}   
-             htmlib-SelectLong("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin) SKIP.
-    {&out} 
-    '</TD></TR>' SKIP. 
+    {&out-long} htmlib-SelectLong("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin) SKIP.
+    {&out} '</TD></TR>' SKIP. 
 
 
     IF NOT ll-customer THEN

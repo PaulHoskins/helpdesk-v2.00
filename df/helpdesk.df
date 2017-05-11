@@ -1946,6 +1946,14 @@ ADD FIELD "Site" OF "CustSite" AS character
   MAX-WIDTH 16
   ORDER 25
 
+ADD FIELD "Name" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 14
+  MAX-WIDTH 80
+  ORDER 130
+
 ADD INDEX "prim" ON "CustSite" 
   AREA "Schema Area"
   UNIQUE
@@ -7360,4 +7368,4 @@ ADD INDEX "prim-key" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000145873
+0000146013

@@ -11,6 +11,7 @@
     22/04/2006  phoski      Initial
     23/10/2015  phoski      create and update audits
     18/06/2015  phoski      Show 'Decomissioned' info in details
+    11/05/2017  phoski      Show Site info
     
     
 ***********************************************************************/
@@ -65,13 +66,6 @@ DEFINE BUFFER this-user FOR WebUser.
 
 {src/web2/wrap-cgi.i}
 {lib/htmlib.i}
-
-
-
- 
-
-
-
 
 /* ************************  Main Code Block  *********************** */
 
@@ -235,21 +229,32 @@ PROCEDURE process-web-request :
         RETURN.
     END.
         
-    {&out} skip
+    {&out} SKIP
            htmlib-StartFieldSet(  "Inventory Details For " + 
                                 custIv.Ref).
     IF CustIv.isDecom
     THEN  {&out} '<div class="infobox">Decommissioned</div>'.
     
+    
+    IF CustIv.Site <> "" THEN
+    DO:
+        FOR FIRST CustSite OF CustIv NO-LOCK:
+            {&out} '<br /><b>' SKIP
+                'Site: ' com-SiteDescription(ROWID(CustSite)," ") '</b>' SKIP.
+        END.
+    END.
+    
+
     {&out} SKIP
                               
            htmlib-StartMntTable().
    
+     
 
     {&out}
     htmlib-TableHeading(
         "^right|Details^left|Notes^left"
-        ) skip.
+        ) SKIP.
 
     FIND ivSub OF CustIv NO-LOCK NO-ERROR.
 
@@ -275,13 +280,13 @@ PROCEDURE process-web-request :
                        ELSE "".
         IF lc-value = ?
             THEN ASSIGN lc-value = "".
-        {&out} htmlib-MntTableField(REPLACE(html-encode(lc-value),"~n","<br>"),'left') skip.
-        {&out} htmlib-MntTableField(html-encode(ivField.dPrompt),'left') skip.
+        {&out} htmlib-MntTableField(REPLACE(html-encode(lc-value),"~n","<br>"),'left') SKIP.
+        {&out} htmlib-MntTableField(html-encode(ivField.dPrompt),'left') SKIP.
 
-        {&out} '</tr>' skip.
+        {&out} '</tr>' SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable().
     
     IF com-IsCustomer(this-user.CompanyCode,this-user.LoginID) = FALSE 
@@ -294,7 +299,7 @@ PROCEDURE process-web-request :
         {&out}
             htmlib-TableHeading(
                 "|Date^left|By^left"
-             ) skip.
+             ) SKIP.
             
          IF CustIv.crt-by <> "" 
          THEN
@@ -302,7 +307,7 @@ PROCEDURE process-web-request :
                     htmlib-MntTableField("Created",'left')    
                    htmlib-MntTableField(STRING(CustIv.crt-datetime,"99/99/9999 hh:mm"),'left')
                    htmlib-MntTableField(DYNAMIC-FUNCTION("com-UserName",custiv.crt-by),'left')  
-                   '</tr>' skip.   
+                   '</tr>' SKIP.   
           
          /*DO li-loop = 1 TO EXTENT(CustIv.upd-by):
           */
@@ -314,11 +319,11 @@ PROCEDURE process-web-request :
                    htmlib-MntTableField("Updated",'left')    
                    htmlib-MntTableField(STRING(CustIv.upd-datetime[li-loop],"99/99/9999 hh:mm"),'left')
                    htmlib-MntTableField(DYNAMIC-FUNCTION("com-UserName",custiv.upd-by[li-loop]),'left')  
-                   '</tr>' skip.   
+                   '</tr>' SKIP.   
                    
          END.
                      
-         {&out} skip 
+         {&out} SKIP 
            htmlib-EndTable().
     
           
@@ -328,7 +333,7 @@ PROCEDURE process-web-request :
            
     {&out}       
            htmlib-EndFieldSet() 
-           skip.
+           SKIP.
 
 END PROCEDURE.
 
