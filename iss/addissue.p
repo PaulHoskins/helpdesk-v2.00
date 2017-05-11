@@ -39,6 +39,7 @@
     02/07/2016  phoski      com-GetTicketBalance for ticket balance
     01/08/2016  phoski      CRM
     01/05/2017  phoski      Customer Sites
+    11/05/2017  phoski      Longchar Raised By
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -1227,8 +1228,13 @@ PROCEDURE ip-MainEntry :
         THEN htmlib-SideLabelError("Raised By")
         ELSE htmlib-SideLabel("Raised By"))
     '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
+    '<TD VALIGN="TOP" ALIGN="left">'.
+    /*
     htmlib-Select("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin)
+    */
+    {&out-long}   
+             htmlib-SelectLong("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin) SKIP.
+    {&out} 
     '</TD></TR>' SKIP. 
 
 
