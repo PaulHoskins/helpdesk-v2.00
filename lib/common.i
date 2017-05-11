@@ -3678,6 +3678,8 @@ FUNCTION Com-SiteDescription RETURNS CHARACTER
     IF TRIM(pc-delim) = "" THEN pc-delim = " ".
         
     lc-temp = IF  CustSite.Site = "" THEN "(Main)" ELSE "(" +  CustSite.Site + ")".
+     lc-temp = lc-temp + pc-delim + CustSite.name.
+     /*
     lc-temp = lc-temp + pc-delim + CustSite.Address1.
     IF CustSite.Address2 <> ""
         THEN lc-temp = lc-temp + pc-delim + CustSite.Address2.
@@ -3686,7 +3688,7 @@ FUNCTION Com-SiteDescription RETURNS CHARACTER
     IF CustSite.PostCode <> ""
         THEN lc-temp = lc-temp + pc-delim + CustSite.PostCode.
         
-		
+    */		
     RETURN lc-temp.
 
 

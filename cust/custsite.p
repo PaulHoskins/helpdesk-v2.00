@@ -9,6 +9,7 @@
     
     When        Who         What
     30/04/2017  phoski      Initial
+    10/05/2017  phoski      Site Name
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -233,7 +234,7 @@ PROCEDURE process-web-request :
 
     {&out}
     htmlib-TableHeading(
-        "Site Code|Address|Contact|Telephone|Notes"
+        "Site Code|Name|Address|Contact|Telephone|Notes"
         ) SKIP.
 
 
@@ -336,6 +337,7 @@ PROCEDURE process-web-request :
             SKIP
            
             htmlib-MntTableField(html-encode(b-query.site),'left')
+            htmlib-MntTableField(b-query.name,'left')
             htmlib-MntTableField(lc-temp,'left')
             htmlib-MntTableField(html-encode(b-query.Contact),'left')
             htmlib-MntTableField(html-encode(b-query.Telephone),'left')

@@ -30,6 +30,7 @@
     14/08/2016 phoski       CRM 
     15/10/2016 phoski       CRM Phase 2 - not iventory/issue for sales users
     30/04/2017 phoski       CustSite
+    10/05/2017  phoski      Site Name
                         
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -580,7 +581,7 @@ PROCEDURE ip-CustomerMainInfo :
         {&out}
             '<tr>' SKIP
             htmlib-MntTableField(html-encode("Site: " + CustSite.site),'left')
-            htmlib-MntTableField(html-encode(""),'left')
+            htmlib-MntTableField(html-encode(CustSite.name),'left')
             htmlib-MntTableField(REPLACE(html-encode(lc-address),"~n","<br>"),'left')
             htmlib-MntTableField(html-encode(CustSite.Contact),'left')
             htmlib-MntTableField(html-encode(custSite.Telephone),'left')

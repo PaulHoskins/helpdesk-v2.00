@@ -10,6 +10,7 @@
     
     When        Who         What
     30/04/2017  phoski      Initial
+    09/05/2017  phoski      Name field on Site
    
 ***********************************************************************/
 
@@ -44,5 +45,6 @@ ASSIGN
     CustSite.postcode  = Customer.postcode
     CustSite.telephone = Customer.telephone
     CustSite.contact   = Customer.contact
-    CustSite.notes     = Customer.notes.
+    CustSite.notes     = Customer.notes
+    CustSite.Name      = Customer.Name.
       

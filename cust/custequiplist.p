@@ -16,6 +16,7 @@
     02/07/2016  phoski      Show ticket balance 
     27/10/2016  phoski      Dont Show inventory for sales people
     01/05/2019  phoski      Customer Sites
+    10/05/2017  phoski      Site Name
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -263,7 +264,7 @@ PROCEDURE ip-AccountInformation :
         {&out}
             '<tr>' SKIP
             htmlib-MntTableField(html-encode("Site: " + CustSite.site),'left')
-            htmlib-MntTableField(html-encode(""),'left')
+            htmlib-MntTableField(html-encode(CustSite.name),'left')
             htmlib-MntTableField(REPLACE(html-encode(lc-address),"~n","<br>"),'left')
             htmlib-MntTableField(html-encode(CustSite.Contact),'left')
             htmlib-MntTableField(html-encode(custSite.Telephone),'left')

@@ -9,6 +9,7 @@
     
     When        Who         What
     27/04/2014  phoski      Initial
+    10/05/2017  phoski      Site Name
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -39,6 +40,7 @@ DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submitsource AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-site         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-name         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-address1     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-address2     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-city         AS CHARACTER NO-UNDO.
@@ -168,6 +170,14 @@ PROCEDURE ip-Validate :
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
  
+  IF lc-name = ""
+        OR lc-name = ?
+        THEN RUN htmlib-AddErrorMessage(
+            'name', 
+            'You must enter the site name',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+  
   
 
 END PROCEDURE.
@@ -351,6 +361,7 @@ PROCEDURE process-web-request :
                 lc-contact   = b-table.contact
                 lc-telephone = b-table.telephone
                 lc-notes     = b-table.notes
+                lc-name      = b-table.name
 
 
                 .
@@ -379,6 +390,7 @@ PROCEDURE process-web-request :
                 lc-contact   = get-value("contact")
                 lc-telephone = get-value("telephone")
                 lc-notes     = get-value("notes")
+                lc-name      = get-value("name")
 
                 .
              
@@ -422,6 +434,7 @@ PROCEDURE process-web-request :
                     b-table.contact   = lc-contact 
                     b-table.telephone = lc-telephone
                     b-table.notes     = lc-notes
+                    b-table.name      = lc-name
                     .
                 
                  
@@ -518,6 +531,23 @@ PROCEDURE process-web-request :
             SKIP.
     {&out} 
         '</TR>' SKIP.
+     {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("name",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Name")
+        ELSE htmlib-SideLabel("Name"))
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">' SKIP.
+
+    
+    IF CAN-DO("ADD,UPDATE",lc-mode)
+        THEN {&out}  htmlib-InputField("name",80,lc-name) 
+            SKIP.
+    ELSE {&out} html-encode(lc-name) .
+
+    {&out} 
+        '</TD></TR>' SKIP. 
+        
 
     {&out} 
         '<TR><TD VALIGN="TOP" ALIGN="right">' 
