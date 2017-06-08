@@ -17,6 +17,7 @@
     02/07/2016  phoski      Admin Time option
     01/08/2016  phoski      CRM
     15/04/2017  phoski      ExcludeReports flag
+    08/06/2017  phoskli     Date Type
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -68,6 +69,9 @@ DEFINE VARIABLE li-tot-period-productivity AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE lc-lodate                  AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
 DEFINE VARIABLE lc-hidate                  AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
 DEFINE VARIABLE lc-admin                   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-dtcode             AS CHARACTER INITIAL 'ISS|ACT|ISSACT' NO-UNDO.
+DEFINE VARIABLE lc-list-dtdesc             AS CHARACTER INITIAL 'Issue|Activity|Issue And Activity' NO-UNDO.
+
 
 {rep/engrep01-build.i}
 
@@ -1328,6 +1332,7 @@ PROCEDURE ip-ProcessReport :
         lc-selectengineer ,
         lc-selectcustomer ,
         lc-admin = 'on',
+        get-value("dtype"),
         OUTPUT TABLE tt-IssRep,
         OUTPUT TABLE tt-IssTime,
         OUTPUT TABLE tt-IssTotal,
@@ -1483,7 +1488,18 @@ PROCEDURE ip-week-month :
         htmlib-StartMntTable()
         htmlib-TableHeading("Date Range|") SKIP.
     
-    
+        
+    {&out} 
+        '<tr><td valign="top" align="right">' 
+        (IF LOOKUP("dType",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("By")
+        ELSE htmlib-SideLabel("By"))
+        '</td>'
+        '<td valign="top" align="left">'
+        htmlib-Select("dtype",lc-list-dtcode,lc-list-dtdesc,get-value("dtype"))
+ 
+        '</td></tr>' SKIP.
+        
     
     {&out} 
         '<tr><td valign="top" align="right">' 

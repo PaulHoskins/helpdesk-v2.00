@@ -16,6 +16,7 @@
                             removed all period week/month stuff
     02/07/2016  phoski      Exclude Admin
     15/04/2017  phoski      ExcludeReports flag
+    08/06/2017  phoski      Date Type
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -42,6 +43,7 @@ DEFINE INPUT PARAMETER pc-ReportType        AS CHARACTER    NO-UNDO.
 DEFINE INPUT PARAMETER pc-Engineers         AS CHARACTER    NO-UNDO.
 DEFINE INPUT PARAMETER pc-Customers         AS CHARACTER    NO-UNDO.
 DEFINE INPUT PARAMETER pl-ExcludeAdmin      AS LOGICAL      NO-UNDO.
+DEFINE INPUT PARAMETER pc-dType             AS CHARACTER    NO-UNDO.
 
 DEFINE OUTPUT PARAMETER TABLE FOR tt-IssRep.
 DEFINE OUTPUT PARAMETER TABLE FOR tt-IssTime.
@@ -74,18 +76,18 @@ DEFINE BUFFER b-tt-IssUser  FOR tt-IssUser.
 DEFINE BUFFER b-tt-IssCust  FOR tt-IssCust.
 
 
-DEFINE VARIABLE vx                 AS INTEGER    NO-UNDO.
-DEFINE VARIABLE vc                 AS CHARACTER  NO-UNDO.   
+DEFINE VARIABLE vx            AS INTEGER   NO-UNDO.
+DEFINE VARIABLE vc            AS CHARACTER NO-UNDO.   
                            
 
-DEFINE VARIABLE viewType           AS INTEGER    NO-UNDO.
-DEFINE VARIABLE reportType         AS INTEGER    NO-UNDO.
+DEFINE VARIABLE viewType      AS INTEGER   NO-UNDO.
+DEFINE VARIABLE reportType    AS INTEGER   NO-UNDO.
 
-DEFINE VARIABLE ld-curr-hours      AS DECIMAL    FORMAT "9999.99" EXTENT 7 NO-UNDO.
-DEFINE VARIABLE lc-day             AS CHARACTER  INITIAL "Mon,Tue,Wed,Thu,Fri,Sat,Sun" NO-UNDO.
+DEFINE VARIABLE ld-curr-hours AS DECIMAL   FORMAT "9999.99" EXTENT 7 NO-UNDO.
+DEFINE VARIABLE lc-day        AS CHARACTER INITIAL "Mon,Tue,Wed,Thu,Fri,Sat,Sun" NO-UNDO.
 
 
-DEFINE VARIABLE pi-array           AS INTEGER    EXTENT 2 NO-UNDO.
+DEFINE VARIABLE pi-array      AS INTEGER   EXTENT 2 NO-UNDO.
 
 
 
@@ -371,8 +373,8 @@ PROCEDURE ipBuildData:
     DEFINE VARIABLE engcust  AS CHARACTER INITIAL "Customer,Engineer,Issues" NO-UNDO.
    
     ASSIGN
-        viewType             = INTEGER(pc-ViewType)         /* pc-ViewType    1=Detailed , 2=SummaryDetail, 3=Summary */   
-        reportType           = INTEGER(pc-ReportType)       /* pc-ReportType  1=Customer, 2=Engineer, 3=Issues */            
+        viewType      = INTEGER(pc-ViewType)         /* pc-ViewType    1=Detailed , 2=SummaryDetail, 3=Summary */   
+        reportType    = INTEGER(pc-ReportType)       /* pc-ReportType  1=Customer, 2=Engineer, 3=Issues */            
         pc-ViewType   = ENTRY(viewType,typedesc)  /* set these to descriptions  */ 
         pc-ReportType = ENTRY(reportType,engcust) /* set these to descriptions  */
         .
@@ -381,18 +383,28 @@ PROCEDURE ipBuildData:
     DO:
         FOR EACH IssActivity NO-LOCK
             WHERE IssActivity.companycode = pc-CompanyCode
+            /*
             AND   IssActivity.StartDate >= pd-FromDate
-            AND   IssActivity.StartDate <= pd-toDate,
+            AND   IssActivity.StartDate <= pd-toDate
+            */,
             FIRST ro-user NO-LOCK
             WHERE ro-user.companycode = pc-CompanyCode
             AND ro-user.LoginID = IssActivity.ActivityBy 
             AND ro-user.UserClass = "internal"
             AND ro-user.excludeReports = FALSE
             :
+                
+            IF pc-dType = "Act"
+                OR pc-dType = "IssAct" THEN
+            DO:
+                IF issActivity.StartDate <   pd-FromDate
+                    OR issActivity.StartDate >   pd-toDate THEN NEXT.
+            END.    
+            
             INNER: 
             DO:
                 IF pl-ExcludeAdmin 
-                AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
+                    AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
                 
                 FIND FIRST issAction OF issActivity NO-LOCK NO-ERROR.
                 IF NOT AVAILABLE issAction THEN NEXT.
@@ -403,6 +415,14 @@ PROCEDURE ipBuildData:
                     AND   IF pc-Customers = "ALL" THEN TRUE  ELSE LOOKUP(Issue.AccountNumber,pc-Customers,",") > 0
                     NO-ERROR.
                 IF NOT AVAILABLE Issue THEN LEAVE INNER.
+                IF pc-dType  = "ISS"
+                    OR pc-dType = "ISSACT" THEN
+                DO:
+                    IF  issue.IssueDate < pd-fromDate
+                        OR  issue.IssueDate > pd-ToDate THEN NEXT.
+
+                END.
+        
                 RUN ReportA(reportType) .
       
             END.
@@ -421,17 +441,33 @@ PROCEDURE ipBuildData:
                 FOR EACH IssActivity NO-LOCK
                     WHERE IssActivity.CompanyCode = webuser.CompanyCode
                     AND IssActivity.ActivityBy  = webuser.loginid
+                    /*
                     AND IssActivity.StartDate >= pd-FromDate
                     AND IssActivity.StartDate <= pd-toDate
+                    */
                     :
+                    IF pc-dType = "Act"
+                        OR pc-dType = "IssAct" THEN
+                    DO:
+                        IF issActivity.StartDate <   pd-FromDate
+                            OR issActivity.StartDate >   pd-toDate THEN NEXT.
+                    END.    
+            
                     IF pl-ExcludeAdmin 
-                    AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
+                        AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
                 
                     FIND FIRST issAction OF issActivity NO-LOCK NO-ERROR.
                     IF NOT AVAILABLE issAction THEN NEXT.
 
                     FIND FIRST issue NO-LOCK WHERE issue.CompanyCode = webuser.CompanyCode
                         AND issue.IssueNumber = IssActivity.IssueNumber NO-ERROR.
+                    IF pc-dType  = "ISS"
+                        OR pc-dType = "ISSACT" THEN
+                    DO:
+                        IF  issue.IssueDate < pd-fromDate
+                            OR  issue.IssueDate > pd-ToDate THEN NEXT.
+                    END.
+                    
                     RUN ReportA(reportType).
                 END.             
             END.               
@@ -442,8 +478,10 @@ PROCEDURE ipBuildData:
         DO:
             FOR EACH IssActivity NO-LOCK
                 WHERE IssActivity.CompanyCode = pc-CompanyCode
+                /*
                 AND IssActivity.StartDate >= pd-FromDate
-                AND IssActivity.StartDate <= pd-ToDate,
+                AND IssActivity.StartDate <= pd-ToDate */
+                ,
                 FIRST ro-user NO-LOCK
                 WHERE ro-user.companycode = pc-CompanyCode
                 AND ro-user.LoginID = IssActivity.ActivityBy 
@@ -451,9 +489,15 @@ PROCEDURE ipBuildData:
                 AND ro-user.excludeReports = FALSE
               
                 :
-                    
+                IF pc-dType = "Act"
+                    OR pc-dType = "IssAct" THEN
+                DO:
+                    IF issActivity.StartDate <   pd-FromDate
+                        OR issActivity.StartDate >   pd-toDate THEN NEXT.
+                END.    
+            
                 IF pl-ExcludeAdmin 
-                AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
+                    AND com-IsActivityChargeable(issActivity.IssActivityID) = FALSE THEN NEXT.
                 
 
                 FIND FIRST issAction OF issActivity NO-LOCK NO-ERROR.
@@ -461,6 +505,13 @@ PROCEDURE ipBuildData:
 
                 FIND FIRST issue NO-LOCK WHERE issue.CompanyCode = pc-CompanyCode
                     AND issue.IssueNumber = IssActivity.IssueNumber NO-ERROR.
+                IF pc-dType  = "ISS"
+                    OR pc-dType = "ISSACT" THEN
+                DO:
+                    IF  issue.IssueDate < pd-fromDate
+                        OR  issue.IssueDate > pd-ToDate THEN NEXT.
+                END.
+                
                 RUN ReportA(reportType).
             END.             
             RUN ReportB.              
@@ -624,7 +675,7 @@ PROCEDURE ReportB :
                 NO-ERROR.
             IF AVAILABLE tt-IssUser 
                 THEN ASSIGN tt-IssUser.productivity = td-hours
-                    li-tot-productivity  = li-tot-productivity + td-hours. 
+                    li-tot-productivity     = li-tot-productivity + td-hours. 
         END.
         FIND tt-IssTotal WHERE tt-IssTotal.ActivityBy = webuser.loginid NO-ERROR.
         IF AVAILABLE tt-IssTotal 
@@ -864,25 +915,25 @@ FUNCTION Wk2Date RETURNS CHARACTER
     ------------------------------------------------------------------------------*/
 
    
-    DEFINE VARIABLE cYear     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE iWkNo     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE iDayNo    AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE iSDayNo   AS DATE NO-UNDO.
-    DEFINE VARIABLE iEDayNo   AS DATE NO-UNDO.
-    DEFINE VARIABLE dYrBegin  AS DATE NO-UNDO.
-    DEFINE VARIABLE WkOne     AS INTEGER  NO-UNDO.
-    DEFINE VARIABLE WkSt      AS INTEGER  INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
+    DEFINE VARIABLE cYear    AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE iWkNo    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iDayNo   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iSDayNo  AS DATE      NO-UNDO.
+    DEFINE VARIABLE iEDayNo  AS DATE      NO-UNDO.
+    DEFINE VARIABLE dYrBegin AS DATE      NO-UNDO.
+    DEFINE VARIABLE WkOne    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE WkSt     AS INTEGER   INITIAL 2 NO-UNDO. /* 1=Sun,2=Mon */
     IF INDEX(cWkYrNo,"-") <> 3 THEN RETURN "Format should be xx-xxxx".
     ASSIGN 
-        cYear  = ENTRY(2,cWkYrNo,"-")
-        WkOne  = WEEKDAY(DATE("01/01/" + cYear)).
+        cYear = ENTRY(2,cWkYrNo,"-")
+        WkOne = WEEKDAY(DATE("01/01/" + cYear)).
       
     IF WkOne <= 5 THEN dYrBegin = DATE("01/01/" + cYear).
     ELSE dYrBegin = DATE("01/01/" + cYear) + WkOne.
     MESSAGE "PAYLH  dYrBegin ="  dYrBegin " WkOne= " wkOne " cWkYrNo= " cWkYrNo.
     ASSIGN 
-        iWkNo  = INTEGER(ENTRY(1,cWkYrNo,"-"))
-        iDayNo = (iWkNo * 7) - 7
+        iWkNo   = INTEGER(ENTRY(1,cWkYrNo,"-"))
+        iDayNo  = (iWkNo * 7) - 7
         iSDayNo = dYrBegin + iDayNo - WkOne + WkSt 
         iEDayNo = iSDayNo + 6 .
    
