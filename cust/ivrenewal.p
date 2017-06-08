@@ -189,16 +189,16 @@ PROCEDURE process-web-request :
     RUN outputHeader.
     
     
-    {&out} htmlib-Header("Inventory Renewals") skip.
+    {&out} htmlib-Header("Inventory Renewals") SKIP.
 
     RUN ip-ExportJScript.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/ivrenewal.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/cust/ivrenewal.p' ) SKIP.
 
     {&out} htmlib-ProgramTitle("Inventory Renewals") 
-    htmlib-hidden("submitsource","") skip
+    htmlib-hidden("submitsource","") SKIP
     .
   
     
@@ -212,11 +212,11 @@ PROCEDURE process-web-request :
     tbar-EndOption()
     tbar-End().
 
-    {&out} skip
-           replace(htmlib-StartMntTable(),'width="100%"','width="97%"') skip
+    {&out} SKIP
+           REPLACE(htmlib-StartMntTable(),'width="100%"','width="97%"') SKIP
            htmlib-TableHeading(
             "Customer|Inventory Reference|Class|Field|Date|Warning Period|Days Remaining"
-            ) skip.
+            ) SKIP.
  
     FOR EACH b-query NO-LOCK
         WHERE b-query.dType = "date"
@@ -268,7 +268,7 @@ PROCEDURE process-web-request :
                 tbar-Link("update",ROWID(custiv),appurl + '/cust/custequipmnt.p',lc-link-otherp)
                 tbar-EndHidden() 
 
-                '</tr>' skip.
+                '</tr>' SKIP.
 
             END.
         END.
@@ -277,15 +277,15 @@ PROCEDURE process-web-request :
             
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
 
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
