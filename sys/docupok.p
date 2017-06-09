@@ -12,8 +12,8 @@
     
     02/09/2010  DJS         3674 - Added Quickview facility
     09/12/2014  phoski      local host then just copy 
-    
-      
+    09/06/2017  phoski      No more wget
+          
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -182,7 +182,7 @@ PROCEDURE process-web-request :
 
     OS-CREATE-DIR value(lc-dest).
 
-    IF HostURL MATCHES "*LocalHost*" THEN
+    IF HostURL MATCHES "*LocalHost*" OR 1 = 1  THEN
     DO:
         ASSIGN lc-source =  "c:/hdupload/" + lc-thefile
                lc-thefile = lc-dest + "/" + lc-thefile.

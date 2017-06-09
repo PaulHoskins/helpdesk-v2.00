@@ -9,6 +9,7 @@
     
     When        Who         What
     03/09/2016  phoski      Initial
+    09/06/2017  phoski      No more wget
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -173,7 +174,7 @@ PROCEDURE process-web-request :
 
     OS-CREATE-DIR value(lc-dest).
 
-    IF HostURL MATCHES "*LocalHost*" THEN
+    IF HostURL MATCHES "*LocalHost*" OR 1 = 1 THEN
     DO:
         ASSIGN 
             lc-source =  "c:/hdupload/" + lc-thefile

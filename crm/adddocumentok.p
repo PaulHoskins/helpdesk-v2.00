@@ -9,6 +9,7 @@
     
     When        Who         What
     22/08/2016  phoski      Initial
+    09/06/2017  phoski      No more wget
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -172,7 +173,7 @@ PROCEDURE process-web-request :
 
     OS-CREATE-DIR value(lc-dest).
 
-    IF HostURL MATCHES "*LocalHost*" THEN
+    IF HostURL MATCHES "*LocalHost*" OR 1 = 1 THEN
     DO:
         ASSIGN 
             lc-source =  "c:/hdupload/" + lc-thefile
@@ -316,11 +317,11 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
      
-    {&out} '<html>' skip
-        '<script language="javascript">' skip
-                    'var ParentWindow = opener' skip
-                    'ParentWindow.documentCreated()' skip
-                    '</script>' skip
+    {&out} '<html>' SKIP
+        '<script language="javascript">' SKIP
+                    'var ParentWindow = opener' SKIP
+                    'ParentWindow.documentCreated()' SKIP
+                    '</script>' SKIP
         '<body><h1>Document Loaded</h1></body></html>'.
 
    
