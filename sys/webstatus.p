@@ -11,6 +11,7 @@
     10/04/2006  phoski      CompanyCode and Sort Order   
     11/04/2006  phoski      DefaultCode & Customer Track
     12/04/2006  phoski      html-trmouse
+    21/07/2017  phoski      Show complete status
 ***********************************************************************/
 
 CREATE WIDGET-POOL.
@@ -194,13 +195,13 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Issue Status") skip.
+    {&out} htmlib-Header("Maintain Issue Status") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webstatus.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webstatus.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Issue Status") skip.
+    {&out} htmlib-ProgramTitle("Maintain Issue Status") SKIP.
     
 
     {&out}
@@ -210,13 +211,13 @@ PROCEDURE process-web-request :
         lc-link-otherp
         ).
 
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
     {&out}
     htmlib-TableHeading(
-        "Type/Order|Status^left|Description^left|Default?|Customer Track?"
-        ) skip.
+        "Type/Order|Status^left|Description^left|Complete?|Default?|Customer Track?"
+        ) SKIP.
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -297,26 +298,28 @@ PROCEDURE process-web-request :
 
        
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
-            htmlib-MntTableField((if b-query.completed 
-            then "Completed" else "Open") + " / " + string(b-query.DisplayOrder),'left')
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
+            htmlib-MntTableField((IF b-query.completed 
+            THEN "Completed" ELSE "Open") + " / " + string(b-query.DisplayOrder),'left')
             htmlib-MntTableField(html-encode(b-query.statuscode),'left')
             htmlib-MntTableField(html-encode(b-query.description),'left')
-            htmlib-MntTableField(html-encode((if b-query.DefaultCode = true
-                                          then 'Yes' else 'No')),'left')
-            htmlib-MntTableField(html-encode((if b-query.CustomerTrack = true
-                                          then 'Yes' else 'No')),'left')
+             htmlib-MntTableField(html-encode((IF b-query.CompletedStatus = TRUE
+                                          THEN 'Yes' ELSE 'No')),'left')
+            htmlib-MntTableField(html-encode((IF b-query.DefaultCode = TRUE
+                                          THEN 'Yes' ELSE 'No')),'left')
+            htmlib-MntTableField(html-encode((IF b-query.CustomerTrack = TRUE
+                                          THEN 'Yes' ELSE 'No')),'left')
             
             tbar-StandardRow(
-                rowid(b-query),
+                ROWID(b-query),
                 lc-user,
                 appurl + "/sys/webstatusmnt.p",
                 "webstatus",
                 lc-link-otherp
                 )
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -328,26 +331,26 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
    
     {lib/navpanel.i "sys/webstatus.p"}
 
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+           SKIP.
 
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

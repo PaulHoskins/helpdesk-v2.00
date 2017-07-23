@@ -29,5 +29,6 @@ END.
 FOR EACH WebUser EXCLUSIVE-LOCK:
     WebUser.Email = "paulanhoskins@outlook.com".
     WebUser.LastPasswordChange = TODAY.
+    WebUser.passwd = ENCODE("12345678").
     
 END. 

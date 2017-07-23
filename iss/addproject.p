@@ -11,6 +11,7 @@
     02/04/2015  phoski      Initial
     15/08/2015  phoski      Default user change 
     01/08/2016  phoski      CRM
+    19/07/2017  phoski      New fields populated
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -60,7 +61,7 @@ DEFINE VARIABLE li-issue            AS INT       NO-UNDO.
 {lib/project.i}
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 RUN process-web-request.
 
@@ -76,16 +77,16 @@ PROCEDURE ip-AreaSelect:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
 
-    {&out}  skip
-            '<select id="areacode" name="areacode" class="inputfield">' skip.
+    {&out}  SKIP
+        '<select id="areacode" name="areacode" class="inputfield">' SKIP.
     {&out}
-    '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
-    IF lc-AreaCode = dynamic-function("htmlib-Null") 
+        '<option value="' DYNAMIC-FUNCTION("htmlib-Null") '" ' 
+        IF lc-AreaCode = dynamic-function("htmlib-Null") 
         THEN "selected" 
-    ELSE "" '>Select Area</option>' skip
-            '<option value="" ' if lc-AreaCode = ""
-                then "selected" else "" '>Not Applicable/Unknown</option>' skip        
-    .
+        ELSE "" '>Select Area</option>' SKIP
+        '<option value="" ' IF lc-AreaCode = ""
+        THEN "selected" ELSE "" '>Not Applicable/Unknown</option>' SKIP        
+        .
     FOR EACH webIssArea NO-LOCK
         WHERE webIssArea.CompanyCode = lc-Global-Company 
         BREAK BY webIssArea.GroupID
@@ -97,19 +98,20 @@ PROCEDURE ip-AreaSelect:
                 WHERE webissagrp.companycode = webissArea.CompanyCode
                 AND webissagrp.Groupid     = webissArea.GroupID NO-LOCK NO-ERROR.
             {&out}
-            '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' skip.
+                '<optgroup label="' html-encode(IF AVAILABLE webissagrp THEN webissagrp.description ELSE "Unknown") '">' SKIP.
         END.
 
         {&out}
-        '<option value="' webIssArea.AreaCode '" ' 
-        IF lc-AreaCode = webIssArea.AreaCode  
+            '<option value="' webIssArea.AreaCode '" ' 
+            IF lc-AreaCode = webIssArea.AreaCode  
             THEN "selected" 
-        ELSE "" '>' html-encode(webIssArea.Description) '</option>' skip.
+            ELSE "" '>' html-encode(webIssArea.Description) '</option>' SKIP.
 
-        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' skip.
+        IF LAST-OF(WebIssArea.GroupID) THEN {&out} '</optgroup>' SKIP.
     END.
 
-    {&out} '</select>'.
+    {&out} 
+        '</select>'.
 END PROCEDURE.
 
 PROCEDURE ip-BuildPage:
@@ -119,130 +121,143 @@ PROCEDURE ip-BuildPage:
     ------------------------------------------------------------------------------*/
     RUN outputHeader.
     
-    {&out} htmlib-Header("Add Project") skip.
+    {&out} htmlib-Header("Add Project") SKIP.
     
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/addproject.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/iss/addproject.p' ) SKIP.
     {&out} htmlib-ProgramTitle("Add Project") 
-    htmlib-hidden("submitsource","") skip.
+        htmlib-hidden("submitsource","") SKIP.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
     
     DEFINE BUFFER bcust FOR customer.
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Account")
         ELSE htmlib-SideLabel("Account"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
-    format-Select-Account(htmlib-Select("accountnumber",lc-list-number,lc-list-name,
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        format-Select-Account(htmlib-Select("accountnumber",lc-list-number,lc-list-name,
         lc-accountnumber) )
-    '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
  
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("raisedlogin",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Raised By")
         ELSE htmlib-SideLabel("Raised By"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin)
-    '</TD></TR>' skip. 
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-Select("raisedlogin",lc-list-login,lc-list-lname,lc-raisedlogin)
+        '</TD></TR>' SKIP. 
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("areacode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Area")
         ELSE htmlib-SideLabel("Area"))
-    '</TD>' 
-    '<TD VALIGN="TOP" ALIGN="left">'
-    SKIP(4).
+        '</TD>' 
+        '<TD VALIGN="TOP" ALIGN="left">'
+        SKIP(4).
 
     RUN ip-AreaSelect.
 
     {&out}
-    '</TD></TR>' skip. 
+        '</TD></TR>' SKIP. 
     
-    {&out} '<tr><td valign="top" align="right">' 
+    {&out} 
+        '<tr><td valign="top" align="right">' 
         (IF LOOKUP("currentassign",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Senior Engineer")
         ELSE htmlib-SideLabel("Senior Engineer"))
-    '</td>' 
-    '<td valign="top" align="left">'
-    htmlib-Select("currentassign",lc-list-assign,lc-list-assname,
+        '</td>' 
+        '<td valign="top" align="left">'
+        htmlib-Select("currentassign",lc-list-assign,lc-list-assname,
         lc-currentassign)
-    '</td></tr>' skip. 
+        '</td></tr>' SKIP. 
        
-    {&out} '<tr><td valign="top" align="right">' 
+    {&out} 
+        '<tr><td valign="top" align="right">' 
         (IF LOOKUP("projeng",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Project Engineer")
         ELSE htmlib-SideLabel("Project Engineer"))
-    '</td>' 
-    '<td valign="top" align="left">'
-    htmlib-Select("projeng",lc-list-assign,lc-list-assname,
+        '</td>' 
+        '<td valign="top" align="left">'
+        htmlib-Select("projeng",lc-list-assign,lc-list-assname,
         lc-projeng)
-    '</td></tr>' skip. 
+        '</td></tr>' SKIP. 
     
-    {&out} '<tr><td valign="top" align="right">' 
+    {&out} 
+        '<tr><td valign="top" align="right">' 
         (IF LOOKUP("projcode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Project Template")
         ELSE htmlib-SideLabel("Project Template"))
-    '</td>' 
-    '<td valign="top" align="left">'
-    htmlib-Select("projcode",lc-list-Projcode,lc-list-ProjDesc,
+        '</td>' 
+        '<td valign="top" align="left">'
+        htmlib-Select("projcode",lc-list-Projcode,lc-list-ProjDesc,
         lc-projeng)
-    '</td></tr>' skip.
+        '</td></tr>' SKIP.
     
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("date",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Project Start")
         ELSE htmlib-SideLabel("Project Start"))
-    '</TD>'
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("date",10,lc-date) 
-    htmlib-CalendarLink("date")
-    '</TD>' skip.
-    {&out} '</TR>' skip.
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("date",10,lc-date) 
+        htmlib-CalendarLink("date")
+        '</TD>' SKIP.
+    {&out} 
+        '</TR>' SKIP.
         
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("briefdescription",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Brief Description")
         ELSE htmlib-SideLabel("Brief Description"))
-    '</TD>'
-    '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("briefdescription",50,lc-briefdescription) 
-    '</TD>' skip.
-    {&out} '</TR>' skip.
+        '</TD>'
+        '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-InputField("briefdescription",50,lc-briefdescription) 
+        '</TD>' SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("longdescription",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Details")
         ELSE htmlib-SideLabel("Details"))
-    '</TD>' skip
+        '</TD>' SKIP
         '<TD VALIGN="TOP" ALIGN="left">'
-         htmlib-TextArea("longdescription",lc-longdescription,10,45)
-        '</TD>' skip
-        skip.
+        htmlib-TextArea("longdescription",lc-longdescription,10,45)
+        '</TD>' SKIP
+        SKIP.
             
        
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<br><br><center>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' skip.
+        {&out} 
+            '<br><br><center>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</center>' SKIP.
     END.
        
     
-    {&out} '<center>' htmlib-SubmitButton("submitform","Create Project") 
-    '</center>' skip.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Create Project") 
+        '</center>' SKIP.
     
 
     {&out}  htmlib-CalendarScript("date") SKIP.
 
-    {&out} htmlib-EndForm() skip.
+    {&out} htmlib-EndForm() SKIP.
 
    
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
    
 
 END PROCEDURE.
@@ -252,6 +267,9 @@ PROCEDURE ip-CreateProject:
             Purpose:  																	  
             Notes:  																	  
     ------------------------------------------------------------------------------*/
+    
+    DEFINE BUFFER Customer FOR Customer.
+    
     
     DO TRANSACTION ON ERROR UNDO, LEAVE:
          
@@ -299,7 +317,7 @@ PROCEDURE ip-CreateProject:
         ASSIGN
             Issue.isProject = TRUE
             Issue.prj-eng   = lc-projeng
-            issue.projCode = lc-projCode    
+            issue.projCode  = lc-projCode    
             Issue.prj-start = DATE(lc-date)
             .   
         
@@ -313,7 +331,13 @@ PROCEDURE ip-CreateProject:
             issue.StatusCode ).
                     
         islib-DefaultActions(lc-global-company,Issue.IssueNumber).
-                
+    
+        FIND Customer OF Issue NO-LOCK NO-ERROR.
+        ASSIGN
+            Issue.i-open           = TRUE
+            Issue.i-st-num         = Customer.st-num
+            Issue.i-AccountManager = Customer.AccountManager.
+                    
         RUN prjlib-NewProject (lc-global-user, lc-global-company,Issue.IssueNumber ).
             
                        
@@ -420,7 +444,7 @@ PROCEDURE ip-GetOwner:
     DO: 
         FIND cu WHERE cu.CompanyCode   = lc-global-company      
             AND cu.AccountNumber = pc-Account           
-           NO-LOCK NO-ERROR.
+            NO-LOCK NO-ERROR.
                                                                       
         FIND FIRST b-user NO-LOCK                                  
             WHERE b-user.CompanyCode   = lc-global-company      
@@ -490,9 +514,9 @@ PROCEDURE ip-Validate:
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    DEFINE VARIABLE ld-date   AS DATE    NO-UNDO.
+    DEFINE VARIABLE ld-date AS DATE    NO-UNDO.
 
-    DEFINE VARIABLE li-int    AS INTEGER NO-UNDO.
+    DEFINE VARIABLE li-int  AS INTEGER NO-UNDO.
     DEFINE BUFFER b FOR webuser.
     
 
@@ -568,14 +592,14 @@ PROCEDURE process-web-request:
     RUN ip-GetAccountNumbers ( INPUT lc-user,OUTPUT lc-list-number,OUTPUT lc-list-name ).
     
     ASSIGN
-        lc-accountNumber = get-value("accountnumber")
-        lc-raisedlogin  = get-value("raisedlogin")
-        lc-submitsource = get-value("submitsource")
-        lc-AreaCode     = get-value("areacode")
-        lc-currentassign = get-value("currentassign")
-        lc-projeng = get-value("projeng")
+        lc-accountNumber    = get-value("accountnumber")
+        lc-raisedlogin      = get-value("raisedlogin")
+        lc-submitsource     = get-value("submitsource")
+        lc-AreaCode         = get-value("areacode")
+        lc-currentassign    = get-value("currentassign")
+        lc-projeng          = get-value("projeng")
         lc-briefdescription = get-value("briefdescription")
-        lc-longdescription = get-value("longdescription")
+        lc-longdescription  = get-value("longdescription")
         lc-date             = get-value("date")
         lc-ProjCode         = get-value("projcode")
         .

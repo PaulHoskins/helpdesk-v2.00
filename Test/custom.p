@@ -27,7 +27,7 @@ DEFINE VARIABLE ld-basedate AS DATETIME NO-UNDO.
 DEFINE VARIABLE ld-amber    AS DATETIME NO-UNDO.
 DEFINE VARIABLE li-min      AS INT      NO-UNDO.
 
-/*
+
 FOR EACH WebUser:
     ASSIGN
        WebUser.Email = 'paulanhoskins@outlook.com'
@@ -36,6 +36,6 @@ FOR EACH WebUser:
     
    
 END.
-*/
+
 
     

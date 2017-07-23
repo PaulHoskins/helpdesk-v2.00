@@ -40,6 +40,8 @@
     01/08/2016  phoski      CRM
     01/05/2017  phoski      Customer Sites
     11/05/2017  phoski      Longchar Raised By
+    19/07/2017  phoski      New fields populated
+   
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -1835,6 +1837,8 @@ PROCEDURE ip-QuickUpdate :
         
     END.
 
+    ASSIGN Issue.i-open           = DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
+   
     IF DYNAMIC-FUNCTION("islib-StatusIsClosed",
         Issue.CompanyCode,
         Issue.StatusCode)
@@ -2558,6 +2562,12 @@ PROCEDURE process-web-request :
                     END.
                 END.
                 islib-DefaultActions(lc-global-company,Issue.IssueNumber).
+                FIND Customer OF Issue NO-LOCK NO-ERROR.
+                ASSIGN
+                    Issue.i-open           = TRUE
+                    Issue.i-st-num         = Customer.st-num
+                    Issue.i-AccountManager = Customer.AccountManager.
+            
                 IF NOT ll-Customer THEN 
                 DO:
                     RUN ip-QuickUpdate.

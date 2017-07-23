@@ -151,7 +151,7 @@ PROCEDURE ip-BuildCompanyStats:
     lh-Query:SET-BUFFERS(lh-Buffer1).
     lh-Query:QUERY-PREPARE(lc-QPhrase).
     lh-Query:QUERY-OPEN().
-    
+        
     lh-Query:GET-FIRST(NO-LOCK). 
     
     REPEAT WHILE lh-Buffer1:AVAILABLE: 
@@ -467,18 +467,18 @@ PROCEDURE ip-CRMRepStatistics:
         <th data-options="field:~'StatValue~',align:~'right~',sortable:false">Total</th>      
             </tr>
         </thead>
-        <tbody>' skip.
+        <tbody>' SKIP.
         
         
         FOR EACH tt-stat NO-LOCK:
             
             IF ENTRY(2,tt-stat.scode,":") = "-" THEN
             DO:
-                {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' skip.
+                {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' SKIP.
                 NEXT.
             END.
             {&out}
-            '<tr><td>' tt-stat.descr '</td>' skip.
+            '<tr><td>' tt-stat.descr '</td>' SKIP.
                  
             DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
                 IF INDEX(tt-stat.scode,"£") > 0
@@ -539,18 +539,18 @@ PROCEDURE ip-CRMStatistics:
     <th data-options="field:~'StatValue~',align:~'right~',sortable:false">Total</th>      
         </tr>
     </thead>
-    <tbody>' skip.
+    <tbody>' SKIP.
     
     
     FOR EACH tt-stat NO-LOCK:
         
         IF ENTRY(2,tt-stat.scode,":") = "-" THEN
         DO:
-            {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' skip.
+            {&out} '<tr><td><p><b>' tt-stat.descr '</b></p></td></tr>' SKIP.
             NEXT.
         END.
         {&out}
-        '<tr><td>' tt-stat.descr '</td>' skip.
+        '<tr><td>' tt-stat.descr '</td>' SKIP.
              
         DO li-loop = 1 TO NUM-ENTRIES(lc-global-opStatus-Code,"|"):
             IF INDEX(tt-stat.scode,"£") > 0
@@ -598,7 +598,7 @@ PROCEDURE ip-EngineerStatistics:
             
         </tr>
     </thead>
-    <tbody>' skip.
+    <tbody>' SKIP.
     
  
     FOR EACH tt-eng NO-LOCK:
@@ -649,12 +649,12 @@ PROCEDURE ip-HelpdeskStatistics:
     <th data-options="field:~'StatValue~',align:~'right~',sortable:false">Total</th>      
         </tr>
     </thead>
-    <tbody>' skip.
+    <tbody>' SKIP.
     
     
     FOR EACH tt-stat NO-LOCK:
         {&out}
-        '<tr><td>' tt-stat.descr '</td>' skip.
+        '<tr><td>' tt-stat.descr '</td>' SKIP.
         
         DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
             {&out} '<td>' tt-stat.class-value[li-loop] '</td>'.
@@ -704,7 +704,7 @@ PROCEDURE ip-IssueGridHeader:
             <th data-options="field:~'cname~',sortable:false">Customer</th>
         </tr>
     </thead>
-    <tbody>' skip.
+    <tbody>' SKIP.
     
 
 END PROCEDURE.

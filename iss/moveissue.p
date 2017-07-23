@@ -12,7 +12,8 @@
     
     09/08/2010  DJS         3667 - view only active co's & users
     02/07/2016  phoski      Ticket balance on account and issue removed
-
+    19/07/2017  phoski      New fields populated
+    
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -112,7 +113,7 @@ PROCEDURE ip-BackToIssue :
     DEFINE VARIABLE lc-link-url     AS CHARACTER NO-UNDO.
 
     RUN outputHeader.
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
    
     ASSIGN 
         request_method = "get".
@@ -134,14 +135,14 @@ PROCEDURE ip-BackToIssue :
     
    
 
-    {&out} '<script language="javascript">' skip.
+    {&out} '<script language="javascript">' SKIP.
 
            
-    {&out} 'NewURL = ' lc-link-url  skip
-           'self.location = NewURL' skip
-            '</script>' skip.
+    {&out} 'NewURL = ' lc-link-url  SKIP
+           'self.location = NewURL' SKIP
+            '</script>' SKIP.
 
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
 
 END PROCEDURE.
 
@@ -179,25 +180,25 @@ PROCEDURE ip-BuildPage :
     ASSIGN
         lc-assign = com-UserName(b-table.AssignTo).
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
     FIND b-area OF b-table NO-LOCK NO-ERROR.
     FIND b-status OF b-table NO-LOCK NO-ERROR.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Customer")
-    '</TD>' skip
-           htmlib-TableField(html-encode(lc-icustname),'left') skip
+    '</TD>' SKIP
+           htmlib-TableField(html-encode(lc-icustname),'left') SKIP
            '<TR><TD VALIGN="TOP" ALIGN="right">' 
            htmlib-SideLabel("Date")
-           '</TD>' skip
-           htmlib-TableField(if b-table.IssueDate = ? then "" else 
-               string(b-table.IssueDate,'99/99/9999') + " " + 
-               string(b-table.IssueTime,'hh:mm am'),'left') skip
+           '</TD>' SKIP
+           htmlib-TableField(IF b-table.IssueDate = ? THEN "" ELSE 
+               STRING(b-table.IssueDate,'99/99/9999') + " " + 
+               string(b-table.IssueTime,'hh:mm am'),'left') SKIP
            '<TR><TD VALIGN="TOP" ALIGN="right">' 
            htmlib-SideLabel("Raised By")
-           '</TD>' skip
-           htmlib-TableField(html-encode(lc-raised),'left') skip
+           '</TD>' SKIP
+           htmlib-TableField(html-encode(lc-raised),'left') SKIP
 
     .
 
@@ -205,13 +206,13 @@ PROCEDURE ip-BuildPage :
     htmlib-SideLabel("Description")
     '</TD>'
     htmlib-TableField(b-table.briefdescription,"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Notes")
     '</TD>'
     htmlib-TableField(REPLACE(b-table.longdescription,'~n','<BR>'),"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
 
     IF AVAILABLE b-area THEN
@@ -219,21 +220,21 @@ PROCEDURE ip-BuildPage :
     htmlib-SideLabel("Area")
     '</TD>'
     htmlib-TableField(b-area.description,"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
     
     IF AVAILABLE b-status THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Status")
     '</TD>'
     htmlib-TableField(b-status.description,"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
     IF AVAILABLE b-cat THEN
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
     htmlib-SideLabel("Category")
     '</TD>'
     htmlib-TableField(b-cat.description,"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
     
     IF lc-assign <> "" THEN
@@ -241,7 +242,7 @@ PROCEDURE ip-BuildPage :
     htmlib-SideLabel("Assigned To")
     '</TD>'
     htmlib-TableField(lc-assign,"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
     
     IF b-table.PlannedCompletion <> ?  THEN
@@ -249,17 +250,17 @@ PROCEDURE ip-BuildPage :
     htmlib-SideLabel("Planned Completion")
     '</TD>'
     htmlib-TableField(STRING(b-table.PlannedCompletion,'99/99/9999'),"") 
-    '</TR>' skip.
+    '</TR>' SKIP.
 
     
 
     {&out} '<tr><td valign=top align=right">'
     htmlib-SideLabel("Select Account")
     '</td>'
-    '<td>' skip.
+    '<td>' SKIP.
                 
    
-    {&out} '<select name="newaccount" class="inputfield">' skip.
+    {&out} '<select name="newaccount" class="inputfield">' SKIP.
 
     FOR EACH customer NO-LOCK
         WHERE customer.companyCode = b-table.Company
@@ -270,12 +271,12 @@ PROCEDURE ip-BuildPage :
 
         {&out}
         '<option value="' customer.AccountNumber '">'
-        html-encode(customer.Name) '</option>' skip.
+        html-encode(customer.Name) '</option>' SKIP.
     END.
 
-    {&out} '</select></td></tr>' skip.
+    {&out} '</select></td></tr>' SKIP.
     
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 END PROCEDURE.
 
@@ -347,7 +348,10 @@ PROCEDURE ip-MoveAccount :
     FIND customer
         WHERE customer.CompanyCode = issue.CompanyCode
         AND customer.AccountNumber = issue.AccountNumber EXCLUSIVE-LOCK.
-
+    ASSIGN 
+        Issue.i-st-num         = Customer.st-num
+        Issue.i-AccountManager = Customer.AccountManager.
+        
     IF customer.SupportTicket = "YES" THEN
     DO:
         ASSIGN
@@ -372,6 +376,7 @@ PROCEDURE ip-MoveAccount :
                 tt-ticket.TxnType           =   "ACT"
                 tt-ticket.IssActivityID     =   issActivity.IssActivityID.
         END.
+        
         RELEASE issue.
         RUN tlib-PostTicket.
     END.
@@ -516,23 +521,23 @@ PROCEDURE process-web-request :
     RUN outputHeader.
 
     {&out}
-    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' skip 
-         '<HTML>' skip
-         '<HEAD>' skip
+    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' SKIP 
+         '<HTML>' SKIP
+         '<HEAD>' SKIP
 
-         '<meta http-equiv="Cache-Control" content="No-Cache">' skip
-         '<meta http-equiv="Pragma"        content="No-Cache">' skip
-         '<meta http-equiv="Expires"       content="0">' skip
-         '<TITLE>' lc-title '</TITLE>' skip
-         DYNAMIC-FUNCTION('htmlib-StyleSheet':U) skip
-         '<script language="JavaScript" src="/scripts/js/standard.js"></script>' skip
-         DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) skip.
+         '<meta http-equiv="Cache-Control" content="No-Cache">' SKIP
+         '<meta http-equiv="Pragma"        content="No-Cache">' SKIP
+         '<meta http-equiv="Expires"       content="0">' SKIP
+         '<TITLE>' lc-title '</TITLE>' SKIP
+         DYNAMIC-FUNCTION('htmlib-StyleSheet':U) SKIP
+         '<script language="JavaScript" src="/scripts/js/standard.js"></script>' SKIP
+         DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
 
 
     
     {&out}
-    '</HEAD>' skip
-         '<body class="normaltext" onUnload="ClosePage()">' skip
+    '</HEAD>' SKIP
+         '<body class="normaltext" onUnload="ClosePage()">' SKIP
     .
 
     {&out}
@@ -540,32 +545,32 @@ PROCEDURE process-web-request :
     htmlib-ProgramTitle(lc-title).
 
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("saveaccount", lc-account) skip
-           htmlib-Hidden ("savestatus", lc-status) skip
-           htmlib-Hidden ("saveassign", lc-assign) skip
-           htmlib-Hidden ("savearea", lc-area) skip
-           htmlib-Hidden ("savecategory", lc-category ) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-Hidden ("savesearch", lc-search) SKIP
+           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+           htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-Hidden ("saveaccount", lc-account) SKIP
+           htmlib-Hidden ("savestatus", lc-status) SKIP
+           htmlib-Hidden ("saveassign", lc-assign) SKIP
+           htmlib-Hidden ("savearea", lc-area) SKIP
+           htmlib-Hidden ("savecategory", lc-category ) SKIP.
     
     {&out} htmlib-Hidden("submitsource","null").
 
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
 
     RUN ip-BuildPage.
 
     {&out} '<br><br><center>' htmlib-SubmitButton("submitform","Update Account").
 
-    {&OUT} htmlib-EndForm() skip.
+    {&OUT} htmlib-EndForm() SKIP.
 
     
     
-    {&out} htmlib-Footer() skip.
+    {&out} htmlib-Footer() SKIP.
 
 
 END PROCEDURE.

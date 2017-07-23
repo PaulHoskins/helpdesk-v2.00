@@ -1,0 +1,99 @@
+ADD FIELD "ArchiveDays" OF "Company" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 45
+  INITIAL "0"
+  ORDER 440
+  MAX-WIDTH 4
+
+ADD FIELD "i-st-num" OF "Issue" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 50
+  INITIAL "0"
+  LABEL "Team Number"
+  ORDER 490
+  MAX-WIDTH 4
+
+ADD FIELD "archived" OF "Issue" AS logical
+  FORMAT "yes/no"
+  POSITION 51
+  INITIAL "no"
+  ORDER 500
+  MAX-WIDTH 1
+
+ADD FIELD "i-AccountManager" OF "Issue" AS character
+  FORMAT "x(15)"
+  POSITION 52
+  INITIAL ""
+  LABEL "Account Manager"
+  ORDER 510
+  MAX-WIDTH 30
+
+ADD FIELD "i-open" OF "Issue" AS logical
+  FORMAT "yes/no"
+  POSITION 53
+  INITIAL "yes"
+  ORDER 520
+  MAX-WIDTH 1
+
+ADD INDEX "x_account" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "AccountNumber" ASCENDING
+
+ADD INDEX "x_AccountManager" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "i-AccountManager" ASCENDING
+
+ADD INDEX "x_Archived" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "archived" ASCENDING
+
+ADD INDEX "x_areaCode" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "AreaCode" ASCENDING
+
+ADD INDEX "x_assignTo" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "AssignTo" ASCENDING
+
+ADD INDEX "x_catCode" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "CatCode" ASCENDING
+
+ADD INDEX "x_companyCode" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING
+
+ADD INDEX "x_createDate" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "CreateDate" ASCENDING
+
+ADD INDEX "x_i-open" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "i-open" ASCENDING
+
+ADD INDEX "x_i-st-num" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "i-st-num" ASCENDING
+
+ADD INDEX "x_iclass" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "iClass" ASCENDING
+
+ADD INDEX "x_issueNumber" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "IssueNumber" ASCENDING
+
+ADD INDEX "x_statusCode" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "StatusCode" ASCENDING
+
+ADD INDEX "st-num" ON "WebUSteam"
+  AREA "Schema Area"
+  INDEX-FIELD "st-num" ASCENDING
+  INDEX-FIELD "LoginID" ASCENDING
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000002082

@@ -31,6 +31,8 @@
     19/12/2016  phoski      Filter Save/Load
     09/01/2016  phoski      Filter dates - adjustment to reflect today
     04/02/2017  phoski      Long for account selection
+    21/07/2017  phoski      New index usage
+    22/07/2017  phoski      Archive Selection
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -87,6 +89,7 @@ DEFINE VARIABLE lc-ass-hi         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-area-lo        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-area-hi        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-srch-status    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-i-open         AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lc-srch-desc      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-cat-lo         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-cat-hi         AS CHARACTER NO-UNDO.
@@ -118,6 +121,7 @@ DEFINE VARIABLE ll-search-err     AS LOG       NO-UNDO.
 
 DEFINE VARIABLE lc-lodate         AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
 DEFINE VARIABLE lc-hidate         AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
+DEFINE VARIABLE lc-archive        AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE lc-SortField      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-SortOrder      AS CHARACTER NO-UNDO.
@@ -126,12 +130,14 @@ DEFINE VARIABLE lc-OrderOptions   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-LastAct        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-QPhrase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE vhLBuffer1        AS HANDLE    NO-UNDO.
+/*
 DEFINE VARIABLE vhLBuffer2        AS HANDLE    NO-UNDO.
+*/
 DEFINE VARIABLE vhLQuery          AS HANDLE    NO-UNDO.
 
 
 DEFINE VARIABLE lc-FilterFields   AS CHARACTER
-    INITIAL "account,status,assign,area,category,lodate,hidate,sortfield,sortorder,iclass,accountmanager" NO-UNDO.
+    INITIAL "account,status,assign,area,category,lodate,hidate,sortfield,sortorder,iclass,accountmanager,archive" NO-UNDO.
 DEFINE VARIABLE lc-FilterValue    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-FField         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-FValue         AS CHARACTER NO-UNDO.
@@ -142,7 +148,6 @@ DEFINE VARIABLE li-FilterDays     AS INTEGER   NO-UNDO.
     
 
 DEFINE BUFFER b-query   FOR issue.
-DEFINE BUFFER b-qcust   FOR Customer.
 DEFINE BUFFER b-search  FOR issue.
 DEFINE BUFFER b-cust    FOR customer.
 DEFINE BUFFER b-status  FOR WebStatus.
@@ -246,7 +251,8 @@ PROCEDURE ip-BuildIssueTable:
                                 '&sortfield=' + lc-SortField + 
                                 '&sortorder=' + lc-SortOrder + 
                                 '&iclass=' + lc-iclass +
-                                '&accountmanager=' + lc-AccountManager.
+                                '&accountmanager=' + lc-AccountManager
+                                + '&archive=' + lc-archive .
         FIND b-cust OF b-query NO-LOCK NO-ERROR.
         ASSIGN 
             lc-customer = IF AVAILABLE b-cust THEN b-cust.name ELSE "".
@@ -311,7 +317,10 @@ PROCEDURE ip-BuildIssueTable:
                         THEN {&out} '<img src="/images/sla/ok.jpg" height="20" width="20" alt="SLA OK">' SKIP.
             
                     ELSE {&out} '&nbsp;' SKIP.
-            
+            IF lc-global-user = "phoski-it" THEN
+            DO:
+                {&out} "A=" b-query.archived " O=" b-query.i-open " T=" b-query.i-st-num " AC=" b-query.i-AccountManager.
+            END.
             {&out} 
                 '</td>' SKIP.
 
@@ -445,6 +454,13 @@ PROCEDURE ip-BuildQueryPhrase:
 
     ASSIGN
         lc-QPhrase = "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
+        
+    IF lc-archive = "C"
+    THEN ASSIGN 
+            lc-QPhrase = lc-QPhrase + " and b-query.Archived = false". 
+    IF lc-archive = "A"
+    THEN ASSIGN 
+            lc-QPhrase = lc-QPhrase + " and b-query.Archived = true".             
 
     IF lc-sel-account <> htmlib-Null() THEN 
     DO:
@@ -479,31 +495,32 @@ PROCEDURE ip-BuildQueryPhrase:
     IF lc-sel-cat <> htmlib-null() 
         THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.CatCode = '" + lc-cat-lo + "'".
 
+
     ASSIGN 
         lc-QPhrase = lc-QPhrase + 
-            " and b-query.CreateDate >= '" + string(DATE(lc-lodate)) + "' " + 
-            " and b-query.CreateDate <= '" + string(DATE(lc-hidate)) + "' ".
-
-    IF lc-srch-status <> "*" 
-        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and index('" + string(lc-srch-status) + "',b-query.StatusCode) <> 0 ".
-    IF li-search > 0 
-        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.IssueNumber = '" + string(li-Search) + "'".
-    ELSE 
-        IF lc-search <> "" 
-            THEN ASSIGN lc-QPhrase = lc-QPhrase  + " and b-query.searchField contains '" + lc-search + "'".
+            " and b-query.CreateDate >= " + string(DATE(lc-lodate)) + " " + 
+            " and b-query.CreateDate <= " + string(DATE(lc-hidate)) + " ".
+    IF lc-srch-status <> "*" THEN
+    DO:
+        IF li-i-open = ?
+        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.statusCode = '" + lc-srch-status + "'".
+        ELSE
+        IF li-i-open 
+        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = true".
+        ELSE ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = false".
+    END.
+      
+   
     
     IF lc-iClass <> "ALL" 
         THEN ASSIGN lc-QPhrase = lc-QPhrase  + " and b-query.iclass = '" + lc-iclass + "'".
-    
-    ASSIGN 
-        lc-QPhrase = lc-QPhrase  + " , first b-qcust NO-LOCK where b-qcust.companyCode = b-query.companycode and b-qcust.accountnumber = b-query.accountnumber".
         
     IF lc-accountManager = 'on' THEN
     DO:
         ASSIGN 
-            lc-QPhrase = lc-QPhrase + " and b-qcust.AccountManager = '" + lc-ass-lo + "'".
-    END.    
-                
+            lc-QPhrase = lc-QPhrase + " and b-query.i-AccountManager = '" + lc-ass-lo + "'".
+    END.
+           
 
     IF lc-SortField <> "" THEN
     DO:
@@ -611,10 +628,7 @@ PROCEDURE ip-InitialProcess :
     
     IF get-value("submitsource") = "FilterLoad" THEN
     DO:
-       
-        
-        /*lc-FilterValue =  DYNAMIC-FUNCTION("com-FilterLoad", lc-global-user,"issue","Default"). */
-        
+                           
         RUN com-GetFilterLoad (lc-global-user,"issue","Default", OUTPUT lc-filterValue, OUTPUT ld-FilterDate).
         
         IF lc-filterValue <> ? THEN
@@ -672,7 +686,10 @@ PROCEDURE ip-InitialProcess :
         lc-SortField      = get-value("sortfield")
         lc-SortOrder      = get-value("sortorder")
         lc-iclass         = get-value("iclass")
-        lc-AccountManager = get-value("accountmanager").
+        lc-AccountManager = get-value("accountmanager")
+        lc-archive        = get-value("archive").
+    IF lc-archive = ""
+    THEN lc-archive = "C".
         
     IF get-value("submitsource") = "FilterSave" THEN
     DO:
@@ -698,7 +715,7 @@ PROCEDURE ip-InitialProcess :
     
  
     IF lc-SortField = "" THEN
-        ASSIGN lc-SortField = /* ENTRY(1,lc-SortOptions,"|") */ "b-query.IssueNumber".
+        ASSIGN lc-SortField = "b-query.IssueNumber".
    
     IF lc-SortOrder = ""
         THEN lc-SortOrder = ENTRY(1,lc-OrderOptions,"|").
@@ -878,6 +895,11 @@ PROCEDURE ip-Selection :
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
+     {&out}
+        '<td align=right valign=top>' htmlib-SideLabel("Archived") '</td>'
+        '<td align=left valign=top>' 
+        format-Select-Account(htmlib-Select("archive","C|A|B","Current|Archived|All",lc-archive)) '</td></tr><tr>' SKIP.
+        
     IF NOT ll-customer
         THEN 
         DO:
@@ -902,6 +924,7 @@ PROCEDURE ip-Selection :
         htmlib-CalendarInputField("lodate",10,lc-lodate) 
         htmlib-CalendarLink("lodate")
         '</td>' SKIP
+        
         .
     IF ll-Customer THEN
         {&out} '<td valign="top" align="right">' 
@@ -1258,14 +1281,18 @@ PROCEDURE ip-SetQueryRanges:
             lc-acc-hi = lc-sel-account.
 
     IF lc-sel-status = htmlib-Null() 
-        THEN ASSIGN lc-srch-status = "*".
+        THEN ASSIGN lc-srch-status = "*"
+                    li-i-open = ?.
     ELSE
         IF lc-sel-status = "AllOpen" 
-            THEN ASSIGN lc-srch-status = lc-open-status.
+            THEN ASSIGN lc-srch-status = lc-open-status
+                         li-i-open = YES.
         ELSE 
             IF lc-sel-status = "AllClosed"
-                THEN ASSIGN lc-srch-status = lc-closed-status.
-            ELSE ASSIGN lc-srch-status = lc-sel-status.
+                THEN ASSIGN lc-srch-status = lc-closed-status
+                            li-i-open = NO.
+            ELSE ASSIGN lc-srch-status = lc-sel-status
+                          li-i-open = ?.
          
     IF lc-sel-assign = htmlib-null() 
         AND DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?) THEN
@@ -1464,7 +1491,8 @@ PROCEDURE process-web-request :
                          + '&sortfield=' + lc-SortField 
                          + '&sortorder=' + lc-SortOrder 
                          + '&iclass=' + lc-iclass 
-                         + '&accountmanager=' + lc-accountmanager
+                         + '&accountmanager=' + lc-accountmanager 
+                         + '&archive=' + lc-archive 
                          
         .
     {&out}
@@ -1519,18 +1547,18 @@ PROCEDURE process-web-request :
  
     CREATE QUERY vhLQuery  
         ASSIGN 
-        CACHE = 100 .
+        CACHE = 1000.
 
     vhLBuffer1 = BUFFER b-query:HANDLE.
-    vhLBuffer2 = BUFFER b-qcust:HANDLE.
-
-    vhLQuery:SET-BUFFERS(vhLBuffer1,vhLBuffer2).
+     vhLQuery:SET-BUFFERS(vhLBuffer1).
+    
     vhLQuery:QUERY-PREPARE(lc-QPhrase).
     vhLQuery:QUERY-OPEN().
 
-    /*
+    /**
+    MESSAGE "Phase = "  lc-QPhrase.
     DYNAMIC-FUNCTION("com-WriteQueryInfo",vhlQuery).
-    */
+    **/ 
  
     vhLQuery:GET-FIRST(NO-LOCK).
 

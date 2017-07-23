@@ -12,6 +12,7 @@
     10/12/2014  phoski      Tidy up from above hacker
     13/03/2016  phoski      Ignore decommission inventory
     01/05/2017  phoski      Site
+    19/07/2017  phoski      New fields populated
 
 ***********************************************************************/
 
@@ -84,10 +85,10 @@ DEFINE VARIABLE lc-currentstatus    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lf-Audit            AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE lc-Report           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-htmldesc         AS CHARACTER NO-UNDO.
-DEFINE VARIABLE dLimit              AS DATE NO-UNDO.
+DEFINE VARIABLE dLimit              AS DATE      NO-UNDO.
 DEFINE VARIABLE cdate               AS CHARACTER FORMAT "x(16)" NO-UNDO.
 DEFINE VARIABLE ddate               AS DATE      FORMAT "99/99/9999" INITIAL 01/01/1999 NO-UNDO.
-DEFINE VARIABLE li-new-iss          AS INTEGER FORMAT '>>>>>>>>>>>'       NO-UNDO.
+DEFINE VARIABLE li-new-iss          AS INTEGER   FORMAT '>>>>>>>>>>>' NO-UNDO.
 DEFINE VARIABLE lc-new-iss          AS CHARACTER FORMAT 'x(13)' NO-UNDO.
 DEFINE VARIABLE lc-site             AS CHARACTER NO-UNDO.
 
@@ -131,7 +132,7 @@ FUNCTION getIssue RETURNS CHARACTER
 ASSIGN
     lc-global-company = TRIM(OS-GETENV("COMPANYCODE")).
 IF lc-global-company = ?
-OR lc-global-company = "" THEN lc-global-company = "ouritdept".
+    OR lc-global-company = "" THEN lc-global-company = "ouritdept".
     
 FIND Company WHERE Company.CompanyCode = lc-global-company NO-LOCK NO-ERROR.
   
@@ -140,13 +141,13 @@ FIND Company WHERE Company.CompanyCode = lc-global-company NO-LOCK NO-ERROR.
     
 ASSIGN
     lc-report = "c:/temp/" + replace(CAPS(lc-global-company)," ","") + "-Renewals.log"
-    dLimit = TODAY.
+    dLimit    = TODAY.
     
 OUTPUT stream srep to value(lc-report) unbuffered.
 
 IF AVAILABLE Company
-AND Company.renewal-login <> ""
-THEN ASSIGN
+    AND Company.renewal-login <> ""
+    THEN ASSIGN
         lc-global-user = Company.renewal-login.
 IF lc-global-user = "" THEN
 DO:
@@ -157,102 +158,102 @@ DO:
     
 END.
 IF lc-global-user  <> "" THEN      
-mBlock:
-FOR EACH customer NO-LOCK 
-    WHERE customer.CompanyCode =  lc-global-company
-    AND customer.IsActive
-    /* AND Customer.AccountNumber BEGINS "1" */     
-    WITH FRAME f-report DOWN WIDTH 255 STREAM-IO TRANSACTION:
+    mBlock:
+    FOR EACH customer NO-LOCK 
+        WHERE customer.CompanyCode =  lc-global-company
+        AND customer.IsActive
+        /* AND Customer.AccountNumber BEGINS "1" */     
+        WITH FRAME f-report DOWN WIDTH 255 STREAM-IO TRANSACTION:
 
-    ASSIGN
-        lc-raisedlogin = Customer.def-renew-loginid.
-    IF lc-raisedlogin = ""
-    THEN lc-raisedlogin = "BATCH".
+        ASSIGN
+            lc-raisedlogin = Customer.def-renew-loginid.
+        IF lc-raisedlogin = ""
+            THEN lc-raisedlogin = "BATCH".
     
-    FOR EACH CustIv   NO-LOCK OF customer,
-        FIRST ivSub   NO-LOCK OF CustIv,
-        FIRST ivClass NO-LOCK OF ivSub
-        BREAK 
-        BY ivClass.DisplayPriority DESCENDING
-        BY ivClass.name
-        BY ivSub.DisplayPriority DESCENDING
-        BY ivSub.name
-        BY CustIv.Ref
-        WITH FRAME f-report DOWN WIDTH 255 STREAM-IO:
+        FOR EACH CustIv   NO-LOCK OF customer,
+            FIRST ivSub   NO-LOCK OF CustIv,
+            FIRST ivClass NO-LOCK OF ivSub
+            BREAK 
+            BY ivClass.DisplayPriority DESCENDING
+            BY ivClass.name
+            BY ivSub.DisplayPriority DESCENDING
+            BY ivSub.name
+            BY CustIv.Ref
+            WITH FRAME f-report DOWN WIDTH 255 STREAM-IO:
     
-        IF CustIv.isDecom THEN NEXT.
+            IF CustIv.isDecom THEN NEXT.
         
     
-        FIND b-ivSub OF CustIv NO-LOCK NO-ERROR.
+            FIND b-ivSub OF CustIv NO-LOCK NO-ERROR.
     
-        FOR EACH ivField OF b-ivSub NO-LOCK
-            WHERE ivField.dtype = "date" 
-            AND   (ivField.dLabel MATCHES("*expir*") OR ivField.dLabel MATCHES("*renew*") )
-            AND   ivField.dwarning > 0
-            BY ivField.dOrder
-            BY ivField.dLabel
-            WITH FRAME f-report DOWN WIDTH 255 STREAM-IO:
+            FOR EACH ivField OF b-ivSub NO-LOCK
+                WHERE ivField.dtype = "date" 
+                AND   (ivField.dLabel MATCHES("*expir*") OR ivField.dLabel MATCHES("*renew*") )
+                AND   ivField.dwarning > 0
+                BY ivField.dOrder
+                BY ivField.dLabel
+                WITH FRAME f-report DOWN WIDTH 255 STREAM-IO:
       
-            FIND CustField
-                WHERE CustField.CustIvID = custIv.CustIvId
-                AND CustField.ivFieldId = ivField.ivFieldId
-                NO-LOCK NO-ERROR.
+                FIND CustField
+                    WHERE CustField.CustIvID = custIv.CustIvId
+                    AND CustField.ivFieldId = ivField.ivFieldId
+                    NO-LOCK NO-ERROR.
     
     
-            IF AVAILABLE custField THEN 
-            DO:
-                ASSIGN 
-                    lc-new-iss = ""
-                    li-new-iss = 0 
-                    cdate = CustField.FieldData 
-                    ddate = checkdate(cdate, 'uk') no-error .
+                IF AVAILABLE custField THEN 
+                DO:
+                    ASSIGN 
+                        lc-new-iss = ""
+                        li-new-iss = 0 
+                        cdate      = CustField.FieldData 
+                        ddate      = checkdate(cdate, 'uk') no-error .
                 
-                IF ddate = ? 
-                    OR ddate < TODAY - (30 * 6) THEN NEXT.
+                    IF ddate = ? 
+                        OR ddate < TODAY - (30 * 6) THEN NEXT.
                     
              
-                IF (ddate  - int(ivField.dwarning)) < TODAY THEN
-                DO:
-                    RUN ip-GenerateInventory(INPUT ROWID(CustIv), OUTPUT lc-htmldesc).
+                    IF (ddate  - int(ivField.dwarning)) < TODAY THEN
+                    DO:
+                        RUN ip-GenerateInventory(INPUT ROWID(CustIv), OUTPUT lc-htmldesc).
                     
                   
-                    RUN ip-GenerateIssue( 
-                        customer.accountNumber,
-                        ENTRY(1,getissue(TRIM(ivClass.name),""),"|"), /* eg "02",  software */
-                        CAPS(ENTRY(2,getissue(TRIM(ivClass.name),""),"|")),
-                        TRIM(CustIv.Ref) + " - " + trim(ivField.dLabel) + " " + string(ddate),
-                        lc-htmldesc,
-                        STRING(CustIv.CustIvID),
-                        STRING(CustIv.ivSubID),
-                        STRING(ROWID(CustIv)) + "-" + trim(ivField.dLabel) + " " + string(ddate),
-                        CustIv.site
-                        ).
+                        RUN ip-GenerateIssue( 
+                            customer.accountNumber,
+                            ENTRY(1,getissue(TRIM(ivClass.name),""),"|"), /* eg "02",  software */
+                            CAPS(ENTRY(2,getissue(TRIM(ivClass.name),""),"|")),
+                            TRIM(CustIv.Ref) + " - " + trim(ivField.dLabel) + " " + string(ddate),
+                            lc-htmldesc,
+                            STRING(CustIv.CustIvID),
+                            STRING(CustIv.ivSubID),
+                            STRING(ROWID(CustIv)) + "-" + trim(ivField.dLabel) + " " + string(ddate),
+                            CustIv.site
+                            ).
                     
                         
-                END.
+                    END.
                
-                DISPLAY STREAM srep
-                    Customer.AccountNumber COLUMN-LABEL 'Account' 
-                    Customer.Name  COLUMN-LABEL 'Name'
-                    CustIv.Ref     COLUMN-LABEL 'Inventory Ref' FORMAT 'x(30)'
-                    ivField.dLabel COLUMN-LABEL 'Field'  FORMAT 'x(30)'
-                    ddate          COLUMN-LABEL 'Renewal!Date'
-                    lc-new-iss     COLUMN-LABEL 'Status'
-                    li-new-iss     COLUMN-LABEL 'Issue!Number'
+                    DISPLAY STREAM srep
+                        Customer.AccountNumber COLUMN-LABEL 'Account' 
+                        Customer.Name  COLUMN-LABEL 'Name'
+                        CustIv.Ref     COLUMN-LABEL 'Inventory Ref' FORMAT 'x(30)'
+                        ivField.dLabel COLUMN-LABEL 'Field'  FORMAT 'x(30)'
+                        ddate          COLUMN-LABEL 'Renewal!Date'
+                        lc-new-iss     COLUMN-LABEL 'Status'
+                        li-new-iss     COLUMN-LABEL 'Issue!Number'
                     
-                    .
+                        .
 
-                DOWN STREAM srep.
+                    DOWN STREAM srep.
                                     
                 
           
+                END.
             END.
         END.
+    /*
+    UNDO mBlock, NEXT mBlock.
+    */
     END.
-/*
-UNDO mBlock, NEXT mBlock.
-*/
-END.
 
 
 OUTPUT stream srep close.
@@ -575,9 +576,9 @@ PROCEDURE ip-GenerateIssue :
 
     FIND FIRST issue 
         WHERE issue.AccountNumber      = lc-accountnumber                  
-          AND issue.CompanyCode        = lc-global-company
-          AND issue.BatchID            = pc-RenRef
-          NO-LOCK NO-ERROR.  
+        AND issue.CompanyCode        = lc-global-company
+        AND issue.BatchID            = pc-RenRef
+        NO-LOCK NO-ERROR.  
 
     IF AVAILABLE issue THEN 
     DO:
@@ -604,6 +605,8 @@ PROCEDURE ip-Initialise :
       Notes:       
     ------------------------------------------------------------------------------*/
     DEFINE INPUT PARAMETER pc-RenRef               AS CHARACTER NO-UNDO.
+    
+   
     
 
     REPEAT:
@@ -641,6 +644,11 @@ PROCEDURE ip-Initialise :
         
         .
 
+    ASSIGN
+        Issue.i-open           = TRUE
+        Issue.i-st-num         = Customer.st-num
+        Issue.i-AccountManager = Customer.AccountManager.
+        
    
 
     ASSIGN 

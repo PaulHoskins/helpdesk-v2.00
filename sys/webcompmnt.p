@@ -26,6 +26,7 @@
     15/10/2016  phoski      Autogen Account Numbers - CRM Phase 2 
     15/12/2016  phoski      Company.unqualOppEmail 
     17/12/2016  phoski      Company.opactwarnDays & Company.opactwarnEmail
+    21/07/2017  phoski      ArchiveDays
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -107,7 +108,7 @@ DEFINE VARIABLE lc-lengthAccount  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-unqualOppEmail AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-opactwarnDays  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-opactwarnEmail AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-ArchiveDays    AS CHARACTER NO-UNDO.
 
 
 
@@ -803,6 +804,22 @@ htmlib-InputField("opactwarnemail",80,lc-opactwarnEmail)
            SKIP.
 {&out} '</TR>' SKIP.
 
+{&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    (IF LOOKUP("archiveDays",lc-error-field,'|') > 0 
+    THEN htmlib-SideLabelError("Issue Archive - Number of Days")
+    ELSE htmlib-SideLabel("Issue Archive - Number of Days"))
+'</TD>'.
+    
+IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+htmlib-InputField("archivedays",4,lc-archiveDays) 
+'</TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField(html-encode(lc-archiveDays),'left')
+           SKIP.
+{&out} '</TR>' SKIP.
+
+
 {&out} htmlib-EndTable() '<br /> 'SKIP.
 END PROCEDURE.
 
@@ -948,6 +965,16 @@ PROCEDURE ip-Validate :
         THEN RUN htmlib-AddErrorMessage(
             'opactwarndays', 
             'The warning days must be 0 or greater',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
+    ASSIGN 
+        li-int = int(lc-archiveDays) no-error.
+    IF ERROR-STATUS:ERROR
+        OR li-int < 0 
+        THEN RUN htmlib-AddErrorMessage(
+            'archivedays', 
+            'The archive days must be 0 or greater',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
             
@@ -1153,6 +1180,7 @@ PROCEDURE process-web-request :
                 lc-unqualoppemail = get-value("unqualoppemail")
                 lc-opactwarnDays  = get-value("opactwarndays")
                 lc-opactwarnEmail = get-value("opactwarnemail")
+                lc-archiveDays    = get-value("archivedays")
                  .
             IF lc-mode = 'update' THEN
             DO:
@@ -1232,6 +1260,7 @@ PROCEDURE process-web-request :
                         b-table.unqualoppemail = lc-unqualoppemail
                         b-table.opactwarnDays = int(lc-opactwarnDays)
                         b-table.opactwarnEmail = lc-opactwarnEmail
+                        b-table.archiveDays = int(lc-archiveDays)
                         
                         
                         
@@ -1322,6 +1351,7 @@ PROCEDURE process-web-request :
                 lc-unqualoppemail = b-table.unqualoppemail
                 lc-opactwarnDays  = STRING(b-table.opactwarnDays)
                 lc-opactwarnEmail = b-table.opactwarnEmail
+                lc-archiveDays    = STRING(b-table.archiveDays)
                 .
                 
             FOR EACH acs_head NO-LOCK

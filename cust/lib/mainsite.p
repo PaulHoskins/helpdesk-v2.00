@@ -11,6 +11,7 @@
     When        Who         What
     30/04/2017  phoski      Initial
     09/05/2017  phoski      Name field on Site
+    19/07/2017  phoski      Update Issue with customer related
    
 ***********************************************************************/
 
@@ -18,10 +19,20 @@ DEFINE INPUT PARAMETER pr-rowid AS ROWID        NO-UNDO.
 
 DEFINE BUFFER Customer FOR Customer.
 DEFINE BUFFER CustSite FOR CustSite.
+DEFINE BUFFER Issue    FOR Issue.
 
 FIND Customer WHERE ROWID(Customer) = pr-rowid EXCLUSIVE-LOCK.
 
-
+FOR EACH Issue EXCLUSIVE-LOCK
+    WHERE issue.CompanyCode = Customer.CompanyCode
+    AND issue.AccountNumber = Customer.AccountNumber:
+    
+    ASSIGN 
+        Issue.i-st-num         = Customer.st-num
+        Issue.i-AccountManager = Customer.AccountManager.
+            
+END.
+ 
 FIND custsite
     WHERE CustSite.CompanyCode = Customer.CompanyCode
     AND CustSite.AccountNumber = Customer.AccountNumber

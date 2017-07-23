@@ -21,6 +21,8 @@
     29/04/2015  phoski      Complex Project - Main info page
     14/11/2015  phoski      No adhoc issues, must be against a contract
     01/05/2017  phoski      Customer Sites
+    19/07/2017  phoski      New fields populated
+    22/07/2017  phoski      Archive param from main window
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -92,6 +94,7 @@ DEFINE VARIABLE lc-submitsource      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-otherp       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE ll-superuser         AS LOG       NO-UNDO.
 DEFINE VARIABLE lc-name              AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-archive           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Doc-TBAR          AS CHARACTER 
     INITIAL "doctb" NO-UNDO.
 DEFINE VARIABLE lc-Action-TBAR       AS CHARACTER
@@ -301,6 +304,7 @@ PROCEDURE ip-BackToIssue :
                         '&category=' + lc-category +
                         '&iclass=' + lc-iclass +
                         '&accountmanager=' + lc-AccountManager +
+                        '&archive=' + lc-Archive +
                         '"'.
     
     IF lc-submitsource = "print" THEN
@@ -1126,6 +1130,8 @@ PROCEDURE ip-Update :
     DEFINE VARIABLE lc-old-AreaCode   AS CHARACTER NO-UNDO.
     DEFINE VARIABLE ld-prj-start      AS DATE      NO-UNDO.
     DEFINE VARIABLE li-prj-diff       AS INTEGER   NO-UNDO.
+    DEFINE BUFFER b-cust            FOR Customer.
+    
     
     
 
@@ -1334,7 +1340,15 @@ PROCEDURE ip-Update :
         END.
 
     END.
-
+    
+    FIND b-cust WHERE b-cust.companyCode = Issue.CompanyCode
+                  AND b-cust.AccountNumber = Issue.AccountNumber NO-LOCK NO-ERROR.
+    ASSIGN 
+        Issue.i-st-num = b-cust.st-num
+        Issue.i-AccountManager = b-cust.AccountManager.
+                     
+    Issue.i-open = DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
+    
     RELEASE issue.
     FIND Issue WHERE ROWID(Issue) = pr-rowid EXCLUSIVE-LOCK.
     IF Issue.AreaCode <> lc-old-AreaCode 
@@ -1559,6 +1573,7 @@ PROCEDURE process-web-request :
         lc-firstrow       = get-value("firstrow")
         lc-lastrow        = get-value("lastrow")
         lc-accountmanager = get-value("accountmanager")
+        lc-archive        = get-value("archive")
         lc-navigation     = get-value("navigation")
         lc-account        = get-value("account")
         lc-status         = get-value("status")
@@ -1585,6 +1600,7 @@ PROCEDURE process-web-request :
             lc-search         = get-value("savesearch")
             lc-firstrow       = get-value("savefirstrow")
             lc-accountmanager = get-value("saveaccountmanager")
+            lc-archive        = get-value("savearchive")
             lc-lastrow        = get-value("savelastrow")
             lc-navigation     = get-value("savenavigation")
             lc-account        = get-value("saveaccount")
@@ -1771,6 +1787,7 @@ PROCEDURE process-web-request :
         htmlib-Hidden ("savesearch", lc-search) SKIP
         htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
         htmlib-hidden ("saveaccountmanager",lc-accountmanager) SKIP
+         htmlib-hidden ("savearchive",lc-archive) SKIP
         htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
         htmlib-Hidden ("savenavigation", lc-navigation) SKIP
         htmlib-Hidden ("saveaccount", lc-account) SKIP
