@@ -830,6 +830,13 @@ ADD FIELD "opactwarnEmail" OF "Company" AS character
   MAX-WIDTH 16
   ORDER 430
 
+ADD FIELD "ArchiveDays" OF "Company" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 45
+  MAX-WIDTH 4
+  ORDER 440
+
 ADD INDEX "CompanyCode" ON "Company" 
   AREA "Schema Area"
   UNIQUE
@@ -1483,6 +1490,14 @@ ADD FIELD "isDecom" OF "CustIv" AS logical
   MAX-WIDTH 1
   ORDER 100
 
+ADD FIELD "Site" OF "CustIv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 110
+
 ADD INDEX "Customer" ON "CustIv" 
   AREA "Schema Area"
   UNIQUE
@@ -1835,6 +1850,124 @@ ADD INDEX "st-num" ON "Customer"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "st-num" ASCENDING 
   INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD TABLE "CustSite"
+  AREA "Schema Area"
+  LABEL "Customer Site Address"
+  DUMP-NAME "custaddr"
+
+ADD FIELD "CompanyCode" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 10
+
+ADD FIELD "AccountNumber" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Account Number"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "Address1" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 1"
+  POSITION 4
+  MAX-WIDTH 80
+  ORDER 40
+
+ADD FIELD "Address2" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Address 2"
+  POSITION 5
+  MAX-WIDTH 80
+  ORDER 50
+
+ADD FIELD "City" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "City"
+  POSITION 6
+  MAX-WIDTH 80
+  ORDER 60
+
+ADD FIELD "County" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "County"
+  POSITION 7
+  MAX-WIDTH 80
+  ORDER 70
+
+ADD FIELD "Country" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Country"
+  POSITION 8
+  MAX-WIDTH 80
+  COLUMN-LABEL "Country"
+  ORDER 80
+
+ADD FIELD "Postcode" OF "CustSite" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Post Code"
+  POSITION 9
+  MAX-WIDTH 30
+  ORDER 90
+
+ADD FIELD "Telephone" OF "CustSite" AS character 
+  FORMAT "x(20)"
+  INITIAL ""
+  LABEL "Telephone"
+  POSITION 10
+  MAX-WIDTH 40
+  ORDER 100
+
+ADD FIELD "Contact" OF "CustSite" AS character 
+  FORMAT "X(40)"
+  INITIAL ""
+  LABEL "Contact"
+  POSITION 11
+  MAX-WIDTH 80
+  ORDER 110
+
+ADD FIELD "notes" OF "CustSite" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Notes"
+  POSITION 12
+  MAX-WIDTH 16
+  ORDER 120
+
+ADD FIELD "Site" OF "CustSite" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 13
+  MAX-WIDTH 16
+  ORDER 25
+
+ADD FIELD "Name" OF "CustSite" AS character 
+  FORMAT "x(40)"
+  INITIAL ""
+  LABEL "Name"
+  POSITION 14
+  MAX-WIDTH 80
+  ORDER 130
+
+ADD INDEX "prim" ON "CustSite" 
+  AREA "Schema Area"
+  UNIQUE
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "AccountNumber" ASCENDING 
+  INDEX-FIELD "Site" ASCENDING 
 
 ADD TABLE "dashb"
   AREA "Schema Area"
@@ -2330,6 +2463,14 @@ ADD FIELD "HTMLBody" OF "EmailH" AS character
   MAX-WIDTH 16
   ORDER 90
 
+ADD FIELD "uidl" OF "EmailH" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Email Server Id"
+  POSITION 11
+  MAX-WIDTH 16
+  ORDER 100
+
 ADD INDEX "EmailID" ON "EmailH" 
   AREA "Schema Area"
   UNIQUE
@@ -2341,6 +2482,37 @@ ADD INDEX "Company" ON "EmailH"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "RcpDate" DESCENDING 
   INDEX-FIELD "RcpTime" DESCENDING 
+
+ADD INDEX "uidl" ON "EmailH" 
+  AREA "Schema Area"
+  INDEX-FIELD "uidl" ASCENDING 
+
+ADD TABLE "emrcv"
+  AREA "Schema Area"
+  LABEL "Email Id Recieved"
+  DUMP-NAME "emrcv"
+
+ADD FIELD "CompanyCode" OF "emrcv" AS character 
+  FORMAT "X(8)"
+  INITIAL ""
+  LABEL "Company Code"
+  POSITION 2
+  MAX-WIDTH 16
+  ORDER 20
+
+ADD FIELD "uidl" OF "emrcv" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Email Server Id"
+  POSITION 3
+  MAX-WIDTH 16
+  ORDER 100
+
+ADD INDEX "uidl" ON "emrcv" 
+  AREA "Schema Area"
+  PRIMARY
+  INDEX-FIELD "CompanyCode" ASCENDING 
+  INDEX-FIELD "uidl" ASCENDING 
 
 ADD TABLE "eSched"
   AREA "Schema Area"
@@ -3697,6 +3869,44 @@ ADD FIELD "AlertUsers" OF "Issue" AS character
   MAX-WIDTH 16
   ORDER 470
 
+ADD FIELD "Site" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  LABEL "Site"
+  POSITION 49
+  MAX-WIDTH 16
+  ORDER 480
+
+ADD FIELD "i-st-num" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "Team Number"
+  POSITION 50
+  MAX-WIDTH 4
+  ORDER 490
+
+ADD FIELD "archived" OF "Issue" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 51
+  MAX-WIDTH 1
+  ORDER 500
+
+ADD FIELD "i-AccountManager" OF "Issue" AS character 
+  FORMAT "x(15)"
+  INITIAL ""
+  LABEL "Account Manager"
+  POSITION 52
+  MAX-WIDTH 30
+  ORDER 510
+
+ADD FIELD "i-open" OF "Issue" AS logical 
+  FORMAT "yes/no"
+  INITIAL "yes"
+  POSITION 53
+  MAX-WIDTH 1
+  ORDER 520
+
 ADD INDEX "IssueNumber" ON "Issue" 
   AREA "Schema Area"
   UNIQUE
@@ -3806,6 +4016,58 @@ ADD INDEX "tlight" ON "Issue"
   INDEX-FIELD "CompanyCode" ASCENDING 
   INDEX-FIELD "tLight" ASCENDING 
   INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "x_account" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "AccountNumber" ASCENDING 
+
+ADD INDEX "x_AccountManager" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "i-AccountManager" ASCENDING 
+
+ADD INDEX "x_Archived" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "archived" ASCENDING 
+
+ADD INDEX "x_areaCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "AreaCode" ASCENDING 
+
+ADD INDEX "x_assignTo" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "AssignTo" ASCENDING 
+
+ADD INDEX "x_catCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CatCode" ASCENDING 
+
+ADD INDEX "x_companyCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CompanyCode" ASCENDING 
+
+ADD INDEX "x_createDate" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "CreateDate" ASCENDING 
+
+ADD INDEX "x_i-open" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "i-open" ASCENDING 
+
+ADD INDEX "x_i-st-num" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "i-st-num" ASCENDING 
+
+ADD INDEX "x_iclass" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "iClass" ASCENDING 
+
+ADD INDEX "x_issueNumber" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "IssueNumber" ASCENDING 
+
+ADD INDEX "x_statusCode" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "StatusCode" ASCENDING 
 
 ADD TABLE "ivClass"
   AREA "Schema Area"
@@ -7191,8 +7453,13 @@ ADD INDEX "prim-key" ON "WebUSteam"
   INDEX-FIELD "LoginID" ASCENDING 
   INDEX-FIELD "st-num" ASCENDING 
 
+ADD INDEX "st-num" ON "WebUSteam" 
+  AREA "Schema Area"
+  INDEX-FIELD "st-num" ASCENDING 
+  INDEX-FIELD "LoginID" ASCENDING 
+
 .
 PSC
 cpstream=ISO8859-1
 .
-0000142768
+0000148126
