@@ -130,9 +130,6 @@ DEFINE VARIABLE lc-OrderOptions   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-LastAct        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-QPhrase        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE vhLBuffer1        AS HANDLE    NO-UNDO.
-/*
-DEFINE VARIABLE vhLBuffer2        AS HANDLE    NO-UNDO.
-*/
 DEFINE VARIABLE vhLQuery          AS HANDLE    NO-UNDO.
 
 
@@ -177,7 +174,7 @@ FUNCTION Format-Select-Account RETURNS CHARACTER
     ( pc-htm AS CHARACTER )  FORWARD.
 
 FUNCTION Format-Select-AccountLong RETURNS LONGCHAR 
-	(pc-htm AS LONGCHAR) FORWARD.
+    (pc-htm AS LONGCHAR) FORWARD.
 
 &ENDIF
 
@@ -271,14 +268,15 @@ PROCEDURE ip-BuildIssueTable:
             lc-raised = IF AVAILABLE b-user THEN b-user.name ELSE "".
           
         FIND CustSite WHERE CustSite.CompanyCode = b-query.CompanyCode
-                        AND CustSite.AccountNumber = b-query.AccountNumber
-                        AND CustSite.Site = b-query.Site NO-LOCK NO-ERROR.
+            AND CustSite.AccountNumber = b-query.AccountNumber
+            AND CustSite.Site = b-query.Site NO-LOCK NO-ERROR.
              
-       IF lc-raised = ""                 
-       THEN ASSIGN lc-raised =  com-SiteDescription(ROWID(CustSite), "<br>").
-       ELSE ASSIGN lc-raised =  com-SiteDescription(ROWID(CustSite),"<br>" ) + "~nRaised by " + lc-raised.                   
+        IF lc-raised = ""                 
+            THEN ASSIGN lc-raised = com-SiteDescription(ROWID(CustSite), "<br>").
+        ELSE ASSIGN lc-raised = com-SiteDescription(ROWID(CustSite),"<br>" ) + "~nRaised by " + lc-raised.                   
             
-       ASSIGN lc-raised = REPLACE(lc-raised,"<br>","~n").     
+        ASSIGN 
+            lc-raised = REPLACE(lc-raised,"<br>","~n").     
             
         ASSIGN 
             lc-assigned = "".
@@ -319,7 +317,8 @@ PROCEDURE ip-BuildIssueTable:
                     ELSE {&out} '&nbsp;' SKIP.
             IF lc-global-user = "phoski-it" THEN
             DO:
-                {&out} "A=" b-query.archived " O=" b-query.i-open " T=" b-query.i-st-num " AC=" b-query.i-AccountManager.
+                {&out} 
+                    "A=" b-query.archived " O=" b-query.i-open " T=" b-query.i-st-num " AC=" b-query.i-AccountManager.
             END.
             {&out} 
                 '</td>' SKIP.
@@ -452,14 +451,33 @@ PROCEDURE ip-BuildQueryPhrase:
             Notes:  																	  
     ------------------------------------------------------------------------------*/
 
+    DEFINE VARIABLE lc-TeamList  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-TeamQDone AS LOG       NO-UNDO.
+    
+    DEFINE BUFFER WebUsTeam FOR WebUsteam.
+    
+    FOR EACH WebUsTeam NO-LOCK
+        WHERE WebUSteam.LoginID  = lc-global-user:
+        IF lc-TeamList = ""
+            THEN  lc-TeamList = STRING(WebUSteam.st-num).
+        ELSE  lc-TeamList = lc-teamList + "," + string(WebUSteam.st-num).
+    END.  
+            
+    IF NUM-ENTRIES(lc-TeamList) > 1 THEN
+    DO:
+        MESSAGE "Multiple Teams for " lc-global-user  " - " lc-TeamList.
+        lc-teamList = "".
+    END.
+           
+            
     ASSIGN
         lc-QPhrase = "for each b-query NO-LOCK where b-query.CompanyCode = '" + string(lc-Global-Company) + "'".
         
     IF lc-archive = "C"
-    THEN ASSIGN 
+        THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.Archived = false". 
     IF lc-archive = "A"
-    THEN ASSIGN 
+        THEN ASSIGN 
             lc-QPhrase = lc-QPhrase + " and b-query.Archived = true".             
 
     IF lc-sel-account <> htmlib-Null() THEN 
@@ -470,7 +488,17 @@ PROCEDURE ip-BuildQueryPhrase:
     ELSE
         IF DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?) THEN
         DO:
-            lc-QPhrase =  lc-QPhrase + " and can-do('" + replace(lc-list-acc,"|",",") + "',b-query.AccountNumber)".
+                                 
+            IF lc-TeamList <> "" THEN
+            DO:
+                IF NUM-ENTRIES(lc-TeamList) = 1
+                    THEN  ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-st-num = " + lc-TeamList.
+                ELSE  ASSIGN lc-QPhrase = lc-QPhrase + " and can-do('" + replace(lc-TeamList,"|",",") + "',string(b-query.i-st-num))".        
+                ASSIGN 
+                    ll-TeamQDone = YES.     
+                
+            END.
+        
         END.
  
     
@@ -480,7 +508,20 @@ PROCEDURE ip-BuildQueryPhrase:
         IF lc-sel-assign = htmlib-null() 
             AND DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?) THEN
         DO:
-            lc-QPhrase =  lc-QPhrase + " and can-do('" + lc-ass-lo + "',b-query.AssignTo)".
+            IF NOT ll-TeamQDone THEN
+            DO:
+                /* lc-QPhrase =  lc-QPhrase + " and can-do('" + lc-ass-lo + "',b-query.AssignTo)". */
+                IF lc-TeamList <> "" THEN
+                DO:
+                    IF NUM-ENTRIES(lc-TeamList) = 1
+                        THEN  ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-st-num = " + lc-TeamList.
+                    ELSE  ASSIGN lc-QPhrase = lc-QPhrase + " and can-do('" + replace(lc-TeamList,"|",",") + "',string(b-query.i-st-num))".        
+                    ASSIGN 
+                        ll-TeamQDone = YES.     
+                
+                END.
+            
+            END.    
         END.
         ELSE
             IF lc-sel-assign <> htmlib-null() 
@@ -496,6 +537,12 @@ PROCEDURE ip-BuildQueryPhrase:
         THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.CatCode = '" + lc-cat-lo + "'".
 
 
+    IF li-search > 0 
+        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.IssueNumber = '" + string(li-Search) + "'".
+    ELSE 
+        IF lc-search <> "" 
+            THEN ASSIGN lc-QPhrase = lc-QPhrase  + " and b-query.searchField contains '" + lc-search + "'".
+            
     ASSIGN 
         lc-QPhrase = lc-QPhrase + 
             " and b-query.CreateDate >= " + string(DATE(lc-lodate)) + " " + 
@@ -503,11 +550,11 @@ PROCEDURE ip-BuildQueryPhrase:
     IF lc-srch-status <> "*" THEN
     DO:
         IF li-i-open = ?
-        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.statusCode = '" + lc-srch-status + "'".
+            THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.statusCode = '" + lc-srch-status + "'".
         ELSE
-        IF li-i-open 
-        THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = true".
-        ELSE ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = false".
+            IF li-i-open 
+                THEN ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = true".
+            ELSE ASSIGN lc-QPhrase = lc-QPhrase + " and b-query.i-open = false".
     END.
       
    
@@ -647,20 +694,20 @@ PROCEDURE ip-InitialProcess :
             END. 
            
             IF ld-FilterDate <> ?
-            AND ld-filterDate <> TODAY THEN
+                AND ld-filterDate <> TODAY THEN
             DO:
                 ASSIGN
                     li-FilterDays = TODAY - ld-filterDate.
                 ASSIGN 
-                    lc-lodate         = get-value("lodate")         
-                    lc-hidate         = get-value("hidate")
+                    lc-lodate = get-value("lodate")         
+                    lc-hidate = get-value("hidate")
                     .
-                 ld-FilterDate = DATE(lc-loDate) + li-filterDays.
+                ld-FilterDate = DATE(lc-loDate) + li-filterDays.
                  
-                 set-user-field("lodate",STRING(ld-FilterDate,"99/99/9999")).
+                set-user-field("lodate",STRING(ld-FilterDate,"99/99/9999")).
                   
-                 ld-FilterDate = DATE(lc-hiDate) + li-filterDays.
-                 set-user-field("hidate",STRING(ld-FilterDate,"99/99/9999")).
+                ld-FilterDate = DATE(lc-hiDate) + li-filterDays.
+                set-user-field("hidate",STRING(ld-FilterDate,"99/99/9999")).
                    
         
                     
@@ -689,7 +736,7 @@ PROCEDURE ip-InitialProcess :
         lc-AccountManager = get-value("accountmanager")
         lc-archive        = get-value("archive").
     IF lc-archive = ""
-    THEN lc-archive = "C".
+        THEN lc-archive = "C".
         
     IF get-value("submitsource") = "FilterSave" THEN
     DO:
@@ -895,20 +942,20 @@ PROCEDURE ip-Selection :
     FIND this-user
         WHERE this-user.LoginID = lc-global-user NO-LOCK NO-ERROR.
 
-     {&out}
+    {&out}
         '<td align=right valign=top>' htmlib-SideLabel("Archived") '</td>'
         '<td align=left valign=top>' 
         format-Select-Account(htmlib-Select("archive","C|A|B","Current|Archived|All",lc-archive)) '</td></tr><tr>' SKIP.
         
     IF NOT ll-customer
         THEN 
-        DO:
-            {&out}
+    DO:
+        {&out}
             '<td align=right valign=top>' htmlib-SideLabel("Customer") '</td>'
             '<td align=left valign=top>'.
-            {&out-long} 
+        {&out-long} 
             format-Select-AccountLong(htmlib-SelectLong("account",lc-list-acc,lc-list-aname,lc-sel-account)) '</td>'.
-        END.
+    END.
 
     {&out}
         '<td align=right valign=top>' htmlib-SideLabel("Status") '</td>'
@@ -1282,17 +1329,17 @@ PROCEDURE ip-SetQueryRanges:
 
     IF lc-sel-status = htmlib-Null() 
         THEN ASSIGN lc-srch-status = "*"
-                    li-i-open = ?.
+            li-i-open      = ?.
     ELSE
         IF lc-sel-status = "AllOpen" 
             THEN ASSIGN lc-srch-status = lc-open-status
-                         li-i-open = YES.
+                li-i-open      = YES.
         ELSE 
             IF lc-sel-status = "AllClosed"
                 THEN ASSIGN lc-srch-status = lc-closed-status
-                            li-i-open = NO.
+                    li-i-open      = NO.
             ELSE ASSIGN lc-srch-status = lc-sel-status
-                          li-i-open = ?.
+                    li-i-open      = ?.
          
     IF lc-sel-assign = htmlib-null() 
         AND DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-global-user,?) THEN
@@ -1439,11 +1486,11 @@ END PROCEDURE.
 &IF DEFINED(EXCLUDE-process-web-request) = 0 &THEN
 
 PROCEDURE process-web-request :
-/*------------------------------------------------------------------------------
-  Purpose:     Process the web request.
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+      Purpose:     Process the web request.
+      Parameters:  <none>
+      Notes:       
+    ------------------------------------------------------------------------------*/
   
     {lib/checkloggedin.i}
 
@@ -1550,15 +1597,15 @@ PROCEDURE process-web-request :
         CACHE = 1000.
 
     vhLBuffer1 = BUFFER b-query:HANDLE.
-     vhLQuery:SET-BUFFERS(vhLBuffer1).
+    vhLQuery:SET-BUFFERS(vhLBuffer1).
     
     vhLQuery:QUERY-PREPARE(lc-QPhrase).
     vhLQuery:QUERY-OPEN().
 
-    /**
+    
     MESSAGE "Phase = "  lc-QPhrase.
     DYNAMIC-FUNCTION("com-WriteQueryInfo",vhlQuery).
-    **/ 
+    
  
     vhLQuery:GET-FIRST(NO-LOCK).
 
@@ -1660,7 +1707,7 @@ FUNCTION Format-Select-Account RETURNS CHARACTER
 END FUNCTION.
 
 FUNCTION Format-Select-AccountLong RETURNS LONGCHAR 
-	 ( pc-htm AS LONGCHAR ) :
+    ( pc-htm AS LONGCHAR ) :
     /*------------------------------------------------------------------------------
       Purpose:  
         Notes:  
