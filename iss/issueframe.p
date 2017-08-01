@@ -9,6 +9,7 @@
     
     When        Who         What
     10/04/2006  phoski      NA    
+    01/08/2017  phoski      Fix 414 Error URI too Long
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -143,6 +144,8 @@ PROCEDURE process-web-request :
         ASSIGN 
             lc-field = ENTRY(li-loop,get-value(?)).
         IF lc-field = 'ExtranetUser' THEN NEXT.
+        
+        IF LENGTH(get-value(lc-field)) > 50 THEN NEXT.
         
         IF lc-field <> "" 
             THEN ASSIGN lc-param = lc-param + '&' + lc-field + '=' + get-value(lc-field).
