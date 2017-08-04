@@ -41,6 +41,8 @@
     01/05/2017  phoski      Customer Sites
     11/05/2017  phoski      Longchar Raised By
     19/07/2017  phoski      New fields populated
+    04/08/2017  phoksi      Activity Default
+    04/08/2017  phoski      Customer Non Standard SLA
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -1344,6 +1346,23 @@ PROCEDURE ip-MainEntry :
     
     IF lc-sla-rows <> "" AND lc-accountnumber <> "" AND NOT ll-customer THEN
     DO:
+        
+        FIND bcust WHERE bcust.companycode = lc-global-company
+            AND bcust.AccountNumber = lc-AccountNumber NO-LOCK NO-ERROR.
+        /*
+        *** 
+        *** Non standard SLA Tell Them
+        ***
+        */
+        IF AVAILABLE bcust AND bcust.nonStandardSLA THEN
+        DO:
+            {&out} '<tr><td>&nbsp;</td><td colspan=1><div class="infobox">Non Standard SLA Hours: '
+                    STRING(bcust.SLABeginHour,"z9") ":" STRING(bcust.SLABeginMin,"99") " - "
+                    STRING(bcust.SLAEndHour,"z9") ":" STRING(bcust.SLAEndMin,"99")
+                    
+                '</td></tr>' SKIP.
+        END.
+        
         {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
             (IF LOOKUP("sla",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("SLA")
@@ -1600,7 +1619,7 @@ PROCEDURE ip-QuickFinish :
         THEN htmlib-SideLabelError("Duration (HH:MM)")
         ELSE htmlib-SideLabel("Duration (HH:MM)"))
     '</td>'.
-    
+   
     {&out} '<td valign="top" align="left">'
     Format-Select-Duration(htmlib-InputField("hours",4,lc-hours))
     ':'
@@ -2501,7 +2520,10 @@ PROCEDURE process-web-request :
                             Issue.link-SLAID = slahead.SLAID.
                         EMPTY TEMP-TABLE tt-sla-sched.
                         RUN lib/slacalc.p
-                            ( Issue.IssueDate,
+                            ( 
+                            Issue.CompanyCode,
+                            Issue.AccountNumber,
+                            Issue.IssueDate,
                             Issue.IssueTime,
                             Issue.link-SLAID,
                             OUTPUT table tt-sla-sched ).
@@ -2710,8 +2732,23 @@ PROCEDURE process-web-request :
                              ELSE IF AVAILABLE slahead THEN  "sla" + string(ROWID(slahead))
                              ELSE "slanoneZZZZ" 
             lc-catcode      = lc-default-catcode.
-        IF NOT ll-Customer 
-            THEN RUN ip-SetUpQuick.
+            
+            
+        IF NOT ll-Customer THEN
+        DO: 
+            RUN ip-SetUpQuick.
+            lc-saved-activity = WebUser.def-activityType.
+            DEFINE BUFFER b-type    FOR webActType.
+            IF WebUser.def-activityType  <> "" THEN
+             FOR FIRST b-type NO-LOCK
+                WHERE b-type.CompanyCode = lc-global-company 
+                  AND b-type.TypeID  = int(WebUser.def-activityType):
+                    ASSIGN lc-actdescription =   b-type.description.
+                     
+             END.
+             
+        END.
+        
     END.
     IF lc-issuesource = "email" THEN
     DO:

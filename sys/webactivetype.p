@@ -193,13 +193,13 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain Activity Types") skip.
+    {&out} htmlib-Header("Maintain Activity Types") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webactivetype.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/webactivetype.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Activity Types") skip.
+    {&out} htmlib-ProgramTitle("Maintain Activity Types") SKIP.
     
     {&out}
     tbar-Begin(
@@ -214,14 +214,14 @@ PROCEDURE process-web-request :
     tbar-End().
 
 
-    {&out} skip
+    {&out} SKIP
            htmlib-StartMntTable().
 
 
     {&out}
     htmlib-TableHeading(
         "Type^left|Description^left|Administration Time?|Minimum Time Bookable<br />(Minutes)^right"
-        ) skip.
+        ) SKIP.
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
@@ -302,23 +302,23 @@ PROCEDURE process-web-request :
 
        
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
-            htmlib-MntTableField(html-encode(string(b-query.ActivityType)),'left')
-            htmlib-MntTableField(html-encode(string(b-query.Description)),'left')
-            htmlib-MntTableField(html-encode(string(b-query.isAdminTime)),'left')
-            htmlib-MntTableField(html-encode(string(b-query.MinTime)),'right')
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(b-query.ActivityType)),'left')
+            htmlib-MntTableField(html-encode(STRING(b-query.Description)),'left')
+            htmlib-MntTableField(html-encode(STRING(b-query.isAdminTime)),'left')
+            htmlib-MntTableField(html-encode(STRING(b-query.MinTime)),'right')
 
-            tbar-BeginHidden(rowid(b-query))
-                tbar-Link("view",rowid(b-query),appurl + "/sys/webactivetypemnt.p",lc-link-otherp)
-                tbar-Link("update",rowid(b-query),appurl + "/sys/webactivetypemnt.p",lc-link-otherp)
-                tbar-Link("delete",rowid(b-query),
-                          if DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"webactivetype",rowid(b-query))
-                          then ( appurl + "/sys/webactivetypemnt.p") else "off",
+            tbar-BeginHidden(ROWID(b-query))
+                tbar-Link("view",ROWID(b-query),appurl + "/sys/webactivetypemnt.p",lc-link-otherp)
+                tbar-Link("update",ROWID(b-query),appurl + "/sys/webactivetypemnt.p",lc-link-otherp)
+                tbar-Link("delete",ROWID(b-query),
+                          IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"webactivetype",ROWID(b-query))
+                          THEN ( appurl + "/sys/webactivetypemnt.p") ELSE "off",
                           lc-link-otherp)             
             tbar-EndHidden()
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -330,26 +330,26 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
+    {&out} SKIP 
            htmlib-EndTable()
-           skip.
+           SKIP.
 
     {lib/navpanel.i "sys/webactivetype.p"}
 
 
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+           htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+           htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+           SKIP.
 
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

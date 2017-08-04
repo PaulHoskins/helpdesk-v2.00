@@ -13,6 +13,7 @@
     13/03/2016  phoski      Ignore decommission inventory
     01/05/2017  phoski      Site
     19/07/2017  phoski      New fields populated
+    04/08/2017  phoski      Customer Non Standard SLA
 
 ***********************************************************************/
 
@@ -684,7 +685,10 @@ PROCEDURE ip-Initialise :
 
             EMPTY TEMP-TABLE tt-sla-sched.
             RUN lib/slacalc.p
-                ( Issue.IssueDate,
+                ( 
+                Issue.CompanyCode,
+                Issue.AccountNumber,
+                Issue.IssueDate,
                 Issue.IssueTime,
                 Issue.link-SLAID,
                 OUTPUT table tt-sla-sched ).

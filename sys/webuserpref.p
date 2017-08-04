@@ -9,6 +9,7 @@
     
     When        Who         What
     28/04/2006  phoski      Initial
+    04/08/2017  phoksi      Activity Default
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -18,17 +19,14 @@ CREATE WIDGET-POOL.
 
 /* Local Variable Definitions ---                                       */
 
-DEFINE VARIABLE lc-error-field AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-error-msg   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-field    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-error-msg      AS CHARACTER NO-UNDO.
 
 
-DEFINE VARIABLE lc-mode        AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-title       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-mode           AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-rowid          AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-title          AS CHARACTER NO-UNDO.
 
-
-DEFINE BUFFER b-valid FOR webuser.
-DEFINE BUFFER b-table FOR webuser.
 
 
 DEFINE VARIABLE lc-search         AS CHARACTER NO-UNDO.
@@ -41,6 +39,15 @@ DEFINE VARIABLE lc-parameters     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-label     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-submit-label   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-link-url       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-actcode   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-actdesc   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-ActivityType   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-list-actid     AS CHARACTER NO-UNDO.  
+DEFINE VARIABLE lc-list-activtype AS CHARACTER NO-UNDO. 
+DEFINE VARIABLE lc-list-activdesc AS CHARACTER NO-UNDO.  
+DEFINE VARIABLE lc-list-activtime AS CHARACTER NO-UNDO.
+
+
 
 
 
@@ -65,6 +72,9 @@ DEFINE VARIABLE lc-usertitleDesc  AS CHARACTER
 
 
 
+
+DEFINE BUFFER b-valid FOR webuser.
+DEFINE BUFFER b-table FOR webuser.
 
 /* ********************  Preprocessor Definitions  ******************** */
 
@@ -92,7 +102,7 @@ DEFINE VARIABLE lc-usertitleDesc  AS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 
 
@@ -123,7 +133,7 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
 
-    DEFINE VARIABLE li-int      AS INTEGER      NO-UNDO.
+    DEFINE VARIABLE li-int AS INTEGER NO-UNDO.
 
     
 
@@ -212,9 +222,14 @@ PROCEDURE process-web-request :
 
     
     FIND webuser WHERE webuser.loginid = lc-user NO-LOCK NO-ERROR.
+    
+    RUN com-GetAction ( lc-global-company , OUTPUT lc-list-actcode, OUTPUT lc-list-actdesc ).
+       
+    RUN com-GetActivityType ( lc-global-company , OUTPUT lc-list-actid, OUTPUT lc-list-activtype, OUTPUT lc-list-activdesc, OUTPUT lc-list-activtime ).
+    
 
     ASSIGN 
-        lc-mode = "UPDATE"
+        lc-mode  = "UPDATE"
         lc-rowid = STRING(ROWID(webuser))
         .
 
@@ -233,8 +248,9 @@ PROCEDURE process-web-request :
     DO:
         
         ASSIGN 
-            lc-customertrack = get-value("customertrack")
+            lc-customertrack  = get-value("customertrack")
             lc-recordsperpage = get-value("recordsperpage")
+            lc-ActivityType   = get-value("activitytype")
             .
         RUN ip-Validate( OUTPUT lc-error-field,
             OUTPUT lc-error-msg ).
@@ -254,7 +270,8 @@ PROCEDURE process-web-request :
                 ASSIGN 
                     b-table.customertrack    = lc-customertrack = 'on'
                     b-table.recordsperpage   = int(lc-recordsperpage)
-                    .
+                    b-table.def-activityType = lc-ActivityType.
+                .
                 
                 set-user-field("prefsaved","yes").
 
@@ -267,75 +284,96 @@ PROCEDURE process-web-request :
     
     IF request_method <> "post"
         THEN ASSIGN 
-            lc-customertrack = IF b-table.customertrack THEN 'on' ELSE ''
+            lc-customertrack  = IF b-table.customertrack THEN 'on' ELSE ''
             lc-recordsperpage = STRING(b-table.recordsperpage)
+            lc-ActivityType   = b-table.def-activityType
             .
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-           htmlib-StartForm("mainform","post", selfurl )
-           htmlib-ProgramTitle("Your Preferences") skip.
+    {&out} htmlib-Header(lc-title) SKIP
+        htmlib-StartForm("mainform","post", selfurl )
+        htmlib-ProgramTitle("Your Preferences - " + WebUser.Name) SKIP.
 
 
     
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
     IF get-value("prefsaved") = "yes" THEN
     DO:
-        {&out} '<tr><th colspan="2" style="text-align: center;">Your preferences have been saved.<br><br></th></tr>'.
+        {&out} 
+            '<tr><th colspan="2" style="text-align: center;">Your preferences have been saved.<br><br></th></tr>'.
     END.
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("customertrack",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Track Your Issues?")
         ELSE htmlib-SideLabel("Track Your Issues?"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-CheckBox("customertrack", IF lc-customertrack = 'on'
-        THEN TRUE ELSE FALSE) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-customertrack = 'on'
-                                         then 'yes' else 'no'),'left')
-           skip.
+            htmlib-CheckBox("customertrack", IF lc-customertrack = 'on'
+            THEN TRUE ELSE FALSE) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(IF lc-customertrack = 'on'
+            THEN 'yes' ELSE 'no'),'left')
+            SKIP.
     
-    {&out} '</TR>' skip.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("recordperpage",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Records Per Page")
         ELSE htmlib-SideLabel("Records Per Page"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("recordsperpage",2,lc-recordsperpage) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(lc-recordsperpage),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-InputField("recordsperpage",2,lc-recordsperpage) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-recordsperpage),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
+
+    
+    {&out} 
+        '<tr><td valign="top" align="right">' 
+        (IF LOOKUP("activitytype",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Default Activity Type")
+        ELSE htmlib-SideLabel("Default Activity Type"))
+        '</td>' 
+        '<td valign="top" align="left">'
+        htmlib-Select("activitytype",lc-list-actid,lc-list-activtype,lc-ActivityType) SKIP
+        '</td></tr>' SKIP. 
+                    
+     
 
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
     
-    {&out} '<center>' htmlib-SubmitButton("submitform","Update") 
-    '</center>' skip.
+    {&out} 
+        '<center>' htmlib-SubmitButton("submitform","Update") 
+        '</center>' SKIP.
     
          
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

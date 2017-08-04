@@ -28,6 +28,7 @@
     02/08/2016  phoski      CRM fields update
     15/10/2016  phoski      CRM Phase 2
     30/04/2017  phoski      Update main site
+    04/08/2017  phoski      Non Standard SLA & Times
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -121,7 +122,11 @@ DEFINE VARIABLE lc-indsector      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ind-code       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-ind-desc       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-add-note       AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-nonStandardSLA AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-slabeginhour   AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-slabeginmin    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-slaendhour     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-slaendmin      AS CHARACTER NO-UNDO.
 
 
 
@@ -158,7 +163,7 @@ DEFINE VARIABLE lc-add-note       AS CHARACTER NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-    {lib/htmlib.i}
+{lib/htmlib.i}
 
 
 
@@ -435,6 +440,38 @@ PROCEDURE ip-MainPage :
 
     {&out} 
         '<tr><td></td><td colspan=2><div class="infobox">Helpdesk Information</div></td></tr>' SKIP.
+        
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("nonstandardSLA",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Non Standard SLA?")
+            ELSE htmlib-SideLabel("Non Standard SLA?"))
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left" COLSPAN="2">'
+            htmlib-CheckBox("nonstandardsla", IF lc-nonstandardSLA = 'on'
+            THEN TRUE ELSE FALSE) 
+            '</TD></TR>' SKIP.
+                
+    
+    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        IF LOOKUP("slabegin",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Office Hours Based SLA - Start/End")
+        ELSE htmlib-SideLabel("Office Hours Based SLA - Start/End")
+              
+        '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+    {&out} '<TD VALIGN="TOP" ALIGN="left">'
+        htmlib-TimeSelect("slabeginhour",lc-slabeginhour,"slabeginmin",lc-slabeginmin)
+        ' / ' 
+        htmlib-TimeSelect("slaendhour",lc-slaendhour,"slaendmin",lc-slaendmin)
+            
+    ' </TD>' SKIP.
+    ELSE 
+    {&out} htmlib-TableField("format time",'left')
+           SKIP.
+    {&out} '</TR>' SKIP.
+            
     
     IF lc-sla-rows <> "" THEN
     DO:
@@ -862,9 +899,11 @@ PROCEDURE ip-Validate :
     ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER pc-error-field  AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg    AS CHARACTER NO-UNDO.
+    
 
     DEFINE BUFFER b-Customer FOR Customer.
     DEFINE VARIABLE li-int AS INT NO-UNDO.
+    DEFINE VARIABLE li-Time AS INTEGER EXTENT 2 NO-UNDO.
     
     
     IF lc-mode = "ADD":U AND glob-company.autoGenAccount = FALSE THEN
@@ -919,6 +958,22 @@ PROCEDURE ip-Validate :
         END.
               
     END.
+ 
+    ASSIGN
+        li-time[1] = ( int(lc-slabeginHour) * 100 ) + int(lc-slabeginmin)
+        li-time[2] = ( int(lc-slaendHour) * 100 ) + int(lc-slaendmin).
+        
+    IF lc-nonStandardSLA = "on" THEN
+    DO:
+        IF li-time[1] = 0
+        OR li-time[2] = 0
+        OR li-time[2] <= li-time[1] THEN RUN htmlib-AddErrorMessage(
+            'slabegin', 
+            'The SLA begin/end times must be entered and valid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+    END.  
+                    
     ASSIGN 
         li-int = int(lc-noemp) NO-ERROR.
     IF ERROR-STATUS:ERROR
@@ -1159,6 +1214,12 @@ PROCEDURE process-web-request :
                 lc-turn           = get-value("turn")
                 lc-salesnote      = get-value("salesnote")
                 lc-indsector      = get-value("indsector")
+                lc-nonstandardSLA = get-value("nonstandardsla")
+                lc-slabeginhour  = get-value("slabeginhour")
+                lc-slabeginmin   = get-value("slabeginmin")
+                lc-slaendhour    = get-value("slaendhour")
+                lc-slaendmin     = get-value("slaendmin")
+                
              
                 .
 
@@ -1230,6 +1291,12 @@ PROCEDURE process-web-request :
                         b-table.AnnualTurnover    = int(lc-turn)
                         b-table.salesnote         = lc-salesnote
                         b-table.industrySector    = lc-indsector
+                        b-table.nonstandardSLA    = lc-nonStandardSLA = "on"
+                        b-table.slabeginhour    = int(lc-slabeginhour)
+                        b-table.slabeginmin     = int(lc-slabeginmin)
+                        b-table.slaendhour      = int(lc-slaendhour)
+                        b-table.slaendmin       = int(lc-slaendmin)
+                        
                         .
                         
                     /* Active now means active on the help desk only */
@@ -1359,8 +1426,11 @@ PROCEDURE process-web-request :
                 lc-turn           = STRING(b-table.AnnualTurnover)
                 lc-salesnote      = b-table.SalesNote
                 lc-indsector      = b-table.industrySector
-                
-                
+                lc-nonStandardSLA = IF b-table.nonstandardSLA THEN "on" ELSE ""
+                lc-slabeginhour     = STRING(b-table.slabeginhour)
+                lc-slabeginmin      = STRING(b-table.slabeginmin)
+                lc-slaendhour       = STRING(b-table.slaendhour)
+                lc-slaendmin        = STRING(b-table.slaendmin)
                 .
 
             IF b-table.DefaultSLAID = 0

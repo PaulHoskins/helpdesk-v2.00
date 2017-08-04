@@ -10,19 +10,23 @@
     When        Who         What
     06/05/2006  phoski      Initial
     18/05/2014  phoski      Date/Time Fields
+    04/08/2017  phoski      Customer Non Standard SLA
     
 ***********************************************************************/
 {lib/slatt.i}
 
-DEFINE INPUT PARAMETER pd-Date     AS DATE                 NO-UNDO.
-DEFINE INPUT PARAMETER pi-Time     AS INTEGER              NO-UNDO.
-DEFINE INPUT PARAMETER pf-SLAID    LIKE slahead.SLAID      NO-UNDO.
+
+DEFINE INPUT PARAMETER pc-companyCode           AS CHARACTER            NO-UNDO.
+DEFINE INPUT PARAMETER pc-AccountNumber         AS CHARACTER            NO-UNDO.
+DEFINE INPUT PARAMETER pd-Date                  AS DATE                 NO-UNDO.
+DEFINE INPUT PARAMETER pi-Time                  AS INTEGER              NO-UNDO.
+DEFINE INPUT PARAMETER pf-SLAID                 LIKE slahead.SLAID      NO-UNDO.
 DEFINE OUTPUT PARAMETER table FOR tt-sla-sched.
 
 
 DEFINE BUFFER slahead FOR slahead.
 DEFINE BUFFER company FOR company.
-
+DEFINE BUFFER Customer FOR Customer.
 
 DEFINE VARIABLE ll-work-day       AS LOG       EXTENT 7 NO-UNDO.
 DEFINE VARIABLE li-sla-begin      AS INTEGER   NO-UNDO.
@@ -115,10 +119,14 @@ FUNCTION fnSeconds RETURNS INTEGER
 /* ***************************  Main Block  *************************** */
 
 
+FIND Company WHERE Company.CompanyCode = pc-companycode NO-LOCK NO-ERROR.
+FIND Customer WHERE customer.CompanyCode = pc-companycode
+    AND Customer.AccountNumber = pc-AccountNumber NO-LOCK NO-ERROR.
+    
 FIND slahead WHERE slahead.SLAID = pf-SLAID NO-LOCK NO-ERROR.
 IF NOT AVAILABLE slahead THEN RETURN.
 IF slahead.RespDesc[1] = "" THEN RETURN.
-FIND company WHERE company.CompanyCode = slahead.CompanyCode NO-LOCK.
+
 
 DYNAMIC-FUNCTION('fnInitialise':U).
 
@@ -323,7 +331,17 @@ FUNCTION fnInitialise RETURNS LOGICAL
     IF slahead.incSun = FALSE
         THEN ASSIGN ll-work-day[1] = FALSE.
 
+    IF Customer.nonStandardSLA THEN
+    ASSIGN 
+        li-sla-begin = DYNAMIC-FUNCTION('fnConvertHourMin':U,
+                                        customer.SLABeginHour,
+                                        customer.SLABeginMin)
+        li-sla-end   = DYNAMIC-FUNCTION('fnConvertHourMin':U,
+                                        customer.SLAEndHour,
+                                        Customer.SLAEndMin)
+        ll-office    = slahead.TimeBase = "OFF".
     
+    ELSE
     ASSIGN 
         li-sla-begin = DYNAMIC-FUNCTION('fnConvertHourMin':U,
                                         company.SLABeginHour,

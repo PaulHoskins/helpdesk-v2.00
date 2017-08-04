@@ -1811,6 +1811,41 @@ ADD FIELD "accStatus" OF "Customer" AS character
   MAX-WIDTH 16
   ORDER 300
 
+ADD FIELD "SLABeginMin" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 40
+  MAX-WIDTH 4
+  ORDER 400
+
+ADD FIELD "SLAEndHour" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "17"
+  POSITION 41
+  MAX-WIDTH 4
+  ORDER 410
+
+ADD FIELD "SLAEndMin" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 42
+  MAX-WIDTH 4
+  ORDER 420
+
+ADD FIELD "NonStandardSLA" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 43
+  MAX-WIDTH 1
+  ORDER 380
+
+ADD FIELD "SLABeginHour" OF "Customer" AS integer 
+  FORMAT "99"
+  INITIAL "8"
+  POSITION 44
+  MAX-WIDTH 4
+  ORDER 390
+
 ADD INDEX "AccountNumber" ON "Customer" 
   AREA "Schema Area"
   UNIQUE
@@ -7313,6 +7348,15 @@ ADD FIELD "ExcludeReports" OF "WebUser" AS logical
   MAX-WIDTH 1
   ORDER 380
 
+ADD FIELD "def-ActivityType" OF "WebUser" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Default ActType"
+  POSITION 41
+  MAX-WIDTH 60
+  COLUMN-LABEL "ActType"
+  ORDER 390
+
 ADD INDEX "LoginID" ON "WebUser" 
   AREA "Schema Area"
   UNIQUE
@@ -7462,4 +7506,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000148126
+0000148977

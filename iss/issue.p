@@ -465,7 +465,7 @@ PROCEDURE ip-BuildQueryPhrase:
             
     IF NUM-ENTRIES(lc-TeamList) > 1 THEN
     DO:
-        MESSAGE "Multiple Teams for " lc-global-user  " - " lc-TeamList.
+       /* MESSAGE "Multiple Teams for " lc-global-user  " - " lc-TeamList. */
         lc-teamList = "".
     END.
            
@@ -1602,10 +1602,10 @@ PROCEDURE process-web-request :
     vhLQuery:QUERY-PREPARE(lc-QPhrase).
     vhLQuery:QUERY-OPEN().
 
-    
+    /*
     MESSAGE "Phase = "  lc-QPhrase.
     DYNAMIC-FUNCTION("com-WriteQueryInfo",vhlQuery).
-    
+    */ 
  
     vhLQuery:GET-FIRST(NO-LOCK).
 

@@ -12,6 +12,7 @@
     20/10/2015  phoski      com-GetHelpDeskEmail for email sender
     27/02/2016  phoski      Link to issue in email
     02/07/2016  phoski      Don't send emails if holiday
+    04/08/2017  phoski      Customer Non Standard SLA
 
 ***********************************************************************/
 
@@ -149,7 +150,7 @@ FOR EACH ro-Issue NO-LOCK
 
         IF slahead.amberWarning > 0 THEN
         DO:
-            RUN lib/calcamber.p ( Issue.CompanyCode,
+            RUN lib/calcamber.p ( Issue.CompanyCode, Issue.AccountNumber,
                 ldt-Level2, slahead.amberWarning, OUTPUT issue.slaamber).
                     
             /*        

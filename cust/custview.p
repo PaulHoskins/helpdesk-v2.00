@@ -31,6 +31,7 @@
     15/10/2016 phoski       CRM Phase 2 - not iventory/issue for sales users
     30/04/2017 phoski       CustSite
     10/05/2017  phoski      Site Name
+    04/08/2017  phoski      Customer Non Standard SLA & i-open
                         
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -678,7 +679,10 @@ PROCEDURE ip-CustomerOpenIssue :
     OPEN QUERY q FOR EACH b-query NO-LOCK
         WHERE b-query.Company = pc-companyCode
         AND b-query.AccountNumber = pc-AccountNumber
+        /*
         AND can-do(lc-open-status,b-query.StatusCode)
+        */
+        AND b-query.i-open = TRUE
         BY b-query.IssueNumber DESCENDING.
 
     GET FIRST q NO-LOCK.
@@ -816,6 +820,17 @@ PROCEDURE ip-CustomerSecondary :
     IF NOT AVAILABLE b-query THEN RETURN.
    
 
+
+    IF b-query.nonStandardSLA THEN
+    DO:
+        {&out} 
+            '<div class="infobox">Non Standard SLA Hours: '
+            STRING(b-query.SLABeginHour,"z9") ":" STRING(b-query.SLABeginMin,"99") " - "
+            STRING(b-query.SLAEndHour,"z9") ":" STRING(b-query.SLAEndMin,"99")
+    
+            '</div>' SKIP.
+    END.
+        
     
     
     {&out} SKIP
@@ -1005,7 +1020,7 @@ PROCEDURE ip-Inventory :
     DEFINE VARIABLE lc-htmlreturn    AS CHARACTER NO-UNDO.   /* 3677 */ 
     DEFINE VARIABLE ll-htmltrue      AS LOG       NO-UNDO.   /* 3677 */ 
     
-    DEFINE VARIABLE lc-temp         AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-temp          AS CHARACTER NO-UNDO.
     
 
 
@@ -1071,7 +1086,7 @@ PROCEDURE ip-Inventory :
     FOR EACH CustSite OF Customer NO-LOCK:
         
         FIND FIRST b-query OF Customer
-                WHERE b-query.Site = CustSite.Site NO-LOCK NO-ERROR.
+            WHERE b-query.Site = CustSite.Site NO-LOCK NO-ERROR.
         IF NOT AVAILABLE b-query THEN NEXT.
             
         IF CustSite.Site > "" THEN
@@ -1080,8 +1095,8 @@ PROCEDURE ip-Inventory :
                      
             
             {&out} 
-              '<div class="infobox">Inventory At Site: ' lc-temp
-              '</div>' SKIP.
+                '<div class="infobox">Inventory At Site: ' lc-temp
+                '</div>' SKIP.
                         
         END.         
 
@@ -1095,7 +1110,7 @@ PROCEDURE ip-Inventory :
         
             FOR EACH b-query NO-LOCK OF Customer
                 WHERE b-query.isDecom = lpass 
-                  AND b-query.Site = CustSite.Site,
+                AND b-query.Site = CustSite.Site,
                 FIRST ivSub NO-LOCK OF b-query,
                 FIRST ivClass NO-LOCK OF ivSub
                 BREAK 

@@ -23,6 +23,7 @@
     01/05/2017  phoski      Customer Sites
     19/07/2017  phoski      New fields populated
     22/07/2017  phoski      Archive param from main window
+    04/08/2017  phoski      Customer Non Standard SLA
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -565,6 +566,16 @@ PROCEDURE ip-IssueMain :
         "~n","<br>")
         ,'left') SKIP
         '</tr>'.
+        
+    IF AVAILABLE b-cust AND b-cust.nonStandardSLA THEN
+    DO:
+        {&out} '<tr><td>&nbsp;</td><td colspan=1><div class="infobox">Non Standard SLA Hours: '
+                STRING(b-cust.SLABeginHour,"z9") ":" STRING(b-cust.SLABeginMin,"99") " - "
+                STRING(b-cust.SLAEndHour,"z9") ":" STRING(b-cust.SLAEndMin,"99")
+                
+            '</td></tr>' SKIP.
+    END.
+           
 
     {&out} 
         '<TR><TD VALIGN="TOP" ALIGN="right">' 
@@ -1311,7 +1322,10 @@ PROCEDURE ip-Update :
         DO:
             EMPTY TEMP-TABLE tt-sla-sched.
             RUN lib/slacalc.p
-                ( Issue.IssueDate,
+                (
+                Issue.CompanyCode,
+                Issue.AccountNumber,
+                Issue.IssueDate,
                 Issue.IssueTime,
                 Issue.link-SLAID,
                 OUTPUT table tt-sla-sched ).

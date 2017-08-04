@@ -10,6 +10,7 @@
     
     When        Who         What
     21/03/2015  phoski      Initial
+    04/08/2017  phoski      
 
 ***********************************************************************/
 
@@ -18,9 +19,11 @@ DEFINE VARIABLE ld-Date AS DATE    NO-UNDO.
 
 DEFINE VARIABLE li-Del  AS INTEGER EXTENT 3 NO-UNDO.
 
+DEFINE STREAM rp.
+
 ASSIGN
     ld-date = TODAY - 1.
-OUTPUT TO c:\temp\sesssionclean.log.   
+OUTPUT STREAM rp TO c:\temp\sesssionclean.log.   
     
 FOR EACH webUser NO-LOCK:
 
@@ -47,7 +50,7 @@ ASSIGN
     li-del[3] = li-del[1] + li-del[2].
     
 DO WITH FRAME f DOWN STREAM-IO:
-    DISPLAY ld-date COLUMN-LABEL 'Clear Date'
+    DISPLAY STREAM rp ld-date COLUMN-LABEL 'Clear Date'
         li-del[1] COLUMN-LABEL 'Salt'
         li-del[2] COLUMN-LABEL 'Session'    
         li-del[3] COLUMN-LABEL 'Total'.
@@ -55,5 +58,5 @@ DO WITH FRAME f DOWN STREAM-IO:
 END.
 
   
-OUTPUT CLOSE.
+OUTPUT STREAM rp CLOSE.
     

@@ -1,31 +1,27 @@
-/*------------------------------------------------------------------------
-    File        : calcamber.p
-    Purpose     : 
+/***********************************************************************
 
-    Syntax      :
+    Program:        lib/slaprocess.p
+    
+    Purpose:        SLA Processing
+    
+    Notes:
+    
+    
+    When        Who         What
+    12/05/2006  phoski      Initial
+    04/08/2017  phoski      Customer Non Standard SLA
 
-    Description : Calculates amber date/time	
-
-    Author(s)   : paul
-    Created     : Wed Jul 30 06:53:01 BST 2014
-    Notes       :
-  ----------------------------------------------------------------------*/
-
-/* ***************************  Definitions  ************************** */
-
-ROUTINE-LEVEL ON ERROR UNDO, THROW.
-
-/* ********************  Preprocessor Definitions  ******************** */
-
-
-/* ***************************  Main Block  *************************** */
+***********************************************************************/
 
 DEFINE INPUT PARAMETER  pc-companyCode          AS CHARACTER    NO-UNDO.
+DEFINE INPUT PARAMETER  pc-AccountNumber        AS CHARACTER    NO-UNDO.
 DEFINE INPUT PARAMETER  pd-baseDate             AS DATETIME     NO-UNDO.
 DEFINE INPUT PARAMETER  pi-minutes              AS INTEGER      NO-UNDO.
 DEFINE OUTPUT PARAMETER pd-Amber                AS DATETIME     NO-UNDO.
 
-DEFINE BUFFER Company FOR Company.
+DEFINE BUFFER Company  FOR Company.
+DEFINE BUFFER Customer FOR Customer.
+
 
 DEFINE VARIABLE li-Balance AS INT       NO-UNDO.
 DEFINE VARIABLE ld-Base    AS DATETIME  NO-UNDO.
@@ -39,6 +35,8 @@ DEFINE VARIABLE ld-temp    AS DATETIME  NO-UNDO.
 
 
 FIND Company WHERE Company.CompanyCode = pc-companycode NO-LOCK NO-ERROR.
+FIND Customer WHERE customer.CompanyCode = pc-companycode
+    AND Customer.AccountNumber = pc-AccountNumber NO-LOCK NO-ERROR.
 
 ASSIGN 
     li-balance = (  pi-minutes * 60 ) * 1000  /*  Milliseconds */
@@ -64,6 +62,11 @@ DO WHILE li-balance > 0:
         lc-temp  = STRING(ld-nowdt,"99/99/9999") + ' ' +
               string(Company.SLABeginHour,'99') + ":" +
               string(Company.SLABeginMin,'99').
+    IF Customer.nonStandardSLA
+        THEN  lc-temp  = STRING(ld-nowdt,"99/99/9999") + ' ' +
+            string(Customer.SLABeginHour,'99') + ":" +
+            string(Customer.SLABeginMin,'99').           
+              
               
               
     ASSIGN 
@@ -89,6 +92,12 @@ DO WHILE li-balance > 0:
         lc-temp = STRING(ld-nowdt,"99/99/9999") + ' ' +
             string(Company.SLAEndHour,'99') + ":" +
             string(Company.SLAEndMin,'99').
+            
+        IF Customer.nonStandardSLA 
+            THEN lc-temp  = STRING(ld-nowdt,"99/99/9999") + ' ' +
+                string(Customer.SLAEndHour,'99') + ":" +
+                string(Customer.SLAEndMin,'99').           
+                  
         ASSIGN
             ld-date1 = DATETIME(lc-temp).
         NEXT.      
