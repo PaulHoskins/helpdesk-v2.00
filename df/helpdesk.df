@@ -3942,6 +3942,14 @@ ADD FIELD "i-open" OF "Issue" AS logical
   MAX-WIDTH 1
   ORDER 520
 
+ADD FIELD "orig-SLAID" OF "Issue" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 54
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 530
+
 ADD INDEX "IssueNumber" ON "Issue" 
   AREA "Schema Area"
   UNIQUE
@@ -5673,6 +5681,13 @@ ADD FIELD "AmberWarning" OF "slahead" AS integer
   POSITION 17
   MAX-WIDTH 4
   ORDER 160
+
+ADD FIELD "seq-no" OF "slahead" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 19
+  MAX-WIDTH 4
+  ORDER 170
 
 ADD INDEX "SLACode" ON "slahead" 
   AREA "Schema Area"
@@ -7506,4 +7521,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000148977
+0000149250

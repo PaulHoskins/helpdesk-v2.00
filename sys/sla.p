@@ -9,6 +9,7 @@
     
     When        Who         What
     24/04/2006  phoski      Initial
+    05/08/2017  phoski      Sequence Field
     
 
 ***********************************************************************/
@@ -79,7 +80,7 @@ DEFINE QUERY q FOR b-query SCROLLING.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -170,9 +171,9 @@ PROCEDURE process-web-request :
    
 
     ASSIGN 
-        lc-search = get-value("search")
-        lc-firstrow = get-value("firstrow")
-        lc-lastrow  = get-value("lastrow")
+        lc-search     = get-value("search")
+        lc-firstrow   = get-value("firstrow")
+        lc-lastrow    = get-value("lastrow")
         lc-navigation = get-value("navigation").
     
     ASSIGN 
@@ -192,39 +193,41 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header("Maintain SLA") skip.
+    {&out} htmlib-Header("Maintain SLA") SKIP.
 
-    {&out} htmlib-JScript-Maintenance() skip.
+    {&out} htmlib-JScript-Maintenance() SKIP.
 
-    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/sla.p' ) skip.
+    {&out} htmlib-StartForm("mainform","post", appurl + '/sys/sla.p' ) SKIP.
 
-    {&out} htmlib-ProgramTitle("Maintain Service Level Agreements") skip.
+    {&out} htmlib-ProgramTitle("Maintain Service Level Agreements") SKIP.
     
 
     {&out}
-    tbar-Begin(
+        tbar-Begin(
         tbar-Find(appurl + "/sys/sla.p")
         )
-    tbar-Link("add",?,appurl + '/' + "sys/slamnt.p",lc-link-otherp)
-    tbar-BeginOption()
-    tbar-Link("view",?,"off",lc-link-otherp)
-    tbar-Link("update",?,"off",lc-link-otherp)
-    tbar-Link("delete",?,"off",lc-link-otherp)
-    tbar-EndOption()
-    tbar-End().
+        tbar-Link("add",?,appurl + '/' + "sys/slamnt.p",lc-link-otherp)
+        tbar-BeginOption()
+        tbar-Link("view",?,"off",lc-link-otherp)
+        tbar-Link("update",?,"off",lc-link-otherp)
+        tbar-Link("delete",?,"off",lc-link-otherp)
+        tbar-EndOption()
+        tbar-End().
 
 
-    {&out} skip
-           htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartMntTable().
 
     {&out}
-    htmlib-TableHeading(
-        "Code^left|Description^left|Customer^left"
-        ) skip.
+        htmlib-TableHeading(
+        "Sequence^right|Code^left|Description^left|Customer^left"
+        ) SKIP.
 
 
     OPEN QUERY q FOR EACH b-query NO-LOCK
-        WHERE b-query.companycode = lc-global-company.
+        WHERE b-query.companycode = lc-global-company
+        BY b-query.seq-no 
+        BY b-query.SLACode.
 
     GET FIRST q NO-LOCK.
 
@@ -276,7 +279,7 @@ PROCEDURE process-web-request :
                 END.
 
     ASSIGN 
-        li-count = 0
+        li-count     = 0
         lr-first-row = ?
         lr-last-row  = ?.
 
@@ -311,25 +314,26 @@ PROCEDURE process-web-request :
         END.
        
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
+            htmlib-MntTableField(STRING(b-query.seq-no),'right')
             htmlib-MntTableField(html-encode(b-query.SLACode),'left')
             htmlib-MntTableField(html-encode(b-query.Description),'left')
             htmlib-MntTableField(html-encode(lc-customer),'left')
 
-            tbar-BeginHidden(rowid(b-query))
-                tbar-Link("view",rowid(b-query),appurl + '/' + "sys/slamnt.p",lc-link-otherp)
-                tbar-Link("update",rowid(b-query),appurl + '/' + "sys/slamnt.p",lc-link-otherp)
-                tbar-Link("delete",rowid(b-query),
-                          if DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"sla",rowid(b-query))
-                          then ( appurl + '/' + "sys/slamnt.p") else "off",
-                          lc-link-otherp)
+            tbar-BeginHidden(ROWID(b-query))
+            tbar-Link("view",ROWID(b-query),appurl + '/' + "sys/slamnt.p",lc-link-otherp)
+            tbar-Link("update",ROWID(b-query),appurl + '/' + "sys/slamnt.p",lc-link-otherp)
+            tbar-Link("delete",ROWID(b-query),
+            IF DYNAMIC-FUNCTION('com-CanDelete':U,lc-user,"sla",ROWID(b-query))
+            THEN ( appurl + '/' + "sys/slamnt.p") ELSE "off",
+            lc-link-otherp)
                 
             tbar-EndHidden()
 
             
-            '</tr>' skip.
+            '</tr>' SKIP.
 
        
 
@@ -341,26 +345,26 @@ PROCEDURE process-web-request :
 
     IF li-count < li-max-lines THEN
     DO:
-        {&out} skip htmlib-BlankTableLines(li-max-lines - li-count) skip.
+        {&out} SKIP htmlib-BlankTableLines(li-max-lines - li-count) SKIP.
     END.
 
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
     {lib/navpanel.i "sys/sla.p"}
     
-    {&out} skip
-           htmlib-Hidden("firstrow", string(lr-first-row)) skip
-           htmlib-Hidden("lastrow", string(lr-last-row)) skip
-           skip.
+    {&out} SKIP
+        htmlib-Hidden("firstrow", STRING(lr-first-row)) SKIP
+        htmlib-Hidden("lastrow", STRING(lr-last-row)) SKIP
+        SKIP.
 
     
     
     {&out} htmlib-EndForm().
 
     
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

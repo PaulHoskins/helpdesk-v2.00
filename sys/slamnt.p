@@ -10,6 +10,8 @@
     When        Who         What
     28/04/2006  phoski      Initial      
     15/05/2014  phoski      Amber Warning period
+    05/08/2017  phoski      Sequence Field
+     
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -55,7 +57,7 @@ DEFINE VARIABLE lc-AlertBase     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-incSat        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-incSun        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-AmberWarning  AS CHARACTER NO-UNDO.
-
+DEFINE VARIABLE lc-Seq           AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE li-loop          AS INTEGER   NO-UNDO.
 DEFINE VARIABLE lc-respunit      LIKE slahead.respunit NO-UNDO.
@@ -93,7 +95,7 @@ DEFINE VARIABLE lc-respdest      LIKE lc-respunit NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -120,48 +122,50 @@ PROCEDURE ip-AlertTable :
       Notes:       
     ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE li-loop         AS INTEGER      NO-UNDO.
-    DEFINE VARIABLE lc-object       AS CHARACTER     NO-UNDO.
-    DEFINE VARIABLE lc-value        AS CHARACTER     NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-object AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-value  AS CHARACTER NO-UNDO.
 
     {&out}
-    '<tr><td colspan=2>'.
+        '<tr><td colspan=2>'.
 
 
-    {&out} skip
-           htmlib-StartFieldSet("SLA Alerts") 
-           htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartFieldSet("SLA Alerts") 
+        htmlib-StartMntTable().
 
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Level^right|Description^left|Unit^left|Time^left|Action^left|Alert To^left"
-        ) skip.
+        ) SKIP.
 
     DO li-loop = 1 TO 10:
-        {&out} '<tr class="tabrow1">'.
+        {&out} 
+            '<tr class="tabrow1">'.
 
-        {&out} '<th style="text-align: right; vertical-align: text-top;">'
-        li-loop ":" '</th>'.
+        {&out} 
+            '<th style="text-align: right; vertical-align: text-top;">'
+            li-loop ":" '</th>'.
 
         IF CAN-DO("view,delete",lc-mode) THEN
         DO:
             {&out} 
-            '<td>' html-encode(b-table.respdesc[li-loop]) '</td>'
-            '<td>' html-encode(
+                '<td>' html-encode(b-table.respdesc[li-loop]) '</td>'
+                '<td>' html-encode(
                 DYNAMIC-FUNCTION("com-DecodeLookup",b-table.respunit[li-loop],
                 lc-global-respunit-code,
                 lc-global-respunit-display)
                 ) '</td>'
-            '<td>' 
-            IF b-table.resptime[li-loop] = 0
+                '<td>' 
+                IF b-table.resptime[li-loop] = 0
                 THEN "&nbsp;" 
-            ELSE html-encode(STRING(b-table.resptime[li-loop])) '</td>'
-            '<td>' html-encode(
+                ELSE html-encode(STRING(b-table.resptime[li-loop])) '</td>'
+                '<td>' html-encode(
                 DYNAMIC-FUNCTION("com-DecodeLookup",b-table.respaction[li-loop],
                 lc-global-respaction-code,
                 lc-global-respaction-display)
                 ) '</td>'
-            '<td>' html-encode(b-table.respdest[li-loop]) '</td>'
+                '<td>' html-encode(b-table.respdest[li-loop]) '</td>'
                 .
 
         END.
@@ -170,40 +174,47 @@ PROCEDURE ip-AlertTable :
             ASSIGN 
                 lc-object = "respdesc" + string(li-loop)
                 lc-value  = get-value(lc-object).
-            {&out} '<td>' htmlib-InputField(lc-object,20,lc-value) '</td>'.
+            {&out} 
+                '<td>' htmlib-InputField(lc-object,20,lc-value) '</td>'.
 
             ASSIGN 
                 lc-object = "respunit" + string(li-loop)
                 lc-value  = get-value(lc-object).
-            {&out} '<td>' htmlib-Select(lc-object,lc-global-respunit-code,lc-global-respunit-display,lc-value) '</td>'.
+            {&out} 
+                '<td>' htmlib-Select(lc-object,lc-global-respunit-code,lc-global-respunit-display,lc-value) '</td>'.
 
             ASSIGN 
                 lc-object = "resptime" + string(li-loop)
                 lc-value  = get-value(lc-object).
-            {&out} '<td>' htmlib-InputField(lc-object,4,lc-value) '</td>'.
+            {&out} 
+                '<td>' htmlib-InputField(lc-object,4,lc-value) '</td>'.
 
             ASSIGN 
                 lc-object = "respaction" + string(li-loop)
                 lc-value  = get-value(lc-object).
-            {&out} '<td>' htmlib-Select(lc-object,lc-global-respaction-code,lc-global-respaction-display,lc-value) '</td>'.
+            {&out} 
+                '<td>' htmlib-Select(lc-object,lc-global-respaction-code,lc-global-respaction-display,lc-value) '</td>'.
 
             ASSIGN 
                 lc-object = "respdest" + string(li-loop)
                 lc-value  = get-value(lc-object).
-            {&out} '<td>' htmlib-InputField(lc-object,30,lc-value) '</td>'.
+            {&out} 
+                '<td>' htmlib-InputField(lc-object,30,lc-value) '</td>'.
 
 
 
         END.
 
-        {&out} '</tr>'.
+        {&out} 
+            '</tr>'.
     END.
-    {&out} skip 
-           htmlib-EndTable()
-           htmlib-EndFieldSet() 
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        htmlib-EndFieldSet() 
+        SKIP.
 
-    {&out} '</td></tr>'.
+    {&out} 
+        '</td></tr>'.
 
 END PROCEDURE.
 
@@ -221,12 +232,12 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE lf-dec      AS DECIMAL          NO-UNDO.
-    DEFINE VARIABLE li-index    AS INTEGER          NO-UNDO.
-    DEFINE VARIABLE lc-char     AS CHARACTER         NO-UNDO.
-    DEFINE VARIABLE li-int      AS INTEGER          NO-UNDO.
+    DEFINE VARIABLE lf-dec   AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE li-index AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-char  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-int   AS INTEGER   NO-UNDO.
 
-    DEFINE BUFFER webuser  FOR webuser.
+    DEFINE BUFFER webuser FOR webuser.
 
     IF lc-mode = "ADD":U THEN
     DO:
@@ -272,6 +283,18 @@ PROCEDURE ip-Validate :
         END.
     END.
 
+    ASSIGN
+        li-int = INT(lc-seq) NO-ERROR.
+
+    IF ERROR-STATUS:ERROR 
+        OR li-int < 0 
+        OR li-int = ? 
+        THEN RUN htmlib-AddErrorMessage(
+            'seq', 
+            'Sequence is invalid',
+            INPUT-OUTPUT pc-error-field,
+            INPUT-OUTPUT pc-error-msg ).
+            
     IF lc-description = ""
         OR lc-description = ?
         THEN RUN htmlib-AddErrorMessage(
@@ -475,19 +498,19 @@ PROCEDURE process-web-request :
 
     
     ASSIGN 
-        lc-mode = get-value("mode")
-        lc-rowid = get-value("rowid")
-        lc-search = get-value("search")
-        lc-firstrow = get-value("firstrow")
-        lc-lastrow  = get-value("lastrow")
+        lc-mode       = get-value("mode")
+        lc-rowid      = get-value("rowid")
+        lc-search     = get-value("search")
+        lc-firstrow   = get-value("firstrow")
+        lc-lastrow    = get-value("lastrow")
         lc-navigation = get-value("navigation").
 
     IF lc-mode = "" 
-        THEN ASSIGN lc-mode = get-field("savemode")
-            lc-rowid = get-field("saverowid")
-            lc-search = get-value("savesearch")
-            lc-firstrow = get-value("savefirstrow")
-            lc-lastrow  = get-value("savelastrow")
+        THEN ASSIGN lc-mode       = get-field("savemode")
+            lc-rowid      = get-field("saverowid")
+            lc-search     = get-value("savesearch")
+            lc-firstrow   = get-value("savefirstrow")
+            lc-lastrow    = get-value("savelastrow")
             lc-navigation = get-value("savenavigation").
 
     ASSIGN 
@@ -499,32 +522,32 @@ PROCEDURE process-web-request :
         WHEN 'add'
         THEN 
             ASSIGN 
-                lc-title = 'Add'
-                lc-link-label = "Cancel addition"
+                lc-title        = 'Add'
+                lc-link-label   = "Cancel addition"
                 lc-submit-label = "Add SLA".
         WHEN 'view'
         THEN 
             ASSIGN 
-                lc-title = 'View'
-                lc-link-label = "Back"
+                lc-title        = 'View'
+                lc-link-label   = "Back"
                 lc-submit-label = "".
         WHEN 'delete'
         THEN 
             ASSIGN 
-                lc-title = 'Delete'
-                lc-link-label = 'Cancel deletion'
+                lc-title        = 'Delete'
+                lc-link-label   = 'Cancel deletion'
                 lc-submit-label = 'Delete SLA'.
         WHEN 'Update'
         THEN 
             ASSIGN 
-                lc-title = 'Update'
-                lc-link-label = 'Cancel update'
+                lc-title        = 'Update'
+                lc-link-label   = 'Cancel update'
                 lc-submit-label = 'Update SLA'.
     END CASE.
 
 
     ASSIGN 
-        lc-title = lc-title + ' SLA'
+        lc-title    = lc-title + ' SLA'
         lc-link-url = appurl + '/sys/sla.p' + 
                                   '?search=' + lc-search + 
                                   '&firstrow=' + lc-firstrow + 
@@ -564,15 +587,16 @@ PROCEDURE process-web-request :
                 lc-incSun        = get-value("incsun")
                 lc-AlertBase     = get-value("alertbase")
                 lc-amberWarning  = get-value("amberwarning")
+                lc-seq           = get-value("seq")
                 .
   
             DO li-loop = 1 TO 10:
                 ASSIGN 
-                    lc-respdesc[li-loop] = get-value("respdesc" + string(li-loop))
-                    lc-respunit[li-loop] = get-value("respunit" + string(li-loop))
-                    lc-resptime[li-loop] = get-value("resptime" + string(li-loop))
+                    lc-respdesc[li-loop]   = get-value("respdesc" + string(li-loop))
+                    lc-respunit[li-loop]   = get-value("respunit" + string(li-loop))
+                    lc-resptime[li-loop]   = get-value("resptime" + string(li-loop))
                     lc-respaction[li-loop] = get-value("respaction" + string(li-loop))
-                    lc-respdest[li-loop] = get-value("respdest" + string(li-loop))
+                    lc-respdest[li-loop]   = get-value("respdest" + string(li-loop))
                     .
             END.
             RUN ip-Validate( OUTPUT lc-error-field,
@@ -596,10 +620,10 @@ PROCEDURE process-web-request :
                 DO:
                     CREATE b-table.
                     ASSIGN 
-                        b-table.slacode = CAPS(lc-slacode)
-                        b-table.companycode = lc-global-company
+                        b-table.slacode       = CAPS(lc-slacode)
+                        b-table.companycode   = lc-global-company
                         b-table.AccountNumber = CAPS(lc-accountNumber)
-                        lc-firstrow      = STRING(ROWID(b-table))
+                        lc-firstrow           = STRING(ROWID(b-table))
                         .
                     DO WHILE TRUE:
                         RUN lib/makeaudit.p (
@@ -618,29 +642,30 @@ PROCEDURE process-web-request :
                 IF lc-error-msg = "" THEN
                 DO:
                     ASSIGN 
-                        b-table.description     = lc-description
-                        b-table.notes           = lc-notes  
-                        b-table.TimeBase        = lc-TimeBase
-                        b-table.AlertBase       = lc-AlertBase
-                        b-table.incSat          = lc-incsat = "on"
-                        b-table.incSun          = lc-incSun = "on"
-                        b-table.AmberWarning    = INT(lc-amberWarning)
+                        b-table.description  = lc-description
+                        b-table.notes        = lc-notes  
+                        b-table.TimeBase     = lc-TimeBase
+                        b-table.AlertBase    = lc-AlertBase
+                        b-table.incSat       = lc-incsat = "on"
+                        b-table.incSun       = lc-incSun = "on"
+                        b-table.AmberWarning = INTEGER(lc-amberWarning)
+                        b-table.seq-no       = INTEGER(lc-seq)
                         .
                    
                     DO li-loop = 1 TO 10:
                         IF lc-respdesc[li-loop] = "" 
                             THEN ASSIGN
-                                b-table.respdesc[li-loop] = ""
-                                b-table.respunit[li-loop] = ""
-                                b-table.resptime[li-loop] = 0
+                                b-table.respdesc[li-loop]   = ""
+                                b-table.respunit[li-loop]   = ""
+                                b-table.resptime[li-loop]   = 0
                                 b-table.respaction[li-loop] = ""
-                                b-table.respdest[li-loop] = "".
+                                b-table.respdest[li-loop]   = "".
                         ELSE ASSIGN
-                                b-table.respdesc[li-loop] = lc-respdesc[li-loop]
-                                b-table.respunit[li-loop] = lc-respunit[li-loop]
-                                b-table.resptime[li-loop] = int(lc-resptime[li-loop])
+                                b-table.respdesc[li-loop]   = lc-respdesc[li-loop]
+                                b-table.respunit[li-loop]   = lc-respunit[li-loop]
+                                b-table.resptime[li-loop]   = int(lc-resptime[li-loop])
                                 b-table.respaction[li-loop] = lc-respaction[li-loop]
-                                b-table.respdest[li-loop] = lc-respdest[li-loop].
+                                b-table.respdest[li-loop]   = lc-respdest[li-loop].
 
 
                     END.
@@ -676,7 +701,7 @@ PROCEDURE process-web-request :
     DO:
         FIND b-table WHERE ROWID(b-table) = to-rowid(lc-rowid) NO-LOCK.
         ASSIGN 
-            lc-slacode = b-table.slacode
+            lc-slacode       = b-table.slacode
             lc-AccountNumber = b-table.AccountNumber.
 
         IF CAN-DO("view,delete",lc-mode)
@@ -691,15 +716,16 @@ PROCEDURE process-web-request :
                 lc-incSun        = IF b-table.incsun THEN "on" ELSE ""
                 lc-incSat        = IF b-table.incsat THEN "on" ELSE ""
                 lc-AmberWarning  = STRING(b-table.AmberWarning)
+                lc-seq           = STRING(b-table.seq-no)
                 .
             DO li-loop = 1 TO 10:
                 IF b-table.respdesc[li-loop] = "" THEN NEXT.
                 ASSIGN
-                    lc-respdesc[li-loop] = b-table.respdesc[li-loop] 
-                    lc-respunit[li-loop] = b-table.respunit[li-loop] 
-                    lc-resptime[li-loop] = STRING(b-table.resptime[li-loop]) 
+                    lc-respdesc[li-loop]   = b-table.respdesc[li-loop] 
+                    lc-respunit[li-loop]   = b-table.respunit[li-loop] 
+                    lc-resptime[li-loop]   = STRING(b-table.resptime[li-loop]) 
                     lc-respaction[li-loop] = b-table.respaction[li-loop]
-                    lc-respdest[li-loop] = b-table.respdest[li-loop].
+                    lc-respdest[li-loop]   = b-table.respdest[li-loop].
                 set-user-field("respdesc" + string(li-loop),lc-respdesc[li-loop]).
                 set-user-field("respunit" + string(li-loop),lc-respunit[li-loop]).
                 set-user-field("resptime" + string(li-loop),lc-resptime[li-loop]).
@@ -713,77 +739,99 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-           htmlib-StartForm("mainform","post", appurl + '/sys/slamnt.p' )
-           htmlib-ProgramTitle(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP
+        htmlib-StartForm("mainform","post", appurl + '/sys/slamnt.p' )
+        htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+        htmlib-Hidden ("saverowid", lc-rowid) SKIP
+        htmlib-Hidden ("savesearch", lc-search) SKIP
+        htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+        htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+        htmlib-Hidden ("nullfield", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("slacode",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("SLA Code")
         ELSE htmlib-SideLabel("SLA Code"))
-    '</TD>' skip
-    .
+        '</TD>' SKIP
+        .
 
     IF lc-mode = "ADD" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("slacode",20,lc-slacode) skip
-           '</TD>'.
-    else
-    {&out} htmlib-TableField(html-encode(lc-slacode),'left')
-           skip.
+            htmlib-InputField("slacode",20,lc-slacode) SKIP
+            '</TD>'.
+    ELSE
+        {&out} htmlib-TableField(html-encode(lc-slacode),'left')
+            SKIP.
 
 
-    {&out} '</TR>' skip.
-
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        (IF LOOKUP("description",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("Description")
-        ELSE htmlib-SideLabel("Description"))
-    '</TD>'.
+    {&out} 
+        '</TR>' SKIP.
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("seq",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Sequence")
+        ELSE htmlib-SideLabel("Sequence"))
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("description",40,lc-description) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(lc-description),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-InputField("seq",3,lc-seq) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-seq),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
+        
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("description",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Description")
+        ELSE htmlib-SideLabel("Description"))
+        '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-InputField("description",40,lc-description) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-description),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
     
     IF lc-mode = "ADD" THEN
     DO:
-        {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
             ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("Account Number")
             ELSE htmlib-SideLabel("Account Number"))
-        '</TD>' skip
-        .
+            '</TD>' SKIP
+            .
 
         {&out} 
-        '<TD VALIGN="TOP" ALIGN="left">'
-        '<input class="inputfield" name="accountnumber" size="8" value="' get-value("accountnumber") '"' skip
-                'onBlur="javascript:AjaxSimpleDescription(this,~'' appurl '~',~'' lc-global-company '~',~'accountnumber~',~'customername~');"'
-                '>'
+            '<TD VALIGN="TOP" ALIGN="left">'
+            '<input class="inputfield" name="accountnumber" size="8" value="' get-value("accountnumber") '"' SKIP
+            'onBlur="javascript:AjaxSimpleDescription(this,~'' appurl '~',~'' lc-global-company '~',~'accountnumber~',~'customername~');"'
+            '>'
                 
-                skip(2)
-                htmlib-ALookup("accountnumber","nullfield",appurl + '/lookup/customer.p')
-                skip(2)
-                '<span id="customername" class="reffield">&nbsp;</span>'
+            SKIP(2)
+            htmlib-ALookup("accountnumber","nullfield",appurl + '/lookup/customer.p')
+            SKIP(2)
+            '<span id="customername" class="reffield">&nbsp;</span>'
             '</TD>'.
-        {&out} '</TR>' skip.
+        {&out} 
+            '</TR>' SKIP.
     END.
     ELSE
         IF lc-accountNumber <> "" 
@@ -795,144 +843,159 @@ PROCEDURE process-web-request :
                 WHERE customer.CompanyCode = lc-global-company
                 AND customer.AccountNumber = lc-AccountNumber
                 NO-LOCK NO-ERROR.
-            {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            {&out} 
+                '<TR><TD VALIGN="TOP" ALIGN="right">' 
                 ( IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
                 THEN htmlib-SideLabelError("Account Number")
                 ELSE htmlib-SideLabel("Account Number"))
-            '</TD>'
-            htmlib-TableField(html-encode(lc-accountnumber + " " + customer.name),'left')
-            '</tr>'
-               skip.
+                '</TD>'
+                htmlib-TableField(html-encode(lc-accountnumber + " " + customer.name),'left')
+                '</tr>'
+                SKIP.
         END.
 
    
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("timebase",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("SLA Covers")
         ELSE htmlib-SideLabel("SLA Covers"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("timebase",lc-global-tbase-code,lc-global-tbase-display,lc-timebase)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(dynamic-function("com-DecodeLookup",lc-timebase,
-                                     lc-global-tbase-code,
-                                     lc-global-tbase-display
-                                     ),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-Select("timebase",lc-global-tbase-code,lc-global-tbase-display,lc-timebase)
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(DYNAMIC-FUNCTION("com-DecodeLookup",lc-timebase,
+            lc-global-tbase-code,
+            lc-global-tbase-display
+            ),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
     
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("incsat",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("SLA Covers Saturdays?")
         ELSE htmlib-SideLabel("SLA Covers Saturdays?"))
-    '</TD>'.
+        '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-CheckBox("incsat", IF lc-incsat = 'on'
-        THEN TRUE ELSE FALSE) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-incsat = 'on'
-                                       then 'yes' else 'no'),'left')
-         skip.
+            htmlib-CheckBox("incsat", IF lc-incsat = 'on'
+            THEN TRUE ELSE FALSE) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(IF lc-incsat = 'on'
+            THEN 'yes' ELSE 'no'),'left')
+            SKIP.
 
-    {&out} '</TR>' skip.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("incsun",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("SLA Covers Sundays?")
         ELSE htmlib-SideLabel("SLA Covers Sundays?"))
-    '</TD>'.
+        '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-CheckBox("incsun", IF lc-incsun = 'on'
-        THEN TRUE ELSE FALSE) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(if lc-incsun = 'on'
-                                       then 'yes' else 'no'),'left')
-         skip.
+            htmlib-CheckBox("incsun", IF lc-incsun = 'on'
+            THEN TRUE ELSE FALSE) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(IF lc-incsun = 'on'
+            THEN 'yes' ELSE 'no'),'left')
+            SKIP.
 
-    {&out} '</TR>' skip.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("alertbase",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("SLA Alerts Time Based On")
         ELSE htmlib-SideLabel("SLA Alerts Time Based On"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-Select("alertbase",lc-global-abase-code,lc-global-abase-display,lc-alertbase)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(dynamic-function("com-DecodeLookup",lc-alertbase,
-                                     lc-global-abase-code,
-                                     lc-global-abase-display
-                                     ),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-Select("alertbase",lc-global-abase-code,lc-global-abase-display,lc-alertbase)
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(DYNAMIC-FUNCTION("com-DecodeLookup",lc-alertbase,
+            lc-global-abase-code,
+            lc-global-abase-display
+            ),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("amberwarning",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Amber Warning (Minutes)")
         ELSE htmlib-SideLabel("Amber Warning (Minutes)"))
-    '</TD>'.
+        '</TD>'.
 
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("amberwarning",4,lc-amberwarning) 
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(html-encode(lc-amberwarning),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-InputField("amberwarning",4,lc-amberwarning) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(lc-amberwarning),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
 
-    {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("notes",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Note")
         ELSE htmlib-SideLabel("Note"))
-    '</TD>'.
+        '</TD>'.
     
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-TextArea("notes",lc-notes,5,60)
-    '</TD>' skip.
-    else 
-    {&out} htmlib-TableField(replace(html-encode(lc-notes),"~n",'<br>'),'left')
-           skip.
-    {&out} '</TR>' skip.
+            htmlib-TextArea("notes",lc-notes,5,60)
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(REPLACE(html-encode(lc-notes),"~n",'<br>'),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
 
 
     RUN ip-AlertTable.
 
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
     IF lc-error-msg <> "" THEN
     DO:
-        {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        {&out} 
+            '<BR><BR><CENTER>' 
+            htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
-        {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        {&out} 
+            '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
+            '</center>' SKIP.
     END.
          
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

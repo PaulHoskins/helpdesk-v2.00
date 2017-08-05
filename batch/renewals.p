@@ -14,6 +14,7 @@
     01/05/2017  phoski      Site
     19/07/2017  phoski      New fields populated
     04/08/2017  phoski      Customer Non Standard SLA
+    05/08/2017  phoski      Orig SLAID
 
 ***********************************************************************/
 
@@ -681,7 +682,8 @@ PROCEDURE ip-Initialise :
         IF AVAILABLE slahead THEN 
         DO:
             ASSIGN 
-                Issue.link-SLAID = slahead.SLAID.
+                Issue.link-SLAID = slahead.SLAID
+                Issue.orig-SLAID = slahead.SLAID.
 
             EMPTY TEMP-TABLE tt-sla-sched.
             RUN lib/slacalc.p

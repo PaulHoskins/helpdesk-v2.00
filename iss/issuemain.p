@@ -1277,8 +1277,13 @@ PROCEDURE ip-Update :
     ELSE
     DO:
         FIND slahead WHERE ROWID(slahead) = to-rowid(substr(lc-sla-selected,4)) NO-LOCK NO-ERROR.
-        IF AVAILABLE slahead
-            THEN ASSIGN Issue.link-SLAID = slahead.SLAID.
+        IF AVAILABLE slahead THEN
+        DO:
+            ASSIGN Issue.link-SLAID = slahead.SLAID.
+            
+            IF Issue.orig-SLAID = 0 
+            THEN Issue.orig-SLAID = slahead.SLAID.
+        END.    
     END.
     
     IF lc-planned = ""
