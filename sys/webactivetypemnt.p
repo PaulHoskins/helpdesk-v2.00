@@ -398,48 +398,48 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
+    {&out} htmlib-Header(lc-title) SKIP
            htmlib-StartForm("mainform","post", appurl + '/sys/webactivetypemnt.p' )
-           htmlib-ProgramTitle(lc-title) skip.
+           htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip
-           htmlib-Hidden ("nullfield", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+           htmlib-Hidden ("saverowid", lc-rowid) SKIP
+           htmlib-Hidden ("savesearch", lc-search) SKIP
+           htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+           htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+           htmlib-Hidden ("savenavigation", lc-navigation) SKIP
+           htmlib-Hidden ("nullfield", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
     IF lc-mode = "DELETE" THEN
     DO:
         {&out}  '<div activitytype="infobox">'
         'Warning:<br>'
         'Deletion of this activity type will also delete all other related details '
-        '</div>' skip.
+        '</div>' SKIP.
     END.
 
-    {&out} htmlib-StartInputTable() skip.
+    {&out} htmlib-StartInputTable() SKIP.
 
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         ( IF LOOKUP("acttype",lc-error-field,'|') > 0 
         THEN htmlib-SideLabelError("Activity Type Code")
         ELSE htmlib-SideLabel("Activity Type Code"))
-    '</TD>' skip
+    '</TD>' SKIP
     .
 
     IF lc-mode = "ADD" THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
-    htmlib-InputField("acttype",10,lc-actype) skip
+    htmlib-InputField("acttype",10,lc-actype) SKIP
            '</TD>'.
-    else
+    ELSE
     {&out} htmlib-TableField(html-encode(lc-actype),'left')
-           skip.
+           SKIP.
 
 
-    {&out} '</TR>' skip.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("desc",lc-error-field,'|') > 0 
@@ -450,11 +450,11 @@ PROCEDURE process-web-request :
     IF NOT CAN-DO("view,delete",lc-mode) THEN
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("desc",40,lc-desc) 
-    '</TD>' skip.
-    else 
+    '</TD>' SKIP.
+    ELSE 
     {&out} htmlib-TableField(html-encode(lc-desc),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
     {&out} '<TR><TD VALIGN="TOP" ALIGN="right">' 
         (IF LOOKUP("mintime",lc-error-field,'|') > 0 
@@ -466,11 +466,11 @@ PROCEDURE process-web-request :
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
     htmlib-InputField("mintime",3,lc-mintime)
               
-    '</TD>' skip.
-    else
+    '</TD>' SKIP.
+    ELSE
     {&out} htmlib-TableField(html-encode(lc-mintime),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
 
 /*
 {&out} '<tr><td valign="top" align="right">' 
@@ -491,31 +491,31 @@ PROCEDURE process-web-request :
         {&out} '<TD VALIGN="TOP" ALIGN="left">'
      htmlib-checkBox("isadmintime",lc-isAdminTime = "on")
               
-    '</TD>' skip.
-    else
+    '</TD>' SKIP.
+    ELSE
     {&out} htmlib-TableField(html-encode(IF lc-isadminTime = "on" THEN "Yes" ELSE "No"),'left')
-           skip.
-    {&out} '</TR>' skip.
+           SKIP.
+    {&out} '</TR>' SKIP.
     
-    {&out} htmlib-EndTable() skip.
+    {&out} htmlib-EndTable() SKIP.
 
 
     IF lc-error-msg <> "" THEN
     DO:
         {&out} '<BR><BR><CENTER>' 
-        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' skip.
+        htmlib-MultiplyErrorMessage(lc-error-msg) '</CENTER>' SKIP.
     END.
 
     IF lc-submit-label <> "" THEN
     DO:
         {&out} '<center>' htmlib-SubmitButton("submitform",lc-submit-label) 
-        '</center>' skip.
+        '</center>' SKIP.
     END.
          
  
 
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+           htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

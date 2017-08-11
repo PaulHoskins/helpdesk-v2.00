@@ -27,11 +27,10 @@ DEFINE VARIABLE lc-error-msg   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-char        AS CHARACTER NO-UNDO.
 
-DEFINE VARIABLE lc-lo-account  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-Account  AS CHARACTER NO-UNDO.
 
-
-DEFINE VARIABLE lc-lodate      AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
-DEFINE VARIABLE lc-hidate      AS CHARACTER FORMAT "99/99/9999" NO-UNDO.
+DEFINE VARIABLE ld-lodate      AS DATE NO-UNDO.
+DEFINE VARIABLE ld-hidate      AS DATE NO-UNDO.
 
 DEFINE BUFFER this-user FOR WebUser.
   
@@ -45,9 +44,8 @@ DEFINE VARIABLE lc-CodeName    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
 
 DEFINE VARIABLE lc-ClassList   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-output      AS CHARACTER NO-UNDO.
+
 DEFINE VARIABLE lc-submit      AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-1Day        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-dtype       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-month       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-year        AS CHARACTER NO-UNDO.
@@ -177,86 +175,6 @@ END PROCEDURE.
 
 &ENDIF
 
-&IF DEFINED(EXCLUDE-ip-ExportReport) = 0 &THEN
-
-PROCEDURE ip-ExportReport :
-    /*------------------------------------------------------------------------------
-      Purpose:     
-      Parameters:  <none>
-      Notes:       
-    ------------------------------------------------------------------------------*/
-    DEFINE OUTPUT PARAMETER pc-filename AS CHARACTER NO-UNDO.
-    
-
-    DEFINE BUFFER customer FOR customer.
-    DEFINE BUFFER issue    FOR issue.
-    
-
-    DEFINE VARIABLE lc-GenKey AS CHARACTER NO-UNDO.
-
-   
-    ASSIGN
-        lc-genkey = STRING(NEXT-VALUE(ReportNumber)).
-    
-        
-    pc-filename = SESSION:TEMP-DIR + "/clientrep-" + lc-GenKey
-        + ".csv".
-
-    OUTPUT TO VALUE(pc-filename).
-
-    PUT UNFORMATTED
-                
-        '"Customer","Issue Number","Description","Issue Type","Raised By","System","SLA","' +
-        'Date Raised","Time Raised","Date Completed","Time Completed","Date First Activity","Time First Activity","Activity Duration","SLA Achieved","SLA Comment","' +
-        '"Closed By' SKIP.
-
-
-    FOR EACH tt-ilog NO-LOCK
-        BREAK BY tt-ilog.AccountNumber
-        BY tt-ilog.IssueNumber
-        :
-            
-        FIND customer WHERE customer.CompanyCode = lc-global-company
-            AND customer.AccountNumber = tt-ilog.AccountNumber
-            NO-LOCK NO-ERROR.
-
-
-        EXPORT DELIMITER ','
-            ( customer.AccountNumber + " " + customer.NAME )
-            tt-ilog.issuenumber
-            tt-ilog.briefDescription
-            tt-ilog.iType
-            tt-ilog.RaisedLoginID
-            tt-ilog.AreaCode
-            tt-ilog.SLADesc
-            tt-ilog.CreateDate
-            STRING(tt-ilog.CreateTime,"hh:mm")
-      
-            IF tt-ilog.CompDate = ? THEN "" ELSE STRING(tt-ilog.CompDate,"99/99/9999")
-
-            IF tt-ilog.CompTime = 0 THEN "" ELSE STRING(tt-ilog.CompTime,"hh:mm")
-            
-            IF tt-ilog.fActDate = ? THEN "" ELSE STRING(tt-ilog.fActDate,"99/99/9999")
-             
-            IF tt-ilog.fActTime = 0 THEN "" ELSE STRING(tt-ilog.factTime,"hh:mm")
-       
-            tt-ilog.ActDuration
-            tt-ilog.SLAAchieved
-            tt-ilog.SLAComment
-            tt-ilog.ClosedBy
-
-            . 
-           
-    END.
-
-    OUTPUT CLOSE.
-
-
-END PROCEDURE.
-
-
-&ENDIF
-
 &IF DEFINED(EXCLUDE-ip-InitialProcess) = 0 &THEN
 
 PROCEDURE ip-InitialProcess :
@@ -279,22 +197,18 @@ PROCEDURE ip-InitialProcess :
     IF ll-customer THEN
     DO:
         ASSIGN 
-            lc-lo-account = this-user.AccountNumber.
-        set-user-field("loaccount",this-user.AccountNumber).
+            lc-Account = this-user.AccountNumber.
+        set-user-field("accountnumber",this-user.AccountNumber).
         
     END.
         
     ASSIGN
-        lc-lo-account = get-value("loaccount")
-        lc-lodate     = get-value("lodate")         
-        lc-hidate     = get-value("hidate")
-        lc-output     = get-value("output")
+        lc-Account = get-value("accountnumber")
         lc-submit     = get-value("submitsource")
         lc-temp       = get-value("allcust")
         lc-month      = get-value("month")
         lc-year       = get-value("year")
         lc-reptype    = get-value("reptype")
-       
         lc-dtype      = get-value("dtype").
     
     
@@ -316,16 +230,10 @@ PROCEDURE ip-InitialProcess :
         
         IF lc-dtype = "" THEN lc-Dtype = "ISS".
         
-                
-        IF lc-lodate = ""
-            THEN ASSIGN lc-lodate = STRING(TODAY - 365, "99/99/9999").
+      
         
-        IF lc-hidate = ""
-            THEN ASSIGN lc-hidate = STRING(TODAY, "99/99/9999").
-        
-        
-        IF lc-lo-account = ""
-            THEN ASSIGN lc-lo-account = ENTRY(1,lc-list-acc,"|").
+        IF lc-Account = ""
+            THEN ASSIGN lc-Account = ENTRY(1,lc-list-acc,"|").
     
         
         DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
@@ -379,7 +287,7 @@ PROCEDURE ip-PrintReport :
             {&out} SKIP
                 htmlib-StartMntTable() SKIP
                 htmlib-TableHeading(
-                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
+                "Period^right|Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
                 "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left"
                 ) SKIP.
@@ -397,7 +305,9 @@ PROCEDURE ip-PrintReport :
         {&out}
             SKIP
             lc-tr
+            
             SKIP
+             htmlib-MntTableField(html-encode(STRING(tt-ilog.Period)),'right')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
             htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
@@ -515,11 +425,9 @@ PROCEDURE ip-ProcessReport :
     RUN rep/clientrepbuild.p (
         lc-global-company,
         lc-global-user,
-        lc-lo-Account,
-        get-value("allcust") = "on",
-        get-value("oneday") = "on",
-        DATE(lc-lodate),
-        DATE(lc-hidate),
+        lc-Account,
+        ld-lodate,
+        ld-hidate,
         SUBSTR(TRIM(lc-classlist),2),
         lc-dtype,
         OUTPUT TABLE tt-ilog
@@ -550,45 +458,21 @@ PROCEDURE ip-Selection :
     IF NOT ll-customer THEN
     DO:
         {&out}
+            '<tr>'
             '<td align=right valign=top>' 
-            (IF LOOKUP("loaccount",lc-error-field,'|') > 0 
+            (IF LOOKUP("accountnumber",lc-error-field,'|') > 0 
             THEN htmlib-SideLabelError("From Customer")
             ELSE htmlib-SideLabel("From Customer"))
             
             '</td>'
             '<td align=left valign=top>' .
         {&out-long}   
-            htmlib-SelectLong("loaccount",lc-list-acc,lc-list-aname,lc-lo-account).
+            htmlib-SelectLong("accountnumber",lc-list-acc,lc-list-aname,lc-Account).
         {&out} 
-            '</td>'.
+            '</td></tr>'.
     END.
     
-    
-    {&out} 
-        '<td valign="top" align="right">' 
-        (IF LOOKUP("lodate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("From Date")
-        ELSE htmlib-SideLabel("From Date"))
-        '</td>'
-        '<td valign="top" align="left">'
-        htmlib-CalendarInputField("lodate",10,lc-lodate) 
-        htmlib-CalendarLink("lodate")
-        '</td>' SKIP.
 
-       
-    {&out} 
-        '<td valign="top" align="right">' 
-        (IF LOOKUP("hidate",lc-error-field,'|') > 0 
-        THEN htmlib-SideLabelError("To Date")
-        ELSE htmlib-SideLabel("To Date"))
-        '</td>'
-        '<td valign="top" align="left">'
-        htmlib-CalendarInputField("hidate",10,lc-hidate) 
-        htmlib-CalendarLink("hidate")
-        '</td>' SKIP.
-
-    {&out} 
-        '</tr>' SKIP.
 
     IF NOT ll-customer THEN
     DO:
@@ -620,15 +504,7 @@ PROCEDURE ip-Selection :
             
         
         
-    {&out} 
-        '<tr><td valign="top" align="right">' 
-        htmlib-SideLabel("Show Over 1 Day Completions")
-        '</td>'
-        '<td valign="top" align="left">'
-        htmlib-checkBox("oneday",get-value("oneday") = "on")
-        
-        '</td></tr>' SKIP.
-        
+           
     
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
         lc-codeName = "chk" + ENTRY(li-loop,lc-global-iclass-code,"|").
@@ -657,13 +533,7 @@ PROCEDURE ip-Selection :
         htmlib-Select("dtype",lc-list-dtcode,lc-list-dtdesc,lc-dtype) '</td></tr>'.
         
     
-    {&out}
-        '<tr><td valign="top" align="right">' 
-        htmlib-SideLabel("Report Output")
-        '</td>'
-        '<td align=left valign=top>' 
-        htmlib-Select("output","WEB|CSV","Web Page|Email CSV",get-value("output")) '</td></tr>'.
-    
+  
   
     {&out} 
         '</table>' SKIP.
@@ -673,6 +543,32 @@ END PROCEDURE.
 &ENDIF
 
 &IF DEFINED(EXCLUDE-ip-Validate) = 0 &THEN
+
+PROCEDURE ip-SetDateRange:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    
+    DEFINE VARIABLE ld-dt1      AS DATE     NO-UNDO.
+    DEFINE VARIABLE ld-dt2      AS DATE     NO-UNDO.
+        
+    ASSIGN ld-dt1 = DATE(int(lc-month),1,int(lc-year)).
+    
+   IF lc-repType = "1"
+   THEN ASSIGN ld-dt2 = Com-MonthEnd(ld-dt1).
+   ELSE
+   DO:
+       ASSIGN ld-dt2 = Com-MonthEnd(ld-dt1)
+              ld-dt1 = ADD-INTERVAL(ld-dt1,-2,"MONTH").
+              
+   END.
+   
+   ASSIGN
+     ld-lodate = ld-dt1
+     ld-hidate = ld-dt2.
+    
+END PROCEDURE.
 
 PROCEDURE ip-SummaryPage:
     /*------------------------------------------------------------------------------
@@ -742,8 +638,8 @@ PROCEDURE ip-SummaryPage:
         htmlib-SideLabel("Reporting Period")
        
         '</td><td valign="top" align="left" colspan=2>'
-        (lc-lodate) ' - '
-        (lc-hidate)
+        STRING(ld-lodate,"99/99/9999") ' - '
+        STRING(ld-hidate,"99/99/9999") /* ' xx ' INTERVAL(ld-hidate,08/01/2017,"Months") */
         '</td></tr>' SKIP.
     {&out} SKIP
         '<tr>'
@@ -1116,40 +1012,24 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
-
-    DEFINE VARIABLE ld-lodate AS DATE      NO-UNDO.
-    DEFINE VARIABLE ld-hidate AS DATE      NO-UNDO.
     DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
     DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
 
-    ASSIGN
-        ld-lodate = DATE(lc-lodate) no-error.
-    IF ERROR-STATUS:ERROR 
-        OR ld-lodate = ?
-        THEN RUN htmlib-AddErrorMessage(
-            'lodate', 
-            'The from date is invalid',
+ 
+    IF ( int(lc-year) = year(TODAY) 
+    AND int(lc-month) > month(TODAY)) 
+    OR  ( int(lc-year) > year(TODAY) )  THEN
+    DO:
+        RUN htmlib-AddErrorMessage(
+            'month', 
+            'You must select a valid report month/year',
             INPUT-OUTPUT pc-error-field,
             INPUT-OUTPUT pc-error-msg ).
-
-    ASSIGN
-        ld-hidate = DATE(lc-hidate) no-error.
-    IF ERROR-STATUS:ERROR 
-        OR ld-hidate = ?
-        THEN RUN htmlib-AddErrorMessage(
-            'hidate', 
-            'The to date is invalid',
-            INPUT-OUTPUT pc-error-field,
-            INPUT-OUTPUT pc-error-msg ).
-
-    IF ld-lodate > ld-hidate 
-        THEN RUN htmlib-AddErrorMessage(
-            'lodate', 
-            'The date range is invalid',
-            INPUT-OUTPUT pc-error-field,
-            INPUT-OUTPUT pc-error-msg ).
-
-
+            
+    END.
+    
+    
+    
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
         lc-codeName = "chk" + ENTRY(li-loop,lc-global-iclass-code,"|").
     
@@ -1159,8 +1039,7 @@ PROCEDURE ip-Validate :
             lc-classlist = lc-ClassList + "," + 
                 ENTRY(li-loop,lc-global-iclass-code,"|").
         END.
-      
-        
+             
     END.
     
     IF TRIM(lc-classlist ) = "" 
@@ -1267,28 +1146,9 @@ PROCEDURE process-web-request :
 
         IF lc-error-msg = "" THEN
         DO:
+            RUN ip-SetDateRange.
             RUN ip-ProcessReport.
-            
-            IF lc-output = "CSV" THEN RUN ip-ExportReport (OUTPUT lc-filename).
-            ELSE
-                IF lc-output = "PDF" THEN RUN ip-PDF (OUTPUT lc-filename).
-            
-            IF lc-output <> "WEB" THEN 
-            DO:
-                mlib-SendAttEmail 
-                    ( lc-global-company,
-                    "",
-                    "HelpDesk Issue Log Report ",
-                    "Please find attached your report covering the period "
-                    + string(DATE(lc-lodate),"99/99/9999") + " to " +
-                    string(DATE(lc-hidate),'99/99/9999'),
-                    this-user.email,
-                    "",
-                    "",
-                    lc-filename).
-                OS-DELETE value(lc-filename).
-            END.
-            
+                                   
         END.
     END.
        
@@ -1329,23 +1189,14 @@ PROCEDURE process-web-request :
     IF request_method = "POST" 
         AND lc-error-msg = "" THEN
     DO:
-       
-        IF lc-output = "WEB" THEN RUN ip-PrintReport.   
-        ELSE
-            {&out} '<div class="infobox" style="font-size: 10px;">Your report has been emailed to '
-                this-user.email
-                '</div>'.
-            
-        
+       RUN ip-PrintReport.   
     END.
 
 
 
     
     {&out} htmlib-EndForm() SKIP.
-    {&out} htmlib-CalendarScript("lodate") SKIP
-        htmlib-CalendarScript("hidate") SKIP.
-   
+    
 
     {&OUT} htmlib-Footer() SKIP.
 

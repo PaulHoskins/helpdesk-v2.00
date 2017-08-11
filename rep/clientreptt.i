@@ -14,6 +14,7 @@
 ***********************************************************************/
 
 DEFINE TEMP-TABLE tt-ilog NO-UNDO
+    FIELD period           AS INTEGER
     FIELD issueNumber      LIKE issue.IssueNumber
     FIELD AccountNumber    LIKE issue.AccountNumber
     FIELD BriefDescription LIKE issue.BriefDescription

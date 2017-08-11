@@ -19,8 +19,7 @@
 DEFINE INPUT PARAMETER pc-companycode          AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-loginid              AS CHARACTER         NO-UNDO.
 DEFINE INPUT PARAMETER pc-AccountNumber        AS CHARACTER         NO-UNDO.
-DEFINE INPUT PARAMETER pl-allcust              AS LOG               NO-UNDO.
-DEFINE INPUT PARAMETER pl-oneday               AS LOG               NO-UNDO.
+
 DEFINE INPUT PARAMETER pd-FromDate             AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pd-ToDate               AS DATE              NO-UNDO.
 DEFINE INPUT PARAMETER pc-ClassList            AS CHARACTER         NO-UNDO.
@@ -92,9 +91,6 @@ PROCEDURE ip-BuildData :
         FIND customer OF Issue NO-LOCK NO-ERROR.
         IF NOT AVAILABLE Customer THEN NEXT.
         
-        IF pl-allcust = NO
-            AND Customer.IsActive = NO THEN NEXT.
-        
          
         
                         
@@ -103,17 +99,14 @@ PROCEDURE ip-BuildData :
 
       
         ASSIGN 
+            tt-ilog.Period = INTERVAL(pd-ToDate,issueDate,"Months") + 1
             tt-ilog.iType = com-DecodeLookup(Issue.iClass,lc-global-iclass-code,lc-global-iclass-desc).
 
 
         ASSIGN
             tt-ilog.isClosed = NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
 
-        IF tt-ilog.isClosed = FALSE AND pl-oneday THEN
-        DO:
-            DELETE tt-ilog.
-            NEXT.
-        END.
+       
         
         IF tt-ilog.SLALevel = ?
             THEN tt-ilog.SLALevel = 0.
@@ -229,26 +222,6 @@ PROCEDURE ip-BuildData :
 
         END.
         
-        IF pl-oneday THEN
-        DO:
-            ASSIGN
-                ldt-st = DATETIME(STRING(tt-ilog.CreateDate,"99/99/9999") + " " + string(tt-ilog.CreateTime,"HH:MM:SS")).
-                
-            ASSIGN
-                ldt-en = DATETIME(STRING(tt-ilog.CompDate,"99/99/9999") + " " + string(tt-ilog.CompTime,"HH:MM:SS")).
-                
-            ASSIGN
-                ldt-day = ADD-INTERVAL(ldt-st,1,"days").
-                
-            IF ldt-Day > ldt-en THEN
-            DO:
-                DELETE tt-ilog.
-                NEXT.
-            END.
-                 
-                    
-           
-        END.
         
     END.
 

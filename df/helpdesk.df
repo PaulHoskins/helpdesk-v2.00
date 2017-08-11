@@ -837,6 +837,15 @@ ADD FIELD "ArchiveDays" OF "Company" AS integer
   MAX-WIDTH 4
   ORDER 440
 
+ADD FIELD "sla-TypeID" OF "Company" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "typeID"
+  POSITION 46
+  MAX-WIDTH 4
+  COLUMN-LABEL "TypeID"
+  ORDER 450
+
 ADD INDEX "CompanyCode" ON "Company" 
   AREA "Schema Area"
   UNIQUE
@@ -7521,4 +7530,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000149250
+0000149419
