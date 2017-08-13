@@ -24,6 +24,7 @@
     19/07/2017  phoski      New fields populated
     22/07/2017  phoski      Archive param from main window
     04/08/2017  phoski      Customer Non Standard SLA
+    13/08/2017  phoski      SLA change restrictions
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -114,6 +115,13 @@ DEFINE VARIABLE lc-Enc-Key           AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-site              AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-list-site-site    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-list-site-name    AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ll-ShowSLAReason     AS LOGICAL   NO-UNDO.
+DEFINE VARIABLE lc-slaReason         AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lf-current-sla       AS DECIMAL   NO-UNDO.
+DEFINE VARIABLE lf-orig-sla          AS DECIMAL   NO-UNDO.
+
+
+
 
 
 DEFINE VARIABLE ll-customer          AS LOG       NO-UNDO.
@@ -529,8 +537,8 @@ PROCEDURE ip-IssueMain :
     DO:
   
         RUN com-GetCustomerSites (lc-global-company, b-table.AccountNumber,
-                OUTPUT lc-list-site-site ,
-                OUTPUT lc-list-site-name  ).
+            OUTPUT lc-list-site-site ,
+            OUTPUT lc-list-site-name  ).
  
                
         {&out} 
@@ -541,16 +549,17 @@ PROCEDURE ip-IssueMain :
             '</TD>'.
     
    
-            {&out} 
-                '<TD VALIGN="TOP" ALIGN="left">'
-                htmlib-Select("site",lc-list-site-site,lc-list-site-name,lc-site) 
-                '</TD></tr>' SKIP.
+        {&out} 
+            '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("site",lc-list-site-site,lc-list-site-name,lc-site) 
+            '</TD></tr>' SKIP.
     
        
     END.
         
         
-    {&out} '<tr><TD VALIGN="TOP" ALIGN="right">' 
+    {&out} 
+        '<tr><TD VALIGN="TOP" ALIGN="right">' 
         htmlib-SideLabel("Date")
         '</TD>' SKIP
         htmlib-TableField(
@@ -569,9 +578,10 @@ PROCEDURE ip-IssueMain :
         
     IF AVAILABLE b-cust AND b-cust.nonStandardSLA THEN
     DO:
-        {&out} '<tr><td>&nbsp;</td><td colspan=1><div class="infobox">Non Standard SLA Hours: '
-                STRING(b-cust.SLABeginHour,"z9") ":" STRING(b-cust.SLABeginMin,"99") " - "
-                STRING(b-cust.SLAEndHour,"z9") ":" STRING(b-cust.SLAEndMin,"99")
+        {&out} 
+            '<tr><td>&nbsp;</td><td colspan=1><div class="infobox">Non Standard SLA Hours: '
+            STRING(b-cust.SLABeginHour,"z9") ":" STRING(b-cust.SLABeginMin,"99") " - "
+            STRING(b-cust.SLAEndHour,"z9") ":" STRING(b-cust.SLAEndMin,"99")
                 
             '</td></tr>' SKIP.
     END.
@@ -1038,6 +1048,20 @@ PROCEDURE ip-Javascript:
         '   ~}' SKIP
         '~}' SKIP
         '</script>'.
+        
+    {&out}
+        '<script>' SKIP
+        'function slaChanged () ~{' SKIP
+        'var slb = document.getElementById("slabox");' SKIP
+        'slb.style.display = "block";' SKIP
+        
+        '~}' SKIP
+        'function slaReset() ~{' SKIP
+        'var slb = document.getElementById("slabox");' SKIP
+        'slb.style.display = "none";' SKIP
+        '~}' SKIP
+        '</script>' SKIP.
+               
 END PROCEDURE.
 
 PROCEDURE ip-NotePage :
@@ -1073,14 +1097,28 @@ PROCEDURE ip-SLATable :
     DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
     DEFINE VARIABLE lc-object AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-html   AS CHARACTER NO-UNDO.
+    
 
 
     {&out}
         htmlib-StartMntTable()
         htmlib-TableHeading(
-        "Select?^left|SLA"
+        "Select?^left|SLA|Sequence^right"
         ) SKIP.
 
+    IF lf-orig-sla <> lf-current-sla AND lf-orig-sla <> 0.00 THEN
+    FOR FIRST slahead WHERE slahead.SLAID = lf-orig-sla NO-LOCK:
+        {&out}
+            htmlib-trmouse()
+            '<td>Original SLA</td>'
+            htmlib-TableField(html-encode(slahead.description),'left')
+            htmlib-TableField(STRING(slahead.seq-no),'right')
+                
+            '</tr>' SKIP.
+            
+        
+    END.
     IF lc-global-company = "MICAR" THEN
     DO:
         {&out}
@@ -1099,14 +1137,31 @@ PROCEDURE ip-SLATable :
 
         FIND slahead WHERE ROWID(slahead) = to-rowid(lc-rowid) NO-LOCK NO-ERROR.
         IF NOT AVAILABLE slahead THEN NEXT.
+    
+            
         ASSIGN
             lc-object = "sla" + lc-rowid.
+            
+            
+        ASSIGN
+            lc-html = htmlib-Radio("sla" , lc-object, IF lc-sla-selected = lc-object THEN TRUE ELSE FALSE).
+           
+           
+        IF lf-current-sla <> 0.00 THEN
+        DO:    
+            IF lc-sla-selected = lc-object 
+                THEN lc-html = REPLACE(lc-html,'>',' onclick="slaReset();" >').   
+            ELSE lc-html = REPLACE(lc-html,'>',' onclick="slaChanged();" >').    
+        END.
+             
+            
         {&out}
             htmlib-trmouse()
             '<td>'
-            htmlib-Radio("sla" , lc-object, IF lc-sla-selected = lc-object THEN TRUE ELSE FALSE) 
+            lc-html
             '</td>'
             htmlib-TableField(html-encode(slahead.description),'left')
+            htmlib-TableField(STRING(slahead.seq-no),'right')
                 
             '</tr>' SKIP.
 
@@ -1117,6 +1172,17 @@ PROCEDURE ip-SLATable :
         htmlib-EndTable()
         SKIP.
 
+    IF ll-ShowSLAReason 
+        THEN {&out} '<div id="slabox" style="display: block">' SKIP.
+    ELSE {&out} '<div id="slabox" style="display: none">' SKIP.
+    
+    {&out} 
+        '<div class="infobox">SLA Change Reason<br />'
+        htmlib-TextArea("slareason",get-value("slareason"),5,60)
+        '</div>' SKIP
+        .
+    {&out} 
+        '</div>'.
 
 
 END PROCEDURE.
@@ -1135,13 +1201,13 @@ PROCEDURE ip-Update :
     DEFINE INPUT PARAMETER pr-rowid        AS ROWID         NO-UNDO.
     DEFINE INPUT PARAMETER pc-user         AS CHARACTER     NO-UNDO.
 
-    DEFINE VARIABLE lc-old-status     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-old-assign     AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ll-old-ticket     AS LOG       NO-UNDO.
-    DEFINE VARIABLE lc-old-AreaCode   AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE ld-prj-start      AS DATE      NO-UNDO.
-    DEFINE VARIABLE li-prj-diff       AS INTEGER   NO-UNDO.
-    DEFINE BUFFER b-cust            FOR Customer.
+    DEFINE VARIABLE lc-old-status   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-old-assign   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-old-ticket   AS LOG       NO-UNDO.
+    DEFINE VARIABLE lc-old-AreaCode AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ld-prj-start    AS DATE      NO-UNDO.
+    DEFINE VARIABLE li-prj-diff     AS INTEGER   NO-UNDO.
+    DEFINE BUFFER b-cust FOR Customer.
     
     
     
@@ -1279,10 +1345,11 @@ PROCEDURE ip-Update :
         FIND slahead WHERE ROWID(slahead) = to-rowid(substr(lc-sla-selected,4)) NO-LOCK NO-ERROR.
         IF AVAILABLE slahead THEN
         DO:
-            ASSIGN Issue.link-SLAID = slahead.SLAID.
+            ASSIGN 
+                Issue.link-SLAID = slahead.SLAID.
             
             IF Issue.orig-SLAID = 0 
-            THEN Issue.orig-SLAID = slahead.SLAID.
+                THEN Issue.orig-SLAID = slahead.SLAID.
         END.    
     END.
     
@@ -1315,7 +1382,8 @@ PROCEDURE ip-Update :
             ROWID(Issue),
             pc-user,
             lf-old-link-SLAID,
-            Issue.link-SLAID ).
+            Issue.link-SLAID ,
+            lc-slareason).
         RELEASE issue.
         FIND Issue WHERE ROWID(Issue) = pr-rowid EXCLUSIVE-LOCK.
         IF Issue.link-SLAID = 0 THEN
@@ -1361,9 +1429,9 @@ PROCEDURE ip-Update :
     END.
     
     FIND b-cust WHERE b-cust.companyCode = Issue.CompanyCode
-                  AND b-cust.AccountNumber = Issue.AccountNumber NO-LOCK NO-ERROR.
+        AND b-cust.AccountNumber = Issue.AccountNumber NO-LOCK NO-ERROR.
     ASSIGN 
-        Issue.i-st-num = b-cust.st-num
+        Issue.i-st-num         = b-cust.st-num
         Issue.i-AccountManager = b-cust.AccountManager.
                      
     Issue.i-open = DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).
@@ -1497,7 +1565,43 @@ PROCEDURE ip-Validate :
                 INPUT-OUTPUT pc-error-msg ).
     END.
 
+    IF lc-sla-selected <> "slanone" AND  lf-current-sla <> 0.00 THEN
+    DO:
+        FIND slahead WHERE ROWID(slahead) = to-rowid(substr(lc-sla-selected,4)) NO-LOCK NO-ERROR.
+        IF AVAILABLE slahead
+            AND  lf-current-sla <> slahead.SLAID THEN
+        DO:
+            ASSIGN 
+                ll-ShowSLAReason = TRUE.
+            IF lc-slareason = ""
+                THEN RUN htmlib-AddErrorMessage(
+                    'sla', 
+                    'You must enter a reason for the SLA change',
+                    INPUT-OUTPUT pc-error-field,
+                    INPUT-OUTPUT pc-error-msg ).
+                    
+            FIND FIRST IssAction
+                WHERE IssAction.CompanyCode = b-table.companyCode
+                  AND IssAction.IssueNumber = b-table.IssueNumber
+                  AND IssAction.AssignTo = lc-currentassign
+                  AND IssAction.ActionStatus = "OPEN" NO-LOCK NO-ERROR.
+                                  
+            IF NOT AVAILABLE IssAction THEN
+            DO:
+                 RUN htmlib-AddErrorMessage(
+                    'sla', 
+                    'To change the SLA there must be at least one open action for ' + com-UserName(lc-currentassign) ,
+                    INPUT-OUTPUT pc-error-field,
+                    INPUT-OUTPUT pc-error-msg ).
+                    
+            END.
+                   
+                   
+        END.
+    END.
+   
     
+            
 
 
 END PROCEDURE.
@@ -1605,9 +1709,10 @@ PROCEDURE process-web-request :
         ll-isBillable     = NO
         lc-iclass         = get-value("iclass")
         lc-prj-start      = get-value("prj-start")
-        lc-site           = get-value("site").
+        lc-site           = get-value("site")
+        .
 
-    .
+    
     IF lc-iclass = ""
         THEN lc-iclass = ENTRY(1,lc-global-iclass-code,"|").
 
@@ -1701,8 +1806,17 @@ PROCEDURE process-web-request :
         lc-ContractAccount = customer.accountNumber
         lc-enc-key         = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
     
+    /*
     ASSIGN
         lc-sla-rows = com-CustomerAvailableSLA(lc-global-company,b-table.AccountNumber).
+        
+    */
+    ASSIGN
+        lf-current-sla = b-table.link-SLAID
+        lf-orig-sla    = b-table.orig-SLAID.
+        
+    RUN iss/lib/issallowslalist.p ( ROWID(b-table) , lc-global-user, OUTPUT lc-sla-rows).
+          
 
     IF request_method = "post" THEN
     DO:
@@ -1723,7 +1837,8 @@ PROCEDURE process-web-request :
             ll-isBillable       = lc-billable-flag = "on"
             lc-prj-start        = get-value("prj-start")
             lc-iclass           = get-value("iclass")
-            lc-site             = get-value("site").
+            lc-site             = get-value("site")
+            lc-slaReason        = get-value("slareason").
           
           
         IF com-TicketOnly(lc-global-company,
@@ -1806,7 +1921,7 @@ PROCEDURE process-web-request :
         htmlib-Hidden ("savesearch", lc-search) SKIP
         htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
         htmlib-hidden ("saveaccountmanager",lc-accountmanager) SKIP
-         htmlib-hidden ("savearchive",lc-archive) SKIP
+        htmlib-hidden ("savearchive",lc-archive) SKIP
         htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
         htmlib-Hidden ("savenavigation", lc-navigation) SKIP
         htmlib-Hidden ("saveaccount", lc-account) SKIP

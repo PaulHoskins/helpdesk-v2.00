@@ -16,6 +16,7 @@
     15/08/2015  phoski      Default alert to def-stat-loginid
     20/10/2015  phoski      com-GetHelpDeskEmail for email sender
     09/04/2017  phoski      Email text changed
+    13/08/2017  phoski      SLA change processing
 ***********************************************************************/
 
 {lib/maillib.i}
@@ -74,7 +75,8 @@ FUNCTION islib-SLAChanged RETURNS LOGICAL
     ( pr-rowid    AS ROWID,
     pc-loginID    AS CHARACTER,
     pf-old-SLAID AS DECIMAL,
-    pf-new-SLAID AS DECIMAL )  FORWARD.
+    pf-new-SLAID AS DECIMAL, 
+     pc-reason    AS CHARACTER)  FORWARD.
 
 
 FUNCTION islib-StatusIsClosed RETURNS LOGICAL
@@ -753,19 +755,31 @@ FUNCTION islib-SLAChanged RETURNS LOGICAL
     ( pr-rowid    AS ROWID,
     pc-loginID    AS CHARACTER,
     pf-old-SLAID AS DECIMAL,
-    pf-new-SLAID AS DECIMAL ) :
+    pf-new-SLAID AS DECIMAL,
+    pc-reason    AS CHARACTER  ) :
     /*------------------------------------------------------------------------------
       Purpose:  
         Notes:  
     ------------------------------------------------------------------------------*/
 
     DEFINE BUFFER Issue FOR Issue.
+    DEFINE BUFFER Company FOR Company.
+    DEFINE BUFFER IssAction FOR IssAction.
+    DEFINE BUFFER b-table FOR issActivity.
+    DEFINE BUFFER WebActType FOR WebActType.
+    
+    
+    DEFINE VARIABLE lf-audit    AS DECIMAL NO-UNDO.
+    
+        
     DEFINE VARIABLE lc-message AS CHARACTER NO-UNDO.
 
     IF pf-old-SLAID = pf-new-SLAID THEN RETURN TRUE.
 
     FIND issue
         WHERE ROWID(issue) = pr-rowid EXCLUSIVE-LOCK NO-ERROR.
+        
+    
 
     IF NOT AVAILABLE issue THEN RETURN FALSE.
 
@@ -781,10 +795,82 @@ FUNCTION islib-SLAChanged RETURNS LOGICAL
             pc-LoginID,
             "SYS.SLA",
             'From: ' + dynamic-function("com-SLADescription",pf-old-SLAID) + '~n' +
-            'To: ' + dynamic-function("com-SLADescription",pf-new-SLAID) + '~n'
+            'To: ' + dynamic-function("com-SLADescription",pf-new-SLAID) + '~n~n' + pc-reason
             ).
         
     END.
+    
+    FIND Company WHERE Company.CompanyCode = Issue.CompanyCode NO-LOCK NO-ERROR.
+    
+    IF Company.sla-TypeID <> 0 THEN
+    DO:
+        FIND FIRST IssAction
+            WHERE IssAction.CompanyCode = Issue.companyCode
+              AND IssAction.IssueNumber = Issue.IssueNumber
+              AND IssAction.AssignTo = Issue.AssignTo
+              AND IssAction.ActionStatus = "OPEN" NO-LOCK NO-ERROR.
+              
+              
+              
+       FIND WebActType WHERE WebActType.CompanyCode = Company.companyCode
+                         AND WebActType.TypeID = Company.sla-TypeID NO-LOCK NO-ERROR.
+                         
+       CREATE b-table.
+       ASSIGN 
+            b-table.IssActionID = IssAction.IssActionID
+            b-table.CompanyCode = Issue.CompanyCode
+            b-table.IssueNumber = issue.IssueNumber
+            b-table.CreateDate  = TODAY
+            b-table.CreateTime  = TIME
+            b-table.CreatedBy   = pc-loginid
+            b-table.ActivityBy  = Issue.assignto
+                .
+
+        DO WHILE TRUE:
+            RUN lib/makeaudit.p (
+                "",
+                OUTPUT lf-audit
+                ).
+            IF CAN-FIND(FIRST IssActivity
+                WHERE IssActivity.IssActivityID = lf-audit NO-LOCK)
+                THEN NEXT.
+            ASSIGN
+                b-table.IssActivityID = lf-audit.
+            LEAVE.
+        END.
+        ASSIGN 
+            b-table.notes          = pc-reason
+            b-table.description    = WebActType.description
+            b-table.Actdescription = WebActType.description
+            b-table.billable       = NO
+            b-table.ActDate        = TODAY
+            b-table.customerview    = NO
+            b-table.ContractType   = Issue.ContractType 
+            b-table.SiteVisit      = NO
+            b-table.TypeID         = Company.sla-TypeID
+            b-table.Duration       = WebActType.MinTime
+            .
+                        
+        ASSIGN
+            b-table.activityType = WebActType.ActivityType.
+                                      
+        ASSIGN 
+            b-table.StartDate = TODAY
+            b-table.StartTime = TIME.
+            
+        RUN com-EndTimeCalc
+                        (
+                        b-table.StartDate,
+                        b-table.StartTime,
+                        b-table.Duration,
+                        OUTPUT b-table.EndDate,
+                        OUTPUT b-table.EndTime
+                        ).
+                        
+                           
+        
+    END.
+    
 
 
 
