@@ -13,6 +13,7 @@
     27/02/2016  phoski      Link to issue in email
     02/07/2016  phoski      Don't send emails if holiday
     04/08/2017  phoski      Customer Non Standard SLA
+    19/08/2017  phoski      Original SLA process call
 
 ***********************************************************************/
 
@@ -105,15 +106,19 @@ ASSIGN
     lc-System = "SLA.ALERT".
 
 FOR EACH ro-Issue NO-LOCK
-    WHERE ro-Issue.SLAStatus = "ON" TRANSACTION:
+    WHERE ro-Issue.SLAStatus = "ON" 
+    /*
+      AND ro-issue.IssueNumber = 139411 
+    */  
+    TRANSACTION:
     
     FIND Issue
         WHERE ROWID(Issue) = rowid(ro-Issue) EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
     IF LOCKED Issue THEN NEXT.
 
-    /*
-    fnlog ( "check " + Issue.companycode + " " + STRING(Issue.issuenumber)).
-    */
+    
+    fnlog ( "check " + Issue.companycode + " " + STRING(Issue.issuenumber) + ' Level ' + string(Issue.SLALevel)).
+    
 
     IF DYNAMIC-FUNCTION('islib-IssueIsOpen':U,ROWID(Issue)) = FALSE
         OR Issue.link-SLAID = ?
@@ -446,6 +451,8 @@ FOR EACH ro-Issue NO-LOCK
     *** Everything done for this Issue/Alert so set the alert level
     ***
     */
+    fnLog ( "Issue " + string(Issue.IssueNumber) + " Level From " + string(Issue.SLAlevel) + " To " + string(li-level)).
+    
     
     ASSIGN
         Issue.SLALevel = li-Level.
@@ -455,6 +462,10 @@ END.
 fnLog("SLA Batch Ends").
 
 OUTPUT stream s-log close.
+
+RUN batch/slaprocess-orig.p.
+
+
 
 QUIT.
 

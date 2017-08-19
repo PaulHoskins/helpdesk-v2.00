@@ -40,6 +40,7 @@
     09/01/2016  phoski      com-GetFilterLoad
     15/04/2017  phoski      ExcludeReports flag
     30/04/2017  phoski      CustSite stuff
+    19/08/2017  phoski      Notes types for Original SLA
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -106,9 +107,9 @@ DEFINE VARIABLE lc-System-KB-Desc                     AS CHARACTER
     INITIAL "Completed Issues" NO-UNDO.
 
 DEFINE VARIABLE lc-System-Note-Code                   AS CHARACTER
-    INITIAL 'SYS.ACCOUNT,SYS.EMAILCUST,SYS.ASSIGN,SYS.SLA,SYS.MISC,SYS.SLAWARN,SYS.SLAMISSED' NO-UNDO.
+    INITIAL 'SYS.ACCOUNT,SYS.EMAILCUST,SYS.ASSIGN,SYS.SLA,SYS.MISC,SYS.SLAWARN,SYS.SLAMISSED,SYS.SLAWARNO,SYS.SLAMISSEDO' NO-UNDO.
 DEFINE VARIABLE lc-System-Note-Desc                   AS CHARACTER
-    INITIAL 'System - Account Changed,System - Customer Emailed,System - Issue Assignment,System - SLA Assigned,System - Misc Note,System - SLA Warning,System - SLA Missed'
+    INITIAL 'System - Account Changed,System - Customer Emailed,System - Issue Assignment,System - SLA Assigned,System - Misc Note,System - SLA Warning,System - SLA Missed,System - Original SLA Warning,System - Original SLA Missed'
     NO-UNDO.
 
 DEFINE VARIABLE lc-global-GT-Code                     AS CHARACTER INITIAL

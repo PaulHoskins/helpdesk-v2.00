@@ -462,12 +462,13 @@ PROCEDURE ip-BuildQueryPhrase:
             THEN  lc-TeamList = STRING(WebUSteam.st-num).
         ELSE  lc-TeamList = lc-teamList + "," + string(WebUSteam.st-num).
     END.  
-            
+    /*        
     IF NUM-ENTRIES(lc-TeamList) > 1 THEN
     DO:
        /* MESSAGE "Multiple Teams for " lc-global-user  " - " lc-TeamList. */
         lc-teamList = "".
     END.
+    */
            
             
     ASSIGN

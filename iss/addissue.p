@@ -2520,7 +2520,7 @@ PROCEDURE process-web-request :
                     DO:
                         ASSIGN 
                             Issue.link-SLAID = slahead.SLAID
-                            Issue.orig-SLAID = slahead.SLAID.
+                            .
                         EMPTY TEMP-TABLE tt-sla-sched.
                         RUN lib/slacalc.p
                             ( 
@@ -2547,7 +2547,10 @@ PROCEDURE process-web-request :
                         IF issue.slaDate[2] <> ? 
                             THEN ASSIGN issue.SLATrip = DATETIME(STRING(Issue.SLADate[2],"99/99/9999") + " " 
                                     + STRING(Issue.SLATime[2],"HH:MM")).
-
+                                    
+                        
+                        RUN iss/lib/issue-orig-sla.p ( ROWID(issue) ).
+                        
                     END.
                 END.
                 IF lc-raisedlogin <> htmlib-Null() 

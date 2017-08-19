@@ -25,6 +25,7 @@
     22/07/2017  phoski      Archive param from main window
     04/08/2017  phoski      Customer Non Standard SLA
     13/08/2017  phoski      SLA change restrictions
+    19/08/2017  phoski      Show original SLA 
 
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -141,6 +142,9 @@ DEFINE BUFFER this-user FOR WebUser.
 /* ************************  Function Prototypes ********************** */
 
 &IF DEFINED(EXCLUDE-fn-DescribeSLA) = 0 &THEN
+
+FUNCTION fn-DescribeOrigSLA RETURNS CHARACTER 
+	(pr-rowid AS ROWID) FORWARD.
 
 FUNCTION fn-DescribeSLA RETURNS CHARACTER
     ( pr-rowid AS ROWID )  FORWARD.
@@ -504,6 +508,8 @@ PROCEDURE ip-IssueMain :
     DEFINE BUFFER WebAttr FOR WebAttr.
 
     DEFINE VARIABLE lc-SLA-Describe AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-Orig-SLA-Desc AS CHARACTER NO-UNDO.
+    
     DEFINE VARIABLE lc-icustname    AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-raised       AS CHARACTER NO-UNDO.
 
@@ -519,6 +525,12 @@ PROCEDURE ip-IssueMain :
 
     ASSIGN 
         lc-SLA-Describe = DYNAMIC-FUNCTION("fn-DescribeSLA",ROWID(b-table)).
+        
+    IF b-table.orig-SLAID <> 0 AND b-table.link-SLAID <> b-table.orig-SLAID THEN
+    DO:
+        lc-Orig-SLA-Desc =  DYNAMIC-FUNCTION("fn-DescribeOrigSLA",ROWID(b-table)).
+    END.
+    
 
     FIND b-user WHERE b-user.LoginId = b-table.RaisedLogin 
         NO-LOCK NO-ERROR.
@@ -575,6 +587,17 @@ PROCEDURE ip-IssueMain :
         "~n","<br>")
         ,'left') SKIP
         '</tr>'.
+        
+    IF lc-orig-sla-desc <> "" THEN
+    {&out}
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        htmlib-SideLabel("Original SLA")
+        '</TD>' SKIP
+        htmlib-TableField(
+        REPLACE(lc-orig-sla-desc,
+        "~n","<br>")
+        ,'left') SKIP
+        '</tr>'.     
         
     IF AVAILABLE b-cust AND b-cust.nonStandardSLA THEN
     DO:
@@ -1345,11 +1368,14 @@ PROCEDURE ip-Update :
         FIND slahead WHERE ROWID(slahead) = to-rowid(substr(lc-sla-selected,4)) NO-LOCK NO-ERROR.
         IF AVAILABLE slahead THEN
         DO:
+            RUN iss/lib/issue-orig-sla.p ( ROWID(issue) ).
+            
             ASSIGN 
                 Issue.link-SLAID = slahead.SLAID.
-            
+            /*
             IF Issue.orig-SLAID = 0 
                 THEN Issue.orig-SLAID = slahead.SLAID.
+            */
         END.    
     END.
     
@@ -2043,7 +2069,101 @@ END PROCEDURE.
 
 /* ************************  Function Implementations ***************** */
 
-&IF DEFINED(EXCLUDE-fn-DescribeSLA) = 0 &THEN
+
+FUNCTION fn-DescribeOrigSLA RETURNS CHARACTER 
+	 ( pr-rowid AS ROWID ) :
+    /*------------------------------------------------------------------------------
+      Purpose:  
+        Notes:  
+    ------------------------------------------------------------------------------*/
+
+
+    DEFINE BUFFER issue   FOR issue.
+    DEFINE BUFFER slahead FOR slahead.
+
+    DEFINE VARIABLE lc-return AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-line   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-table  AS LOG       NO-UNDO.
+
+
+    FIND issue
+        WHERE ROWID(issue) = pr-rowid NO-LOCK NO-ERROR.
+
+    IF NOT AVAILABLE issue THEN RETURN "".
+
+   
+
+    IF issue.orig-SLAID = 0 
+        OR issue.orig-SLAID = ?
+        OR NOT CAN-FIND(slahead WHERE slahead.slaid = issue.orig-slaid NO-LOCK)
+        THEN RETURN "No SLA".
+
+    FIND slahead WHERE slahead.slaid = Issue.orig-slaid NO-LOCK NO-ERROR.
+
+    ASSIGN 
+        lc-return = slahead.description.
+
+    IF DYNAMIC-FUNCTION('islib-IssueIsOpen':U,pr-rowid) THEN
+    DO:
+        DO li-loop = 1 TO 10:
+            IF Issue.orig-SLADate[li-loop] = ?
+                OR slahead.RespDesc[li-loop] = "" THEN NEXT.
+
+            IF ll-table = FALSE THEN
+            DO:
+                ASSIGN 
+                    lc-return = lc-return + 
+                    htmlib-StartMntTable() +
+                    htmlib-TableHeading(
+                    "Level^right|Description|Date").
+                ASSIGN 
+                    ll-table = TRUE.
+            END.
+            ASSIGN 
+                lc-line = '<tr class="tabrow1">'.
+            
+            ASSIGN
+                lc-line = lc-line + 
+                          htmlib-TableField(STRING(li-loop) + 
+                                            IF li-loop = Issue.orig-SLALevel THEN "*" ELSE "",'right') +
+                          htmlib-TableField(html-encode(
+                              slahead.RespDesc[li-loop] + ' (' + 
+                               slahead.RespUnit[li-loop] + ' ' + string(slahead.RespTime[li-loop])
+                               + ')'
+                              
+                              ),'left')
+                         + 
+                         htmlib-TableField(html-encode(
+                              STRING(issue.orig-SLADate[li-loop],"99/99/9999") + " " + 
+                              string(issue.orig-SLATime[li-loop],"hh:mm am")
+                              
+                              ),'left')
+                         + '</tr>'.
+            /*
+            assign lc-line = "Level " + string(li-loop) + ": " + 
+                               slahead.RespDesc[li-loop] + ' (' + 
+                               slahead.RespUnit[li-loop] + ' ' + string(slahead.RespTime[li-loop])
+                               + ')'.
+            assign lc-line = lc-line + " at " + 
+                        string(issue.SLADate[li-loop],"99/99/9999") + " " + 
+                        string(issue.SLATime[li-loop],"hh:mm am").
+            */
+
+            ASSIGN 
+                lc-return = lc-return + lc-line.
+
+            
+        END.
+        IF ll-table
+            THEN ASSIGN lc-return = lc-return + htmlib-EndTable().
+        
+    END.
+    
+    RETURN lc-return.
+	
+		
+END FUNCTION.
 
 FUNCTION fn-DescribeSLA RETURNS CHARACTER
     ( pr-rowid AS ROWID ) :
@@ -2140,5 +2260,4 @@ FUNCTION fn-DescribeSLA RETURNS CHARACTER
 END FUNCTION.
 
 
-&ENDIF
 

@@ -3959,6 +3959,65 @@ ADD FIELD "orig-SLAID" OF "Issue" AS decimal
   DECIMALS 2
   ORDER 530
 
+ADD FIELD "orig-SLAStatus" OF "Issue" AS character 
+  DESCRIPTION "OFF or ON"
+  FORMAT "X(8)"
+  INITIAL "ON"
+  LABEL "SLA Status"
+  POSITION 55
+  MAX-WIDTH 16
+  ORDER 560
+
+ADD FIELD "orig-SLATime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Time"
+  POSITION 56
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 570
+
+ADD FIELD "orig-SLATrip" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "SLA Deadline"
+  POSITION 57
+  MAX-WIDTH 8
+  ORDER 580
+
+ADD FIELD "orig-SLAAmber" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "Amber Warning At"
+  POSITION 58
+  MAX-WIDTH 8
+  ORDER 590
+
+ADD FIELD "orig-SLADate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "SLA Date"
+  POSITION 59
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 540
+
+ADD FIELD "orig-tLight" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "99"
+  LABEL "Traffic Light Level"
+  POSITION 60
+  MAX-WIDTH 4
+  ORDER 550
+
+ADD FIELD "orig-SLALevel" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Level"
+  POSITION 61
+  MAX-WIDTH 4
+  ORDER 600
+
 ADD INDEX "IssueNumber" ON "Issue" 
   AREA "Schema Area"
   UNIQUE
@@ -4021,6 +4080,11 @@ ADD INDEX "link-SLAID" ON "Issue"
   AREA "Schema Area"
   INDEX-FIELD "link-SLAID" ASCENDING 
   INDEX-FIELD "IssueDate" DESCENDING 
+
+ADD INDEX "orig-SLAStatus" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "orig-SLAStatus" ASCENDING 
+  INDEX-FIELD "orig-SLAID" ASCENDING 
 
 ADD INDEX "project" ON "Issue" 
   AREA "Schema Area"
@@ -7530,4 +7594,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000149419
+0000150719

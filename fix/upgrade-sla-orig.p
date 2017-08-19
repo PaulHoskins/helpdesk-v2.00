@@ -13,8 +13,10 @@
   ----------------------------------------------------------------------*/
 
 
-FOR EACH Issue:
-    ASSIGN
-     orig-slaid = link-slaid.
+FOR EACH Issue EXCLUSIVE-LOCK:
+   
+   
+   RUN iss/lib/issue-orig-sla.p ( ROWID(issue) ).
+   
     
 END.
