@@ -107,9 +107,6 @@ ASSIGN
 
 FOR EACH ro-Issue NO-LOCK
     WHERE ro-Issue.SLAStatus = "ON" 
-    /*
-      AND ro-issue.IssueNumber = 139411 
-    */  
     TRANSACTION:
     
     FIND Issue
@@ -158,20 +155,7 @@ FOR EACH ro-Issue NO-LOCK
             RUN lib/calcamber.p ( Issue.CompanyCode, Issue.AccountNumber,
                 ldt-Level2, slahead.amberWarning, OUTPUT issue.slaamber).
                     
-            /*        
-            li-mill = (  slahead.amberWarning * 60 ) * 1000.
-            ldt-Amber2 = ldt-Level2 - li-Mill.
-            issue.slaamber = ldt-Amber2.
-            */
-            
-            /*fnLog ( "Amber ( Level2 " + STRING(ldt-level2) + " - " +
-                string(slahead.amberWarning) + "mins ) = " +
-                string(issue.slaamber)
-                ).
-            */ 
-
         END.
-
 
     END.
 
@@ -192,8 +176,6 @@ FOR EACH ro-Issue NO-LOCK
     *** SLA LEvel 2 is the tripwire 
     */
    
-
-
     IF issue.slaDate[2] <> ? THEN
     DO:
         lc-dt = STRING(Issue.SLADate[2],"99/99/9999") + " " 

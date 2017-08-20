@@ -1448,7 +1448,7 @@ PROCEDURE process-web-request :
                 zx                = zx + 1
                 li-opener         = 2
                 lc-customerview   = "on" .
-                
+             /*   
              IF AVAILABLE b-user AND b-user.def-activityType  <> "" THEN
              FOR FIRST b-type NO-LOCK
                 WHERE b-type.CompanyCode = lc-global-company 
@@ -1456,9 +1456,17 @@ PROCEDURE process-web-request :
                     ASSIGN
                      lc-actdescription =   b-type.description 
                      lc-saved-activity   =  b-user.def-activityType
+                     
+                     /*
+                     lc-save-defaulttimeSet = IF b-type.MinTime = 0 THEN "05" ELSE STRING(b-type.minTime,"99")
+                     lc-save-mins           = lc-save-DefaultTimeSet.
+                     */
                      .
              END.
-             
+              lc-DefaultTimeSet = "99".
+              
+             MESSAGE "PAulh  = " lc-DefaultTimeSet.
+             */
   
         END.
 

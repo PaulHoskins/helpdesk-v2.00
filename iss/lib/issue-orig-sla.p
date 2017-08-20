@@ -27,7 +27,6 @@ FIND Issue WHERE ROWID(issue) = pr-issue NO-LOCK NO-ERROR.
 ASSIGN 
     lc-global-company = Issue.CompanyCode.
  
-MESSAGE "PAULH " Issue.IssueNumber " Current " Issue.link-SLAID " Orig " Issue.orig-SLAID.
 
 IF Issue.link-SLAID <> 0 AND Issue.orig-SLAID = 0 THEN
 DO:

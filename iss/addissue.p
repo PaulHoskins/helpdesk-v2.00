@@ -44,7 +44,7 @@
     04/08/2017  phoksi      Activity Default
     04/08/2017  phoski      Customer Non Standard SLA
     05/08/2017  phoski      Orig SLAID
-    
+    20/08/2017  phoski      Activity default time
    
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -1898,8 +1898,7 @@ PROCEDURE ip-SetUpQuick :
         lc-timeHourSet    = IF lc-timeHourSet <> "" THEN lc-timeHourSet ELSE "0"
         lc-DefaultTimeSet = ENTRY(1,lc-list-activtime,"|")
         lc-saved-activity = "0"
-      
-        .
+            .
 
 
 END PROCEDURE.
@@ -2749,7 +2748,8 @@ PROCEDURE process-web-request :
              FOR FIRST b-type NO-LOCK
                 WHERE b-type.CompanyCode = lc-global-company 
                   AND b-type.TypeID  = int(WebUser.def-activityType):
-                    ASSIGN lc-actdescription =   b-type.description.
+                    ASSIGN lc-actdescription =   b-type.description
+                           lc-defaulttimeSet = IF b-type.MinTime = 0 THEN "05" ELSE STRING(b-type.minTime,"99").
                      
              END.
              
