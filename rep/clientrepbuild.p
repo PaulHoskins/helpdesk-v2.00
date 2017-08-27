@@ -111,8 +111,14 @@ PROCEDURE ip-BuildData :
         IF tt-ilog.SLALevel = ?
             THEN tt-ilog.SLALevel = 0.
 
+            
+        IF tt-ilog.orig-SLALevel = ?
+        THEN tt-ilog.orig-SLALevel = 0.
+
         ASSIGN 
-            tt-ilog.SLAAchieved = TRUE.
+            tt-ilog.SLAAchieved = TRUE
+            tt-ilog.orig-SLAAchieved = TRUE.
+            
 
 
         IF tt-ilog.isClosed THEN
@@ -150,7 +156,26 @@ PROCEDURE ip-BuildData :
                 END.
                 
             END.
+            IF issue.orig-slaTrip <> ? THEN
+            DO:
+                ldt-comp = ?.
+                IF tt-ilog.Compdate <> ? THEN
+                DO:
+                    ldt-Comp = DATETIME(
+                        STRING(tt-ilog.CompDate,"99/99/9999") + " " + 
+                        STRING(tt-ilog.CompTime,"hh:mm")
+                        ).
+                    ASSIGN
+                        tt-ilog.orig-SLAAchieved = ldt-Comp <= issue.orig-SLATrip.
+
+
+                END.
+                
+            END.
+            
         END.
+        
+  
         
         FIND slahead WHERE slahead.SLAID = Issue.link-SLAID NO-LOCK NO-ERROR.
         IF AVAILABLE slahead THEN
@@ -160,7 +185,18 @@ PROCEDURE ip-BuildData :
         END.
         ELSE tt-ilog.SLADesc = "".
         
+        FIND slahead WHERE slahead.SLAID = Issue.orig-SLAID NO-LOCK NO-ERROR.
+        IF AVAILABLE slahead THEN
+        DO: 
+            
+            tt-ilog.orig-SLADesc = slahead.SLACode + "/" + string(tt-ilog.orig-SLALevel).
+        END.
+        ELSE tt-ilog.orig-SLADesc = "".
 
+        IF Issue.SLAOverrideAchieved
+        THEN ASSIGN tt-ilog.orig-SLAAchieved = TRUE
+                    tt-ilog.SLAAchieved = TRUE.
+                    
         ASSIGN 
             tt-ilog.AreaCode      = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
             tt-ilog.RaisedLoginID = DYNAMIC-FUNCTION("com-UserName",tt-ilog.RaisedLoginID).

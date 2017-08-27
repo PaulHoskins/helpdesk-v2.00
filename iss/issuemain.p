@@ -26,7 +26,8 @@
     04/08/2017  phoski      Customer Non Standard SLA
     13/08/2017  phoski      SLA change restrictions
     19/08/2017  phoski      Show original SLA 
-
+    27/08/2017  phoski      Override SLA Achieved Flag & Note
+    
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -103,8 +104,6 @@ DEFINE VARIABLE lc-Doc-TBAR          AS CHARACTER
 DEFINE VARIABLE lc-Action-TBAR       AS CHARACTER
     INITIAL "acttb" NO-UNDO.
 
-/* Contract stuff  */
-
 DEFINE VARIABLE lc-list-ctype        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-list-cdesc        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-contract-type     AS CHARACTER NO-UNDO.
@@ -120,10 +119,8 @@ DEFINE VARIABLE ll-ShowSLAReason     AS LOGICAL   NO-UNDO.
 DEFINE VARIABLE lc-slaReason         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lf-current-sla       AS DECIMAL   NO-UNDO.
 DEFINE VARIABLE lf-orig-sla          AS DECIMAL   NO-UNDO.
-
-
-
-
+DEFINE VARIABLE lc-achieved-sla      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-achieved-note     AS CHARACTER NO-UNDO.
 
 DEFINE VARIABLE ll-customer          AS LOG       NO-UNDO.
 DEFINE BUFFER this-user FOR WebUser.
@@ -144,7 +141,7 @@ DEFINE BUFFER this-user FOR WebUser.
 &IF DEFINED(EXCLUDE-fn-DescribeSLA) = 0 &THEN
 
 FUNCTION fn-DescribeOrigSLA RETURNS CHARACTER 
-	(pr-rowid AS ROWID) FORWARD.
+    (pr-rowid AS ROWID) FORWARD.
 
 FUNCTION fn-DescribeSLA RETURNS CHARACTER
     ( pr-rowid AS ROWID )  FORWARD.
@@ -507,11 +504,11 @@ PROCEDURE ip-IssueMain :
     DEFINE BUFFER b-user  FOR WebUser.
     DEFINE BUFFER WebAttr FOR WebAttr.
 
-    DEFINE VARIABLE lc-SLA-Describe AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-SLA-Describe  AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc-Orig-SLA-Desc AS CHARACTER NO-UNDO.
     
-    DEFINE VARIABLE lc-icustname    AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-raised       AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-icustname     AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-raised        AS CHARACTER NO-UNDO.
 
 
     FIND b-cust WHERE b-cust.CompanyCode = b-table.CompanyCode
@@ -589,15 +586,15 @@ PROCEDURE ip-IssueMain :
         '</tr>'.
         
     IF lc-orig-sla-desc <> "" THEN
-    {&out}
-        '<TR><TD VALIGN="TOP" ALIGN="right">' 
-        htmlib-SideLabel("Original SLA")
-        '</TD>' SKIP
-        htmlib-TableField(
-        REPLACE(lc-orig-sla-desc,
-        "~n","<br>")
-        ,'left') SKIP
-        '</tr>'.     
+        {&out}
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            htmlib-SideLabel("Original SLA")
+            '</TD>' SKIP
+            htmlib-TableField(
+            REPLACE(lc-orig-sla-desc,
+            "~n","<br>")
+            ,'left') SKIP
+            '</tr>'.     
         
     IF AVAILABLE b-cust AND b-cust.nonStandardSLA THEN
     DO:
@@ -826,6 +823,31 @@ PROCEDURE ip-IssueMain :
             '</TR>' SKIP.
 
     END.
+    IF this-user.accountManager OR ll-superuser THEN
+    DO:
+        
+         {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("achieved-sla",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Override SLA Achieved?")
+            ELSE htmlib-SideLabel("Override SLA Achieved?"))
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">' SKIP
+            htmlib-CheckBox("achieved-sla", IF lc-achieved-sla = "ON" THEN TRUE ELSE FALSE)
+             
+           '</td></tr>'.
+           
+           {&out} 
+            '<TR><TD VALIGN="TOP" ALIGN="right">' 
+            (IF LOOKUP("achieved-sla",lc-error-field,'|') > 0 
+            THEN htmlib-SideLabelError("Override SLA Achieved Note")
+            ELSE htmlib-SideLabel("Override SLA Achieved Note"))
+            '</TD>'
+            '<TD VALIGN="TOP" ALIGN="left">' SKIP
+            htmlib-TextArea("achieved-note",lc-achieved-note,3,60)
+             
+           '</td></tr>'.
+    END.    
         
     IF b-table.iClass <> lc-global-iclass-complex THEN
     DO:
@@ -1131,17 +1153,17 @@ PROCEDURE ip-SLATable :
         ) SKIP.
 
     IF lf-orig-sla <> lf-current-sla AND lf-orig-sla <> 0.00 THEN
-    FOR FIRST slahead WHERE slahead.SLAID = lf-orig-sla NO-LOCK:
-        {&out}
-            htmlib-trmouse()
-            '<td>Original SLA</td>'
-            htmlib-TableField(html-encode(slahead.description),'left')
-            htmlib-TableField(STRING(slahead.seq-no),'right')
+        FOR FIRST slahead WHERE slahead.SLAID = lf-orig-sla NO-LOCK:
+            {&out}
+                htmlib-trmouse()
+                '<td><b>Original SLA</b><br />&nbsp;</td>'
+                htmlib-TableField('<b>' + html-encode(slahead.description) + '<b/>' ,'left')
+                htmlib-TableField('<b>' + STRING(slahead.seq-no) + '<b/>','right')
                 
-            '</tr>' SKIP.
+                '</tr>' SKIP.
             
         
-    END.
+        END.
     IF lc-global-company = "MICAR" THEN
     DO:
         {&out}
@@ -1372,10 +1394,10 @@ PROCEDURE ip-Update :
             
             ASSIGN 
                 Issue.link-SLAID = slahead.SLAID.
-            /*
-            IF Issue.orig-SLAID = 0 
-                THEN Issue.orig-SLAID = slahead.SLAID.
-            */
+        /*
+        IF Issue.orig-SLAID = 0 
+            THEN Issue.orig-SLAID = slahead.SLAID.
+        */
         END.    
     END.
     
@@ -1472,6 +1494,15 @@ PROCEDURE ip-Update :
         Issue.CompanyCode,
         Issue.StatusCode)
         THEN DYNAMIC-FUNCTION("islib-RemoveAlerts",ROWID(Issue)).
+        
+    IF this-user.accountManager OR ll-superuser THEN
+    DO:
+        ASSIGN
+            Issue.SLAOverrideAchieved = lc-achieved-sla = "on"
+            Issue.SLAOverrideNote     = lc-achieved-note
+            .
+                 
+    END.    
 
 
     
@@ -1608,13 +1639,13 @@ PROCEDURE ip-Validate :
                     
             FIND FIRST IssAction
                 WHERE IssAction.CompanyCode = b-table.companyCode
-                  AND IssAction.IssueNumber = b-table.IssueNumber
-                  AND IssAction.AssignTo = lc-currentassign
-                  AND IssAction.ActionStatus = "OPEN" NO-LOCK NO-ERROR.
+                AND IssAction.IssueNumber = b-table.IssueNumber
+                AND IssAction.AssignTo = lc-currentassign
+                AND IssAction.ActionStatus = "OPEN" NO-LOCK NO-ERROR.
                                   
             IF NOT AVAILABLE IssAction THEN
             DO:
-                 RUN htmlib-AddErrorMessage(
+                RUN htmlib-AddErrorMessage(
                     'sla', 
                     'To change the SLA there must be at least one open action for ' + com-UserName(lc-currentassign) ,
                     INPUT-OUTPUT pc-error-field,
@@ -1625,7 +1656,18 @@ PROCEDURE ip-Validate :
                    
         END.
     END.
-   
+    
+    IF this-user.accountManager OR ll-superuser THEN
+    DO:
+        IF lc-achieved-sla = "on" AND lc-achieved-note = ""
+            THEN  RUN htmlib-AddErrorMessage(
+                'achieved-sla', 
+                'You must enter a note for to override the SLA Achieved' ,
+                INPUT-OUTPUT pc-error-field,
+                INPUT-OUTPUT pc-error-msg ).
+                    
+    END.
+    
     
             
 
@@ -1736,6 +1778,7 @@ PROCEDURE process-web-request :
         lc-iclass         = get-value("iclass")
         lc-prj-start      = get-value("prj-start")
         lc-site           = get-value("site")
+        
         .
 
     
@@ -1864,7 +1907,10 @@ PROCEDURE process-web-request :
             lc-prj-start        = get-value("prj-start")
             lc-iclass           = get-value("iclass")
             lc-site             = get-value("site")
-            lc-slaReason        = get-value("slareason").
+            lc-slaReason        = get-value("slareason")
+            lc-achieved-sla     = get-value("achieved-sla")
+            lc-achieved-note    = get-value("achieved-note")
+            .
           
           
         IF com-TicketOnly(lc-global-company,
@@ -1917,7 +1963,13 @@ PROCEDURE process-web-request :
                 THEN ASSIGN lc-sla-selected = "sla" + string(ROWID(slahead)).
 
         END.
-              
+        IF this-user.accountManager OR ll-superuser THEN
+        DO:
+            ASSIGN 
+                lc-achieved-sla = IF b-table.SLAOverrideAchieved THEN "on" ELSE ""
+                lc-achieved-note = b-table.SLAOverrideNote.
+                
+        END.      
     END.
    
     RUN outputHeader.
@@ -2071,7 +2123,7 @@ END PROCEDURE.
 
 
 FUNCTION fn-DescribeOrigSLA RETURNS CHARACTER 
-	 ( pr-rowid AS ROWID ) :
+    ( pr-rowid AS ROWID ) :
     /*------------------------------------------------------------------------------
       Purpose:  
         Notes:  

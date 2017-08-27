@@ -36,6 +36,12 @@ DEFINE TEMP-TABLE tt-ilog NO-UNDO
     FIELD fActDate         AS DATE      LABEL 'First Acivity Date'
     FIELD fActTime         AS INTEGER   LABEL 'First Activity Time'
     
+    FIELD orig-SLALevel       AS INTEGER   LABEL 'SLA Level'
+    FIELD orig-SLADesc        AS CHARACTER LABEL 'SLA'
+    FIELD orig-SLAAchieved    AS LOGICAL   LABEL 'SLA Achieved'
+    FIELD SLAOverrideAchieved AS LOGICAL
+    
+    
     
     INDEX MainKey IS PRIMARY 
         AccountNumber IssueNumber       

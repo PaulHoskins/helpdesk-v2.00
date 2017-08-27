@@ -21,6 +21,8 @@
     19/12/2016  phoski      Show only >1 day completions
     09/04/2017  phoski      Support Team selection  
     09/04/2017  phoski      Date Types
+    25/08/2017  phoski      Original SLA
+    
            
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -215,8 +217,8 @@ PROCEDURE ip-ExportReport :
 
     PUT UNFORMATTED
                 
-        '"Customer","Issue Number","Description","Issue Type","Raised By","System","SLA","' +
-        'Date Raised","Time Raised","Date Completed","Time Completed","Date First Activity","Time First Activity","Activity Duration","SLA Achieved","SLA Comment","' +
+        '"Customer","Issue Number","Description","Issue Type","Raised By","System","Original SLA","Current SLA","' +
+        'Date Raised","Time Raised","Date Completed","Time Completed","Date First Activity","Time First Activity","Activity Duration","Original SLA Achieved","Current SLA Achieved","SLA Comment","' +
         '"Closed By' SKIP.
 
 
@@ -237,6 +239,7 @@ PROCEDURE ip-ExportReport :
             tt-ilog.iType
             tt-ilog.RaisedLoginID
             tt-ilog.AreaCode
+            tt-ilog.Orig-SLADesc
             tt-ilog.SLADesc
             tt-ilog.CreateDate
             STRING(tt-ilog.CreateTime,"hh:mm")
@@ -250,6 +253,7 @@ PROCEDURE ip-ExportReport :
             IF tt-ilog.fActTime = 0 THEN "" ELSE STRING(tt-ilog.factTime,"hh:mm")
        
             tt-ilog.ActDuration
+            tt-ilog.orig-SLAAchieved
             tt-ilog.SLAAchieved
             tt-ilog.SLAComment
             tt-ilog.ClosedBy
@@ -416,8 +420,8 @@ PROCEDURE ip-PDF:
                 '<thead>'
                 '<tr>'
                 htmlib-TableHeading(
-                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
-                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^left|Time First Activity^left|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
+                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|Original SLA^left|Current SLA^left|" +
+                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^left|Time First Activity^left|Activity Duration^right|Original SLA Achieved^left|Current SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left")
                 
                 '</tr>'
@@ -440,6 +444,7 @@ PROCEDURE ip-PDF:
             htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
             htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+             htmlib-MntTableField(html-encode(STRING(tt-ilog.orig-SLADesc)),'left')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
@@ -464,6 +469,7 @@ PROCEDURE ip-PDF:
             
         {&prince}
             htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.orig-SLAAchieved)),'left')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
             htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
 
@@ -546,8 +552,8 @@ PROCEDURE ip-PrintReport :
             {&out} SKIP
                 htmlib-StartMntTable() SKIP
                 htmlib-TableHeading(
-                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
-                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
+                "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|Original SLA^left|Current SLA^left|" +
+                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|Original<br/>SLA Achieved^left|Current<br/>SLA Achieved^left|SLA Comment^left|" +
                 "Closed By^left"
                 ) SKIP.
 
@@ -573,7 +579,8 @@ PROCEDURE ip-PrintReport :
             htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
 
             htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
-            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.orig-SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)) + IF tt-ilog.orig-SLADesc = tt-ilog.SLADesc THEN "" ELSE "*",'left')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right').
         
@@ -596,6 +603,7 @@ PROCEDURE ip-PrintReport :
                 htmlib-MntTableField(html-encode(""),'right').   
         {&out}
             htmlib-MntTableField(html-encode(STRING(tt-ilog.ActDuration)),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.orig-SLAAchieved)),'left')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.SLAAchieved)),'left')
             htmlib-MntTableField(REPLACE(tt-ilog.SLAComment,'~n','<br/>'),'left')
 
