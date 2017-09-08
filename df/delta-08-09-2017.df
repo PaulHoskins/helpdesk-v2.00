@@ -1,0 +1,151 @@
+ADD FIELD "sla-TypeID" OF "Company" AS integer
+  FORMAT "9999"
+  POSITION 46
+  INITIAL "0"
+  LABEL "typeID"
+  COLUMN-LABEL "TypeID"
+  ORDER 450
+  MAX-WIDTH 4
+
+ADD FIELD "SLABeginMin" OF "Customer" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 40
+  INITIAL "30"
+  ORDER 400
+  MAX-WIDTH 4
+
+ADD FIELD "SLAEndHour" OF "Customer" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 41
+  INITIAL "17"
+  ORDER 410
+  MAX-WIDTH 4
+
+ADD FIELD "SLAEndMin" OF "Customer" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 42
+  INITIAL "30"
+  ORDER 420
+  MAX-WIDTH 4
+
+ADD FIELD "NonStandardSLA" OF "Customer" AS logical
+  FORMAT "yes/no"
+  POSITION 43
+  INITIAL "no"
+  ORDER 380
+  MAX-WIDTH 1
+
+ADD FIELD "SLABeginHour" OF "Customer" AS integer
+  FORMAT "99"
+  POSITION 44
+  INITIAL "8"
+  ORDER 390
+  MAX-WIDTH 4
+
+ADD FIELD "orig-SLAID" OF "Issue" AS decimal
+  FORMAT "->>,>>9.99"
+  POSITION 54
+  INITIAL "0"
+  DECIMALS 2
+  ORDER 530
+  MAX-WIDTH 17
+
+ADD FIELD "orig-SLAStatus" OF "Issue" AS character
+  DESCRIPTION "OFF or ON"
+  FORMAT "X(8)"
+  POSITION 55
+  INITIAL "ON"
+  LABEL "SLA Status"
+  ORDER 560
+  MAX-WIDTH 16
+
+ADD FIELD "orig-SLATime" OF "Issue" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 56
+  INITIAL "0"
+  LABEL "SLA Time"
+  EXTENT 10
+  ORDER 570
+  MAX-WIDTH 220
+
+ADD FIELD "orig-SLATrip" OF "Issue" AS datetime
+  FORMAT "99/99/9999 HH:MM"
+  POSITION 57
+  INITIAL ?
+  LABEL "SLA Deadline"
+  ORDER 580
+  MAX-WIDTH 8
+
+ADD FIELD "orig-SLAAmber" OF "Issue" AS datetime
+  FORMAT "99/99/9999 HH:MM"
+  POSITION 58
+  INITIAL ?
+  LABEL "Amber Warning At"
+  ORDER 590
+  MAX-WIDTH 8
+
+ADD FIELD "orig-SLADate" OF "Issue" AS date
+  FORMAT "99/99/9999"
+  POSITION 59
+  INITIAL ?
+  LABEL "SLA Date"
+  EXTENT 10
+  ORDER 540
+  MAX-WIDTH 220
+
+ADD FIELD "orig-tLight" OF "Issue" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 60
+  INITIAL "99"
+  LABEL "Traffic Light Level"
+  ORDER 550
+  MAX-WIDTH 4
+
+ADD FIELD "orig-SLALevel" OF "Issue" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 61
+  INITIAL "0"
+  LABEL "SLA Level"
+  ORDER 600
+  MAX-WIDTH 4
+
+ADD FIELD "SLAOverrideAchieved" OF "Issue" AS logical
+  FORMAT "yes/no"
+  POSITION 62
+  INITIAL "no"
+  ORDER 610
+  MAX-WIDTH 1
+
+ADD FIELD "SLAOverrideNote" OF "Issue" AS character
+  FORMAT "x(8)"
+  POSITION 63
+  INITIAL ""
+  ORDER 620
+  MAX-WIDTH 16
+
+ADD INDEX "orig-SLAStatus" ON "Issue"
+  AREA "Schema Area"
+  INDEX-FIELD "orig-SLAStatus" ASCENDING
+  INDEX-FIELD "orig-SLAID" ASCENDING
+
+ADD FIELD "seq-no" OF "slahead" AS integer
+  FORMAT "->,>>>,>>9"
+  POSITION 19
+  INITIAL "0"
+  ORDER 170
+  MAX-WIDTH 4
+
+ADD FIELD "def-ActivityType" OF "WebUser" AS character
+  FORMAT "X(30)"
+  POSITION 41
+  INITIAL ""
+  LABEL "Default ActType"
+  COLUMN-LABEL "ActType"
+  ORDER 390
+  MAX-WIDTH 60
+
+.
+PSC
+cpstream=ISO8859-1
+.
+0000002842

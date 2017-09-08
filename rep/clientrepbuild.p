@@ -199,11 +199,15 @@ PROCEDURE ip-BuildData :
                     
         ASSIGN 
             tt-ilog.AreaCode      = DYNAMIC-FUNCTION("com-AreaName",pc-companyCode,issue.AreaCode)
-            tt-ilog.RaisedLoginID = DYNAMIC-FUNCTION("com-UserName",tt-ilog.RaisedLoginID).
+            tt-ilog.RaisedLoginID = DYNAMIC-FUNCTION("com-UserName",tt-ilog.RaisedLoginID)
+            tt-ilog.AssignTo      = DYNAMIC-FUNCTION("com-UserName",tt-ilog.AssignTo).
         IF tt-ilog.AreaCode = ""
             THEN tt-ilog.AreaCode = "Not defined".
         
-
+        FIND WebStatus OF Issue NO-LOCK NO-ERROR.
+        IF AVAILABLE webstatus
+        THEN tt-ilog.latestComment = WebStatus.Description. 
+            
         /*
         ***
         *** Time spent 
@@ -257,6 +261,8 @@ PROCEDURE ip-BuildData :
                 .
 
         END.
+        
+        
         
         
     END.

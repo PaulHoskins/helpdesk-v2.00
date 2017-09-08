@@ -20,31 +20,22 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
+DEFINE BUFFER this-user FOR WebUser.
 
 DEFINE VARIABLE lc-error-field AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-error-msg   AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE lc-rowid       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-char        AS CHARACTER NO-UNDO.
-
-DEFINE VARIABLE lc-Account  AS CHARACTER NO-UNDO.
-
-DEFINE VARIABLE ld-lodate      AS DATE NO-UNDO.
-DEFINE VARIABLE ld-hidate      AS DATE NO-UNDO.
-
-DEFINE BUFFER this-user FOR WebUser.
-  
+DEFINE VARIABLE lc-Account     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE ld-lodate      AS DATE      NO-UNDO.
+DEFINE VARIABLE ld-hidate      AS DATE      NO-UNDO.
 DEFINE VARIABLE ll-Customer    AS LOG       NO-UNDO.
-
 DEFINE VARIABLE lc-list-acc    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-list-aname  AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-filename    AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE lc-CodeName    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE li-loop        AS INTEGER   NO-UNDO.
-
 DEFINE VARIABLE lc-ClassList   AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE lc-submit      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-dtype       AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-month       AS CHARACTER NO-UNDO.
@@ -52,19 +43,17 @@ DEFINE VARIABLE lc-year        AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-sel-month   AS CHARACTER INITIAL '01|02|03|04|05|06|07|08|09|10|11|12' NO-UNDO.
 DEFINE VARIABLE lc-sel-year    AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-reptype     AS CHARACTER NO-UNDO.
-
 DEFINE VARIABLE lc-list-dtcode AS CHARACTER INITIAL 'ISS|ACT|ISSACT' NO-UNDO.
 DEFINE VARIABLE lc-list-dtdesc AS CHARACTER INITIAL 'Issue|Activity|Issue And Activity' NO-UNDO.
+DEFINE VARIABLE lc-labels      AS CHARACTER EXTENT 3 NO-UNDO.
+DEFINE VARIABLE lc-doc-key      AS CHARACTER NO-UNDO.
 
 
-
-
-
-DEFINE TEMP-TABLE ttc NO-UNDO
+DEFINE TEMP-TABLE tt-cid NO-UNDO
     FIELD id AS CHARACTER 
     INDEX MainKey IS UNIQUE
     id.
-DEFINE TEMP-TABLE ttd NO-UNDO
+DEFINE TEMP-TABLE tt-data NO-UNDO
     FIELD id     AS CHARACTER     
     FIELD lbl    AS CHARACTER
     FIELD val    AS DECIMAL
@@ -72,8 +61,16 @@ DEFINE TEMP-TABLE ttd NO-UNDO
     INDEX MainKey IS UNIQUE
     id lbl.
         
+DEFINE TEMP-TABLE tt-month NO-UNDO
+    FIELD AreaCode AS CHARACTER
+    FIELD Val      AS DECIMAL EXTENT 3
+    INDEX MainKey IS UNIQUE
+    AreaCode.
+      
+          
+            
     
-    .
+   
 {rep/clientreptt.i}
 {lib/maillib.i}
 {lib/princexml.i}
@@ -170,6 +167,16 @@ PROCEDURE ip-ExportJScript :
 
     {&out} SKIP
         '</script>' SKIP.
+        
+     {&out}  '<style>' SKIP
+     '@media print~{' SKIP
+     '#noprint~{' SKIP
+     'display:none;' SKIP
+     '~}' SKIP
+     '~}' SKIP
+     '</style>' SKIP.
+     
+  
 END PROCEDURE.
 
 
@@ -184,12 +191,12 @@ PROCEDURE ip-InitialProcess :
       Notes:       
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE lc-temp AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-loop AS INTEGER NO-UNDO.
+    DEFINE VARIABLE li-loop AS INTEGER   NO-UNDO.
     
     
     DO li-loop = YEAR(TODAY) TO YEAR(TODAY) - 10 BY -1:
         IF lc-sel-year = ""
-        THEN lc-sel-year = STRING(li-loop,"9999").
+            THEN lc-sel-year = STRING(li-loop,"9999").
         ELSE lc-sel-year = lc-sel-year + "|" + STRING(li-loop,"9999").
         
     END.
@@ -204,12 +211,12 @@ PROCEDURE ip-InitialProcess :
         
     ASSIGN
         lc-Account = get-value("accountnumber")
-        lc-submit     = get-value("submitsource")
-        lc-temp       = get-value("allcust")
-        lc-month      = get-value("month")
-        lc-year       = get-value("year")
-        lc-reptype    = get-value("reptype")
-        lc-dtype      = get-value("dtype").
+        lc-submit  = get-value("submitsource")
+        lc-temp    = get-value("allcust")
+        lc-month   = get-value("month")
+        lc-year    = get-value("year")
+        lc-reptype = get-value("reptype")
+        lc-dtype   = get-value("dtype").
     
     
     IF lc-temp = "on"
@@ -262,16 +269,34 @@ PROCEDURE ip-PrintReport :
 
     DEFINE BUFFER customer FOR customer.
     DEFINE BUFFER issue    FOR issue.
-    DEFINE VARIABLE li-count AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE lc-tr    AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-eng   AS INTEGER   NO-UNDO.
-    
+    DEFINE VARIABLE li-count        AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-tr           AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng          AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-Banner1      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-Banner2      AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-mth-label    AS CHARACTER NO-UNDO.
+       
+                   
     DEFINE BUFFER tt-ilog FOR tt-ilog.
     
+    ASSIGN
+        lc-Banner1 =    "Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
+                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
+                "Closed By^left".
+                
+    ASSIGN
+        lc-Banner2 =    "Issue Number^right|Description^left|Raised By^left|System^left|SLA^left|" +
+                        "Date Raised^right|Time Raised^right|" + 
+                        "Latest Status Comments|Issue With".
+                
+                   
+ 
     
     FOR EACH tt-ilog NO-LOCK
+        WHERE tt-ilog.isClosed = TRUE
         BREAK BY tt-ilog.AccountNumber
-        BY tt-ilog.IssueNumber
+              BY tt-ilog.period DESC
+              BY tt-ilog.IssueNumber
         :
 
         IF FIRST-OF(tt-ilog.AccountNumber) THEN
@@ -279,18 +304,19 @@ PROCEDURE ip-PrintReport :
             FIND customer WHERE customer.CompanyCode = lc-global-company
                 AND customer.AccountNumber = tt-ilog.AccountNumber
                 NO-LOCK NO-ERROR.
-            {&out} htmlib-BeginCriteria("Customer - " + tt-ilog.AccountNumber + " " + 
-                customer.NAME) SKIP.
-            RUN ip-SummaryPage (tt-ilog.AccountNumber).
-                    
+             RUN ip-SummaryPage (tt-ilog.AccountNumber).
+        END.
+        
+        IF FIRST-OF(tt-ilog.period) THEN
+        DO:           
             
+            ASSIGN 
+                lc-mth-label = "Issues raised during the month of "  + 
+                ENTRY(MONTH(tt-ilog.CreateDate),lc-Global-Months-Name,"|") + " " + string(YEAR(tt-ilog.CreateDate),"9999").
             {&out} SKIP
                 htmlib-StartMntTable() SKIP
-                htmlib-TableHeading(
-                "Period^right|Issue Number^right|Description^left|Issue Class^left|Raised By^left|System^left|SLA^left|" +
-                "Date Raised^right|Time Raised^right|Date Completed^right|Time Completed^right|Date First Activity^right|Time First Activity^right|Activity Duration^right|SLA Achieved^left|SLA Comment^left|" +
-                "Closed By^left"
-                ) SKIP.
+                '<tr><td colspan=' NUM-ENTRIES(lc-Banner1,"|") ' align="center"><h3>' lc-mth-label '</h3></td></tr>' SKIP
+                htmlib-TableHeading(lc-Banner1) SKIP.
 
             li-count = 0.
 
@@ -307,7 +333,6 @@ PROCEDURE ip-PrintReport :
             lc-tr
             
             SKIP
-             htmlib-MntTableField(html-encode(STRING(tt-ilog.Period)),'right')
             htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
 
             htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
@@ -344,59 +369,177 @@ PROCEDURE ip-PrintReport :
 
             htmlib-MntTableField(html-encode(STRING(tt-ilog.ClosedBy)),'left')
 
-
-
             SKIP .
 
         {&out} 
             '</tr>' SKIP.
 
-
-
-
-
-
-        IF LAST-OF(tt-ilog.AccountNumber) THEN
+        IF LAST-OF(tt-ilog.period) THEN
         DO:
             {&out} SKIP 
                 htmlib-EndTable()
                 SKIP.
 
-            {&out} htmlib-EndCriteria().
-
-
         END.
-
 
     END.
     
-    FIND FIRST ttc NO-LOCK NO-ERROR.
+    /** Open issue */
     
+    FOR EACH tt-ilog NO-LOCK
+        WHERE tt-ilog.isClosed = FALSE
+          AND tt-ilog.catCode <> "Project"
+        BREAK BY tt-ilog.AccountNumber
+              BY tt-ilog.period DESC
+              BY tt-ilog.IssueNumber
+        :
+
+               
+        IF FIRST(tt-ilog.period) THEN
+        DO:           
+            
+            ASSIGN 
+                lc-mth-label = "Outstanding issues".
+            {&out} SKIP
+                htmlib-StartMntTable() SKIP
+                '<tr><td colspan=' NUM-ENTRIES(lc-Banner2,"|") ' align="center"><h3>' lc-mth-label '</h3></td></tr>' SKIP
+                htmlib-TableHeading(lc-Banner2) SKIP.
+
+            li-count = 0.
+
+        END.
+
+        li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.          
+            
+
+        {&out}
+            SKIP
+            lc-tr
+            
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
+
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+   
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
+
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.latestComment )),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.assignto)),'left')
+                
        
-    IF AVAILABLE ttc THEN
+            SKIP .
+
+        {&out} 
+            '</tr>' SKIP.
+
+        IF LAST(tt-ilog.period) THEN
+        DO:
+            {&out} SKIP 
+                htmlib-EndTable()
+                SKIP.
+
+        END.
+
+    END.
+    
+    /** Open Project */
+    
+    FOR EACH tt-ilog NO-LOCK
+        WHERE tt-ilog.isClosed = FALSE
+          AND tt-ilog.catCode = "Project"
+        BREAK BY tt-ilog.AccountNumber
+              BY tt-ilog.period DESC
+              BY tt-ilog.IssueNumber
+        :
+
+               
+        IF FIRST(tt-ilog.period) THEN
+        DO:           
+            
+            ASSIGN 
+                lc-mth-label = "Projects".
+            {&out} SKIP
+                htmlib-StartMntTable() SKIP
+                '<tr><td colspan=' NUM-ENTRIES(lc-Banner2,"|") ' align="center"><h3>' lc-mth-label '</h3></td></tr>' SKIP
+                htmlib-TableHeading(lc-Banner2) SKIP.
+
+            li-count = 0.
+
+        END.
+
+        li-count = li-count + 1.
+        IF li-count MOD 2 = 0
+            THEN lc-tr = '<tr style="background: #EBEBE6;">'.
+        ELSE lc-tr = '<tr style="background: white;">'.          
+            
+
+        {&out}
+            SKIP
+            lc-tr
+            
+            SKIP
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.issuenumber)),'right')
+
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.briefDescription)),'left')
+   
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.RaisedLoginID)),'left')
+
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.AreaCode)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.SLADesc)),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateDate,"99/99/9999")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.CreateTime,"hh:mm")),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.latestComment )),'left')
+            htmlib-MntTableField(html-encode(STRING(tt-ilog.assignto)),'left')
+                
+       
+            SKIP .
+
+        {&out} 
+            '</tr>' SKIP.
+
+        IF LAST(tt-ilog.period) THEN
+        DO:
+            {&out} SKIP 
+                htmlib-EndTable()
+                SKIP.
+
+        END.
+
+    END.
+    
+    FIND FIRST tt-cid NO-LOCK NO-ERROR.
+           
+    IF AVAILABLE tt-cid THEN
     DO:
         {&out} SKIP
             '<script>' SKIP
             
             'window.onload = function()~{' SKIP
             .
-        FOR EACH ttc NO-LOCK:
+        FOR EACH tt-cid NO-LOCK:
                 
             {&out}      
-                'var ctx = document.getElementById("' ttc.id '").getContext("2d");' SKIP.
+                'var ctx = document.getElementById("' tt-cid.id '").getContext("2d");' SKIP.
             
-            IF  ttc.id BEGINS "B" THEN 
+            IF  tt-cid.id BEGINS "B" THEN 
             DO:
                 {&out}
-                    'window.myPie = new Chart(ctx).Bar(pd' ttc.id ', ~{' SKIP
+                    'window.myPie = new Chart(ctx).Bar(pd' tt-cid.id ', ~{' SKIP
                     '  responsive : true ' SKIP
                     '~});' SKIP.
                
             END.
-            /*
-            ELSE {&out}
-                    'window.myPie = new Chart(ctx).Pie(pd' ttc.id ');' SKIP.
-            */
+        /*
+        ELSE {&out}
+                'window.myPie = new Chart(ctx).Pie(pd' tt-cid.id ');' SKIP.
+        */
         END.
          
         {&out}    
@@ -431,7 +574,6 @@ PROCEDURE ip-ProcessReport :
         SUBSTR(TRIM(lc-classlist),2),
         lc-dtype,
         OUTPUT TABLE tt-ilog
-
         ).
 
 END PROCEDURE.
@@ -495,16 +637,13 @@ PROCEDURE ip-Selection :
         htmlib-Select("month",lc-sel-month,lc-sel-month,lc-month) " / "
         htmlib-Select("year",lc-sel-year,lc-sel-year,lc-year)'</td></tr>'.
         
-        {&out}
+    {&out}
         '<tr><td valign="top" align="right">' 
         htmlib-SideLabel("Report Type")
         '</td>'
         '<td align=left valign=top>' 
         htmlib-Select("reptype","1|3","1 Month|3 Month",lc-repType) '</td></tr>'.
-            
-        
-        
-           
+   
     
     DO li-loop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
         lc-codeName = "chk" + ENTRY(li-loop,lc-global-iclass-code,"|").
@@ -524,7 +663,7 @@ PROCEDURE ip-Selection :
     END.
 
         
-   
+   /*
     {&out}
         '<tr><td valign="top" align="right">' 
         htmlib-SideLabel("Date Selection By")
@@ -533,7 +672,10 @@ PROCEDURE ip-Selection :
         htmlib-Select("dtype",lc-list-dtcode,lc-list-dtdesc,lc-dtype) '</td></tr>'.
         
     
-  
+    */
+    {&out} htmlib-hidden ("dtype","ISS").
+    
+     
   
     {&out} 
         '</table>' SKIP.
@@ -545,28 +687,30 @@ END PROCEDURE.
 &IF DEFINED(EXCLUDE-ip-Validate) = 0 &THEN
 
 PROCEDURE ip-SetDateRange:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:
-------------------------------------------------------------------------------*/
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
     
-    DEFINE VARIABLE ld-dt1      AS DATE     NO-UNDO.
-    DEFINE VARIABLE ld-dt2      AS DATE     NO-UNDO.
+    DEFINE VARIABLE ld-dt1 AS DATE NO-UNDO.
+    DEFINE VARIABLE ld-dt2 AS DATE NO-UNDO.
         
-    ASSIGN ld-dt1 = DATE(int(lc-month),1,int(lc-year)).
+    ASSIGN 
+        ld-dt1 = DATE(int(lc-month),1,int(lc-year)).
     
-   IF lc-repType = "1"
-   THEN ASSIGN ld-dt2 = Com-MonthEnd(ld-dt1).
-   ELSE
-   DO:
-       ASSIGN ld-dt2 = Com-MonthEnd(ld-dt1)
-              ld-dt1 = ADD-INTERVAL(ld-dt1,-2,"MONTH").
+    IF lc-repType = "1"
+        THEN ASSIGN ld-dt2 = Com-MonthEnd(ld-dt1).
+    ELSE
+    DO:
+        ASSIGN 
+            ld-dt2 = Com-MonthEnd(ld-dt1)
+            ld-dt1 = ADD-INTERVAL(ld-dt1,-2,"MONTH").
               
-   END.
+    END.
    
-   ASSIGN
-     ld-lodate = ld-dt1
-     ld-hidate = ld-dt2.
+    ASSIGN
+        ld-lodate = ld-dt1
+        ld-hidate = ld-dt2.
     
 END PROCEDURE.
 
@@ -580,24 +724,25 @@ PROCEDURE ip-SummaryPage:
 
     DEFINE BUFFER customer FOR customer.
     DEFINE BUFFER issue    FOR issue.
-    DEFINE VARIABLE li-count    AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE li-sla      AS INTEGER   EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE ld-sla      AS DECIMAL   EXTENT 2 NO-UNDO.
-    DEFINE VARIABLE li-loop     AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE li-time     AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE li-Tot-Time AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE li-temp     AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE ld-temp     AS DECIMAL   NO-UNDO.
-    DEFINE VARIABLE lc-id       AS CHARACTER EXTENT 3 NO-UNDO.
+    DEFINE VARIABLE li-count     AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-sla       AS INTEGER   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE ld-sla       AS DECIMAL   EXTENT 2 NO-UNDO.
+    DEFINE VARIABLE li-loop      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-time      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-Tot-Time  AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE li-temp      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE ld-temp      AS DECIMAL   NO-UNDO.
+    DEFINE VARIABLE lc-id        AS CHARACTER EXTENT 3 NO-UNDO.
+    DEFINE VARIABLE li-tot-count AS INTEGER   EXTENT 3 NO-UNDO.
     
         
-    DEFINE VARIABLE lc-tr       AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-eng      AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE lc-Co       AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE lc-hi       AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-tCol     AS INT       NO-UNDO.
-    DEFINE VARIABLE lc-lb       AS CHARACTER NO-UNDO.
-    DEFINE VARIABLE li-set      AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-tr        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-eng       AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-Co        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc-hi        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-tCol      AS INTEGER       NO-UNDO.
+    DEFINE VARIABLE lc-lb        AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-set       AS INTEGER   NO-UNDO.
 
     ASSIGN
         lc-co = "#F7464A,#46BFBD,#FDB45C,#949FB1,#4D5360,#FF5A5E,#5AD3D1,#FFC870,#A8B3C5,#616774" 
@@ -628,153 +773,32 @@ PROCEDURE ip-SummaryPage:
             ASSIGN ld-sla[li-loop] = ROUND( li-sla[li-loop] / ( li-count / 100 ),2).
     END.
     
-    {&out} SKIP
-        '<div style="padding: 15px;">' SKIP
-        REPLACE(htmlib-StartMntTable(),"100%","35%") SKIP.
-                
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Reporting Period")
-       
-        '</td><td valign="top" align="left" colspan=2>'
-        STRING(ld-lodate,"99/99/9999") ' - '
-        STRING(ld-hidate,"99/99/9999") /* ' xx ' INTERVAL(ld-hidate,08/01/2017,"Months") */
-        '</td></tr>' SKIP.
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Technical Account Manager")
-       
-        '</td><td valign="top" align="left" colspan=2>'
-        DYNAMIC-FUNCTION('com-UserName',Customer.AccountManager)
-        '</td></tr>' SKIP.
-       
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Total Activity Duration")
-       
-        '</td><td valign="top" align="left" colspan=2>'
-        /*li-time ' - ' */
-        fnTimeString(li-Tot-Time)
-        '</td></tr>' SKIP.
-             
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Number Of Issues")
-       
-        '</td><td valign="top" align="left" colspan=2>'
-        li-count
-        '</td></tr>' SKIP.
-     
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("SLA Achieved")
-        '</td></tr>' SKIP.
-       
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        "Yes"
-       
-        '</td><td valign="top" align="right">'
-        li-sla[1] 
-        '</td><td valign="top" align="right">'
-        STRING(ld-sla[1],"zzzz9.99-") '%'
-        '</td></tr>' SKIP.
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        "No"
-       
-        '</td><td valign="top" align="right">'
-        li-sla[2]
-        '</td><td valign="top" align="right">'
-        STRING(ld-sla[2],"zzzz9.99-") '%'
-        '</td></tr>' SKIP.
-         
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Number Of Issues By SLA Level")
-        '</td></tr>' SKIP.
     
-    ASSIGN
-        li-Temp = 0.
-         
-    FOR EACH tt-ilog NO-LOCK
-        WHERE tt-ilog.AccountNumber = pc-account
-        BREAK BY tt-ilog.SLALevel:
+    {&out} 
+        '<div style="page-break-before: always;"><br /><h1 align="center"  style="page-break-after: always;">' SKIP.
         
-        ASSIGN
-            li-temp = li-temp + 1.
+    FOR FIRST doch NO-LOCK
+        WHERE doch.CompanyCode = lc-global-company
+        AND doch.RelType = "customer"
+        AND doch.RelKey  = customer.AccountNumber
+        AND doch.descr = "Report Logo":
             
-        IF NOT LAST-OF(tt-ilog.SLALevel) THEN NEXT.
+          ASSIGN 
+            lc-doc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"Document",STRING(ROWID(doch))).
         
-        ld-temp = ROUND( li-temp / ( li-count / 100 ),2).
-        
-        {&out} SKIP
-            '<tr>'
-            '<td valign="top" align="right">'
-            tt-ilog.SLALevel
-       
-            '</td><td valign="top" align="right">'
-            li-temp 
-            '</td><td valign="top" align="right">'
-            STRING(ld-temp,">>>>9.99-") '%'
-            '</td></tr>' SKIP.
-       
-        
-        ASSIGN 
-            li-temp = 0.
-          
-    END.    
-    
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Number Of Issues By Class")
-        '</td></tr>' SKIP.
-    
-    ASSIGN
-        li-Temp = 0.
-         
-    FOR EACH tt-ilog NO-LOCK
-        WHERE tt-ilog.AccountNumber = pc-account
-        BREAK BY tt-ilog.iType:
-        
-        ASSIGN
-            li-temp = li-temp + 1.
+        {&out} '<img src="' 
+             appurl 
+            '/sys/docview.' 
+            LC(doch.DocType) '?docid=' url-encode(lc-doc-key,"Query") '" alt="Logo" style="width: 40%;"><br><br>'.
             
-        IF NOT LAST-OF(tt-ilog.iType) THEN NEXT.
-        
-        ld-temp = ROUND( li-temp / ( li-count / 100 ),2).
-        
-        {&out} SKIP
-            '<tr>'
-            '<td valign="top" align="right">'
-            tt-ilog.iType
-       
-            '</td><td valign="top" align="right">'
-            li-temp 
-            '</td><td valign="top" align="right">'
-            STRING(ld-temp,">>>>9.99-") '%'
-            '</td></tr>' SKIP.
-       
-        
-        ASSIGN 
-            li-temp = 0.
-          
+                 
     END.  
-    {&out} SKIP
-        '<tr>'
-        '<td valign="top" align="right">'
-        htmlib-SideLabel("Issues By System Area")
-        '</td></tr>' SKIP.
-    
+             
+    {&out}   
+        'Service report for the period<br />'
+        STRING(ld-lodate,"99/99/9999")  ' to ' STRING(ld-hidate,"99/99/9999") '<br />'
+        '</div>' SKIP.
+
     ASSIGN
         li-Temp  = 0
         li-Time  = 0
@@ -786,18 +810,26 @@ PROCEDURE ip-SummaryPage:
         .
          
     DO li-loop = 1 TO 3:
-        CREATE ttc.
+        CREATE tt-cid.
         ASSIGN 
-            ttc.id = lc-id[li-loop].
+            tt-cid.id = lc-id[li-loop].
         
     END.
     FOR EACH tt-ilog NO-LOCK
         WHERE tt-ilog.AccountNumber = pc-account
+        AND tt-ilog.isClosed = TRUE
         BREAK BY tt-ilog.AreaCode:
         
         ASSIGN
             li-temp = li-temp + 1
             li-time = li-time + tt-ilog.iActDuration.
+            
+        FIND tt-month WHERE tt-month.AreaCode = tt-ilog.areaCode EXCLUSIVE-LOCK NO-ERROR.
+        IF NOT AVAILABLE tt-month THEN CREATE tt-month.
+        ASSIGN 
+            tt-month.areaCode            = tt-ilog.AreaCode
+            tt-month.val[tt-ilog.period] = tt-month.val[tt-ilog.period] + 1.
+                   
             
         IF NOT LAST-OF(tt-ilog.AreaCode) THEN NEXT.
         
@@ -805,25 +837,25 @@ PROCEDURE ip-SummaryPage:
             THEN lc-lb = tt-ilog.AreaCode.
         ELSE lc-lb = lc-lb + "," + tt-ilog.AreaCode.
         
-        CREATE ttd.
+        CREATE tt-data.
         ASSIGN 
-            ttd.id  = lc-id[1]
-            ttd.lbl = tt-ilog.AreaCode
-            ttd.val = li-temp.
-               
-        CREATE ttd.
+            tt-data.id  = lc-id[1]
+            tt-data.lbl = tt-ilog.AreaCode
+            tt-data.val = li-temp.
+        
+        CREATE tt-data.
         ASSIGN 
-            ttd.id  = lc-id[2]
-            ttd.lbl = tt-ilog.AreaCode
-            ttd.val = ROUND(ROUND(li-time / 60,2) / 60,2).
-               
-        CREATE ttd.
+            tt-data.id  = lc-id[2]
+            tt-data.lbl = tt-ilog.AreaCode
+            tt-data.val = ROUND(ROUND(li-time / 60,2) / 60,2).
+            
+        CREATE tt-data.
         ASSIGN 
-            ttd.id        = lc-id[3]
-            ttd.lbl       = tt-ilog.AreaCode
-            ttd.SetVal[1] = li-temp.
-        ttd.SetVal[2] = ROUND(ROUND(li-time / 60,2) / 60,2).
-                      
+            tt-data.id        = lc-id[3]
+            tt-data.lbl       = tt-ilog.AreaCode
+            tt-data.SetVal[1] = li-temp.
+        tt-data.SetVal[2] = ROUND(ROUND(li-time / 60,2) / 60,2).
+        /*              
         {&out} SKIP
             '<tr>'
             '<td valign="top" align="right">'
@@ -837,52 +869,28 @@ PROCEDURE ip-SummaryPage:
          
             '</td></tr>' SKIP.
        
-        
+        */
         ASSIGN 
             li-temp = 0
             li-time = 0.
           
-    END.      
+    END. 
+    
+    /*     
                
     {&out} SKIP 
         htmlib-EndTable() SKIP.
-                
+    */            
     {&out} 
+        '<h1 align="center">' Customer.Name ' jobs resolved for the period ' STRING(ld-lodate,"99/99/9999")  ' to ' STRING(ld-hidate,"99/99/9999") '</h1>'
+        '<h2 align="center">Issues by system</h2>'
         '<table width="100%" border="0">' SKIP.
-        /*
-        '<TR>'
-        '<td valign="top" align="CENTER">'
-        REPLACE(htmlib-SideLabel("Number of Issues By System Area"),":","")
-        '</td>'
-        '<td valign="top" align="CENTER">'
-        REPLACE(htmlib-SideLabel("Time By System Area In Hours"),":","")
-        '</td></tr>'
-       
-        '<tr><td align="CENTER" style="border: 1px solid #E4ECF0;">' SKIP.            
     {&out} 
-        '<div id="canvas-holder1" >' SKIP
-        
-        '<canvas id="' lc-id[1] '" width="300" height="300"/>' SKIP
-        
-        '</div>' SKIP.
-        *
-    {&out} 
-        '</td><td align="CENTER" style="border: 1px solid #E4ECF0;">'.
-     
-    {&out} 
-        '<div id="canvas-holder2">' SKIP
-        '<canvas id="' lc-id[2] '" width="300" height="300"/>' SKIP
-        '</div>' SKIP.
-     
-    {&out} 
-        '</td></tr><tr><td colspan="2" align="CENTER" style="border: 1px solid #E4ECF0;">'.
-     */
-        {&out} 
         '<tr><td colspan="2" align="CENTER" style="border: 1px solid #E4ECF0;">'.
         
     {&out} 
         '<div id="canvas-holder3">' SKIP
-        '<canvas id="' lc-id[3] '" width="500" height="300"/>' SKIP
+        '<canvas id="' lc-id[3] '" width="500" height="250"/>' SKIP
         '</div>' SKIP.
          
     {&out} 
@@ -891,52 +899,10 @@ PROCEDURE ip-SummaryPage:
     {&out} 
         '<script>' SKIP.
     
-    /*
-    ***
-    *** Array object for pie graphs 
-    ***
-    */
-    DO li-loop = 1 TO 2:
-        
-        {&out} SKIP
-            'var pd' lc-id[li-loop] ' = [' SKIP.
-               
-        li-tcol = 0.
-        FOR EACH ttd NO-LOCK 
-            WHERE ttd.id = lc-id[li-loop]
-            AND ttd.val > 0
-            BREAK BY  ttd.id:
-                  
-            li-tCol = li-tCol + 1.
-            IF li-tCol > num-entries(lc-co)
-                THEN li-tCol = 1.
-              
-            {&out} 
-                '~{' SKIP
-                ' value: ' ttd.val ',' SKIP
-                ' color: ~"' ENTRY(li-tCol,lc-co) '",' SKIP
-                ' highlight: ~"' ENTRY(li-tCol,lc-hi) '",' SKIP
-                ' label: ~"' ttd.lbl '"' SKIP
-                '~}'.
-                    
-            IF NOT LAST-OF(ttd.id)
-                THEN {&out} ',' SKIP.
-            ELSE {&out} SKIP.     
-                    
-                .
-              
-                  
-                 
-        END.       
-        {&out} 
-            '];' SKIP.
-                
-          
-            
-                   
-    END.  
+ 
     /* Array Object for Bar */
     
+       
     {&out} SKIP(2)
         'var pd' lc-id[3] ' = ~{' SKIP
         ' labels : [ ' .
@@ -971,9 +937,9 @@ PROCEDURE ip-SummaryPage:
                 '   data :' SKIP
                 '   ['.
         DO li-loop = 1 TO NUM-ENTRIES(lc-lb):
-            FIND ttd WHERE ttd.id = lc-id[3]
-                AND ttd.lbl = entry(li-loop,lc-lb) NO-LOCK.
-            {&out} ttd.setVal[li-set].
+            FIND tt-data WHERE tt-data.id = lc-id[3]
+                AND tt-data.lbl = entry(li-loop,lc-lb) NO-LOCK.
+            {&out} tt-data.setVal[li-set].
             IF li-loop <  NUM-ENTRIES(lc-lb)
                 THEN {&out} ','.
             ELSE {&out} ']' SKIP.
@@ -993,7 +959,69 @@ PROCEDURE ip-SummaryPage:
     {&out} SKIP
         '</script>'.
     
-               
+      
+    {&out} 
+         '<div style="page-break-before: always;">&nbsp;</div>'
+        '<div align="center"  style="page-break-after: always;">' SKIP.
+     
+    IF lc-repType = "1" THEN       
+        {&out} SKIP
+            REPLACE(htmlib-StartMntTable(),"100","40") SKIP
+            htmlib-TableHeading(
+            "|" + lc-labels[1] + "^right"
+            ) SKIP.
+                
+    ELSE          
+        {&out} SKIP
+            REPLACE(htmlib-StartMntTable(),"100","40") SKIP
+            htmlib-TableHeading(
+            "|" + lc-labels[1] + "^right|" + lc-labels[2] + "^right|" + lc-labels[3] + "^right"
+            ) SKIP.
+                            
+    FOR EACH tt-month NO-LOCK:
+         
+        {&out} 
+            '<tr>'
+            htmlib-MntTableField(html-encode(tt-month.AreaCode),'right')
+            htmlib-MntTableField(html-encode(STRING(tt-month.Val[1])),'right').
+            
+        IF lc-RepType <> "1"
+            THEN 
+            {&out} htmlib-MntTableField(html-encode(STRING(tt-month.Val[2])),'right')
+                htmlib-MntTableField(html-encode(STRING(tt-month.Val[3])),'right').
+          
+        {&out} 
+            '</tr>'.
+        
+        ASSIGN
+         li-tot-count[1] = li-tot-count[1] + tt-month.val[1]
+         li-tot-count[2] = li-tot-count[2] + tt-month.val[2]
+         li-tot-count[3] = li-tot-count[3] + tt-month.val[3].
+         
+    END.
+    {&out} 
+            '<tr>'
+            htmlib-MntTableField("<b>Total",'right')
+            htmlib-MntTableField('<b>' + html-encode(STRING(li-tot-count[1])),'right').
+            
+        IF lc-RepType <> "1"
+            THEN 
+            {&out} htmlib-MntTableField('<b>' + html-encode(STRING(li-tot-count[2])),'right')
+                htmlib-MntTableField('<b>' + html-encode(STRING(li-tot-count[3])),'right').
+          
+        {&out} 
+            '</tr>'.
+            
+                 
+                
+                
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
+                           
+    {&out} 
+        '</div>' SKIP.
+                          
                 
     {&out} 
         '</div>'
@@ -1012,13 +1040,13 @@ PROCEDURE ip-Validate :
     DEFINE OUTPUT PARAMETER pc-error-field AS CHARACTER NO-UNDO.
     DEFINE OUTPUT PARAMETER pc-error-msg  AS CHARACTER NO-UNDO.
 
-    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
-    DEFINE VARIABLE lc-rowid  AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE li-loop  AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-rowid AS CHARACTER NO-UNDO.
 
  
     IF ( int(lc-year) = year(TODAY) 
-    AND int(lc-month) > month(TODAY)) 
-    OR  ( int(lc-year) > year(TODAY) )  THEN
+        AND int(lc-month) > month(TODAY)) 
+        OR  ( int(lc-year) > year(TODAY) )  THEN
     DO:
         RUN htmlib-AddErrorMessage(
             'month', 
@@ -1124,7 +1152,8 @@ PROCEDURE process-web-request :
       Notes:       
     ------------------------------------------------------------------------------*/
     DEFINE VARIABLE lc-filename AS CHARACTER NO-UNDO.
-    
+    DEFINE VARIABLE lc-Title    AS CHARACTER NO-UNDO.
+        
   
     {lib/checkloggedin.i}
 
@@ -1134,6 +1163,9 @@ PROCEDURE process-web-request :
     
     ASSIGN
         ll-customer = this-user.UserClass = "CUSTOMER".
+        
+    ASSIGN
+        lc-title = "Client Report" .
 
     RUN ip-InitialProcess.
 
@@ -1146,6 +1178,10 @@ PROCEDURE process-web-request :
 
         IF lc-error-msg = "" THEN
         DO:
+            FOR FIRST Customer WHERE Customer.CompanyCode = lc-global-Company
+                                 AND Customer.AccountNumber = lc-Account NO-LOCK:
+                lc-title = lc-title + " " + Customer.Name.
+            END.                         
             RUN ip-SetDateRange.
             RUN ip-ProcessReport.
                                    
@@ -1155,12 +1191,16 @@ PROCEDURE process-web-request :
     RUN outputHeader.
 
     {&out} DYNAMIC-FUNCTION('htmlib-CalendarInclude':U) SKIP.
-    {&out} htmlib-Header("Issue Log") SKIP.
+    {&out} htmlib-Header(lc-title) SKIP.
     RUN ip-ExportJScript.
     {&out} htmlib-JScript-Maintenance() SKIP.
     {&out} htmlib-StartForm("mainform","post", appurl + '/rep/clientrep.p' ) SKIP.
+    
+    {&out} '<div id="noprint">'SKIP.
+     
     {&out} htmlib-ProgramTitle("Client Report") 
         htmlib-hidden("submitsource","") SKIP.
+      
     {&out} htmlib-BeginCriteria("Report Criteria").
     
     {&out} 
@@ -1184,12 +1224,14 @@ PROCEDURE process-web-request :
         '</center>' SKIP.
 
     
-    
-    
+    {&out} '</div>' SKIP. /* noprint */
+        
     IF request_method = "POST" 
         AND lc-error-msg = "" THEN
     DO:
-       RUN ip-PrintReport.   
+        RUN set-labels.
+       
+        RUN ip-PrintReport.   
     END.
 
 
@@ -1203,6 +1245,29 @@ PROCEDURE process-web-request :
 
 END PROCEDURE.
 
+PROCEDURE set-labels:
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE li-loop AS INTEGER NO-UNDO.
+    DEFINE VARIABLE ld-work AS DATE    NO-UNDO.
+    
+    IF lc-repType = "1"
+        THEN ASSIGN lc-labels[1] = ENTRY(MONTH(ld-hidate),lc-Global-Months-Name,"|") + " " + string(YEAR(ld-hiDate),"9999").
+    ELSE
+    DO li-loop = 3 TO 1 BY -1:
+        IF li-loop = 3
+            THEN ld-work = ld-hidate.
+        ELSE ld-work = ADD-INTERVAL(ld-work,-1,"months").
+        
+        lc-labels[li-loop] = ENTRY(MONTH(ld-work),lc-Global-Months-Name,"|") + " " + string(YEAR(ld-work),"9999").
+        
+        
+    END.
+
+END PROCEDURE.
 
 &ENDIF
 

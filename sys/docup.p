@@ -58,7 +58,7 @@ DEFINE VARIABLE ll-customer AS LOG       NO-UNDO.
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 {lib/maillib.i}
 
 
@@ -147,7 +147,7 @@ PROCEDURE process-web-request :
     {lib/checkloggedin.i} 
 
     ASSIGN 
-        lc-type = get-value("type")
+        lc-type  = get-value("type")
         lc-rowid = get-value("rowid").
 
     IF lc-rowid = ""
@@ -187,43 +187,45 @@ PROCEDURE process-web-request :
 
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip
-    .
+    {&out} htmlib-Header(lc-title) SKIP.
 
-    {&out} '<script language="JavaScript" src="/scripts/js/docupval.js"></script>' skip.   
+    {&out} 
+        '<script language="JavaScript" src="/scripts/js/docupval.js"></script>' SKIP.   
 
     
     {&out}
-    REPLACE(htmlib-StartForm("mainform","post", "/perl/uploaddoc.pl"),
+        REPLACE(htmlib-StartForm("mainform","post", "/perl/uploaddoc.pl"),
         "<form",
         '<form ENCTYPE="multipart/form-data" ')
-    htmlib-ProgramTitle(lc-title) skip.
+        htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-SimpleBackButton() '<BR><BR>' skip.
+    {&out} htmlib-SimpleBackButton() '<BR><BR>' SKIP.
 
 
-    {&out} '<table align=center>'
-    '<tr><td align="right">'  htmlib-SideLabel('Document') '</td><td><input size="60" class="inputfield" type="file" name="filename"></td></tr>'
+    {&out} 
+        '<table align=center>'
+        '<tr><td align="right">'  htmlib-SideLabel('Document') '</td><td><input size="60" class="inputfield" type="file" name="filename"></td></tr>'
 
-    '<tr><td align="right">'  htmlib-SideLabel('Description') '</td><td>' htmlib-InputField("comment",60,"") '</td></tr>'.
+        '<tr><td align="right">'  htmlib-SideLabel('Description') '</td><td>' htmlib-InputField("comment",60,"") '</td></tr>'.
 
     IF NOT ll-Customer THEN
     DO:
         {&out}
-        '<tr><td align="right">'  htmlib-SideLabel('Customer View?') '</td><td>' 
-        htmlib-CheckBox('custview', IF request_method = "get" THEN TRUE ELSE get-value("custview") = "on") '</td></tr>'.
+            '<tr><td align="right">'  htmlib-SideLabel('Customer View?') '</td><td>' 
+            htmlib-CheckBox('custview', IF request_method = "get" THEN TRUE ELSE get-value("custview") = "on") '</td></tr>'.
 
         {&out}
-        '<tr><td align="right">'  htmlib-SideLabel('Quick View?') '</td><td>' 
-        htmlib-CheckBox('quickview',  FALSE) '</td></tr>'.
+            '<tr><td align="right">'  htmlib-SideLabel('Quick View?') '</td><td>' 
+            htmlib-CheckBox('quickview',  FALSE) '</td></tr>'.
     END.
    
-    {&out} '</table>'
+    {&out} 
+        '</table>'
         
-    '<br><br><center><input class="actionbutton" type="button" value="Load Document" onclick="DoSubmit()"></center>'
+        '<br><br><center><input class="actionbutton" type="button" value="Load Document" onclick="DoSubmit()"></center>'
         .
     {&out} htmlib-Hidden("type",lc-type)
-    htmlib-Hidden("rowid",lc-rowid).
+        htmlib-Hidden("rowid",lc-rowid).
 
          
     IF ll-Customer THEN {&out} htmlib-Hidden("custview","on").
@@ -235,13 +237,13 @@ PROCEDURE process-web-request :
             + "&backto=custissuedoc").
     END.
     ELSE {&out} htmlib-Hidden("OKPage", appurl + '/sys/docupok.p?type=' + lc-type
-        + "&rowid=" + lc-rowid).
+            + "&rowid=" + lc-rowid).
 
     {&out} htmlib-Hidden("NotOKPage", appurl + '/sys/docupfail.p?type=' + lc-type
         + "&rowid=" + lc-rowid).
 
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

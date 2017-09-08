@@ -84,7 +84,7 @@ DEFINE VARIABLE lc-type         AS CHARACTER
 /* ************************* Included-Libraries *********************** */
 
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -171,19 +171,19 @@ PROCEDURE process-web-request :
     {lib/checkloggedin.i} 
 
     ASSIGN 
-        lc-mode = get-value("mode")
-        lc-rowid = get-value("rowid")
-        lc-search = get-value("search")
-        lc-firstrow = get-value("firstrow")
-        lc-lastrow  = get-value("lastrow")
+        lc-mode       = get-value("mode")
+        lc-rowid      = get-value("rowid")
+        lc-search     = get-value("search")
+        lc-firstrow   = get-value("firstrow")
+        lc-lastrow    = get-value("lastrow")
         lc-navigation = get-value("navigation").
 
     IF lc-mode = "" 
-        THEN ASSIGN lc-mode = get-field("savemode")
-            lc-rowid = get-field("saverowid")
-            lc-search = get-value("savesearch")
-            lc-firstrow = get-value("savefirstrow")
-            lc-lastrow  = get-value("savelastrow")
+        THEN ASSIGN lc-mode       = get-field("savemode")
+            lc-rowid      = get-field("saverowid")
+            lc-search     = get-value("savesearch")
+            lc-firstrow   = get-value("savefirstrow")
+            lc-lastrow    = get-value("savelastrow")
             lc-navigation = get-value("savenavigation").
 
     ASSIGN 
@@ -243,7 +243,7 @@ PROCEDURE process-web-request :
 
     ASSIGN
         lc-link-label = "Back"
-        lc-link-url = appurl + '/cust/cust.p' + 
+        lc-link-url   = appurl + '/cust/cust.p' + 
                                   '?search=' + lc-search + 
                                   '&firstrow=' + lc-firstrow + 
                                   '&lastrow=' + lc-lastrow + 
@@ -253,74 +253,76 @@ PROCEDURE process-web-request :
     
     RUN outputHeader.
     
-    {&out} htmlib-Header(lc-title) skip.
+    {&out} htmlib-Header(lc-title) SKIP.
 
     
-    {&out} '<script language="javascript">' skip.
+    {&out} 
+        '<script language="javascript">' SKIP.
 
     {&OUT}
-    'function MntButtonPress(ButtonEvent,NewURL) ~{':U SKIP
+        'function MntButtonPress(ButtonEvent,NewURL) ~{':U SKIP
         'this.location = NewURL':U SKIP
         '~}':U SKIP
-        'function ConfirmDelete(DocID) ~{' skip
-        '   if (confirm("Are you sure you want to delete this document?")) ~{' skip
-        '   document.mainform.elements["subaction"].value = "delete";' skip
-        '   document.mainform.elements["deleteid"].value = DocID;' skip
-        '   document.mainform.submit();' skip
-        '   ~}' skip
-        '~}' skip
-        'function ToggleCustomerView(DocID) ~{' skip
-        '   document.mainform.elements["subaction"].value = "toggle";' skip
-        '   document.mainform.elements["toggleid"].value = DocID;' skip
-        '   document.mainform.submit();' skip
-        '~}' skip
-        'function ToggleQuickView(DocID) ~{' skip                                                 /* 3674 */ 
-        '   document.mainform.elements["subaction"].value = "toggleQ";' skip                      /* 3674 */ 
-        '   document.mainform.elements["toggleQid"].value = DocID;' skip                          /* 3674 */ 
-        '   document.mainform.submit();' skip                                                     /* 3674 */ 
-        '~}' skip                                                                                 /* 3674 */ 
-        '</script>' skip.                                                                         
+        'function ConfirmDelete(DocID) ~{' SKIP
+        '   if (confirm("Are you sure you want to delete this document?")) ~{' SKIP
+        '   document.mainform.elements["subaction"].value = "delete";' SKIP
+        '   document.mainform.elements["deleteid"].value = DocID;' SKIP
+        '   document.mainform.submit();' SKIP
+        '   ~}' SKIP
+        '~}' SKIP
+        'function ToggleCustomerView(DocID) ~{' SKIP
+        '   document.mainform.elements["subaction"].value = "toggle";' SKIP
+        '   document.mainform.elements["toggleid"].value = DocID;' SKIP
+        '   document.mainform.submit();' SKIP
+        '~}' SKIP
+        'function ToggleQuickView(DocID) ~{' SKIP                                                 /* 3674 */ 
+        '   document.mainform.elements["subaction"].value = "toggleQ";' SKIP                      /* 3674 */ 
+        '   document.mainform.elements["toggleQid"].value = DocID;' SKIP                          /* 3674 */ 
+        '   document.mainform.submit();' SKIP                                                     /* 3674 */ 
+        '~}' SKIP                                                                                 /* 3674 */ 
+        '</script>' SKIP.                                                                         
     
 
 
     {&out}
-    htmlib-StartForm("mainform","post", appurl + "/cust/custdoc.p" )
-    htmlib-ProgramTitle(lc-title) skip.
+        htmlib-StartForm("mainform","post", appurl + "/cust/custdoc.p" )
+        htmlib-ProgramTitle(lc-title) SKIP.
 
-    {&out} htmlib-Hidden ("savemode", lc-mode) skip
-           htmlib-Hidden ("saverowid", lc-rowid) skip
-           htmlib-Hidden ("savesearch", lc-search) skip
-           htmlib-Hidden ("savefirstrow", lc-firstrow) skip
-           htmlib-Hidden ("savelastrow", lc-lastrow) skip
-           htmlib-Hidden ("savenavigation", lc-navigation) skip.
+    {&out} htmlib-Hidden ("savemode", lc-mode) SKIP
+        htmlib-Hidden ("saverowid", lc-rowid) SKIP
+        htmlib-Hidden ("savesearch", lc-search) SKIP
+        htmlib-Hidden ("savefirstrow", lc-firstrow) SKIP
+        htmlib-Hidden ("savelastrow", lc-lastrow) SKIP
+        htmlib-Hidden ("savenavigation", lc-navigation) SKIP.
         
-    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' skip.
+    {&out} htmlib-TextLink(lc-link-label,lc-link-url) '<BR><BR>' SKIP.
 
   
     IF get-value("problem") <> "" THEN
     DO:
-        {&out} '<div class="infobox">' get-value("problem") '</div>' skip.
+        {&out} 
+            '<div class="infobox">' get-value("problem") '</div>' SKIP.
     END.
     {&out}
-    tbar-Begin(
+        tbar-Begin(
         ""
         )
-    tbar-Link("add",?,appurl + '/sys/docup.p',"type=" +
+        tbar-Link("add",?,appurl + '/sys/docup.p',"type=" +
         lc-type + "&ownerrowid=" + lc-rowid)
-    tbar-BeginOption()
-    tbar-Link("delete",?,"off","")
-    tbar-Link("customerview",?,"off","")
-    tbar-Link("quickview",?,"off","")   /* 3674 */ 
-    tbar-Link("documentview",?,"off","")
-    tbar-EndOption()
-    tbar-End().
+        tbar-BeginOption()
+        tbar-Link("delete",?,"off","")
+        tbar-Link("customerview",?,"off","")
+        tbar-Link("quickview",?,"off","")   /* 3674 */ 
+        tbar-Link("documentview",?,"off","")
+        tbar-EndOption()
+        tbar-End().
 
-    {&out} skip
-          htmlib-StartMntTable().
+    {&out} SKIP
+        htmlib-StartMntTable().
     {&out}
-    htmlib-TableHeading(
+        htmlib-TableHeading(
         "Date|Time|By|Description|Customer View|Quick View|Type|Size (KB)^right"   /* 3674 */ 
-        ) skip.
+        ) SKIP.
 
     FOR EACH b-query NO-LOCK
         WHERE b-query.CompanyCode = lc-global-company
@@ -330,54 +332,54 @@ PROCEDURE process-web-request :
         ASSIGN 
             lc-doc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-global-user,TODAY,"Document",STRING(ROWID(b-query))).
         {&out}
-            skip
-            tbar-tr(rowid(b-query))
-            skip
-            htmlib-MntTableField(string(b-query.CreateDate,"99/99/9999"),'left')
-            htmlib-MntTableField(string(b-query.CreateTime,"hh:mm am"),'left')
-            htmlib-MntTableField(html-encode(dynamic-function("com-UserName",b-query.CreateBy)),'left')
+            SKIP
+            tbar-tr(ROWID(b-query))
+            SKIP
+            htmlib-MntTableField(STRING(b-query.CreateDate,"99/99/9999"),'left')
+            htmlib-MntTableField(STRING(b-query.CreateTime,"hh:mm am"),'left')
+            htmlib-MntTableField(html-encode(DYNAMIC-FUNCTION("com-UserName",b-query.CreateBy)),'left')
             htmlib-MntTableField(b-query.descr,'left')
-            htmlib-MntTableField(if b-query.CustomerView then 'Yes' else 'No','left')
-            htmlib-MntTableField(if b-query.Quickview then 'Yes' else 'No','left') /* 3674 */ 
+            htmlib-MntTableField(IF b-query.CustomerView THEN 'Yes' ELSE 'No','left')
+            htmlib-MntTableField(IF b-query.Quickview THEN 'Yes' ELSE 'No','left') /* 3674 */ 
             htmlib-MntTableField(b-query.DocType,'left')
-            htmlib-MntTableField(string(round(b-query.InBytes / 1024,2)),'right')
-            tbar-BeginHidden(rowid(b-query))
-                tbar-Link("delete",rowid(b-query),
-                          'javascript:ConfirmDelete(' + string(b-query.docid) + ');',
-                          "")
-                 tbar-Link("customerview",rowid(b-query),
-                          'javascript:ToggleCustomerView(' + string(b-query.docid) + ');',
-                          "")
-                 tbar-Link("quickview",rowid(b-query),                                    /* 3674 */   
-                          'javascript:ToggleQuickView(' + string(b-query.docid) + ');',   /* 3674 */   
-                          "")                                                             /* 3674 */   
-                 tbar-Link("documentview",rowid(b-query),                                 
-                          'javascript:OpenNewWindow('                                    
-                          + '~'' + appurl 
-                          + '/sys/docview.' 
-                            + lc(b-query.DocType) + '?docid=' + url-encode(lc-doc-key,"Query")
-                          + '~'' 
-                          + ');'
-                          ,"")
+            htmlib-MntTableField(STRING(ROUND(b-query.InBytes / 1024,2)),'right')
+            tbar-BeginHidden(ROWID(b-query))
+            tbar-Link("delete",ROWID(b-query),
+            'javascript:ConfirmDelete(' + string(b-query.docid) + ');',
+            "")
+            tbar-Link("customerview",ROWID(b-query),
+            'javascript:ToggleCustomerView(' + string(b-query.docid) + ');',
+            "")
+            tbar-Link("quickview",ROWID(b-query),                                    /* 3674 */   
+            'javascript:ToggleQuickView(' + string(b-query.docid) + ');',   /* 3674 */   
+            "")                                                             /* 3674 */   
+            tbar-Link("documentview",ROWID(b-query),                                 
+            'javascript:OpenNewWindow('                                    
+            + '~'' + appurl 
+            + '/sys/docview.' 
+            + lc(b-query.DocType) + '?docid=' + url-encode(lc-doc-key,"Query")
+            + '~'' 
+            + ');'
+            ,"")
                 
             tbar-EndHidden()
-            '</tr>' skip.
+            '</tr>' SKIP.
 
     END.
 
-    {&out} skip 
-           htmlib-EndTable()
-           skip.
+    {&out} SKIP 
+        htmlib-EndTable()
+        SKIP.
 
     {&out}
-    htmlib-Hidden("subaction","")
-    htmlib-Hidden("deleteid","")
-    htmlib-Hidden("toggleid","")
-    htmlib-Hidden("toggleQid","").   /* 3674 */ 
+        htmlib-Hidden("subaction","")
+        htmlib-Hidden("deleteid","")
+        htmlib-Hidden("toggleid","")
+        htmlib-Hidden("toggleQid","").   /* 3674 */ 
 
 
-    {&out} htmlib-EndForm() skip
-           htmlib-Footer() skip.
+    {&out} htmlib-EndForm() SKIP
+        htmlib-Footer() SKIP.
     
   
 END PROCEDURE.
