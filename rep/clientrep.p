@@ -975,7 +975,7 @@ PROCEDURE ip-SummaryPage:
         {&out} SKIP
             REPLACE(htmlib-StartMntTable(),"100","40") SKIP
             htmlib-TableHeading(
-            "|" + lc-labels[1] + "^right|" + lc-labels[2] + "^right|" + lc-labels[3] + "^right"
+            "|" + lc-labels[3] + "^right|" + lc-labels[2] + "^right|" + lc-labels[1] + "^right"
             ) SKIP.
                             
     FOR EACH tt-month NO-LOCK:

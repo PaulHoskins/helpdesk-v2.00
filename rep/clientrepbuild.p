@@ -96,12 +96,20 @@ PROCEDURE ip-BuildData :
                         
         CREATE tt-ilog.
         BUFFER-COPY issue TO tt-ilog.
-
       
-        ASSIGN 
-            tt-ilog.Period = INTERVAL(pd-ToDate,issueDate,"Months") + 1
+      
+        ASSIGN              
             tt-ilog.iType = com-DecodeLookup(Issue.iClass,lc-global-iclass-code,lc-global-iclass-desc).
-
+        
+        IF MONTH(tt-ilog.createDate) = month(pd-ToDate)
+        AND year(tt-ilog.createDate) = year(pd-ToDate)
+        THEN ASSIGN tt-ilog.Period = 1.
+        ELSE
+        IF MONTH(tt-ilog.createDate) = month(pd-fromDate)
+        AND year(tt-ilog.createDate) = year(pd-fromDate)
+        THEN ASSIGN tt-ilog.Period = 3.
+        ELSE ASSIGN tt-ilog.Period = 2. 
+       
 
         ASSIGN
             tt-ilog.isClosed = NOT DYNAMIC-FUNCTION("islib-IssueIsOpen",ROWID(Issue)).

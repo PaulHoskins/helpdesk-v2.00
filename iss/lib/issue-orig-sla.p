@@ -22,7 +22,7 @@ DEFINE BUFFER Issue   FOR Issue.
 
 
 
-FIND Issue WHERE ROWID(issue) = pr-issue NO-LOCK NO-ERROR.
+FIND Issue WHERE ROWID(issue) = pr-issue EXCLUSIVE-LOCK NO-ERROR.
 
 ASSIGN 
     lc-global-company = Issue.CompanyCode.

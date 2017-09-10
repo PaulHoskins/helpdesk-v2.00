@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="helpdesk" targetNamespace="urn:tempuri-org" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:prodata="urn:schemas-progress-com:xml-prodata:0001" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="urn:tempuri-org" xmlns:S2="urn:tempuri-org:helpdesk" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:S1="urn:soap-fault:details" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+<wsdl:documentation>EncodingType=DOC_LITERAL, Proxygen_Product=Progress Version 11.6</wsdl:documentation>
+  <wsdl:types>
+<schema elementFormDefault="unqualified" targetNamespace="urn:soap-fault:details" xmlns="http://www.w3.org/2001/XMLSchema"><element name="FaultDetail"><complexType><sequence><element name="errorMessage" type="xsd:string"/><element name="requestID" type="xsd:string"/></sequence></complexType></element></schema>
+<schema elementFormDefault="qualified" targetNamespace="urn:tempuri-org:helpdesk" xmlns="http://www.w3.org/2001/XMLSchema"><element name="login"><complexType><sequence><element name="pcLoginId" nillable="true" type="xsd:string"/><element name="pcPasswd" nillable="true" type="xsd:string"/></sequence></complexType></element><element name="loginResponse"><complexType><sequence><element name="result" nillable="true" type="xsd:string"/><element name="plOk" nillable="true" type="xsd:boolean"/><element name="pcToken" nillable="true" type="xsd:string"/></sequence></complexType></element></schema>
+  </wsdl:types>
+  <wsdl:message name="helpdesk_loginResponse">
+    <wsdl:part name="parameters" element="S2:loginResponse"/>
+  </wsdl:message>
+  <wsdl:message name="helpdesk_login">
+    <wsdl:part name="parameters" element="S2:login"/>
+  </wsdl:message>
+  <wsdl:message name="FaultDetailMessage">
+    <wsdl:part name="FaultDetail" element="S1:FaultDetail"/>
+  </wsdl:message>
+  <wsdl:portType name="helpdeskObj">
+    <wsdl:operation name="login">
+      <wsdl:input message="tns:helpdesk_login"/>
+      <wsdl:output message="tns:helpdesk_loginResponse"/>
+      <wsdl:fault name="helpdeskFault" message="tns:FaultDetailMessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="helpdeskObj" type="tns:helpdeskObj">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="login">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="helpdeskFault">
+        <soap:fault name="helpdeskFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="helpdeskService">
+    <wsdl:port name="helpdeskObj" binding="tns:helpdeskObj">
+<wsdl:documentation></wsdl:documentation>
+      <soap:address location="http://www.tempuri.org/wsa/wsa1"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
