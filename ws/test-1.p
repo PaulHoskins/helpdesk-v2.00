@@ -20,3 +20,8 @@ RUN login IN hhelpdeskObj(INPUT pcLoginId, INPUT pcPasswd, OUTPUT result, OUTPUT
 
 
 DISP plok pcToken.
+
+/*
+wsdl /language:VB /out:HelpDeskProxyClass.vb http://localhost:8080/wsa/wsa1/wsdl?targetURI=urn:tempuri-org
+*/
+

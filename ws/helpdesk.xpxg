@@ -84,6 +84,48 @@
     <IsTTResultSet>false</IsTTResultSet>
     <WriteDatasetBeforeImage>false</WriteDatasetBeforeImage>
     <Procedure isPersistent="false" useFullName="false">
+      <Name>getcrmlist</Name>
+      <ProcPath>ws\</ProcPath>
+      <ProPath>C:\Development\projects\helpdesk-v2.00\</ProPath>
+      <ProcExt>p</ProcExt>
+      <ProcDetail isCustomized="true" usesUnknownDefault="true" useRetVal="false" usesTTMappingDefault="true" IsTTResultSet="true" usesBeforeImageDefault="true" IsMappedToSubmit="false">
+        <Name>getcrmlist</Name>
+        <HelpString />
+        <Parameter allowUnknown="false" ordinal="1" writeXmlBeforeImage="false">
+          <Name>pcToken</Name>
+          <Type>1</Type>
+          <Mode>2</Mode>
+        </Parameter>
+        <Parameter allowUnknown="false" ordinal="2" writeXmlBeforeImage="false">
+          <Name>plOk</Name>
+          <Type>3</Type>
+          <Mode>2</Mode>
+        </Parameter>
+        <Parameter allowUnknown="false" ordinal="3" writeXmlBeforeImage="false">
+          <Name>pcMessage</Name>
+          <Type>1</Type>
+          <Mode>2</Mode>
+        </Parameter>
+        <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+          <Name>tt_crm</Name>
+          <Type>15</Type>
+          <Mode>2</Mode>
+          <MetaData>
+            <FieldName>opNo</FieldName>
+            <Type>4</Type>
+            <Extent>0</Extent>
+            <TypeName>INTEGER</TypeName>
+          </MetaData>
+          <MetaData>
+            <FieldName>opDesc</FieldName>
+            <Type>1</Type>
+            <Extent>0</Extent>
+            <TypeName>CHARACTER</TypeName>
+          </MetaData>
+        </Parameter>
+      </ProcDetail>
+    </Procedure>
+    <Procedure isPersistent="false" useFullName="false">
       <Name>login</Name>
       <ProcPath>ws\</ProcPath>
       <ProPath>C:\Development\projects\helpdesk-v2.00\</ProPath>

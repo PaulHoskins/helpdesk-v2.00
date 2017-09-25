@@ -19,14 +19,12 @@ DEFINE INPUT PARAMETER  pc-LoginId      AS CHARACTER    NO-UNDO.
 DEFINE INPUT PARAMETER  pc-Passwd       AS CHARACTER    NO-UNDO.
 
 DEFINE OUTPUT PARAMETER pl-ok           AS LOGICAL      NO-UNDO.
-DEFINE OUTPUT PARAMETER pc-token        AS LONGCHAR     NO-UNDO.
+DEFINE OUTPUT PARAMETER pc-message      AS CHARACTER    NO-UNDO.
+DEFINE OUTPUT PARAMETER pc-token        AS CHARACTER    NO-UNDO.
 
 
-MESSAGE "Login " pc-Loginid.
-
-ASSIGN
-    pl-ok = TRUE
-    pc-token = "PAUL".
-    
-    
+ASSIGN 
+    pl-ok      = NO
+    pc-message = "The user does not exist".
+       
     

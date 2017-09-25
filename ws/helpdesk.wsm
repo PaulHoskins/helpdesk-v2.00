@@ -80,6 +80,61 @@
       <IsTTResultSet>false</IsTTResultSet>
       <WriteDatasetBeforeImage>false</WriteDatasetBeforeImage>
       <Procedure isPersistent="false" useFullName="false">
+        <Name>getcrmlist</Name>
+        <ProcPath>ws\</ProcPath>
+        <ProPath>C:\Development\projects\helpdesk-v2.00\</ProPath>
+        <ProcExt>p</ProcExt>
+        <ProcDetail isCustomized="true" usesUnknownDefault="true" useRetVal="false" usesTTMappingDefault="true" IsTTResultSet="true" usesBeforeImageDefault="true" IsMappedToSubmit="false">
+          <Name>getcrmlist</Name>
+          <HelpString></HelpString>
+          <ReturnValue allowUnknown="false" ordinal="0" writeXmlBeforeImage="false">
+            <Name>result</Name>
+            <OrigName>result</OrigName>
+            <Type>1</Type>
+            <Mode>0</Mode>
+          </ReturnValue>
+          <Parameter allowUnknown="false" ordinal="1" writeXmlBeforeImage="false">
+            <Name>pcToken</Name>
+            <OrigName>pc-token</OrigName>
+            <Type>1</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="2" writeXmlBeforeImage="false">
+            <Name>plOk</Name>
+            <OrigName>pl-ok</OrigName>
+            <Type>3</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="3" writeXmlBeforeImage="false">
+            <Name>pcMessage</Name>
+            <OrigName>pc-message</OrigName>
+            <Type>1</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+            <Name>tt_crm</Name>
+            <OrigName>tt_crm</OrigName>
+            <Type>15</Type>
+            <Mode>2</Mode>
+            <NamespaceUri xsi:nil="true"/>
+            <MetaData>
+              <FieldName>opNo</FieldName>
+              <Type>4</Type>
+              <Extent>0</Extent>
+              <TypeName>INTEGER</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+            <MetaData>
+              <FieldName>opDesc</FieldName>
+              <Type>1</Type>
+              <Extent>0</Extent>
+              <TypeName>CHARACTER</TypeName>
+              <XmlNodeType>0</XmlNodeType>
+            </MetaData>
+          </Parameter>
+        </ProcDetail>
+      </Procedure>
+      <Procedure isPersistent="false" useFullName="false">
         <Name>login</Name>
         <ProcPath>ws\</ProcPath>
         <ProPath>C:\Development\projects\helpdesk-v2.00\</ProPath>
@@ -111,9 +166,15 @@
             <Mode>2</Mode>
           </Parameter>
           <Parameter allowUnknown="false" ordinal="4" writeXmlBeforeImage="false">
+            <Name>pcMessage</Name>
+            <OrigName>pc-message</OrigName>
+            <Type>1</Type>
+            <Mode>2</Mode>
+          </Parameter>
+          <Parameter allowUnknown="false" ordinal="5" writeXmlBeforeImage="false">
             <Name>pcToken</Name>
             <OrigName>pc-token</OrigName>
-            <Type>39</Type>
+            <Type>1</Type>
             <Mode>2</Mode>
           </Parameter>
         </ProcDetail>

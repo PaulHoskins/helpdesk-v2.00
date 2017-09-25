@@ -3,10 +3,16 @@
 <wsdl:documentation>EncodingType=DOC_LITERAL, Proxygen_Product=Progress Version 11.6</wsdl:documentation>
   <wsdl:types>
 <schema elementFormDefault="unqualified" targetNamespace="urn:soap-fault:details" xmlns="http://www.w3.org/2001/XMLSchema"><element name="FaultDetail"><complexType><sequence><element name="errorMessage" type="xsd:string"/><element name="requestID" type="xsd:string"/></sequence></complexType></element></schema>
-<schema elementFormDefault="qualified" targetNamespace="urn:tempuri-org:helpdesk" xmlns="http://www.w3.org/2001/XMLSchema"><element name="login"><complexType><sequence><element name="pcLoginId" nillable="true" type="xsd:string"/><element name="pcPasswd" nillable="true" type="xsd:string"/></sequence></complexType></element><element name="loginResponse"><complexType><sequence><element name="result" nillable="true" type="xsd:string"/><element name="plOk" nillable="true" type="xsd:boolean"/><element name="pcToken" nillable="true" type="xsd:string"/></sequence></complexType></element></schema>
+<schema elementFormDefault="qualified" targetNamespace="urn:tempuri-org:helpdesk" xmlns="http://www.w3.org/2001/XMLSchema"><complexType name="getcrmlist_tt_crmRow"><sequence><element name="opNo" nillable="true" type="xsd:int"/><element name="opDesc" nillable="true" type="xsd:string"/></sequence></complexType><complexType name="getcrmlist_tt_crmParam"><sequence><element maxOccurs="unbounded" minOccurs="0" name="tt_crmRow" type="S2:getcrmlist_tt_crmRow"/></sequence></complexType><element name="getcrmlist"><complexType><sequence/></complexType></element><element name="getcrmlistResponse"><complexType><sequence><element name="result" nillable="true" type="xsd:string"/><element name="pcToken" nillable="true" type="xsd:string"/><element name="plOk" nillable="true" type="xsd:boolean"/><element name="pcMessage" nillable="true" type="xsd:string"/><element name="tt_crm" nillable="true" type="S2:getcrmlist_tt_crmParam"/></sequence></complexType></element><element name="login"><complexType><sequence><element name="pcLoginId" nillable="true" type="xsd:string"/><element name="pcPasswd" nillable="true" type="xsd:string"/></sequence></complexType></element><element name="loginResponse"><complexType><sequence><element name="result" nillable="true" type="xsd:string"/><element name="plOk" nillable="true" type="xsd:boolean"/><element name="pcMessage" nillable="true" type="xsd:string"/><element name="pcToken" nillable="true" type="xsd:string"/></sequence></complexType></element></schema>
   </wsdl:types>
+  <wsdl:message name="helpdesk_getcrmlist">
+    <wsdl:part name="parameters" element="S2:getcrmlist"/>
+  </wsdl:message>
   <wsdl:message name="helpdesk_loginResponse">
     <wsdl:part name="parameters" element="S2:loginResponse"/>
+  </wsdl:message>
+  <wsdl:message name="helpdesk_getcrmlistResponse">
+    <wsdl:part name="parameters" element="S2:getcrmlistResponse"/>
   </wsdl:message>
   <wsdl:message name="helpdesk_login">
     <wsdl:part name="parameters" element="S2:login"/>
@@ -15,6 +21,11 @@
     <wsdl:part name="FaultDetail" element="S1:FaultDetail"/>
   </wsdl:message>
   <wsdl:portType name="helpdeskObj">
+    <wsdl:operation name="getcrmlist">
+      <wsdl:input message="tns:helpdesk_getcrmlist"/>
+      <wsdl:output message="tns:helpdesk_getcrmlistResponse"/>
+      <wsdl:fault name="helpdeskFault" message="tns:FaultDetailMessage"/>
+    </wsdl:operation>
     <wsdl:operation name="login">
       <wsdl:input message="tns:helpdesk_login"/>
       <wsdl:output message="tns:helpdesk_loginResponse"/>
@@ -23,6 +34,18 @@
   </wsdl:portType>
   <wsdl:binding name="helpdeskObj" type="tns:helpdeskObj">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="getcrmlist">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input>
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal"/>
+      </wsdl:output>
+      <wsdl:fault name="helpdeskFault">
+        <soap:fault name="helpdeskFault" use="literal"/>
+      </wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="login">
       <soap:operation soapAction="" style="document"/>
       <wsdl:input>
