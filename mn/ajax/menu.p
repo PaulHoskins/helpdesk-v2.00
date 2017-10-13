@@ -1,6 +1,6 @@
 /***********************************************************************
 
-    Program:        mn/menupanel.p
+    Program:        mn/ajax/menu.p
     
     Purpose:        Left Panel Menu   
     
@@ -24,6 +24,8 @@
     10/09/2016  phoski      CRM
     19/09/2016  phoski      Re-instate 'Diary'
     22/04/2017  phoski      Tidy up alert box
+    29/09/2017  phoski      Internal/Remote get Assigments and Assignment
+                            Link includes date range
                               
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -50,8 +52,13 @@ DEFINE VARIABLE cGUID          AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-unq         AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-Enc-Key     AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-renew       AS CHARACTER NO-UNDO.
-
-
+DEFINE VARIABLE lc-system      AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-image       AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-company     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-address     AS CHARACTER NO-UNDO.
+DEFINE VARIABLE li-cust-open   AS INTEGER   NO-UNDO.
+DEFINE VARIABLE li-user-open   AS INTEGER   NO-UNDO.
+DEFINE VARIABLE li-total       AS INTEGER   NO-UNDO.
 
 DEFINE TEMP-TABLE tt-menu NO-UNDO
     FIELD ItemNo      AS INTEGER
@@ -67,20 +74,12 @@ DEFINE TEMP-TABLE tt-menu NO-UNDO
     INDEX i-ItemNo IS PRIMARY UNIQUE
     ItemNo.
 
-DEFINE VARIABLE lc-system    AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-image     AS CHARACTER NO-UNDO.
-DEFINE VARIABLE lc-company   AS CHARACTER NO-UNDO.
-
-DEFINE VARIABLE lc-address   AS CHARACTER NO-UNDO.
-DEFINE VARIABLE li-cust-open AS INTEGER   NO-UNDO.
-DEFINE VARIABLE li-user-open AS INTEGER   NO-UNDO.
-
-DEFINE VARIABLE li-total     AS INTEGER   NO-UNDO.
-
 DEFINE TEMP-TABLE tt NO-UNDO
     FIELD ACode        AS CHARACTER
     FIELD ADescription AS CHARACTER
     FIELD ACount       AS INTEGER
+    FIELD LoDate       AS DATE
+    FIELD hiDate       AS DATE
     FIELD CCount       AS INTEGER   EXTENT 4
     INDEX i-ACode IS PRIMARY ACode 
     INDEX i-ACount           ACount DESCENDING ADescription.
@@ -88,35 +87,8 @@ DEFINE TEMP-TABLE tt NO-UNDO
 
 
 
-
-
-/* ********************  Preprocessor Definitions  ******************** */
-
-&Scoped-define PROCEDURE-TYPE Procedure
-&Scoped-define DB-AWARE no
-
-
-
-
-
-
-/* *********************** Procedure Settings ************************ */
-
-
-
-/* *************************  Create Window  ************************** */
-
-/* DESIGN Window definition (used by the UIB) 
-  CREATE WINDOW Procedure ASSIGN
-         HEIGHT             = 14.15
-         WIDTH              = 60.57.
-/* END WINDOW DEFINITION */
-                                                                        */
-
-/* ************************* Included-Libraries *********************** */
-
 {src/web2/wrap-cgi.i}
-{lib/htmlib.i}
+    {lib/htmlib.i}
 
 
 
@@ -171,22 +143,21 @@ PROCEDURE ip-InternalUser :
     DO:
         
         {&out} 
-        '<br /><a class="tlink" style="width: 100%;" href="' appurl
-        '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' SKIP
-                'Your Diary' 
-                '</a><br /><br />' SKIP.     
+            '<br /><a class="tlink" style="width: 100%;" href="' appurl
+            '/time/diaryframe.p' lc-random '" target="mainwindow" title="Diary View">' SKIP
+            'Your Diary' 
+            '</a><br /><br />' SKIP.     
                 
         IF DYNAMIC-FUNCTION("com-HasSchedule",webuser.CompanyCode,WebUser.LoginID) > 0 THEN
         DO:
             ASSIGN 
-                lc-enc-key =
-               DYNAMIC-FUNCTION("sysec-EncodeValue",WebUser.LoginID,TODAY,"ScheduleKey",STRING(ROWID(webuser))).
+                lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",WebUser.LoginID,TODAY,"ScheduleKey",STRING(ROWID(webuser))).
                  
             {&out} 
-            '<br /><a class="tlink" style="width: 100%;" href="' appurl
-            '/sched/yourschedule.p?engineer=' url-encode(lc-enc-key,"Query")  '" target="mainwindow" title="Project Schedule">' SKIP
+                '<br /><a class="tlink" style="width: 100%;" href="' appurl
+                '/sched/yourschedule.p?engineer=' url-encode(lc-enc-key,"Query")  '" target="mainwindow" title="Project Schedule">' SKIP
                 'Your Project Schedule' 
-                    '</a><br /><br />' SKIP. 
+                '</a><br /><br />' SKIP. 
         END.        
                  
     END.
@@ -195,15 +166,16 @@ PROCEDURE ip-InternalUser :
 
     IF ll-Alert THEN
     DO:
-        {&out} '<div class="menualert" style="background-color: #E1EAFB;">'.
+        {&out} 
+            '<div class="menualert" style="background-color: #E1EAFB;">'.
         ASSIGN
             lc-Random = "?random=" + string(int(TODAY)) + string(TIME) + string(ETIME) + string(ROWID(webuser)).
         IF li-ActionCount > 0
             OR li-AlertCount > 0 THEN
         DO:
             {&out} 
-            '<BR /><a class="tlink" style="border:none; width: 100%;" href="' appurl
-            '/mn/alertpage.p' lc-random '" target="mainwindow" title="Alerts">Your' SKIP.
+                '<BR /><a class="tlink" style="border:none; width: 100%;" href="' appurl
+                '/mn/alertpage.p' lc-random '" target="mainwindow" title="Alerts">Your' SKIP.
          
             IF li-ActionCount > 0 THEN
                 {&out} ' actions (' li-ActionCount ')'.
@@ -211,34 +183,36 @@ PROCEDURE ip-InternalUser :
             DO:
                 {&out} ( IF li-ActionCount > 0 THEN ' & ' ELSE ' ' ) 'SLA alerts (' li-AlertCount ')'.
             END.
-            {&out} '</a><br />' SKIP.
+            {&out} 
+                '</a><br />' SKIP.
         END.
         IF li-unCount > 0 
             THEN {&out} 
-        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
-        '/iss/issue.p' lc-random '&status=allopen&assign=NotAssigned" target="mainwindow" title="Unassigned Issues">'
-        li-uncount ' Unassigned Issues</a><br />'.
+                '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
+                '/iss/issue.p' lc-random '&status=allopen&assign=NotAssigned" target="mainwindow" title="Unassigned Issues">'
+                li-uncount ' Unassigned Issues</a><br />'.
 
         IF li-EmailCount > 0 
             THEN {&out} 
-        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
-        '/mail/mail.p' lc-random '" target="mainwindow" title="HelpDesk Emails">'
-        li-EmailCount ' HelpDesk Emails</a><br />'.
+                '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
+                '/mail/mail.p' lc-random '" target="mainwindow" title="HelpDesk Emails">'
+                li-EmailCount ' HelpDesk Emails</a><br />'.
 
         IF li-Inventory > 0 
             THEN {&out} 
-        '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
-        '/cust/ivrenewal.p' lc-random '" target="mainwindow" title="Inventory Renewals">'
-        li-Inventory ' Inventory Renewals</a><br />'.
+                '<BR /><a class="tlink" style="border: none; width: 100%;" href="' appurl
+                '/cust/ivrenewal.p' lc-random '" target="mainwindow" title="Inventory Renewals">'
+                li-Inventory ' Inventory Renewals</a><br />'.
         IF li-OpenAction > 0
             THEN {&out} 
-        '</BR><a class="tlink" style="border: none; width: 100%;" href="' appurl
-        '/iss/openaction.p' lc-random '" target="mainwindow" title="Open Actions">' SKIP
+                '</BR><a class="tlink" style="border: none; width: 100%;" href="' appurl
+                '/iss/openaction.p' lc-random '" target="mainwindow" title="Open Actions">' SKIP
                 'Open Actions (' li-OpenAction ')'
                 '</a><br />' SKIP.
 
    
-        {&out} '</BR /></div>'.
+        {&out} 
+            '</BR /></div>'.
 
     END.
 
@@ -263,9 +237,11 @@ PROCEDURE ip-NewMenu :
     DEFINE VARIABLE lc-desc   AS CHARACTER NO-UNDO.
 
 
-    {&out} '<div id="menustrip" style="margin: 7px;">' htmlib-BeginCriteria("Menu").
+    {&out} 
+        '<div id="menustrip" style="margin: 7px;">' htmlib-BeginCriteria("Menu").
 
-    {&out} '<div id="menu">' SKIP.
+    {&out} 
+        '<div id="menu">' SKIP.
 
     FOR EACH tt-menu NO-LOCK :
         IF tt-menu.Level > 1 THEN NEXT.
@@ -278,17 +254,22 @@ PROCEDURE ip-NewMenu :
                 THEN lc-unq = '&UniqueID='  + cGUID.
             ELSE lc-unq = '?UniqueID='  + cGUID.
 
-            {&out} '<div class="menusub" style="margin-left: 0px;">' SKIP
-                   '<table><tr><td nowrap>'.
-            {&out} '<a href="'  appurl  '/' tt-menu.ObjURL lc-unq  '" target="' tt-menu.ObjTarget '"' SKIP.
+            {&out} 
+                '<div class="menusub" style="margin-left: 0px;">' SKIP
+                '<table><tr><td nowrap>'.
+            {&out} 
+                '<a href="'  appurl  '/' tt-menu.ObjURL lc-unq  '" target="' tt-menu.ObjTarget '"' SKIP.
               
             {&out} ' title="' + html-encode(tt-menu.description) '"'.
 
-            {&out} '>' SKIP
-                     html-encode(tt-menu.description) 
-                    '</a></br>' SKIP.
-            {&out} '</td></tr>'.
-            {&out} '</table></div>' SKIP.
+            {&out} 
+                '>' SKIP
+                html-encode(tt-menu.description) 
+                '</a></br>' SKIP.
+            {&out} 
+                '</td></tr>'.
+            {&out} 
+                '</table></div>' SKIP.
 
             NEXT.
         END.
@@ -300,23 +281,26 @@ PROCEDURE ip-NewMenu :
             lc-object = "msub" + string(tt-menu.ItemNo).
 
         {&out}
-        '<div id="mhd' tt-menu.ItemNo '" class="menuhd">'
-        '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
-        lc-object '~')">'
-        '&nbsp;'
-        lc-desc
-        '</div>' SKIP.
+            '<div id="mhd' tt-menu.ItemNo '" class="menuhd">'
+            '<img src="/images/general/menuclosed.gif" onClick="hdexpandcontent(this, ~''
+            lc-object '~')">'
+            '&nbsp;'
+            lc-desc
+            '</div>' SKIP.
         
-        {&out} '<div class="menusub" style="display:none;" id="' lc-Object  '">' SKIP.
+        {&out} 
+            '<div class="menusub" style="display:none;" id="' lc-Object  '">' SKIP.
 
-        {&out} '<table>'.
+        {&out} 
+            '<table>'.
 
         FOR EACH b-sub-menu WHERE b-sub-menu.ItemNo > tt-menu.ItemNo NO-LOCK   :
 
             IF b-sub-menu.Level = 1 THEN LEAVE.
 
             IF ROWID(b-sub-menu) = rowid(tt-menu) THEN NEXT.
-            {&out} '<tr><td nowrap>'.
+            {&out} 
+                '<tr><td nowrap>'.
 
             
 
@@ -324,23 +308,29 @@ PROCEDURE ip-NewMenu :
                 THEN lc-unq = '&UniqueID='  + cGUID.
             ELSE lc-unq = '?UniqueID='  + cGUID.
            
-            {&out} '<a href="'  appurl  '/' b-sub-menu.ObjURL lc-unq  '" target="' b-sub-menu.ObjTarget '"'.
+            {&out} 
+                '<a href="'  appurl  '/' b-sub-menu.ObjURL lc-unq  '" target="' b-sub-menu.ObjTarget '"'.
                 
             {&out} ' title="' + html-encode(b-sub-menu.description) '"'.
-            {&out}  '>'
-            html-encode(b-sub-menu.description) 
-            '</a></br>' SKIP.
-            {&out} '</td></tr>'.
+            {&out}  
+                '>'
+                html-encode(b-sub-menu.description) 
+                '</a></br>' SKIP.
+            {&out} 
+                '</td></tr>'.
                    
             
         END.
-        {&out} '</table>'.
+        {&out} 
+            '</table>'.
 
-        {&out} '</div>' SKIP.
+        {&out} 
+            '</div>' SKIP.
 
     END.
 
-    {&out} '</div>' SKIP.
+    {&out} 
+        '</div>' SKIP.
 
     {&out} htmlib-EndCriteria() '</div>'.
 
@@ -363,10 +353,10 @@ PROCEDURE ip-SuperUserAnalysis :
     DEFINE BUFFER customer    FOR customer.
     DEFINE BUFFER b-WebStatus FOR WebStatus.
     
-    DEFINE VARIABLE ll-Steam AS LOG       NO-UNDO.
+    DEFINE VARIABLE ll-Steam AS LOG     NO-UNDO.
 
 
-    DEFINE VARIABLE iloop    AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE iloop    AS INTEGER NO-UNDO.
 
     ll-Steam = DYNAMIC-FUNCTION("com-isTeamMember", lc-global-company,lc-user,?).
 
@@ -413,6 +403,15 @@ PROCEDURE ip-SuperUserAnalysis :
         END.
         ASSIGN 
             tt.Acount = tt.ACount + 1.
+            
+        IF tt.lodate = ?
+            OR tt.lodate > Issue.CreateDate 
+            THEN ASSIGN tt.lodate = Issue.CreateDate.
+           
+        IF tt.hidate = ?
+            OR tt.hidate < Issue.CreateDate 
+            THEN ASSIGN tt.hidate = Issue.CreateDate.
+        
         DO iloop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
             IF issue.iclass = ENTRY(iloop,lc-global-iclass-code,"|")
                 THEN ASSIGN tt.ccount[iloop] = tt.ccount[iloop] + 1.
@@ -444,67 +443,75 @@ PROCEDURE ip-SuperUserFinal :
     
     IF AVAILABLE tt THEN
     DO:
-        {&out} '<div style="margin: 7px;">'.
+        {&out} 
+            '<div style="margin: 7px;">'.
 
 
         {&out} htmlib-BeginCriteria("Assignments - " + string(TIME,'hh:mm am')).
 
-        {&out} '<table style="font-size: 10px;">'.
+        {&out} 
+            '<table style="font-size: 10px;">'.
 
         IF lc-renew <> "" THEN
         DO:
             FIND FIRST tt WHERE tt.ACode = lc-renew NO-LOCK NO-ERROR.
             {&out} 
-            '<tr><td nowrap  style="vertical-align:top">'
-            '<a title="Inventory Renewals" target="mainwindow" class="tlink" style="border:none;' 
-            IF AVAILABLE tt THEN 'color: red;' 
-            ELSE ''
-            '" href="' appurl '/iss/issue.p?frommenu=yes&status=allopen&assign=' lc-renew '">'
-            html-encode("Renewals")
-            '</a></td><td align=right class="menuinfo">' 
-            IF AVAILABLE tt THEN tt.ACount 
-            ELSE 0 '&nbsp;</td></tr>'.
+                '<tr><td nowrap  style="vertical-align:top">'
+                '<a title="Inventory Renewals" target="mainwindow" class="tlink" style="border:none;' 
+                IF AVAILABLE tt THEN 'color: red;' 
+                ELSE ''
+                '" href="' appurl '/iss/issue.p?frommenu=yes&status=allopen&assign=' lc-renew '">'
+                html-encode("Renewals")
+                '</a></td><td align=right class="menuinfo">' 
+                IF AVAILABLE tt THEN tt.ACount 
+                ELSE 0 '&nbsp;</td></tr>'.
         END.
         
 
         FOR EACH tt NO-LOCK WHERE tt.ACode <> lc-renew USE-INDEX i-ACount :
             lc-Class = TRIM(SUBSTR(tt.ADescription,1,15)).
             {&out} 
-            '<tr><td nowrap  style="vertical-align:top">'
-            '<a title="View All Issues For ' html-encode(tt.ADescription) '" target="mainwindow" class="tlink" style="border:none;" href="' 
-            appurl '/iss/issue.p?frommenu=yes&status=allopen&iclass=All&sortfield=b-query.tlight&sortorder=ASC&assign=' tt.ACode '">'
-            html-encode(lc-class)
-            '</a></td>' SKIP.
+                '<tr><td nowrap  style="vertical-align:top">'
+                '<a title="View All Issues For ' html-encode(tt.ADescription) '" target="mainwindow" class="tlink" style="border:none;" href="' 
+                appurl '/iss/issue.p?frommenu=yes&status=allopen&iclass=All&sortfield=b-query.tlight&sortorder=ASC&assign=' tt.ACode '&lodate=' STRING(tt.loDate,"99/99/9999") 
+                '&hidate='  STRING(tt.hiDate,"99/99/9999")  '">'
+                html-encode(lc-class)
+                '</a></td>' SKIP.
             IF tt.Acount = 0 THEN
                 {&out} '<td align=right class="menuinfo">' tt.ACount '</td></tr>'.
-             ELSE
-             DO:
-        {&out} '<td align=right  style="vertical-align:top">' SKIP.
-        DO iloop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
-            IF iloop > 3 THEN NEXT.
-            lc-class = ENTRY(iloop,lc-global-iclass-code,"|").
-            IF iloop > 1 THEN {&out} '-'.
-            {&out} 
-            '<a title="View Issues For ' lc-class '" target="mainwindow" class="tlink" style="border:none;" href="' 
-            appurl '/iss/issue.p?frommenu=yes&status=allopen&iclass=' lc-class '&sortfield=b-query.tlight&sortorder=ASC&assign=' tt.ACode '">'
-            STRING(tt.CCount[iloop]) '</a>' SKIP.
+            ELSE
+            DO:
+                {&out} 
+                    '<td align=right  style="vertical-align:top">' SKIP.
+                DO iloop = 1 TO NUM-ENTRIES(lc-global-iclass-code,"|"):
+                    IF iloop > 3 THEN NEXT.
+                    lc-class = ENTRY(iloop,lc-global-iclass-code,"|").
+                    IF iloop > 1 THEN {&out} '-'.
+                    {&out} 
+                        '<a title="View Issues For ' lc-class '" target="mainwindow" class="tlink" style="border:none;" href="' 
+                        appurl '/iss/issue.p?frommenu=yes&status=allopen&iclass=' lc-class '&sortfield=b-query.tlight&sortorder=ASC&assign=' tt.ACode '&lodate=' STRING(tt.loDate,"99/99/9999") 
+                        '&hidate='  STRING(tt.hiDate,"99/99/9999")  '">'
+                        STRING(tt.CCount[iloop]) '</a>' SKIP.
 
 
-        END.
+                END.
 
-        {&out} '</td></tr>' SKIP.
+                {&out} 
+                    '</td></tr>' SKIP.
 
 
 
 
-    END.
+            END.
 
             
-END.
-{&out} '</table>'.
-{&out} htmlib-EndCriteria().
-{&out} '</div>'.
-END.
+        END.
+        {&out} 
+            '</table>'.
+        {&out} htmlib-EndCriteria().
+        {&out} 
+            '</div>'.
+    END.
 
 END PROCEDURE.
 
@@ -530,10 +537,10 @@ PROCEDURE mnlib-BuildIssueMenu :
     DEFINE BUFFER b-object FOR webobject.
     DEFINE BUFFER b-user   FOR webuser.
 
-    DEFINE VARIABLE li-ItemNo AS INTEGER    NO-UNDO.
-    DEFINE VARIABLE lc-desc   AS CHARACTER  NO-UNDO.
-    DEFINE VARIABLE ll-found  AS LOGICAL    NO-UNDO.
-    DEFINE VARIABLE li-loop   AS INTEGER    NO-UNDO.
+    DEFINE VARIABLE li-ItemNo AS INTEGER   NO-UNDO.
+    DEFINE VARIABLE lc-desc   AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE ll-found  AS LOGICAL   NO-UNDO.
+    DEFINE VARIABLE li-loop   AS INTEGER   NO-UNDO.
     
     
     FIND b-user WHERE b-user.loginid = lc-user NO-LOCK NO-ERROR.
@@ -560,7 +567,7 @@ PROCEDURE mnlib-BuildIssueMenu :
                     tt-menu.ItemNo      = li-itemno
                     tt-menu.Level       = pi-level
                     tt-menu.Description = "Your Dashboards"
-                    ll-found = TRUE.
+                    ll-found            = TRUE.
             END.
             FIND LAST tt-menu NO-LOCK NO-ERROR.
             ASSIGN 
@@ -597,8 +604,7 @@ PROCEDURE mnlib-BuildIssueMenu :
             FIND Customer OF Issue NO-LOCK NO-ERROR.
             
             ASSIGN 
-                lc-enc-key =
-                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+                lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
                  
             
             ASSIGN 
@@ -876,8 +882,8 @@ PROCEDURE process-web-request :
 
     ASSIGN 
         lc-user = get-value("user")
-        MyUUID = GENERATE-UUID  
-        cGUID  = GUID(MyUUID). 
+        MyUUID  = GENERATE-UUID  
+        cGUID   = GUID(MyUUID). 
 
 
     RUN outputHeader.
@@ -894,8 +900,9 @@ PROCEDURE process-web-request :
         FIND Company WHERE Company.companycode = lc-global-company NO-LOCK NO-ERROR.
         lc-renew = Company.renewal-login.
 
-        {&out} '<div class="inform"><fieldset>'
-        '<span class="menuinfo">'.
+        {&out} 
+            '<div class="inform"><fieldset>'
+            '<span class="menuinfo">'.
 
         IF CAN-DO(lc-global-internal,WebUser.UserClass) THEN
         DO:
@@ -909,8 +916,7 @@ PROCEDURE process-web-request :
                 NO-LOCK NO-ERROR.
                 
             ASSIGN 
-                lc-enc-key =
-                 DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
+                lc-enc-key = DYNAMIC-FUNCTION("sysec-EncodeValue",lc-user,TODAY,"customer",STRING(ROWID(customer))).
             ASSIGN
                 lc-address   = customer.name
                 li-cust-open = com-CustomerOpenIssues(customer.companycode,
@@ -923,18 +929,20 @@ PROCEDURE process-web-request :
             lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,customer.Country).
             lc-address = DYNAMIC-FUNCTION("com-StringReturn",lc-address,customer.PostCode).
 
-            {&out} '<p>' REPLACE(lc-address,"~n","<br>") '</p>'.
+            {&out} 
+                '<p>' REPLACE(lc-address,"~n","<br>") '</p>'.
             {&out} SKIP
                 '<a title="Your Details" target="mainwindow" class="tlink" style="border:none;" href="' appurl '/cust/custview.p?source=menu&rowid=' 
-                    url-encode(lc-enc-key,"Query") '">'
+                url-encode(lc-enc-key,"Query") '">'
                 "View Your Details"
                 '</a>' SKIP.
 
 
         END.
-        {&out} '</span>'.
+        {&out} 
+            '</span>'.
         {&out}
-        '</fieldset></div>'.
+            '</fieldset></div>'.
 
         IF CAN-DO(lc-global-internal,WebUser.UserClass) THEN
         DO:
@@ -1040,7 +1048,7 @@ PROCEDURE process-web-request :
         END.
 
         IF NOT WebUser.engType BEGINS "SAL" THEN
-        RUN mnlib-BuildIssueMenu ( webuser.pagename, 1 ).
+            RUN mnlib-BuildIssueMenu ( webuser.pagename, 1 ).
 
         RUN mnlib-BuildMenu ( webuser.pagename, 1 ).
 
@@ -1081,6 +1089,10 @@ PROCEDURE process-web-request :
             AND WebUser.SuperUser
             AND NOT WebUser.engType BEGINS "SAL" 
             THEN RUN ip-SuperUserFinal.
+        ELSE
+            IF WebUser.UserClass = "INTERNAL" 
+                AND WebUser.engType BEGINS "REMOTE" 
+                THEN RUN ip-SuperUserFinal.
 
     END.
 

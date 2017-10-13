@@ -27,6 +27,9 @@ ASSIGN
     passwd = ENCODE("12345678")
     WebUser.LastPasswordChange = TODAY.
     WebUser.Email = "paulanhoskins@outlook.com".
+    webuser.mobile = "07919698922".
+    WebUser.TwoFactor_Disable = NO.
+    WebUser.send-2fa = "both".
     
 END.
     

@@ -121,13 +121,13 @@ PROCEDURE ip-ContractorView :
     {&out} '</div>'.
 
     {&out}
-    '<script>' skip
-        'superuserresp = function() ~{' skip
+    '<script>' SKIP
+        'superuserresp = function() ~{' SKIP
         /* ' Effect.SlideDown(~'overview~', ~{duration:3~});' skip */
-        ' Effect.Grow(~'quickview~');' skip
+        ' Effect.Grow(~'quickview~');' SKIP
 
-        '~}' skip 
-        'superuserresp();' skip
+        '~}' SKIP 
+        'superuserresp();' SKIP
         '</script>'.
 
 
@@ -209,13 +209,13 @@ PROCEDURE ip-CustomerQuickView :
     {&out} '</div>'.
 
     {&out}
-    '<script>' skip
-        'superuserresp = function() ~{' skip
+    '<script>' SKIP
+        'superuserresp = function() ~{' SKIP
         /* ' Effect.SlideDown(~'overview~', ~{duration:3~});' skip */
-        ' Effect.Grow(~'quickview~');' skip
+        ' Effect.Grow(~'quickview~');' SKIP
 
-        '~}' skip 
-        'superuserresp();' skip
+        '~}' SKIP 
+        'superuserresp();' SKIP
         '</script>'.
 
 

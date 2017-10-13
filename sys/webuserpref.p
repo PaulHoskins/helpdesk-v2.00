@@ -10,6 +10,7 @@
     When        Who         What
     28/04/2006  phoski      Initial
     04/08/2017  phoksi      Activity Default
+    13/10/2017  phoski      send-2fa field
 ***********************************************************************/
 CREATE WIDGET-POOL.
 
@@ -69,7 +70,7 @@ DEFINE VARIABLE lc-usertitleCode  AS CHARACTER
     INITIAL '' NO-UNDO.
 DEFINE VARIABLE lc-usertitleDesc  AS CHARACTER
     INITIAL '' NO-UNDO.
-
+DEFINE VARIABLE lc-send-2fa        AS CHARACTER NO-UNDO.
 
 
 
@@ -251,6 +252,7 @@ PROCEDURE process-web-request :
             lc-customertrack  = get-value("customertrack")
             lc-recordsperpage = get-value("recordsperpage")
             lc-ActivityType   = get-value("activitytype")
+            lc-send-2fa       = get-value("send-2fa")
             .
         RUN ip-Validate( OUTPUT lc-error-field,
             OUTPUT lc-error-msg ).
@@ -270,7 +272,8 @@ PROCEDURE process-web-request :
                 ASSIGN 
                     b-table.customertrack    = lc-customertrack = 'on'
                     b-table.recordsperpage   = int(lc-recordsperpage)
-                    b-table.def-activityType = lc-ActivityType.
+                    b-table.def-activityType = lc-ActivityType
+                    b-table.send-2fa         = lc-send-2fa.
                 .
                 
                 set-user-field("prefsaved","yes").
@@ -287,6 +290,7 @@ PROCEDURE process-web-request :
             lc-customertrack  = IF b-table.customertrack THEN 'on' ELSE ''
             lc-recordsperpage = STRING(b-table.recordsperpage)
             lc-ActivityType   = b-table.def-activityType
+            lc-send-2fa       = b-table.send-2fa
             .
 
     RUN outputHeader.
@@ -355,7 +359,15 @@ PROCEDURE process-web-request :
         '</td></tr>' SKIP. 
                     
      
-
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("send-2fa",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Send 2FA To Device")
+        ELSE htmlib-SideLabel("Send 2FA To Device"))
+        '</TD><TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("send-2fa",lc-global-send-2fa-Code ,lc-global-send-2fa-Desc,lc-send-2fa) 
+            '</TD></TR>' SKIP.
+        
 
     {&out} htmlib-EndTable() SKIP.
 

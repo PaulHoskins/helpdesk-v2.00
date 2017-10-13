@@ -29,6 +29,7 @@
     31/07/2016  phoski      Filter On Disabled flag      
     31/07/2016  phoski      Customers must have a relevany sub type   
     15/04/2017  phoski      ExcludeReports field
+    13/10/2017  phoski      send-2fa field
     
 ***********************************************************************/
 CREATE WIDGET-POOL.
@@ -88,6 +89,7 @@ DEFINE VARIABLE lc-EmailTimeReport AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-iss-survey      AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-factorDisable   AS CHARACTER NO-UNDO.
 DEFINE VARIABLE lc-excludeReports  AS CHARACTER NO-UNDO.
+DEFINE VARIABLE lc-send-2fa        AS CHARACTER NO-UNDO.
 
 
 DEFINE VARIABLE lc-html            AS CHARACTER NO-UNDO.
@@ -365,6 +367,27 @@ PROCEDURE ip-Page :
     
     {&out} 
         '</TR>' SKIP.
+            
+    {&out} 
+        '<TR><TD VALIGN="TOP" ALIGN="right">' 
+        (IF LOOKUP("send-2fa",lc-error-field,'|') > 0 
+        THEN htmlib-SideLabelError("Send 2FA To Device")
+        ELSE htmlib-SideLabel("Send 2FA To Device"))
+        '</TD>'.
+    
+    IF NOT CAN-DO("view,delete",lc-mode) THEN
+        {&out} '<TD VALIGN="TOP" ALIGN="left">'
+            htmlib-Select("send-2fa",lc-global-send-2fa-Code ,lc-global-send-2fa-Desc,lc-send-2fa) 
+            '</TD>' SKIP.
+    ELSE 
+        {&out} htmlib-TableField(html-encode(
+           lc-send-2fa
+            ),'left')
+            SKIP.
+    {&out} 
+        '</TR>' SKIP.
+   
+         
 
              
 /**   
@@ -1297,6 +1320,7 @@ PROCEDURE process-web-request :
                 lc-iss-survey      = get-value("iss-survey")
                 lc-FactorDisable   = get-value("factordisable")
                 lc-excludeReports  = get-value("excludereports")
+                lc-send-2fa        = get-value("send-2fa")
                 .
             
            
@@ -1364,6 +1388,7 @@ PROCEDURE process-web-request :
                         b-table.iss_survey            = lc-iss-survey = "on"
                         b-table.twofactor_Disable     = lc-factordisable = "on"
                         b-table.excludereports        = lc-excludeReports = "on"
+                        b-table.send-2fa              = lc-send-2fa
                         .
                     ASSIGN 
                         b-table.name = b-table.forename + ' ' + 
@@ -1502,6 +1527,7 @@ PROCEDURE process-web-request :
                 lc-iss-survey      = IF b-table.iss_survey THEN "on" ELSE ""
                 lc-factorDisable   = IF b-table.twofactor_disable THEN "on" ELSE ""
                 lc-excludeReports  = IF b-table.excludeReports THEN "on" ELSE ""
+                lc-send-2fa        = b-table.send-2fa
                 .
             
         END.

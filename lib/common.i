@@ -41,6 +41,7 @@
     15/04/2017  phoski      ExcludeReports flag
     30/04/2017  phoski      CustSite stuff
     19/08/2017  phoski      Notes types for Original SLA
+    13/10/2017  phoski      send-2fa code & types
  ***********************************************************************/
 
 {lib/attrib.i}
@@ -224,6 +225,13 @@ DEFINE VARIABLE lc-global-FormType-Desc               AS CHARACTER
     INITIAL "Contact Us|Need IT Support?|Quotation Request|Call Back Request|Brochure Request" NO-UNDO.
 DEFINE VARIABLE lc-global-CRMRS-ACC-CRT               AS CHARACTER 
     INITIAL 'ACC-CRT' NO-UNDO.
+    
+  
+DEFINE VARIABLE lc-global-send-2fa-Code                 AS CHARACTER 
+    INITIAL 'both|mobile|email' NO-UNDO.
+DEFINE VARIABLE lc-global-send-2fa-Desc                 AS CHARACTER 
+    INITIAL "To Both (Mobile & Email Address)|To Mobile|To Email Address" NO-UNDO.
+       
 DEFINE VARIABLE lc-Global-Months-Name                 AS CHARACTER INITIAL
     "January|February|March|April|May|June|July|August|September|October|November|December" NO-UNDO.
                  
@@ -3598,6 +3606,7 @@ FUNCTION com-QuickView RETURNS LOGICAL
     IF NOT AVAILABLE b-webuser
         OR b-webuser.UserClass = "{&CUSTOMER}" THEN RETURN FALSE.
 
+    
     IF b-webuser.UserClass = "{&CONTRACT}" THEN RETURN TRUE.
     
     IF b-webuser.SuperUser THEN RETURN TRUE.

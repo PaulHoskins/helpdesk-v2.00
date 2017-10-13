@@ -181,22 +181,22 @@ PROCEDURE process-web-request :
     
     
     {&out}
-    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' skip "~n" +
-         '<HTML>' skip
-         '<HEAD>' skip
-         '<meta http-equiv="Cache-Control" content="No-Cache">' skip
-         '<meta http-equiv="Pragma"        content="No-Cache">' skip
-         '<meta http-equiv="Expires"       content="0">' skip
-         '<TITLE></TITLE>' skip
-         DYNAMIC-FUNCTION('htmlib-StyleSheet':U) skip.
-    {&out} '<link rel="stylesheet" href="/style/menu.css" type="text/css">' skip.
+    '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">' SKIP "~n" +
+         '<HTML>' SKIP
+         '<HEAD>' SKIP
+         '<meta http-equiv="Cache-Control" content="No-Cache">' SKIP
+         '<meta http-equiv="Pragma"        content="No-Cache">' SKIP
+         '<meta http-equiv="Expires"       content="0">' SKIP
+         '<TITLE></TITLE>' SKIP
+         DYNAMIC-FUNCTION('htmlib-StyleSheet':U) SKIP.
+    {&out} '<link rel="stylesheet" href="/style/menu.css" type="text/css">' SKIP.
 
     
     {&out}
-    '<script language="JavaScript" src="/scripts/js/standard.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/menu.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' skip
-        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' skip
+    '<script language="JavaScript" src="/scripts/js/standard.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/menu.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/prototype.js"></script>' SKIP
+        '<script language="JavaScript" src="/scripts/js/scriptaculous.js"></script>' SKIP
     .
 
 
@@ -205,38 +205,38 @@ PROCEDURE process-web-request :
     DO:
 
         {&out} 
-        '<script>' skip
-            'function GetAlerts(target) ~{' skip
-            '   var url = "' appurl '/mn/ajax/menu.p?user=' webuser.LoginID '"' skip
-            '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
-            '~}' skip.
+        '<script>' SKIP
+            'function GetAlerts(target) ~{' SKIP
+            '   var url = "' appurl '/mn/ajax/menu.p?user=' webuser.LoginID '"' SKIP
+            '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' SKIP
+            '~}' SKIP.
 
         IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) AND NOT WebUser.engType BEGINS "SAL" 
         THEN {&out}
-        'function SuperUser(target) ~{' skip
-                '   var url = "' appurl '/mn/ajax/superuser.p?user=' webuser.LoginID '"' skip
-                '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
-                '~}' skip.
+        'function SuperUser(target) ~{' SKIP
+                '   var url = "' appurl '/mn/ajax/superuser.p?user=' webuser.LoginID '"' SKIP
+                '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' SKIP
+                '~}' SKIP.
         IF WebUser.engType BEGINS "SAL" 
         THEN {&out}
-        'function SuperUser(target) ~{' skip
-                '   var url = "' appurl '/mn/ajax/crmuser.p?user=' webuser.LoginID '"' skip
-                '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' skip
-                '~}' skip.        
+        'function SuperUser(target) ~{' SKIP
+                '   var url = "' appurl '/mn/ajax/crmuser.p?user=' webuser.LoginID '"' SKIP
+                '   var myAjax = new Ajax.PeriodicalUpdater( target, url, ~{evalScripts: true, asynchronous:true, frequency:28800 ~});' SKIP
+                '~}' SKIP.        
         {&out}
-        'function InitialisePage() ~{' skip
-            '  GetAlerts("ajaxmenu");' skip.
+        'function InitialisePage() ~{' SKIP
+            '  GetAlerts("ajaxmenu");' SKIP.
         
 
         IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) OR WebUser.engType BEGINS "SAL" 
-            THEN {&out} '  SuperUser("superuser");' skip.
+            THEN {&out} '  SuperUser("superuser");' SKIP.
 
         {&out}
-        '~}' skip
-            '</script>' skip.   
+        '~}' SKIP
+            '</script>' SKIP.   
 
         {&out}
-        '</head>' skip '<body onLoad="InitialisePage()">'.
+        '</head>' SKIP '<body onLoad="InitialisePage()">'.
 
    
 
@@ -244,17 +244,17 @@ PROCEDURE process-web-request :
         {&out} '<button onclick="window.location.reload(true);">Refresh Menu</button>' SKIP.
         {&out} '</div><br />'.
 
-        {&out} '<div id="ajaxmenu"></div>' skip.
+        {&out} '<div id="ajaxmenu"></div>' SKIP.
         
         IF DYNAMIC-FUNCTION("com-QuickView",webuser.LoginID) OR WebUser.engType BEGINS "SAL" 
-            THEN {&out} '<div id="superuser"></div>' skip.
+            THEN {&out} '<div id="superuser"></div>' SKIP.
 
     END.
     ELSE {&out}
-    '</head>' skip '<body>'.
+    '</head>' SKIP '<body>'.
     
    
-    {&OUT} htmlib-Footer() skip.
+    {&OUT} htmlib-Footer() SKIP.
     
   
 END PROCEDURE.

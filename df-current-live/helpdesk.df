@@ -837,6 +837,15 @@ ADD FIELD "ArchiveDays" OF "Company" AS integer
   MAX-WIDTH 4
   ORDER 440
 
+ADD FIELD "sla-TypeID" OF "Company" AS integer 
+  FORMAT "9999"
+  INITIAL "0"
+  LABEL "typeID"
+  POSITION 46
+  MAX-WIDTH 4
+  COLUMN-LABEL "TypeID"
+  ORDER 450
+
 ADD INDEX "CompanyCode" ON "Company" 
   AREA "Schema Area"
   UNIQUE
@@ -1810,6 +1819,41 @@ ADD FIELD "accStatus" OF "Customer" AS character
   POSITION 39
   MAX-WIDTH 16
   ORDER 300
+
+ADD FIELD "SLABeginMin" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 40
+  MAX-WIDTH 4
+  ORDER 400
+
+ADD FIELD "SLAEndHour" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "17"
+  POSITION 41
+  MAX-WIDTH 4
+  ORDER 410
+
+ADD FIELD "SLAEndMin" OF "Customer" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "30"
+  POSITION 42
+  MAX-WIDTH 4
+  ORDER 420
+
+ADD FIELD "NonStandardSLA" OF "Customer" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 43
+  MAX-WIDTH 1
+  ORDER 380
+
+ADD FIELD "SLABeginHour" OF "Customer" AS integer 
+  FORMAT "99"
+  INITIAL "8"
+  POSITION 44
+  MAX-WIDTH 4
+  ORDER 390
 
 ADD INDEX "AccountNumber" ON "Customer" 
   AREA "Schema Area"
@@ -3907,6 +3951,87 @@ ADD FIELD "i-open" OF "Issue" AS logical
   MAX-WIDTH 1
   ORDER 520
 
+ADD FIELD "orig-SLAID" OF "Issue" AS decimal 
+  FORMAT "->>,>>9.99"
+  INITIAL "0"
+  POSITION 54
+  MAX-WIDTH 17
+  DECIMALS 2
+  ORDER 530
+
+ADD FIELD "orig-SLAStatus" OF "Issue" AS character 
+  DESCRIPTION "OFF or ON"
+  FORMAT "X(8)"
+  INITIAL "ON"
+  LABEL "SLA Status"
+  POSITION 55
+  MAX-WIDTH 16
+  ORDER 560
+
+ADD FIELD "orig-SLATime" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Time"
+  POSITION 56
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 570
+
+ADD FIELD "orig-SLATrip" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "SLA Deadline"
+  POSITION 57
+  MAX-WIDTH 8
+  ORDER 580
+
+ADD FIELD "orig-SLAAmber" OF "Issue" AS datetime 
+  FORMAT "99/99/9999 HH:MM"
+  INITIAL ?
+  LABEL "Amber Warning At"
+  POSITION 58
+  MAX-WIDTH 8
+  ORDER 590
+
+ADD FIELD "orig-SLADate" OF "Issue" AS date 
+  FORMAT "99/99/9999"
+  INITIAL ?
+  LABEL "SLA Date"
+  POSITION 59
+  MAX-WIDTH 220
+  EXTENT 10
+  ORDER 540
+
+ADD FIELD "orig-tLight" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "99"
+  LABEL "Traffic Light Level"
+  POSITION 60
+  MAX-WIDTH 4
+  ORDER 550
+
+ADD FIELD "orig-SLALevel" OF "Issue" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  LABEL "SLA Level"
+  POSITION 61
+  MAX-WIDTH 4
+  ORDER 600
+
+ADD FIELD "SLAOverrideAchieved" OF "Issue" AS logical 
+  FORMAT "yes/no"
+  INITIAL "no"
+  POSITION 62
+  MAX-WIDTH 1
+  ORDER 610
+
+ADD FIELD "SLAOverrideNote" OF "Issue" AS character 
+  FORMAT "x(8)"
+  INITIAL ""
+  POSITION 63
+  MAX-WIDTH 16
+  ORDER 620
+
 ADD INDEX "IssueNumber" ON "Issue" 
   AREA "Schema Area"
   UNIQUE
@@ -3969,6 +4094,11 @@ ADD INDEX "link-SLAID" ON "Issue"
   AREA "Schema Area"
   INDEX-FIELD "link-SLAID" ASCENDING 
   INDEX-FIELD "IssueDate" DESCENDING 
+
+ADD INDEX "orig-SLAStatus" ON "Issue" 
+  AREA "Schema Area"
+  INDEX-FIELD "orig-SLAStatus" ASCENDING 
+  INDEX-FIELD "orig-SLAID" ASCENDING 
 
 ADD INDEX "project" ON "Issue" 
   AREA "Schema Area"
@@ -5638,6 +5768,13 @@ ADD FIELD "AmberWarning" OF "slahead" AS integer
   POSITION 17
   MAX-WIDTH 4
   ORDER 160
+
+ADD FIELD "seq-no" OF "slahead" AS integer 
+  FORMAT "->,>>>,>>9"
+  INITIAL "0"
+  POSITION 19
+  MAX-WIDTH 4
+  ORDER 170
 
 ADD INDEX "SLACode" ON "slahead" 
   AREA "Schema Area"
@@ -7313,6 +7450,15 @@ ADD FIELD "ExcludeReports" OF "WebUser" AS logical
   MAX-WIDTH 1
   ORDER 380
 
+ADD FIELD "def-ActivityType" OF "WebUser" AS character 
+  FORMAT "X(30)"
+  INITIAL ""
+  LABEL "Default ActType"
+  POSITION 41
+  MAX-WIDTH 60
+  COLUMN-LABEL "ActType"
+  ORDER 390
+
 ADD INDEX "LoginID" ON "WebUser" 
   AREA "Schema Area"
   UNIQUE
@@ -7462,4 +7608,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000148126
+0000150986

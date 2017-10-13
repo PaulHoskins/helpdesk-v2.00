@@ -7459,6 +7459,13 @@ ADD FIELD "def-ActivityType" OF "WebUser" AS character
   COLUMN-LABEL "ActType"
   ORDER 390
 
+ADD FIELD "send-2fa" OF "WebUser" AS character 
+  FORMAT "x(8)"
+  INITIAL "Both"
+  POSITION 42
+  MAX-WIDTH 16
+  ORDER 400
+
 ADD INDEX "LoginID" ON "WebUser" 
   AREA "Schema Area"
   UNIQUE
@@ -7608,4 +7615,4 @@ ADD INDEX "st-num" ON "WebUSteam"
 PSC
 cpstream=ISO8859-1
 .
-0000150986
+0000151116

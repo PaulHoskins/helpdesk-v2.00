@@ -22,6 +22,7 @@ DEFINE OUTPUT PARAMETER pl-ok           AS LOGICAL      NO-UNDO.
 DEFINE OUTPUT PARAMETER pc-message      AS CHARACTER    NO-UNDO.
 DEFINE OUTPUT PARAMETER pc-token        AS CHARACTER    NO-UNDO.
 
+MESSAGE "PAul Login " pc-loginid.
 
 ASSIGN 
     pl-ok      = NO
