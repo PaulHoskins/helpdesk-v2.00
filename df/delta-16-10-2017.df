@@ -1,0 +1,12 @@
+ADD FIELD "send-2fa" OF "WebUser" AS character 
+  FORMAT "x(8)"
+  INITIAL "Both"
+  POSITION 42
+  MAX-WIDTH 16
+  ORDER 400
+  
+.
+PSC
+cpstream=ISO8859-1
+.
+0000002082
