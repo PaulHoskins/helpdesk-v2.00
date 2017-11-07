@@ -176,8 +176,13 @@ FUNCTION pxml-Email-Header        RETURNS CHARACTER (pc-companyCode AS CHARACTER
     END.
     ELSE
     DO:
+        /*
         lc-use = "http://www.ouritdept.co.uk/files/main_logo.jpg".
         lc-output = lc-output + '<img src="' + lc-use + '" height=70px width=160px style="float: left; padding-right: 10px;">' .
+        */
+        lc-use = "https://ouritdept-helpdesk.co.uk/images/main_logo.jpg".
+        lc-output = lc-output + '<img src="' + lc-use + '" style="float: left; padding-right: 10px;">' .
+        
     END.
 
 
